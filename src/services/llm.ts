@@ -30,6 +30,7 @@ export const generateRecipes = async (
   apiKey: string,
   vegetables: Vegetable[],
   people: number,
+  meals: number,
   diet: string,
   language: string
 ): Promise<MealPlan> => {
@@ -44,7 +45,7 @@ export const generateRecipes = async (
     You are a smart recipe planner. I have these vegetables in my pantry:
     ${pantryList}
 
-    I need a meal plan for 4 to 5 distinct meals for ${people} people.
+    I need a meal plan for ${meals} distinct meals for ${people} people.
     
     DIETARY PREFERENCE: ${diet}
     LANGUAGE: ${language}

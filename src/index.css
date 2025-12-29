@@ -1,12 +1,14 @@
 :root {
   /* Dynamic HSL Palette */
-  --hue-primary: 150; /* Fresh Green */
-  --hue-secondary: 200; /* Cool Blue */
-  
+  --hue-primary: 150;
+  /* Fresh Green */
+  --hue-secondary: 200;
+  /* Cool Blue */
+
   --color-primary: hsl(var(--hue-primary), 60%, 45%);
   --color-primary-hover: hsl(var(--hue-primary), 60%, 35%);
   --color-secondary: hsl(var(--hue-secondary), 70%, 50%);
-  
+
   --color-bg-mesh-1: hsl(var(--hue-primary), 80%, 90%);
   --color-bg-mesh-2: hsl(var(--hue-secondary), 80%, 90%);
 
@@ -29,13 +31,13 @@
   :root {
     --color-primary: hsl(var(--hue-primary), 60%, 55%);
     --color-primary-hover: hsl(var(--hue-primary), 60%, 65%);
-    
+
     --color-bg-mesh-1: hsl(240, 20%, 10%);
     --color-bg-mesh-2: hsl(var(--hue-primary), 20%, 15%);
 
     --color-text-main: hsl(0, 0%, 95%);
     --color-text-muted: hsl(200, 10%, 70%);
-    
+
     --glass-bg: hsla(240, 20%, 15%, 0.6);
     --glass-border: hsla(0, 0%, 100%, 0.1);
     --glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.4);
@@ -51,17 +53,21 @@
 body {
   font-family: var(--font-family);
   background: radial-gradient(at 0% 0%, var(--color-bg-mesh-1) 0px, transparent 50%),
-              radial-gradient(at 100% 0%, var(--color-bg-mesh-2) 0px, transparent 50%),
-              radial-gradient(at 100% 100%, var(--color-bg-mesh-1) 0px, transparent 50%),
-              radial-gradient(at 0% 100%, var(--color-bg-mesh-2) 0px, transparent 50%);
-  background-color: #f8fafc; /* Fallback */
+    radial-gradient(at 100% 0%, var(--color-bg-mesh-2) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, var(--color-bg-mesh-1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, var(--color-bg-mesh-2) 0px, transparent 50%);
+  background-color: #f8fafc;
+  /* Fallback */
   color: var(--color-text-main);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   font: inherit;
   outline: none;
 }
@@ -187,7 +193,9 @@ input, button, select, textarea {
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -196,5 +204,6 @@ h1 {
   font-size: 2.5rem;
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }

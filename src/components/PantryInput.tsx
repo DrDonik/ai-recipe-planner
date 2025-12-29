@@ -36,7 +36,7 @@ export const PantryInput: React.FC<PantryInputProps> = ({
     };
 
     return (
-        <div className="glass-panel p-6 flex flex-col gap-6">
+        <div className="glass-panel p-8 flex flex-col gap-6">
             <div className="flex flex-row items-center gap-3 mb-2">
                 <Leaf className="text-[var(--color-primary)]" size={24} />
                 <h2>{t.pantry}</h2>

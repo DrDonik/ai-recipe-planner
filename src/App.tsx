@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Users, Key, Utensils, Globe } from 'lucide-react';
+import { Sparkles, Users, Key, Utensils, Globe, Salad } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { ShoppingList } from './components/ShoppingList';
@@ -16,6 +16,7 @@ function App() {
   }, [apiKey]);
 
   const [people, setPeople] = useState(2);
+  const [meals, setMeals] = useState(4);
   const [diet, setDiet] = useState('Mostly Vegetarian');
   const [language, setLanguage] = useState('German');
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
@@ -49,7 +50,7 @@ function App() {
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, vegetables, people, diet, language);
+      const plan = await generateRecipes(apiKey, vegetables, people, meals, diet, language);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -107,42 +108,70 @@ function App() {
         {/* Input Section */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-1 space-y-6">
-            {/* Diet Preference */}
-            <div className="glass-panel p-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Utensils className="text-[var(--color-secondary)]" size={24} />
-                <span className="font-semibold">{t.diet}</span>
+            {/* Preferences Panel */}
+            <div className="glass-panel p-8 space-y-8">
+              {/* Diet Preference */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Utensils className="text-[var(--color-secondary)]" size={24} />
+                  <span className="font-semibold">{t.diet}</span>
+                </div>
+                <select
+                  value={diet}
+                  onChange={(e) => setDiet(e.target.value)}
+                  className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus:border-[var(--color-primary)] transition-all cursor-pointer"
+                >
+                  <option value="Vegan">Vegan</option>
+                  <option value="Vegetarian">Vegetarian</option>
+                  <option value="Mostly Vegetarian">Mostly Vegetarian</option>
+                  <option value="Pescatarian">Pescatarian</option>
+                  <option value="Flexitarian">Flexitarian</option>
+                  <option value="Carnivore">Carnivore</option>
+                </select>
               </div>
-              <select
-                value={diet}
-                onChange={(e) => setDiet(e.target.value)}
-                className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus:border-[var(--color-primary)] transition-all cursor-pointer"
-              >
-                <option value="Vegan">Vegan</option>
-                <option value="Vegetarian">Vegetarian</option>
-                <option value="Mostly Vegetarian">Mostly Vegetarian</option>
-                <option value="Pescatarian">Pescatarian</option>
-                <option value="Flexitarian">Flexitarian</option>
-                <option value="Carnivore">Carnivore</option>
-              </select>
-            </div>
 
-            {/* People Count */}
-            <div className="glass-panel p-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Users className="text-[var(--color-secondary)]" size={24} />
-                <span className="font-semibold">{t.people}</span>
+              {/* Separator */}
+              <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent" />
+
+              {/* People Count */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Users className="text-[var(--color-secondary)]" size={24} />
+                  <span className="font-semibold">{t.people}</span>
+                </div>
+                <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
+                  <button
+                    onClick={() => setPeople(Math.max(1, people - 1))}
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                  >-</button>
+                  <span className="w-6 text-center font-mono font-semibold">{people}</span>
+                  <button
+                    onClick={() => setPeople(people + 1)}
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                  >+</button>
+                </div>
               </div>
-              <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
-                <button
-                  onClick={() => setPeople(Math.max(1, people - 1))}
-                  className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
-                >-</button>
-                <span className="w-6 text-center font-mono font-semibold">{people}</span>
-                <button
-                  onClick={() => setPeople(people + 1)}
-                  className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
-                >+</button>
+
+              {/* Separator */}
+              <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent" />
+
+              {/* Meals Count */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Salad className="text-[var(--color-secondary)]" size={24} />
+                  <span className="font-semibold">{t.meals}</span>
+                </div>
+                <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
+                  <button
+                    onClick={() => setMeals(Math.max(1, meals - 1))}
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                  >-</button>
+                  <span className="w-6 text-center font-mono font-semibold">{meals}</span>
+                  <button
+                    onClick={() => setMeals(meals + 1)}
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                  >+</button>
+                </div>
               </div>
             </div>
 

@@ -18,6 +18,7 @@ export const translations = {
         noVeg: "No vegetables added yet.",
         apiKeyError: "Please enter a valid API Key.",
         veggieError: "Please add at least one vegetable to your pantry.",
+        meals: "Meals to plan",
     },
     German: {
         ingredients: "Zutaten",
@@ -37,5 +38,6 @@ export const translations = {
         noVeg: "Noch kein Gemüse hinzugefügt.",
         apiKeyError: "Bitte gib einen gültigen API-Key ein.",
         veggieError: "Bitte füge mindestens ein Gemüse zu deinem Vorrat hinzu.",
+        meals: "Anzahl Mahlzeiten",
     }
 };
