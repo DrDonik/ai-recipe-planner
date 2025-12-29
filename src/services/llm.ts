@@ -56,8 +56,9 @@ export const generateRecipes = async (
     4. Try to use one main vegetable type per recipe if possible, or combine compatible ones.
     5. Keep track of which pantry items (by ID) are used in each recipe.
     6. List any MISSING ingredients I need to buy (protein, spices, other veggies, grains, etc.).
-    7. The portion sizes must be realistic for ${people} people.
-    8. Return ONLY valid JSON. No markdown formatting, no code blocks.
+    7. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
+    8. The portion sizes must be realistic for ${people} people.
+    9. Return ONLY valid JSON. No markdown formatting, no code blocks.
 
     JSON Structure:
     {

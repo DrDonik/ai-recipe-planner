@@ -2,19 +2,23 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import type { Ingredient } from '../services/llm';
+import { translations } from '../constants/translations';
 
 interface ShoppingListProps {
     items: Ingredient[];
+    language: string;
 }
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) => {
+    const t = translations[language as keyof typeof translations];
+
     if (items.length === 0) return null;
 
     return (
         <div className="glass-panel p-6">
             <div className="flex items-center gap-3 mb-4">
                 <ShoppingCart className="text-[var(--color-secondary)]" size={24} />
-                <h2>Shopping List</h2>
+                <h2>{t.shoppingList}</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">

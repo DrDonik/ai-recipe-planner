@@ -2,18 +2,22 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Leaf } from 'lucide-react';
 import type { Vegetable } from '../services/llm';
+import { translations } from '../constants/translations';
 
 interface PantryInputProps {
     vegetables: Vegetable[];
     onAddVegetable: (v: Vegetable) => void;
     onRemoveVegetable: (id: string) => void;
+    language: string;
 }
 
 export const PantryInput: React.FC<PantryInputProps> = ({
     vegetables,
     onAddVegetable,
     onRemoveVegetable,
+    language
 }) => {
+    const t = translations[language as keyof typeof translations];
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
 
@@ -35,7 +39,7 @@ export const PantryInput: React.FC<PantryInputProps> = ({
         <div className="glass-panel p-6 flex flex-col gap-6">
             <div className="flex flex-row items-center gap-3 mb-2">
                 <Leaf className="text-[var(--color-primary)]" size={24} />
-                <h2>Pantry Inventory</h2>
+                <h2>{t.pantry}</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
@@ -54,14 +58,14 @@ export const PantryInput: React.FC<PantryInputProps> = ({
                     className="input-field w-full md:w-32"
                 />
                 <button type="submit" className="btn btn-primary whitespace-nowrap">
-                    <Plus size={18} /> Add
+                    <Plus size={18} /> {t.add}
                 </button>
             </form>
 
             <div className="grid grid-cols-1 gap-2 mt-2">
                 {vegetables.length === 0 && (
                     <div className="text-[var(--color-text-muted)] text-center py-4 italic">
-                        No vegetables added yet.
+                        {t.noVeg}
                     </div>
                 )}
 

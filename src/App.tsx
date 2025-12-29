@@ -6,6 +6,7 @@ import { RecipeCard } from './components/RecipeCard';
 import { ShoppingList } from './components/ShoppingList';
 import { generateRecipes } from './services/llm';
 import type { Vegetable, MealPlan } from './services/llm';
+import { translations } from './constants/translations';
 
 function App() {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
@@ -23,6 +24,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const t = translations[language as keyof typeof translations];
+
   const addVegetable = (v: Vegetable) => {
     setVegetables([...vegetables, v]);
   };
@@ -33,11 +36,11 @@ function App() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      setError("Please enter a valid API Key.");
+      setError(t.apiKeyError);
       return;
     }
     if (vegetables.length === 0) {
-      setError("Please add at least one vegetable to your pantry.");
+      setError(t.veggieError);
       return;
     }
 
@@ -108,7 +111,7 @@ function App() {
             <div className="glass-panel p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Utensils className="text-[var(--color-secondary)]" size={24} />
-                <span className="font-semibold">Diet</span>
+                <span className="font-semibold">{t.diet}</span>
               </div>
               <select
                 value={diet}
@@ -124,13 +127,11 @@ function App() {
               </select>
             </div>
 
-
-
             {/* People Count */}
             <div className="glass-panel p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Users className="text-[var(--color-secondary)]" size={24} />
-                <span className="font-semibold">People to feed</span>
+                <span className="font-semibold">{t.people}</span>
               </div>
               <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
                 <button
@@ -149,6 +150,7 @@ function App() {
               vegetables={vegetables}
               onAddVegetable={addVegetable}
               onRemoveVegetable={removeVegetable}
+              language={language}
             />
 
             <button
@@ -159,11 +161,11 @@ function App() {
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
-                  Planning Meals...
+                  {t.planning}
                 </>
               ) : (
                 <>
-                  <Sparkles size={20} /> Generate Meal Plan
+                  <Sparkles size={20} /> {t.generate}
                 </>
               )}
             </button>
@@ -178,17 +180,17 @@ function App() {
           <div className="lg:col-span-2 space-y-8">
             {mealPlan ? (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <ShoppingList items={mealPlan.shoppingList} />
+                <ShoppingList items={mealPlan.shoppingList} language={language} />
 
                 <div>
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
                     <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-transparent bg-clip-text">
-                      Your Personalized Menu
+                      {t.menuTitle}
                     </span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {mealPlan.recipes.map((recipe, index) => (
-                      <RecipeCard key={recipe.id} recipe={recipe} index={index} />
+                      <RecipeCard key={recipe.id} recipe={recipe} index={index} language={language} />
                     ))}
                   </div>
                 </div>
@@ -198,8 +200,8 @@ function App() {
                 <div className="bg-white/40 p-6 rounded-full mb-4">
                   <Sparkles size={48} className="text-[var(--color-primary)]/50" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Ready to plan?</h3>
-                <p className="max-w-md">Add your veggies, set the number of people, and let AI design a perfect minimal-waste menu for you.</p>
+                <h3 className="text-xl font-semibold mb-2">{t.ready}</h3>
+                <p className="max-w-md">{t.readyDesc}</p>
               </div>
             )}
           </div>
