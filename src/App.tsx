@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { Sparkles, Users, Key, Utensils } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, Users, Key, Utensils, Globe } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { ShoppingList } from './components/ShoppingList';
@@ -8,9 +8,15 @@ import { generateRecipes } from './services/llm';
 import type { Vegetable, MealPlan } from './services/llm';
 
 function App() {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
+
+  useEffect(() => {
+    localStorage.setItem('gemini_api_key', apiKey);
+  }, [apiKey]);
+
   const [people, setPeople] = useState(2);
   const [diet, setDiet] = useState('Mostly Vegetarian');
+  const [language, setLanguage] = useState('German');
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
@@ -40,7 +46,7 @@ function App() {
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, vegetables, people, diet);
+      const plan = await generateRecipes(apiKey, vegetables, people, diet, language);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -66,15 +72,29 @@ function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
-            <Key size={16} className="ml-2 text-[var(--color-text-muted)]" />
-            <input
-              type="password"
-              placeholder="Paste Gemini/OpenAI Key"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="bg-transparent border-none outline-none text-sm w-48 px-2"
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
+              <Key size={16} className="ml-2 text-[var(--color-text-muted)]" />
+              <input
+                type="password"
+                placeholder="Paste Gemini/OpenAI Key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="bg-transparent border-none outline-none text-sm w-48 px-2"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
+              <Globe size={16} className="ml-2 text-[var(--color-text-muted)]" />
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-[var(--color-text-main)] w-full"
+              >
+                <option value="German">Deutsch</option>
+                <option value="English">English</option>
+              </select>
+            </div>
           </div>
         </div>
       </header>
@@ -103,6 +123,8 @@ function App() {
                 <option value="Carnivore">Carnivore</option>
               </select>
             </div>
+
+
 
             {/* People Count */}
             <div className="glass-panel p-6 flex items-center justify-between">

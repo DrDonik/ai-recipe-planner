@@ -30,7 +30,8 @@ export const generateRecipes = async (
   apiKey: string,
   vegetables: Vegetable[],
   people: number,
-  diet: string
+  diet: string,
+  language: string
 ): Promise<MealPlan> => {
   if (!apiKey) throw new Error("API Key is required");
 
@@ -46,15 +47,17 @@ export const generateRecipes = async (
     I need a meal plan for 4 to 5 distinct meals for ${people} people.
     
     DIETARY PREFERENCE: ${diet}
+    LANGUAGE: ${language}
     
     RULES:
     1. STRICTLY follow the dietary preference: ${diet}.
-    2. Prioritize using as many of my pantry vegetables as possible.
-    3. Try to use one main vegetable type per recipe if possible, or combine compatible ones.
-    4. Keep track of which pantry items (by ID) are used in each recipe.
-    5. List any MISSING ingredients I need to buy (protein, spices, other veggies, grains, etc.).
-    6. The portion sizes must be realistic for ${people} people.
-    7. Return ONLY valid JSON. No markdown formatting, no code blocks.
+    2. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
+    3. Prioritize using as many of my pantry vegetables as possible.
+    4. Try to use one main vegetable type per recipe if possible, or combine compatible ones.
+    5. Keep track of which pantry items (by ID) are used in each recipe.
+    6. List any MISSING ingredients I need to buy (protein, spices, other veggies, grains, etc.).
+    7. The portion sizes must be realistic for ${people} people.
+    8. Return ONLY valid JSON. No markdown formatting, no code blocks.
 
     JSON Structure:
     {
