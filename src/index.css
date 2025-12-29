@@ -1,0 +1,200 @@
+:root {
+  /* Dynamic HSL Palette */
+  --hue-primary: 150; /* Fresh Green */
+  --hue-secondary: 200; /* Cool Blue */
+  
+  --color-primary: hsl(var(--hue-primary), 60%, 45%);
+  --color-primary-hover: hsl(var(--hue-primary), 60%, 35%);
+  --color-secondary: hsl(var(--hue-secondary), 70%, 50%);
+  
+  --color-bg-mesh-1: hsl(var(--hue-primary), 80%, 90%);
+  --color-bg-mesh-2: hsl(var(--hue-secondary), 80%, 90%);
+
+  --color-text-main: hsl(200, 20%, 20%);
+  --color-text-muted: hsl(200, 10%, 50%);
+  --color-text-light: hsl(0, 0%, 98%);
+
+  --glass-bg: hsla(0, 0%, 100%, 0.7);
+  --glass-border: hsla(0, 0%, 100%, 0.5);
+  --glass-shadow: 0 8px 32px 0 hsla(var(--hue-primary), 30%, 80%, 0.3);
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: hsl(var(--hue-primary), 60%, 55%);
+    --color-primary-hover: hsl(var(--hue-primary), 60%, 65%);
+    
+    --color-bg-mesh-1: hsl(240, 20%, 10%);
+    --color-bg-mesh-2: hsl(var(--hue-primary), 20%, 15%);
+
+    --color-text-main: hsl(0, 0%, 95%);
+    --color-text-muted: hsl(200, 10%, 70%);
+    
+    --glass-bg: hsla(240, 20%, 15%, 0.6);
+    --glass-border: hsla(0, 0%, 100%, 0.1);
+    --glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.4);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: radial-gradient(at 0% 0%, var(--color-bg-mesh-1) 0px, transparent 50%),
+              radial-gradient(at 100% 0%, var(--color-bg-mesh-2) 0px, transparent 50%),
+              radial-gradient(at 100% 100%, var(--color-bg-mesh-1) 0px, transparent 50%),
+              radial-gradient(at 0% 100%, var(--color-bg-mesh-2) 0px, transparent 50%);
+  background-color: #f8fafc; /* Fallback */
+  color: var(--color-text-main);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+input, button, select, textarea {
+  font: inherit;
+  outline: none;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-xl);
+}
+
+.glass-card {
+  background: hsla(0, 0%, 100%, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.dark .glass-card {
+  background: hsla(240, 20%, 20%, 0.4);
+}
+
+.glass-card:hover {
+  background: hsla(0, 0%, 100%, 0.6);
+  transform: translateY(-2px);
+}
+
+.dark .glass-card:hover {
+  background: hsla(240, 20%, 25%, 0.6);
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Form Elements */
+.input-field {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: hsla(0, 0%, 100%, 0.5);
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.dark .input-field {
+  background: hsla(240, 20%, 10%, 0.5);
+}
+
+.input-field:focus {
+  border-color: var(--color-primary);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 12px hsla(var(--hue-primary), 60%, 45%, 0.3);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  padding: 0.5rem;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.btn-icon:hover {
+  color: var(--color-text-main);
+  background: hsla(0, 0%, 0%, 0.05);
+}
+
+.dark .btn-icon:hover {
+  background: hsla(0, 0%, 100%, 0.1);
+}
+
+/* Typography */
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
