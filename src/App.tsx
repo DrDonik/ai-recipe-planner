@@ -106,10 +106,10 @@ function App() {
       <main className="container flex flex-col gap-8">
 
         {/* Input Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
           <div className="lg:col-span-1 space-y-6">
             {/* Preferences Panel */}
-            <div className="glass-panel p-8 space-y-8">
+            <div className="glass-panel p-10 space-y-8">
               {/* Diet Preference */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -121,12 +121,12 @@ function App() {
                   onChange={(e) => setDiet(e.target.value)}
                   className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus:border-[var(--color-primary)] transition-all cursor-pointer"
                 >
-                  <option value="Vegan">Vegan</option>
-                  <option value="Vegetarian">Vegetarian</option>
-                  <option value="Mostly Vegetarian">Mostly Vegetarian</option>
-                  <option value="Pescatarian">Pescatarian</option>
-                  <option value="Flexitarian">Flexitarian</option>
-                  <option value="Carnivore">Carnivore</option>
+                  <option value="Vegan">{t.dietOptions.vegan}</option>
+                  <option value="Vegetarian">{t.dietOptions.vegetarian}</option>
+                  <option value="Mostly Vegetarian">{t.dietOptions.mostlyVegetarian}</option>
+                  <option value="Pescatarian">{t.dietOptions.pescatarian}</option>
+                  <option value="Flexitarian">{t.dietOptions.flexitarian}</option>
+                  <option value="Carnivore">{t.dietOptions.carnivore}</option>
                 </select>
               </div>
 
@@ -217,7 +217,7 @@ function App() {
                       {t.menuTitle}
                     </span>
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     {mealPlan.recipes.map((recipe, index) => (
                       <RecipeCard key={recipe.id} recipe={recipe} index={index} language={language} />
                     ))}

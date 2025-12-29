@@ -19,6 +19,18 @@ export const translations = {
         apiKeyError: "Please enter a valid API Key.",
         veggieError: "Please add at least one vegetable to your pantry.",
         meals: "Meals to plan",
+        dietOptions: {
+            vegan: "Vegan",
+            vegetarian: "Vegetarian",
+            mostlyVegetarian: "Mostly Vegetarian",
+            pescatarian: "Pescatarian",
+            flexitarian: "Flexitarian",
+            carnivore: "Carnivore",
+        },
+        placeholders: {
+            ingredient: "Vegetable (e.g. Carrots)",
+            amount: "Amount (e.g. 1kg)",
+        }
     },
     German: {
         ingredients: "Zutaten",
@@ -39,5 +51,17 @@ export const translations = {
         apiKeyError: "Bitte gib einen gültigen API-Key ein.",
         veggieError: "Bitte füge mindestens ein Gemüse zu deinem Vorrat hinzu.",
         meals: "Anzahl Mahlzeiten",
+        dietOptions: {
+            vegan: "Vegan",
+            vegetarian: "Vegetarisch",
+            mostlyVegetarian: "Größtenteils Vegetarisch",
+            pescatarian: "Pescetarisch",
+            flexitarian: "Flexitarisch",
+            carnivore: "Fleischfresser",
+        },
+        placeholders: {
+            ingredient: "Gemüse (z.B. Karotten)",
+            amount: "Menge (z.B. 1kg)",
+        }
     }
 };

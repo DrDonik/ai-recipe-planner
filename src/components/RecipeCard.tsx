@@ -18,7 +18,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="glass-card p-6 flex flex-col h-full"
+            className="glass-card p-8 flex flex-col h-full"
         >
             <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold text-[var(--color-primary)]">{recipe.title}</h3>

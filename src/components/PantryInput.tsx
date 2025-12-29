@@ -36,7 +36,7 @@ export const PantryInput: React.FC<PantryInputProps> = ({
     };
 
     return (
-        <div className="glass-panel p-8 flex flex-col gap-6">
+        <div className="glass-panel p-10 flex flex-col gap-6">
             <div className="flex flex-row items-center gap-3 mb-2">
                 <Leaf className="text-[var(--color-primary)]" size={24} />
                 <h2>{t.pantry}</h2>
@@ -45,14 +45,14 @@ export const PantryInput: React.FC<PantryInputProps> = ({
             <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
                 <input
                     type="text"
-                    placeholder="Vegetable (e.g. Carrots)"
+                    placeholder={t.placeholders.ingredient}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="input-field flex-1"
                 />
                 <input
                     type="text"
-                    placeholder="Amount (e.g. 1kg)"
+                    placeholder={t.placeholders.amount}
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     className="input-field w-full md:w-32"
