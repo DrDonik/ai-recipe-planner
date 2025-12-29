@@ -10,6 +10,7 @@ import type { Vegetable, MealPlan } from './services/llm';
 function App() {
   const [apiKey, setApiKey] = useState('');
   const [people, setPeople] = useState(2);
+  const [diet, setDiet] = useState('Mostly Vegetarian');
   const [vegetables, setVegetables] = useState<Vegetable[]>([]);
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
@@ -39,7 +40,7 @@ function App() {
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, vegetables, people);
+      const plan = await generateRecipes(apiKey, vegetables, people, diet);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -83,6 +84,26 @@ function App() {
         {/* Input Section */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-1 space-y-6">
+            {/* Diet Preference */}
+            <div className="glass-panel p-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Utensils className="text-[var(--color-secondary)]" size={24} />
+                <span className="font-semibold">Diet</span>
+              </div>
+              <select
+                value={diet}
+                onChange={(e) => setDiet(e.target.value)}
+                className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus:border-[var(--color-primary)] transition-all cursor-pointer"
+              >
+                <option value="Vegan">Vegan</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Mostly Vegetarian">Mostly Vegetarian</option>
+                <option value="Pescatarian">Pescatarian</option>
+                <option value="Flexitarian">Flexitarian</option>
+                <option value="Carnivore">Carnivore</option>
+              </select>
+            </div>
+
             {/* People Count */}
             <div className="glass-panel p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
