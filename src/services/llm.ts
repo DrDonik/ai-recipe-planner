@@ -52,11 +52,11 @@ export const generateRecipes = async (
     RULES:
     1. STRICTLY follow the dietary preference: ${diet}.
     2. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
-    3. Prioritize using as many of my pantry vegetables as possible.
-    4. Try to use one main vegetable type per recipe if possible, or combine compatible ones.
-    5. Keep track of which pantry items (by ID) are used in each recipe.
-    6. List any MISSING ingredients I need to buy (protein, spices, other veggies, grains, etc.).
-    7. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
+    3. The "ingredients" array must contain EVERY single ingredient needed for the recipe (both what I have and what I need to buy).
+    4. The "missingIngredients" array must ONLY contain items I need to buy.
+    5. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
+    6. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
+    7. Prioritize using as many of my pantry vegetables as possible.
     8. The portion sizes must be realistic for ${people} people.
     9. Return ONLY valid JSON. No markdown formatting, no code blocks.
 

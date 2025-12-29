@@ -38,11 +38,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
                             const isMissing = recipe.missingIngredients.some(m => m.item.toLowerCase().includes(ing.item.toLowerCase()));
 
                             return (
-                                <li key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-dashed border-[var(--glass-border)] py-1 last:border-0 gap-1">
-                                    <span className={`${isMissing ? "text-amber-600 dark:text-amber-400 font-medium" : "text-[var(--color-text-main)]"} break-words`}>
+                                <li key={i} className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-1.5 last:border-0 gap-3">
+                                    <span className={`text-sm ${isMissing ? "text-amber-600 dark:text-amber-400 font-medium" : "text-[var(--color-text-main)]"} flex-1`}>
                                         {ing.item}
                                     </span>
-                                    <span className="text-[var(--color-text-muted)] font-mono text-xs whitespace-nowrap bg-white/30 px-1.5 rounded self-start sm:self-auto">{ing.amount}</span>
+                                    <span className="text-[var(--color-text-muted)] font-mono text-xs whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded">{ing.amount}</span>
                                 </li>
                             );
                         })}
@@ -56,8 +56,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
                         </h4>
                         <div className="flex flex-wrap gap-2">
                             {recipe.missingIngredients.map((m, i) => (
-                                <span key={i} className="text-xs bg-white/50 dark:bg-black/20 px-2 py-1 rounded text-amber-800 dark:text-amber-200 border border-amber-100 dark:border-amber-900">
-                                    {m.item} ({m.amount})
+                                <span key={i} className="inline-block text-xs bg-white/50 dark:bg-black/20 px-2 py-1 rounded text-amber-800 dark:text-amber-200 border border-amber-100 dark:border-amber-900 mb-1">
+                                    {m.item} <span className="opacity-75">({m.amount})</span>
                                 </span>
                             ))}
                         </div>
