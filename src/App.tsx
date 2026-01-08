@@ -6,7 +6,7 @@ import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { generateRecipes } from './services/llm';
-import type { PantryItem, MealPlan, Recipe } from './services/llm';
+import type { PantryItem, MealPlan, Recipe, Ingredient } from './services/llm';
 import { translations } from './constants/translations';
 
 function App() {
@@ -68,11 +68,14 @@ function App() {
 
   // Single Recipe View State
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
+  // Single Shopping List View State
+  const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
 
   useEffect(() => {
-    // Parse URL for shared recipe
+    // Parse URL for shared recipe or shopping list
     const searchParams = new URLSearchParams(window.location.search);
     const recipeParam = searchParams.get('recipe');
+    const shoppingListParam = searchParams.get('shoppingList');
 
     if (recipeParam) {
       try {
@@ -82,11 +85,25 @@ function App() {
       } catch (err) {
         console.error("Failed to parse shared recipe", err);
       }
+    } else if (shoppingListParam) {
+      try {
+        const json = decodeURIComponent(escape(atob(shoppingListParam)));
+        const shoppingList = JSON.parse(json);
+        setViewShoppingList(shoppingList);
+      } catch (err) {
+        console.error("Failed to parse shared shopping list", err);
+      }
     }
   }, []);
 
   const clearViewRecipe = () => {
     setViewRecipe(null);
+    // clean URL
+    window.history.pushState({}, '', window.location.pathname);
+  };
+
+  const clearViewShoppingList = () => {
+    setViewShoppingList(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
   };
@@ -141,6 +158,22 @@ function App() {
           <RecipeCard recipe={viewRecipe} index={0} language={language} />
           <button
             onClick={clearViewRecipe}
+            className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
+          >
+            ← Back to AI Recipe Planner
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (viewShoppingList) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] p-8 flex flex-col items-center justify-center">
+        <div className="max-w-4xl w-full">
+          <ShoppingList items={viewShoppingList} language={language} />
+          <button
+            onClick={clearViewShoppingList}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
             ← Back to AI Recipe Planner
