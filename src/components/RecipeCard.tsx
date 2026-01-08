@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, ChefHat, AlertCircle, Share2 } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, Share2, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../services/llm';
 import { translations } from '../constants/translations';
@@ -29,19 +29,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
         return JSON.stringify(schema);
     };
 
-    const handleShare = async () => {
-        const json = JSON.stringify(recipe);
-        // UTF-8 friendly base64 encoding
-        const base64 = btoa(unescape(encodeURIComponent(json)));
-        // Fix: encodeURIComponent because base64 can contain '+' which URLSearchParams treats as space
-        const url = `${window.location.origin}${window.location.pathname}?recipe=${encodeURIComponent(base64)}`;
+    // Generate URL for sharing and external link
+    const json = JSON.stringify(recipe);
+    // UTF-8 friendly base64 encoding
+    const base64 = btoa(unescape(encodeURIComponent(json)));
+    // Fix: encodeURIComponent because base64 can contain '+' which URLSearchParams treats as space
+    const shareUrl = `${window.location.origin}${window.location.pathname}?recipe=${encodeURIComponent(base64)}`;
 
+    const handleShare = async () => {
         // 1. Try Web Share API (Mobile/Modern)
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: recipe.title,
-                    url: url
+                    url: shareUrl
                 });
                 return;
             } catch (err: any) {
@@ -56,7 +57,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
         // 2. Try Modern Clipboard API (Secure Contexts)
         try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(url);
+                await navigator.clipboard.writeText(shareUrl);
                 // Simple visual feedback
                 const btn = document.activeElement as HTMLElement;
                 const originalTitle = btn?.title;
@@ -72,7 +73,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
         // 3. Fallback: Legacy execCommand('copy') (Works in some insecure contexts)
         try {
             const textArea = document.createElement("textarea");
-            textArea.value = url;
+            textArea.value = shareUrl;
 
             // Ensure it's not visible but part of DOM
             textArea.style.position = "fixed";
@@ -95,7 +96,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
         }
 
         // 4. Ultimate Fallback: window.prompt
-        window.prompt('Copy this link to share:', url);
+        window.prompt('Copy this link to share:', shareUrl);
     };
 
     return (
@@ -110,20 +111,32 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
                 dangerouslySetInnerHTML={{ __html: generateSchema() }}
             />
 
-            <button
-                onClick={handleShare}
-                className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100"
-                title="Share Recipe"
-            >
-                <Share2 size={18} className="text-[var(--color-text-muted)]" />
-            </button>
-
             <div>
-                <div className="flex justify-between items-start mb-6 pr-10">
-                    <h3 className="text-xl font-bold text-[var(--color-primary)]">{recipe.title}</h3>
-                    <div className="flex items-center gap-1 text-sm text-[var(--color-text-main)] bg-white/50 dark:bg-white/10 px-2 py-1 rounded-full whitespace-nowrap">
-                        <Clock size={14} />
-                        <span>{recipe.time}</span>
+                <div className="flex justify-between items-start mb-6">
+                    <h3 className="text-xl font-bold text-[var(--color-primary)] pr-4">{recipe.title}</h3>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                        <div className="flex items-center gap-1 text-sm text-[var(--color-text-main)] bg-white/50 dark:bg-white/10 px-2 py-1 rounded-full whitespace-nowrap">
+                            <Clock size={14} />
+                            <span>{recipe.time}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <a
+                                href={shareUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                                title="Open in new tab"
+                            >
+                                <ExternalLink size={18} />
+                            </a>
+                            <button
+                                onClick={handleShare}
+                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                                title="Share Recipe"
+                            >
+                                <Share2 size={18} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
