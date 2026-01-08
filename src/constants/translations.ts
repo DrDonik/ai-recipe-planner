@@ -28,6 +28,8 @@ export const translations = {
             flexitarian: "Flexitarian",
             carnivore: "Carnivore",
         },
+        spiceRack: "Spice Rack & Staples",
+        spicesPlaceholder: "Add spices, oils, sauces...",
         placeholders: {
             ingredient: "Ingredient (e.g. Carrots)",
             amount: "Amount (e.g. 1kg or 3 pcs)",
@@ -62,6 +64,8 @@ export const translations = {
             flexitarian: "Flexitarisch",
             carnivore: "Fleischfresser",
         },
+        spiceRack: "Gewürzregal & Vorräte",
+        spicesPlaceholder: "Gewürze, Öl, Soßen hinzufügen...",
         placeholders: {
             ingredient: "Zutat (z.B. Karotten)",
             amount: "Menge (z.B. 1kg oder 3 Stück)",

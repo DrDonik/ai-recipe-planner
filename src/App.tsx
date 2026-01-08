@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Sparkles, Users, Key, Utensils, Globe, Salad, Info } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
+import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { generateRecipes } from './services/llm';
 import type { PantryItem, MealPlan, Recipe } from './services/llm';
@@ -20,6 +21,20 @@ function App() {
   const [diet, setDiet] = useState('Mostly Vegetarian');
   const [language, setLanguage] = useState('German');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+
+  // Spice Rack State with Persistence
+  const [spices, setSpices] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('spice_rack_items');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('spice_rack_items', JSON.stringify(spices));
+  }, [spices]);
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(false);
@@ -61,6 +76,16 @@ function App() {
     setPantryItems(pantryItems.filter(v => v.id !== id));
   };
 
+  const addSpice = (spice: string) => {
+    if (!spices.includes(spice)) {
+      setSpices([...spices, spice]);
+    }
+  };
+
+  const removeSpice = (spiceToRemove: string) => {
+    setSpices(spices.filter(s => s !== spiceToRemove));
+  };
+
   const handleGenerate = async () => {
     if (!apiKey) {
       setError(t.apiKeyError);
@@ -76,7 +101,7 @@ function App() {
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, pantryItems, people, meals, diet, language);
+      const plan = await generateRecipes(apiKey, pantryItems, people, meals, diet, language, spices);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -230,13 +255,6 @@ function App() {
               </div>
             </div>
 
-            <PantryInput
-              pantryItems={pantryItems}
-              onAddPantryItem={addPantryItem}
-              onRemovePantryItem={removePantryItem}
-              language={language}
-            />
-
             <button
               onClick={handleGenerate}
               disabled={loading}
@@ -253,6 +271,20 @@ function App() {
                 </>
               )}
             </button>
+
+            <PantryInput
+              pantryItems={pantryItems}
+              onAddPantryItem={addPantryItem}
+              onRemovePantryItem={removePantryItem}
+              language={language}
+            />
+
+            <SpiceRack
+              spices={spices}
+              onAddSpice={addSpice}
+              onRemoveSpice={removeSpice}
+              language={language}
+            />
 
             {error && (
               <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2">

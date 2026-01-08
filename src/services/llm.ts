@@ -32,7 +32,8 @@ export const generateRecipes = async (
   people: number,
   meals: number,
   diet: string,
-  language: string
+  language: string,
+  spices: string[] = []
 ): Promise<MealPlan> => {
   if (!apiKey) throw new Error("API Key is required");
 
@@ -41,9 +42,15 @@ export const generateRecipes = async (
     .map((v) => `- ${v.name} (${v.amount}) [ID: ${v.id}]`)
     .join("\n");
 
+  const spiceList = spices.length > 0
+    ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.join(", ")}`
+    : "No extra spices available.";
+
   const prompt = `
     You are a smart recipe planner. I have these ingredients in my pantry:
     ${pantryList}
+
+    ${spiceList}
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
     
@@ -54,12 +61,14 @@ export const generateRecipes = async (
     1. STRICTLY follow the dietary preference: ${diet}.
     2. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
     3. The "ingredients" array must contain EVERY single ingredient needed for the recipe (both what I have and what I need to buy).
-    4. The "missingIngredients" array must ONLY contain items I need to buy.
+    4. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices if they are listed in "Available Spices".
     5. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
     6. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     7. Prioritize using as many of my pantry ingredients as possible.
-    8. The portion sizes must be realistic for ${people} people.
-    9. Return ONLY valid JSON. No markdown formatting, no code blocks.
+    8. Let the available spices guide the recipes. Not all spices need to be used.
+    9. If you need to buy spices, use the "missingIngredients" array.
+    10. The portion sizes must be realistic for ${people} people.
+    11. Return ONLY valid JSON. No markdown formatting, no code blocks.
 
     JSON Structure:
     {
