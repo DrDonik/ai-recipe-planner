@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Leaf } from 'lucide-react';
+import { Plus, Trash2, Leaf, Info } from 'lucide-react';
 import { translations } from '../constants/translations';
 
 interface SpiceRackProps {
@@ -28,9 +28,23 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
 
     return (
         <div className="glass-panel p-10 flex flex-col gap-6">
-            <div className="flex flex-row items-center gap-3 mb-2">
-                <Leaf className="text-[var(--color-primary)]" size={24} />
-                <h2>{t.spiceRack}</h2>
+            <div className="flex flex-row items-center justify-between mb-2">
+                <div className="flex flex-row items-center gap-3">
+                    <Leaf className="text-[var(--color-primary)]" size={24} />
+                    <h2>{t.spiceRack}</h2>
+                </div>
+                <div className="tooltip-container">
+                    <button
+                        type="button"
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1.5 rounded-full outline-none focus:text-[var(--color-primary)]"
+                        aria-label="Spice Rack Info"
+                    >
+                        <Info size={18} />
+                    </button>
+                    <div className="tooltip-text">
+                        {t.spiceRackInfo}
+                    </div>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-row gap-3">

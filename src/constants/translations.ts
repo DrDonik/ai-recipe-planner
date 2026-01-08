@@ -34,7 +34,8 @@ export const translations = {
             ingredient: "Ingredient (e.g. Carrots)",
             amount: "Amount (e.g. 1kg or 3 pcs)",
         },
-        apiInfo: "Your API key is stored only on this device and is never sent to our website's servers."
+        apiInfo: "Your API key is stored only on this device and is never sent to our website's servers.",
+        spiceRackInfo: "Add staples like spices, oils, or salt. These items won't be added to your shopping list and are saved on this device for future sessions."
     },
     German: {
         ingredients: "Zutaten",
@@ -70,6 +71,7 @@ export const translations = {
             ingredient: "Zutat (z.B. Karotten)",
             amount: "Menge (z.B. 1kg oder 3 Stück)",
         },
-        apiInfo: "Dein API-Schlüssel wird nur auf diesem Gerät gespeichert und niemals an unsere Website-Server gesendet."
+        apiInfo: "Dein API-Schlüssel wird nur auf diesem Gerät gespeichert und niemals an unsere Website-Server gesendet.",
+        spiceRackInfo: "Füge Grundvorräte wie Gewürze, Öl oder Salz hinzu. Diese werden nicht auf die Einkaufsliste gesetzt und bleiben gespeichert."
     }
 };
