@@ -1,5 +1,5 @@
 
-export interface Vegetable {
+export interface PantryItem {
   id: string;
   name: string;
   amount: string;
@@ -28,7 +28,7 @@ export interface MealPlan {
 
 export const generateRecipes = async (
   apiKey: string,
-  vegetables: Vegetable[],
+  ingredients: PantryItem[],
   people: number,
   meals: number,
   diet: string,
@@ -36,13 +36,13 @@ export const generateRecipes = async (
 ): Promise<MealPlan> => {
   if (!apiKey) throw new Error("API Key is required");
 
-  // Format vegetables for the prompt
-  const pantryList = vegetables
+  // Format ingredients for the prompt
+  const pantryList = ingredients
     .map((v) => `- ${v.name} (${v.amount}) [ID: ${v.id}]`)
     .join("\n");
 
   const prompt = `
-    You are a smart recipe planner. I have these vegetables in my pantry:
+    You are a smart recipe planner. I have these ingredients in my pantry:
     ${pantryList}
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
@@ -57,7 +57,7 @@ export const generateRecipes = async (
     4. The "missingIngredients" array must ONLY contain items I need to buy.
     5. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
     6. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
-    7. Prioritize using as many of my pantry vegetables as possible.
+    7. Prioritize using as many of my pantry ingredients as possible.
     8. The portion sizes must be realistic for ${people} people.
     9. Return ONLY valid JSON. No markdown formatting, no code blocks.
 
@@ -70,7 +70,7 @@ export const generateRecipes = async (
           "time": "30 mins",
           "ingredients": [ {"item": "Name", "amount": "Quantity"} ],
           "instructions": ["Step 1", "Step 2"],
-          "usedIngredients": ["vegetable_id_1", "vegetable_id_2"],
+          "usedIngredients": ["pantry_item_id_1", "pantry_item_id_2"],
           "missingIngredients": [{"item": "Chicken", "amount": "500g"}]
         }
       ],

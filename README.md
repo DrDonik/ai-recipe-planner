@@ -1,6 +1,6 @@
-# Veggie Planner 🥗
+# AI Recipe Planner 🥗
 
-A smart, AI-powered meal planner that turns your pantry ingredients into delicious recipes.
+A smart, AI-powered meal planner that turns your pantry ingredients into recipes.
 
 ## Features
 

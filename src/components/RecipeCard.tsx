@@ -41,7 +41,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
             try {
                 await navigator.share({
                     title: recipe.title,
-                    text: `Check out this recipe for ${recipe.title}!`,
                     url: url
                 });
                 return;
@@ -62,7 +61,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
                 const btn = document.activeElement as HTMLElement;
                 const originalTitle = btn?.title;
                 if (btn) btn.title = "Copied!";
-                alert(t.shoppingList + ": Link copied!"); // Reusing a translation or simple string
+                alert("Link copied!");
                 if (btn) setTimeout(() => btn.title = originalTitle || "Share Recipe", 2000);
                 return;
             }
