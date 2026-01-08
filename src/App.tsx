@@ -16,9 +16,20 @@ function App() {
     localStorage.setItem('gemini_api_key', apiKey);
   }, [apiKey]);
 
-  const [people, setPeople] = useState(2);
-  const [meals, setMeals] = useState(4);
-  const [diet, setDiet] = useState('Mostly Vegetarian');
+  const [people, setPeople] = useState(() => {
+    const saved = localStorage.getItem('people_count');
+    return saved ? parseInt(saved, 10) : 2;
+  });
+
+  const [meals, setMeals] = useState(() => {
+    const saved = localStorage.getItem('meals_count');
+    return saved ? parseInt(saved, 10) : 4;
+  });
+
+  const [diet, setDiet] = useState(() => {
+    return localStorage.getItem('diet_preference') || 'Mostly Vegetarian';
+  });
+
   const [language, setLanguage] = useState('German');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
 
@@ -35,6 +46,18 @@ function App() {
   useEffect(() => {
     localStorage.setItem('spice_rack_items', JSON.stringify(spices));
   }, [spices]);
+
+  useEffect(() => {
+    localStorage.setItem('people_count', people.toString());
+  }, [people]);
+
+  useEffect(() => {
+    localStorage.setItem('meals_count', meals.toString());
+  }, [meals]);
+
+  useEffect(() => {
+    localStorage.setItem('diet_preference', diet);
+  }, [diet]);
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(false);

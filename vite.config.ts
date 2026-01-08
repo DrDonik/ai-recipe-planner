@@ -6,7 +6,4 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: '/ai-recipe-planner/', // GitHub Pages base path
-  server: {
-    host: true, // Enable LAN access
-  },
 });
