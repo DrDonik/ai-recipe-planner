@@ -5,7 +5,7 @@ import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { ShoppingList } from './components/ShoppingList';
 import { generateRecipes } from './services/llm';
-import type { Vegetable, MealPlan } from './services/llm';
+import type { Vegetable, MealPlan, Recipe } from './services/llm';
 import { translations } from './constants/translations';
 
 function App() {
@@ -25,7 +25,33 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const t = translations[language as keyof typeof translations];
+
+  // Single Recipe View State
+  const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
+
+  useEffect(() => {
+    // Parse URL for shared recipe
+    const searchParams = new URLSearchParams(window.location.search);
+    const recipeParam = searchParams.get('recipe');
+
+    if (recipeParam) {
+      try {
+        const json = decodeURIComponent(escape(atob(recipeParam)));
+        const recipe = JSON.parse(json);
+        setViewRecipe(recipe);
+      } catch (err) {
+        console.error("Failed to parse shared recipe", err);
+      }
+    }
+  }, []);
+
+  const clearViewRecipe = () => {
+    setViewRecipe(null);
+    // clean URL
+    window.history.pushState({}, '', window.location.pathname);
+  };
 
   const addVegetable = (v: Vegetable) => {
     setVegetables([...vegetables, v]);
@@ -58,6 +84,23 @@ function App() {
       setLoading(false);
     }
   };
+
+
+  if (viewRecipe) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] p-8 flex flex-col items-center justify-center">
+        <div className="max-w-2xl w-full">
+          <RecipeCard recipe={viewRecipe} index={0} language={language} />
+          <button
+            onClick={clearViewRecipe}
+            className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
+          >
+            ← Back to Recipe Planner
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-20">
