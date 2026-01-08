@@ -105,8 +105,8 @@ function App() {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="glass-panel rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl">
-        <div className="container flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+      <header className="glass-panel !py-4 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl">
+        <div className="container flex flex-col sm:flex-row items-center justify-between py-2 gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-[var(--color-primary)] rounded-xl text-white shadow-lg shadow-emerald-500/30">
               <Utensils size={28} />
@@ -152,7 +152,7 @@ function App() {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
           <div className="lg:col-span-1 space-y-6">
             {/* Preferences Panel */}
-            <div className="glass-panel p-10 space-y-8">
+            <div className="glass-panel p-10 space-y-2">
               {/* Diet Preference */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -185,12 +185,12 @@ function App() {
                 <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
                   <button
                     onClick={() => setPeople(Math.max(1, people - 1))}
-                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
                   >-</button>
                   <span className="w-6 text-center font-mono font-semibold">{people}</span>
                   <button
                     onClick={() => setPeople(people + 1)}
-                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
                   >+</button>
                 </div>
               </div>
@@ -207,12 +207,12 @@ function App() {
                 <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
                   <button
                     onClick={() => setMeals(Math.max(1, meals - 1))}
-                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
                   >-</button>
                   <span className="w-6 text-center font-mono font-semibold">{meals}</span>
                   <button
                     onClick={() => setMeals(meals + 1)}
-                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
                   >+</button>
                 </div>
               </div>
@@ -251,7 +251,7 @@ function App() {
 
           <div className="lg:col-span-2 space-y-8">
             {mealPlan ? (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <ShoppingList items={mealPlan.shoppingList} language={language} />
 
                 <div>

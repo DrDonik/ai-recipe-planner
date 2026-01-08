@@ -1,69 +1,103 @@
 @import "tailwindcss";
 
 :root {
-  /* Dynamic HSL Palette */
-  --hue-primary: 150;
-  /* Fresh Green */
-  --hue-secondary: 200;
-  /* Cool Blue */
+  /*
+    Universal Design Palette
+    Base Neutrals: Zinc-like (Cool Greys)
+  */
+  --hue-neutral: 240;
 
-  --color-primary: hsl(var(--hue-primary), 60%, 45%);
-  --color-primary-hover: hsl(var(--hue-primary), 60%, 35%);
+  /* Primary: Emerald/Teal - Accessible & Fresh */
+  --hue-primary: 155;
+  --sat-primary: 50%;
+  --lig-primary: 45%;
+
+  /* Secondary: Sky/Blue */
+  --hue-secondary: 205;
+
+  /* Light Mode Semantic Colors */
+  --color-bg-app: hsl(var(--hue-neutral), 5%, 96%);
+  /* Slightly off-white */
+  --color-bg-surface: hsl(255, 100%, 100%);
+  /* Pure white for cards */
+  --color-bg-surface-hover: hsl(var(--hue-neutral), 5%, 96%);
+
+  --color-text-main: hsl(var(--hue-neutral), 5%, 10%);
+  /* Almost black */
+  --color-text-muted: hsl(var(--hue-neutral), 4%, 45%);
+  /* Mid-grey */
+  --color-text-light: hsl(var(--hue-neutral), 5%, 98%);
+  /* For dark btns */
+
+  --color-border: hsl(var(--hue-neutral), 5%, 85%);
+  /* Subtle border */
+  --color-border-hover: hsl(var(--hue-neutral), 5%, 70%);
+
+  /* Brand Colors */
+  --color-primary: hsl(var(--hue-primary), var(--sat-primary), var(--lig-primary));
+  --color-primary-hover: hsl(var(--hue-primary), var(--sat-primary), 35%);
+  --color-primary-light: hsl(var(--hue-primary), var(--sat-primary), 92%);
+  /* For badges/highlights */
+
   --color-secondary: hsl(var(--hue-secondary), 70%, 50%);
 
-  --color-bg-mesh-1: hsl(var(--hue-primary), 80%, 90%);
-  --color-bg-mesh-2: hsl(var(--hue-secondary), 80%, 90%);
-
-  --color-text-main: hsl(200, 20%, 20%);
-  --color-text-muted: hsl(200, 10%, 50%);
-  --color-text-light: hsl(0, 0%, 98%);
-
+  /* Glass Effects */
   --glass-bg: hsla(0, 0%, 100%, 0.7);
-  --glass-border: hsla(0, 0%, 100%, 0.5);
-  --glass-shadow: 0 8px 32px 0 hsla(var(--hue-primary), 30%, 80%, 0.3);
+  --glass-border: hsla(var(--hue-neutral), 0%, 0%, 0.1);
+  --glass-shadow: 0 4px 6px -1px hsla(var(--hue-neutral), 0%, 0%, 0.05),
+    0 2px 4px -1px hsla(var(--hue-neutral), 0%, 0%, 0.03);
 
+  /* Typography & Layout */
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  --radius-xl: 24px;
-  --radius-lg: 16px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
+  --radius-xl: 1rem;
+  /* 16px */
+  --radius-lg: 0.75rem;
+  /* 12px */
+  --radius-md: 0.5rem;
+  /* 8px */
+  --radius-sm: 0.25rem;
+  /* 4px */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: hsl(var(--hue-primary), 60%, 55%);
-    --color-primary-hover: hsl(var(--hue-primary), 60%, 65%);
+    /* Dark Mode Defaults - Zinc Scale */
+    --color-bg-app: hsl(var(--hue-neutral), 5%, 7%);
+    /* Deep textured black */
+    --color-bg-surface: hsl(var(--hue-neutral), 5%, 12%);
+    /* Dark Grey */
+    --color-bg-surface-hover: hsl(var(--hue-neutral), 5%, 16%);
 
-    --color-bg-mesh-1: hsl(240, 20%, 10%);
-    --color-bg-mesh-2: hsl(var(--hue-primary), 20%, 15%);
+    --color-text-main: hsl(var(--hue-neutral), 5%, 92%);
+    /* Off-white */
+    --color-text-muted: hsl(var(--hue-neutral), 4%, 60%);
+    /* Light grey */
 
-    --color-text-main: hsl(0, 0%, 95%);
-    --color-text-muted: hsl(200, 10%, 70%);
+    --color-border: hsl(var(--hue-neutral), 5%, 20%);
+    --color-border-hover: hsl(var(--hue-neutral), 5%, 30%);
 
-    --glass-bg: hsla(240, 20%, 15%, 0.6);
-    --glass-border: hsla(0, 0%, 100%, 0.1);
-    --glass-shadow: 0 8px 32px 0 hsla(0, 0%, 0%, 0.4);
+    /* Primary adjustments for Dark Mode */
+    --color-primary: hsl(var(--hue-primary), 50%, 50%);
+    --color-primary-hover: hsl(var(--hue-primary), 50%, 60%);
+    --color-primary-light: hsl(var(--hue-primary), 50%, 15%);
+
+    /* Glass Effects Dark */
+    --glass-bg: hsla(var(--hue-neutral), 5%, 12%, 0.6);
+    --glass-border: hsla(var(--hue-neutral), 5%, 80%, 0.08);
+    /* Subtle highlight */
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
+      0 2px 4px -1px rgba(0, 0, 0, 0.2);
   }
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
   font-family: var(--font-family);
-  background: radial-gradient(at 0% 0%, var(--color-bg-mesh-1) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, var(--color-bg-mesh-2) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, var(--color-bg-mesh-1) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, var(--color-bg-mesh-2) 0px, transparent 50%);
-  background-color: #f8fafc;
-  /* Fallback */
+  background-color: var(--color-bg-app);
   color: var(--color-text-main);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 input,
@@ -74,35 +108,39 @@ textarea {
   outline: none;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism / Surface Utilities */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  background: var(--color-bg-surface);
+  /* Fallback/Solid for better contrast */
+  border: 1px solid var(--color-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius-xl);
+  padding: 2rem;
+}
+
+@supports (backdrop-filter: blur(12px)) {
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
 }
 
 .glass-card {
-  background: hsla(0, 0%, 100%, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  transition: transform 0.2s, background 0.2s;
-}
-
-.dark .glass-card {
-  background: hsla(240, 20%, 20%, 0.4);
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
 }
 
 .glass-card:hover {
-  background: hsla(0, 0%, 100%, 0.6);
   transform: translateY(-2px);
-}
-
-.dark .glass-card:hover {
-  background: hsla(240, 20%, 25%, 0.6);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* shadow-lg */
+  border-color: var(--color-border-hover);
 }
 
 /* Layout Utilities */
@@ -135,20 +173,25 @@ textarea {
 .input-field {
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
-  background: hsla(0, 0%, 100%, 0.5);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
   width: 100%;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
-.dark .input-field {
-  background: hsla(240, 20%, 10%, 0.5);
+.input-field::placeholder {
+  color: var(--color-text-muted);
 }
 
 .input-field:focus {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+  /* Focus ring */
+  outline: none;
 }
 
+/* Buttons */
 .btn {
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
@@ -164,34 +207,38 @@ textarea {
 
 .btn-primary {
   background: var(--color-primary);
-  color: white;
-  box-shadow: 0 4px 12px hsla(var(--hue-primary), 60%, 45%, 0.3);
+  color: #ffffff;
+  /* Always white for legibility on primary */
+  box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
 }
 
 .btn-primary:hover {
   background: var(--color-primary-hover);
   transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px hsla(var(--hue-primary), 60%, 40%, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-primary:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .btn-icon {
   padding: 0.5rem;
   background: transparent;
   color: var(--color-text-muted);
+  border-radius: var(--radius-md);
 }
 
 .btn-icon:hover {
   color: var(--color-text-main);
-  background: hsla(0, 0%, 0%, 0.05);
-}
-
-.dark .btn-icon:hover {
-  background: hsla(0, 0%, 100%, 0.1);
+  background: var(--color-bg-surface-hover);
 }
 
 /* Typography */
@@ -199,13 +246,13 @@ h1,
 h2,
 h3 {
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  color: var(--color-text-main);
 }
 
 h1 {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* Removed gradient text for better accessibility/readability in all modes, 
+     or can be re-added if high contrast is ensured.
+     Keeping it simple and high-contrast for 'Universal Design'. */
 }
