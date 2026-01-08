@@ -72,18 +72,18 @@ export const PantryInput: React.FC<PantryInputProps> = ({
                 )}
 
                 {vegetables.map((v) => (
-                    <div key={v.id} className="glass-card p-3 flex flex-row items-center justify-between">
+                    <div key={v.id} className="glass-card flex flex-row items-center justify-between" style={{ padding: '0.75rem' }}>
                         <div className="flex flex-row items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></div>
                             <span className="font-semibold">{v.name}</span>
-                            <span className="text-[var(--color-text-muted)] text-sm bg-white/20 px-2 py-0.5 rounded-full">
+                            <span className="text-[var(--color-text-muted)] text-sm bg-white/50 dark:bg-white/10 rounded-md shadow-sm" style={{ padding: '0.25rem 0.75rem' }}>
                                 {v.amount}
                             </span>
                         </div>
                         <button
                             onClick={() => onRemoveVegetable(v.id)}
-                            className="btn-icon text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-full p-2"
-                            title="Remove"
+                            className="btn-icon text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-2"
+                            title={t.remove}
                         >
                             <Trash2 size={16} />
                         </button>
