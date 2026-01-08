@@ -256,3 +256,48 @@ h1 {
      or can be re-added if high contrast is ensured.
      Keeping it simple and high-contrast for 'Universal Design'. */
 }
+
+/* Tooltip */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-main);
+  text-align: center;
+  border-radius: var(--radius-md);
+  padding: 8px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--glass-shadow);
+  font-size: 0.75rem;
+  font-weight: normal;
+  pointer-events: none;
+}
+
+.tooltip-container:hover .tooltip-text,
+.tooltip-container:focus-within .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--color-border) transparent transparent transparent;
+}

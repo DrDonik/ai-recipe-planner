@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Users, Key, Utensils, Globe, Salad } from 'lucide-react';
+import { Sparkles, Users, Key, Utensils, Globe, Salad, Info } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { ShoppingList } from './components/ShoppingList';
 import { generateRecipes } from './services/llm';
-import type { Vegetable, MealPlan, Recipe } from './services/llm';
+import type { PantryItem, MealPlan, Recipe } from './services/llm';
 import { translations } from './constants/translations';
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
   const [meals, setMeals] = useState(4);
   const [diet, setDiet] = useState('Mostly Vegetarian');
   const [language, setLanguage] = useState('German');
-  const [vegetables, setVegetables] = useState<Vegetable[]>([]);
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,12 +53,12 @@ function App() {
     window.history.pushState({}, '', window.location.pathname);
   };
 
-  const addVegetable = (v: Vegetable) => {
-    setVegetables([...vegetables, v]);
+  const addPantryItem = (v: PantryItem) => {
+    setPantryItems([...pantryItems, v]);
   };
 
-  const removeVegetable = (id: string) => {
-    setVegetables(vegetables.filter(v => v.id !== id));
+  const removePantryItem = (id: string) => {
+    setPantryItems(pantryItems.filter(v => v.id !== id));
   };
 
   const handleGenerate = async () => {
@@ -66,7 +66,7 @@ function App() {
       setError(t.apiKeyError);
       return;
     }
-    if (vegetables.length === 0) {
+    if (pantryItems.length === 0) {
       setError(t.veggieError);
       return;
     }
@@ -76,7 +76,7 @@ function App() {
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, vegetables, people, meals, diet, language);
+      const plan = await generateRecipes(apiKey, pantryItems, people, meals, diet, language);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -95,7 +95,7 @@ function App() {
             onClick={clearViewRecipe}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
-            ← Back to Recipe Planner
+            ← Back to AI Recipe Planner
           </button>
         </div>
       </div>
@@ -113,7 +113,7 @@ function App() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
-                Veggie Planner
+                AI Recipe Planner
               </h1>
               <p className="text-sm text-[var(--color-text-muted)]">Turn your pantry into plans</p>
             </div>
@@ -129,6 +129,18 @@ function App() {
                 onChange={(e) => setApiKey(e.target.value)}
                 className="bg-transparent border-none outline-none text-sm w-48 px-2"
               />
+              <div className="tooltip-container flex items-center mr-2">
+                <button
+                  type="button"
+                  className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 rounded-full outline-none focus:text-[var(--color-primary)]"
+                  aria-label="API Info"
+                >
+                  <Info size={14} />
+                </button>
+                <div className="tooltip-text">
+                  {t.apiInfo}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
@@ -219,9 +231,9 @@ function App() {
             </div>
 
             <PantryInput
-              vegetables={vegetables}
-              onAddVegetable={addVegetable}
-              onRemoveVegetable={removeVegetable}
+              pantryItems={pantryItems}
+              onAddPantryItem={addPantryItem}
+              onRemovePantryItem={removePantryItem}
               language={language}
             />
 

@@ -8,7 +8,7 @@ export const translations = {
         generate: "Generate Meal Plan",
         planning: "Planning Meals...",
         ready: "Ready to plan?",
-        readyDesc: "Add your veggies, set the number of people, and let AI design a perfect minimal-waste menu for you.",
+        readyDesc: "Add your ingredients, set the number of people, and let AI design a perfect minimal-waste menu for you.",
         people: "People to feed",
         diet: "Diet",
         language: "Language",
@@ -16,9 +16,9 @@ export const translations = {
         pantry: "Pantry Inventory",
         add: "Add",
         remove: "Remove",
-        noVeg: "No vegetables added yet.",
+        noVeg: "No ingredients added yet.",
         apiKeyError: "Please enter a valid API Key.",
-        veggieError: "Please add at least one vegetable to your pantry.",
+        veggieError: "Please add at least one ingredient to your pantry.",
         meals: "Meals to plan",
         dietOptions: {
             vegan: "Vegan",
@@ -29,9 +29,10 @@ export const translations = {
             carnivore: "Carnivore",
         },
         placeholders: {
-            ingredient: "Vegetable (e.g. Carrots)",
-            amount: "Amount (e.g. 1kg)",
-        }
+            ingredient: "Ingredient (e.g. Carrots)",
+            amount: "Amount (e.g. 1kg or 3 pcs)",
+        },
+        apiInfo: "Your API key is stored only on this device and is never sent to our website's servers."
     },
     German: {
         ingredients: "Zutaten",
@@ -41,7 +42,7 @@ export const translations = {
         generate: "Mahlzeiten planen",
         planning: "Plane Gerichte...",
         ready: "Bereit zum Planen?",
-        readyDesc: "Füge dein Gemüse hinzu, wähle die Personenanzahl und lass die KI einen perfekten Menüplan erstellen.",
+        readyDesc: "Füge deine Zutaten hinzu, wähle die Personenanzahl und lass die KI einen perfekten Menüplan erstellen.",
         people: "Personenanzahl",
         diet: "Ernährung",
         language: "Sprache",
@@ -49,9 +50,9 @@ export const translations = {
         pantry: "Vorratsschrank",
         add: "Hinzufügen",
         remove: "Entfernen",
-        noVeg: "Noch kein Gemüse hinzugefügt.",
+        noVeg: "Noch keine Zutaten hinzugefügt.",
         apiKeyError: "Bitte gib einen gültigen API-Key ein.",
-        veggieError: "Bitte füge mindestens ein Gemüse zu deinem Vorrat hinzu.",
+        veggieError: "Bitte füge mindestens eine Zutat zu deinem Vorrat hinzu.",
         meals: "Anzahl Mahlzeiten",
         dietOptions: {
             vegan: "Vegan",
@@ -62,8 +63,9 @@ export const translations = {
             carnivore: "Fleischfresser",
         },
         placeholders: {
-            ingredient: "Gemüse (z.B. Karotten)",
-            amount: "Menge (z.B. 1kg)",
-        }
+            ingredient: "Zutat (z.B. Karotten)",
+            amount: "Menge (z.B. 1kg oder 3 Stück)",
+        },
+        apiInfo: "Dein API-Schlüssel wird nur auf diesem Gerät gespeichert und niemals an unsere Website-Server gesendet."
     }
 };
