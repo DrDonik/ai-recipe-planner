@@ -4,6 +4,8 @@ import { Plus, Trash2, Leaf } from 'lucide-react';
 import type { Vegetable } from '../services/llm';
 import { translations } from '../constants/translations';
 
+import { generateId } from '../utils/idGenerator';
+
 interface PantryInputProps {
     vegetables: Vegetable[];
     onAddVegetable: (v: Vegetable) => void;
@@ -26,7 +28,7 @@ export const PantryInput: React.FC<PantryInputProps> = ({
         if (!name.trim() || !amount.trim()) return;
 
         onAddVegetable({
-            id: crypto.randomUUID(),
+            id: generateId(),
             name: name.trim(),
             amount: amount.trim(),
         });
