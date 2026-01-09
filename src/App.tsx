@@ -186,21 +186,20 @@ function App() {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="glass-panel !py-4 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl">
-        <div className="container flex flex-col sm:flex-row items-center justify-between py-2 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[var(--color-primary)] rounded-xl text-white shadow-lg shadow-emerald-500/30">
-              <Utensils size={28} />
+      <header className="glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl">
+        <div className="container flex flex-col items-center py-1">
+          <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
+            {/* Floating Leading Icon - Absolute positioned to stay outside the text alignment flow */}
+            <div className="absolute -left-14 sm:-left-16 top-0.5 p-2 bg-[var(--color-primary)] rounded-xl text-white shadow-lg shadow-emerald-500/30">
+              <Utensils className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
-                AI Recipe Planner
-              </h1>
-              <p className="text-sm text-[var(--color-text-muted)]">Turn your pantry into plans</p>
-            </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
+              AI Recipe Planner
+            </h1>
+
+            <p className="text-sm text-[var(--color-text-muted)]">Turn your pantry into plans</p>
+
             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
               <Key size={16} className="ml-2 text-[var(--color-text-muted)]" />
               <input
@@ -247,7 +246,7 @@ function App() {
             {/* Preferences Panel */}
             <div className="glass-panel p-10 space-y-2">
               {/* Diet Preference */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <Utensils className="text-[var(--color-secondary)]" size={24} />
                   <span className="font-semibold">{t.diet}</span>
@@ -270,17 +269,17 @@ function App() {
               <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent" />
 
               {/* People Count */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <Users className="text-[var(--color-secondary)]" size={24} />
                   <span className="font-semibold">{t.people}</span>
                 </div>
-                <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max">
                   <button
                     onClick={() => setPeople(Math.max(1, people - 1))}
                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
                   >-</button>
-                  <span className="w-6 text-center font-mono font-semibold">{people}</span>
+                  <span className="w-8 text-center font-mono font-semibold text-sm">{people}</span>
                   <button
                     onClick={() => setPeople(people + 1)}
                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
@@ -292,17 +291,17 @@ function App() {
               <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent" />
 
               {/* Meals Count */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <Salad className="text-[var(--color-secondary)]" size={24} />
                   <span className="font-semibold">{t.meals}</span>
                 </div>
-                <div className="flex items-center gap-3 bg-white/50 dark:bg-black/20 rounded-lg p-1">
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max">
                   <button
                     onClick={() => setMeals(Math.max(1, meals - 1))}
                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
                   >-</button>
-                  <span className="w-6 text-center font-mono font-semibold">{meals}</span>
+                  <span className="w-8 text-center font-mono font-semibold text-sm">{meals}</span>
                   <button
                     onClick={() => setMeals(meals + 1)}
                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
