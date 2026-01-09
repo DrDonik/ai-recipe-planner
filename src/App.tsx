@@ -205,7 +205,7 @@ function App() {
               <Key size={16} className="ml-2 text-[var(--color-text-muted)]" />
               <input
                 type="password"
-                placeholder="Paste Gemini/OpenAI Key"
+                placeholder="Paste Gemini API Key"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="bg-transparent border-none outline-none text-sm w-48 px-2"
