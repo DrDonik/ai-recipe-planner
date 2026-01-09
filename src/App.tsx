@@ -97,12 +97,43 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const updateMetaTags = (title: string, description: string, url: string) => {
+      // Update title
+      document.title = title;
+
+      // Update Open Graph tags
+      const ogTitle = document.getElementById('og-title');
+      const ogDescription = document.getElementById('og-description');
+      const ogUrl = document.getElementById('og-url');
+
+      if (ogTitle) ogTitle.setAttribute('content', title);
+      if (ogDescription) ogDescription.setAttribute('content', description);
+      if (ogUrl) ogUrl.setAttribute('content', url);
+
+      // Update Twitter tags
+      const twitterTitle = document.getElementById('twitter-title');
+      const twitterDescription = document.getElementById('twitter-description');
+
+      if (twitterTitle) twitterTitle.setAttribute('content', title);
+      if (twitterDescription) twitterDescription.setAttribute('content', description);
+    };
+
     if (viewRecipe) {
-      document.title = `${viewRecipe.title} | AI Recipe Planner`;
+      const title = `${viewRecipe.title} | AI Recipe Planner`;
+      const description = viewRecipe.ingredients.slice(0, 3).map(i => i.item).join(', ') +
+        (viewRecipe.ingredients.length > 3 ? '...' : '');
+      const url = window.location.href;
+      updateMetaTags(title, description, url);
     } else if (viewShoppingList) {
-      document.title = `${t.shoppingList} | AI Recipe Planner`;
+      const title = `${t.shoppingList} | AI Recipe Planner`;
+      const description = 'Your shopping list from AI Recipe Planner';
+      const url = window.location.href;
+      updateMetaTags(title, description, url);
     } else {
-      document.title = 'AI Recipe Planner';
+      const title = 'AI Recipe Planner';
+      const description = 'Turn your pantry into delicious meal plans with AI';
+      const url = window.location.origin + window.location.pathname;
+      updateMetaTags(title, description, url);
     }
   }, [viewRecipe, viewShoppingList, t.shoppingList]);
 
