@@ -96,6 +96,16 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (viewRecipe) {
+      document.title = `${viewRecipe.title} | AI Recipe Planner`;
+    } else if (viewShoppingList) {
+      document.title = `${t.shoppingList} | AI Recipe Planner`;
+    } else {
+      document.title = 'AI Recipe Planner';
+    }
+  }, [viewRecipe, viewShoppingList, t.shoppingList]);
+
   const clearViewRecipe = () => {
     setViewRecipe(null);
     // clean URL

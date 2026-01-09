@@ -301,3 +301,9 @@ h1 {
   border-style: solid;
   border-color: var(--color-border) transparent transparent transparent;
 }
+
+.instruction-step-active {
+  background-color: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}

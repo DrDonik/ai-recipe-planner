@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, ChefHat, AlertCircle, Share2, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../services/llm';
@@ -13,6 +13,24 @@ interface RecipeCardProps {
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language }) => {
     const t = translations[language as keyof typeof translations];
+    const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
+    const [activeStep, setActiveStep] = useState<number | null>(null);
+
+    const toggleIngredient = (idx: number) => {
+        setStruckIngredients(prev => {
+            const next = new Set(prev);
+            if (next.has(idx)) {
+                next.delete(idx);
+            } else {
+                next.add(idx);
+            }
+            return next;
+        });
+    };
+
+    const toggleStepHighlight = (idx: number) => {
+        setActiveStep(prev => prev === idx ? null : idx);
+    };
 
     const generateSchema = () => {
         const schema = {
@@ -150,11 +168,22 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
                                 const isMissing = recipe.missingIngredients.some(m => m.item.toLowerCase().includes(ing.item.toLowerCase()));
 
                                 return (
-                                    <li key={i} className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3">
-                                        <span className={`text-sm ${isMissing ? "text-amber-600 dark:text-amber-400 font-medium" : "text-[var(--color-text-main)]"} flex-1`}>
+                                    <li
+                                        key={i}
+                                        className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3 cursor-pointer group/ing"
+                                        onClick={() => toggleIngredient(i)}
+                                    >
+                                        <span className={`text-sm transition-all ${struckIngredients.has(i)
+                                            ? "line-through opacity-50 text-[var(--color-text-muted)]"
+                                            : isMissing
+                                                ? "text-amber-600 dark:text-amber-400 font-medium"
+                                                : "text-[var(--color-text-main)]"
+                                            } flex-1`}>
                                             {ing.item}
                                         </span>
-                                        <span className="text-[var(--color-text-muted)] font-mono text-xs whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded">{ing.amount}</span>
+                                        <span className={`text-[var(--color-text-muted)] font-mono text-xs whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded transition-opacity ${struckIngredients.has(i) ? "opacity-30" : ""}`}>
+                                            {ing.amount}
+                                        </span>
                                     </li>
                                 );
                             })}
@@ -182,7 +211,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language 
                         </h4>
                         <ol className="list-decimal list-inside space-y-4 text-sm opacity-90">
                             {recipe.instructions.map((step, i) => (
-                                <li key={i} className="pl-1 marker:text-[var(--color-primary)] marker:font-bold">
+                                <li
+                                    key={i}
+                                    className={`pl-1 marker:text-[var(--color-primary)] marker:font-bold cursor-pointer transition-all ${activeStep === i ? 'instruction-step-active' : ''
+                                        }`}
+                                    onClick={() => toggleStepHighlight(i)}
+                                >
                                     {step}
                                 </li>
                             ))}
