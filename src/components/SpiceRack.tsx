@@ -47,7 +47,7 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-row gap-3">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <input
                     type="text"
                     placeholder={t.spicesPlaceholder}
