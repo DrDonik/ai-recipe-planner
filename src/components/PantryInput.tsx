@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Trash2, Refrigerator } from 'lucide-react';
+import { Plus, Trash2, Refrigerator, Info } from 'lucide-react';
 import type { PantryItem } from '../services/llm';
 import { translations } from '../constants/translations';
 
@@ -39,9 +39,23 @@ export const PantryInput: React.FC<PantryInputProps> = ({
 
     return (
         <div className="glass-panel p-10 flex flex-col gap-6">
-            <div className="flex flex-row items-center gap-3 mb-2">
-                <Refrigerator className="text-[var(--color-primary)]" size={24} />
-                <h2>{t.pantry}</h2>
+            <div className="flex flex-row items-center justify-between mb-2">
+                <div className="flex flex-row items-center gap-3">
+                    <Refrigerator className="text-[var(--color-primary)]" size={24} />
+                    <h2>{t.pantry}</h2>
+                </div>
+                <div className="tooltip-container">
+                    <button
+                        type="button"
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1.5 rounded-full outline-none focus:text-[var(--color-primary)]"
+                        aria-label="Pantry Info"
+                    >
+                        <Info size={18} />
+                    </button>
+                    <div className="tooltip-text">
+                        {t.pantryInfo}
+                    </div>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
