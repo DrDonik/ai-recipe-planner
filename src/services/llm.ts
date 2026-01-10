@@ -33,7 +33,8 @@ export const generateRecipes = async (
   meals: number,
   diet: string,
   language: string,
-  spices: string[] = []
+  spices: string[] = [],
+  styleWishes: string = ''
 ): Promise<MealPlan> => {
   if (!apiKey) throw new Error("API Key is required");
 
@@ -46,6 +47,10 @@ export const generateRecipes = async (
     ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.join(", ")}`
     : "No extra spices available.";
 
+  const styleWishesText = styleWishes.trim()
+    ? `STYLE/WISHES: ${styleWishes}`
+    : "";
+
   const prompt = `
     You are a smart recipe planner. I have these ingredients in my pantry:
     ${pantryList}
@@ -53,12 +58,13 @@ export const generateRecipes = async (
     ${spiceList}
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
-    
+
     DIETARY PREFERENCE: ${diet}
     LANGUAGE: ${language}
+    ${styleWishesText}
     
     RULES:
-    1. STRICTLY follow the dietary preference: ${diet}.
+    1. STRICTLY follow the dietary preference: ${diet}.${styleWishes.trim() ? ` Also respect the style/wishes: ${styleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
     2. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
     3. The "ingredients" array must contain EVERY single ingredient needed for the recipe (both what I have and what I need to buy).
     4. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices if they are listed in "Available Spices".

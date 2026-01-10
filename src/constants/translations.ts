@@ -28,6 +28,8 @@ export const translations = {
             flexitarian: "Flexitarian",
             carnivore: "Carnivore",
         },
+        styleWishes: "Style, Wishes, etc.",
+        styleWishesPlaceholder: "Indian, Gluten-free, ...",
         spiceRack: "Spice Rack & Staples",
         spicesPlaceholder: "Add spices, oils, sauces...",
         placeholders: {
@@ -66,6 +68,8 @@ export const translations = {
             flexitarian: "Flexitarisch",
             carnivore: "Fleischfresser",
         },
+        styleWishes: "Stil, Wünsche, etc.",
+        styleWishesPlaceholder: "Indisch, Glutenfrei, ...",
         spiceRack: "Gewürzregal & Vorräte",
         spicesPlaceholder: "Gewürze, Öl, Soßen hinzufügen...",
         placeholders: {

@@ -30,6 +30,10 @@ function App() {
     return localStorage.getItem('diet_preference') || 'Mostly Vegetarian';
   });
 
+  const [styleWishes, setStyleWishes] = useState(() => {
+    return localStorage.getItem('style_wishes') || '';
+  });
+
   const [language, setLanguage] = useState('German');
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
 
@@ -58,6 +62,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('diet_preference', diet);
   }, [diet]);
+
+  useEffect(() => {
+    localStorage.setItem('style_wishes', styleWishes);
+  }, [styleWishes]);
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(false);
@@ -182,7 +190,7 @@ function App() {
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, pantryItems, people, meals, diet, language, spices);
+      const plan = await generateRecipes(apiKey, pantryItems, people, meals, diet, language, spices, styleWishes);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -304,6 +312,21 @@ function App() {
                   <option value="Flexitarian">{t.dietOptions.flexitarian}</option>
                   <option value="Carnivore">{t.dietOptions.carnivore}</option>
                 </select>
+              </div>
+
+              {/* Separator */}
+              <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent" />
+
+              {/* Style, Wishes, etc. */}
+              <div className="flex flex-col items-start gap-3">
+                <span className="font-semibold">{t.styleWishes}</span>
+                <input
+                  type="text"
+                  value={styleWishes}
+                  onChange={(e) => setStyleWishes(e.target.value)}
+                  placeholder={t.styleWishesPlaceholder}
+                  className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[var(--color-primary)] transition-all w-full"
+                />
               </div>
 
               {/* Separator */}
