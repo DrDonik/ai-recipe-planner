@@ -537,6 +537,12 @@ function App() {
               )}
             </button>
 
+            {error && (
+              <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2">
+                {error}
+              </div>
+            )}
+
             <PantryInput
               pantryItems={pantryItems}
               onAddPantryItem={addPantryItem}
@@ -552,12 +558,6 @@ function App() {
               isMinimized={spiceRackMinimized}
               onToggleMinimize={() => setSpiceRackMinimized(!spiceRackMinimized)}
             />
-
-            {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2">
-                {error}
-              </div>
-            )}
           </div>
 
           <div className="lg:col-span-2 space-y-8">
