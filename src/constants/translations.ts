@@ -38,7 +38,9 @@ export const translations = {
         },
         apiInfo: "Your API key is stored only on this device and is never sent to our website's servers.",
         pantryInfo: "Add your main ingredients here. The planner will try to use all of these ingredients in the generated recipes.",
-        spiceRackInfo: "Add staples like spices, oils, or salt. These items will not necessarily be used in the recipes, won't be added to your shopping list and are saved on this device for future sessions."
+        spiceRackInfo: "Add staples like spices, oils, or salt. These items will not necessarily be used in the recipes, won't be added to your shopping list and are saved on this device for future sessions.",
+        headerMinimize: "Minimize header",
+        headerExpand: "Expand header"
     },
     German: {
         ingredients: "Zutaten",
@@ -78,6 +80,8 @@ export const translations = {
         },
         apiInfo: "Dein API-Schlüssel wird nur auf diesem Gerät gespeichert und niemals an unsere Website-Server gesendet.",
         pantryInfo: "Füge hier deine Hauptzutaten hinzu. Der Planer wird versuchen, alle diese Zutaten aufzubrauchen.",
-        spiceRackInfo: "Füge Grundvorräte wie Gewürze, Öl oder Salz hinzu. Diese werden nicht notwendigerweise in den Rezepten genutzt, werden nicht auf die Einkaufsliste gesetzt und bleiben gespeichert."
+        spiceRackInfo: "Füge Grundvorräte wie Gewürze, Öl oder Salz hinzu. Diese werden nicht notwendigerweise in den Rezepten genutzt, werden nicht auf die Einkaufsliste gesetzt und bleiben gespeichert.",
+        headerMinimize: "Kopfzeile minimieren",
+        headerExpand: "Kopfzeile erweitern"
     }
 };

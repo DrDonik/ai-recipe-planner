@@ -250,12 +250,7 @@ h3 {
   color: var(--color-text-main);
 }
 
-h1 {
-  font-size: 2.5rem;
-  /* Removed gradient text for better accessibility/readability in all modes, 
-     or can be re-added if high contrast is ensured.
-     Keeping it simple and high-contrast for 'Universal Design'. */
-}
+/* h1 font-size is now controlled by Tailwind utility classes for dynamic sizing */
 
 /* Tooltip */
 .tooltip-container {

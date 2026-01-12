@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Users, Key, Utensils, Globe, Salad, Info } from 'lucide-react';
+import { Sparkles, Users, Key, Utensils, Globe, Salad, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
@@ -66,6 +66,16 @@ function App() {
   useEffect(() => {
     localStorage.setItem('style_wishes', styleWishes);
   }, [styleWishes]);
+
+  const [headerMinimized, setHeaderMinimized] = useState(() => {
+    const saved = localStorage.getItem('header_minimized');
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('header_minimized', headerMinimized.toString());
+  }, [headerMinimized]);
+
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(false);
@@ -235,54 +245,75 @@ function App() {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl">
+      <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
         <div className="container flex flex-col items-center py-1">
           <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
             {/* Floating Leading Icon - Absolute positioned to stay outside the text alignment flow */}
-            <div className="absolute -left-14 sm:-left-16 top-0.5 p-2 bg-[var(--color-primary)] rounded-xl text-white shadow-lg shadow-emerald-500/30">
-              <Utensils className="w-6 h-6 sm:w-7 sm:h-7" />
+            <div className={`absolute -left-14 sm:-left-16 top-0.5 p-2 bg-[var(--color-primary)] rounded-xl text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 ${headerMinimized ? 'scale-75' : ''}`}>
+              <Utensils className={`transition-all duration-300 ${headerMinimized ? 'w-5 h-5' : 'w-6 h-6 sm:w-7 sm:h-7'}`} />
             </div>
 
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
-              AI Recipe Planner
-            </h1>
+            {/* Title with inline toggle button */}
+            <div className="flex items-center gap-3">
+              <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] transition-all duration-300 ${headerMinimized ? 'text-2xl' : 'text-4xl'}`}>
+                AI Recipe Planner
+              </h1>
 
-            <p className="text-sm text-[var(--color-text-muted)]">Turn your pantry into plans</p>
-
-            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
-              <Key size={16} className="ml-2 text-[var(--color-text-muted)]" />
-              <input
-                type="password"
-                placeholder="Paste Gemini API Key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="bg-transparent border-none outline-none text-sm w-48 px-2"
-              />
-              <div className="tooltip-container flex items-center mr-2">
+              {/* Toggle Button */}
+              <div className="tooltip-container">
                 <button
-                  type="button"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 rounded-full outline-none focus:text-[var(--color-primary)]"
-                  aria-label="API Info"
+                  onClick={() => setHeaderMinimized(!headerMinimized)}
+                  className="p-1.5 rounded-lg bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/30 transition-all text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                  aria-label={headerMinimized ? t.headerExpand : t.headerMinimize}
                 >
-                  <Info size={14} />
+                  {headerMinimized ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                 </button>
                 <div className="tooltip-text">
-                  {t.apiInfo}
+                  {headerMinimized ? t.headerExpand : t.headerMinimize}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)]">
-              <Globe size={16} className="ml-2 text-[var(--color-text-muted)]" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-[var(--color-text-main)] w-full"
-              >
-                <option value="German">Deutsch</option>
-                <option value="English">English</option>
-              </select>
-            </div>
+            {!headerMinimized && (
+              <>
+                <p className="text-sm text-[var(--color-text-muted)] animate-in fade-in slide-in-from-top-2 duration-300">Turn your pantry into plans</p>
+
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Key size={16} className="ml-2 text-[var(--color-text-muted)]" />
+                  <input
+                    type="password"
+                    placeholder="Paste Gemini API Key"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="bg-transparent border-none outline-none text-sm w-48 px-2"
+                  />
+                  <div className="tooltip-container flex items-center mr-2">
+                    <button
+                      type="button"
+                      className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 rounded-full outline-none focus:text-[var(--color-primary)]"
+                      aria-label="API Info"
+                    >
+                      <Info size={14} />
+                    </button>
+                    <div className="tooltip-text">
+                      {t.apiInfo}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Globe size={16} className="ml-2 text-[var(--color-text-muted)]" />
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-[var(--color-text-main)] w-full"
+                  >
+                    <option value="German">Deutsch</option>
+                    <option value="English">English</option>
+                  </select>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>
