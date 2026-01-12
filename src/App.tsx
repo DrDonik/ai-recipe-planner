@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Users, Key, Utensils, Globe, Salad, Info, ChevronUp, ChevronDown, ChefHat } from 'lucide-react';
+import { Sparkles, Users, Key, Utensils, Globe, Salad, Info, ChevronUp, ChevronDown, ChefHat, Refrigerator } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
@@ -88,12 +88,15 @@ function App() {
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
   // Single Shopping List View State
   const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
+  // Single Pantry View State
+  const [viewPantry, setViewPantry] = useState<PantryItem[] | null>(null);
 
   useEffect(() => {
-    // Parse URL for shared recipe or shopping list
+    // Parse URL for shared recipe, shopping list, or pantry
     const searchParams = new URLSearchParams(window.location.search);
     const recipeParam = searchParams.get('recipe');
     const shoppingListParam = searchParams.get('shoppingList');
+    const pantryParam = searchParams.get('pantry');
 
     if (recipeParam) {
       try {
@@ -110,6 +113,14 @@ function App() {
         setViewShoppingList(shoppingList);
       } catch (err) {
         console.error("Failed to parse shared shopping list", err);
+      }
+    } else if (pantryParam) {
+      try {
+        const json = decodeURIComponent(escape(atob(pantryParam)));
+        const pantry = JSON.parse(json);
+        setViewPantry(pantry);
+      } catch (err) {
+        console.error("Failed to parse shared pantry", err);
       }
     }
   }, []);
@@ -147,13 +158,18 @@ function App() {
       const description = 'Your shopping list from AI Recipe Planner';
       const url = window.location.href;
       updateMetaTags(title, description, url);
+    } else if (viewPantry) {
+      const title = `${t.pantry} | AI Recipe Planner`;
+      const description = 'Shared pantry inventory from AI Recipe Planner';
+      const url = window.location.href;
+      updateMetaTags(title, description, url);
     } else {
       const title = 'AI Recipe Planner';
       const description = 'Turn your pantry into delicious meal plans with AI';
       const url = window.location.origin + window.location.pathname;
       updateMetaTags(title, description, url);
     }
-  }, [viewRecipe, viewShoppingList, t.shoppingList]);
+  }, [viewRecipe, viewShoppingList, viewPantry, t.shoppingList, t.pantry]);
 
   const clearViewRecipe = () => {
     setViewRecipe(null);
@@ -165,6 +181,19 @@ function App() {
     setViewShoppingList(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
+  };
+
+  const clearViewPantry = () => {
+    setViewPantry(null);
+    // clean URL
+    window.history.pushState({}, '', window.location.pathname);
+  };
+
+  const loadPantryItems = () => {
+    if (viewPantry) {
+      setPantryItems(viewPantry);
+      clearViewPantry();
+    }
   };
 
   const addPantryItem = (v: PantryItem) => {
@@ -233,6 +262,49 @@ function App() {
           <ShoppingList items={viewShoppingList} language={language} />
           <button
             onClick={clearViewShoppingList}
+            className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
+          >
+            ← Back to AI Recipe Planner
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (viewPantry) {
+    return (
+      <div className="min-h-screen bg-[var(--color-background)] p-8 flex flex-col items-center justify-center">
+        <div className="max-w-2xl w-full">
+          <div className="glass-panel p-10">
+            <div className="flex items-center gap-3 mb-6">
+              <Refrigerator className="text-[var(--color-primary)]" size={32} />
+              <h1 className="text-2xl font-bold">{t.sharedPantry || t.pantry}</h1>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 mb-6">
+              {viewPantry.map((item) => (
+                <div key={item.id} className="glass-card flex flex-row items-center justify-between" style={{ padding: '0.75rem' }}>
+                  <div className="flex flex-row items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></div>
+                    <span className="font-semibold">{item.name}</span>
+                    <span className="text-[var(--color-text-muted)] text-sm bg-white/50 dark:bg-white/10 rounded-md shadow-sm" style={{ padding: '0.25rem 0.75rem' }}>
+                      {item.amount}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={loadPantryItems}
+              className="btn btn-primary w-full mb-4"
+            >
+              {t.loadPantry || 'Load these items into my pantry'}
+            </button>
+          </div>
+
+          <button
+            onClick={clearViewPantry}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
             ← Back to AI Recipe Planner

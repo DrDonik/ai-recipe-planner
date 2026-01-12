@@ -40,7 +40,10 @@ export const translations = {
         pantryInfo: "Add your main ingredients here. The planner will try to use all of these ingredients in the generated recipes.",
         spiceRackInfo: "Add staples like spices, oils, or salt. These items will not necessarily be used in the recipes, won't be added to your shopping list and are saved on this device for future sessions.",
         headerMinimize: "Minimize header",
-        headerExpand: "Expand header"
+        headerExpand: "Expand header",
+        sharedPantry: "Shared Pantry",
+        loadPantry: "Load these items into my pantry",
+        noPantryToShare: "No pantry items to share!"
     },
     German: {
         ingredients: "Zutaten",
@@ -82,6 +85,9 @@ export const translations = {
         pantryInfo: "Füge hier deine Hauptzutaten hinzu. Der Planer wird versuchen, alle diese Zutaten aufzubrauchen.",
         spiceRackInfo: "Füge Grundvorräte wie Gewürze, Öl oder Salz hinzu. Diese werden nicht notwendigerweise in den Rezepten genutzt, werden nicht auf die Einkaufsliste gesetzt und bleiben gespeichert.",
         headerMinimize: "Kopfzeile minimieren",
-        headerExpand: "Kopfzeile erweitern"
+        headerExpand: "Kopfzeile erweitern",
+        sharedPantry: "Geteilter Vorratsschrank",
+        loadPantry: "Diese Zutaten in meinen Vorrat laden",
+        noPantryToShare: "Keine Vorratszutaten zum Teilen!"
     }
 };
