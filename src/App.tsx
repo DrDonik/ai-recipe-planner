@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Users, Key, Utensils, Globe, Salad, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { Sparkles, Users, Key, Utensils, Globe, Salad, Info, ChevronUp, ChevronDown, ChefHat } from 'lucide-react';
 import { PantryInput } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
@@ -246,7 +246,7 @@ function App() {
     <div className="min-h-screen pb-20">
       {/* Header */}
       <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
-        <div className="container flex flex-col items-center py-1">
+        <div className="app-container flex flex-col items-center py-1">
           <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
             {/* Floating Leading Icon - Absolute positioned to stay outside the text alignment flow */}
             <div className={`absolute -left-14 sm:-left-16 top-0.5 p-2 bg-[var(--color-primary)] rounded-xl text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 ${headerMinimized ? 'scale-75' : ''}`}>
@@ -318,7 +318,7 @@ function App() {
         </div>
       </header>
 
-      <main className="container flex flex-col gap-8">
+      <main className="app-container flex flex-col gap-8">
 
         {/* Input Section */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
@@ -350,7 +350,10 @@ function App() {
 
               {/* Style, Wishes, etc. */}
               <div className="flex flex-col items-start gap-3">
-                <span className="font-semibold">{t.styleWishes}</span>
+                <div className="flex items-center gap-3">
+                  <ChefHat className="text-[var(--color-secondary)]" size={24} />
+                  <span className="font-semibold">{t.styleWishes}</span>
+                </div>
                 <input
                   type="text"
                   value={styleWishes}

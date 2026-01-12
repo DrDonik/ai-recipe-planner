@@ -58,20 +58,20 @@ export const PantryInput: React.FC<PantryInputProps> = ({
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                 <input
                     type="text"
                     placeholder={t.placeholders.ingredient}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="input-field flex-1"
+                    className="input-field w-full flex-1"
                 />
                 <input
                     type="text"
                     placeholder={t.placeholders.amount}
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="input-field w-full md:w-32"
+                    className="input-field w-full"
                 />
                 <button type="submit" className="btn btn-primary whitespace-nowrap">
                     <Plus size={18} /> {t.add}

@@ -53,7 +53,7 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                     placeholder={t.spicesPlaceholder}
                     value={newSpice}
                     onChange={(e) => setNewSpice(e.target.value)}
-                    className="input-field flex-1"
+                    className="input-field w-full flex-1"
                 />
                 <button type="submit" className="btn btn-primary whitespace-nowrap">
                     <Plus size={18} /> {t.add}
