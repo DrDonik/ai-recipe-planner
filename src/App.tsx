@@ -245,7 +245,7 @@ function App() {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-8 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
+      <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
         <div className="container flex flex-col items-center py-1">
           <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
             {/* Floating Leading Icon - Absolute positioned to stay outside the text alignment flow */}
