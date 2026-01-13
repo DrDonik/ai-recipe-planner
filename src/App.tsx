@@ -125,6 +125,8 @@ function App() {
   const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
   // Single Pantry View State
   const [viewPantry, setViewPantry] = useState<PantryItem[] | null>(null);
+  // Modal Recipe State
+  const [modalRecipe, setModalRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
     // Parse URL for shared recipe, shopping list, or pantry
@@ -595,7 +597,13 @@ function App() {
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     {mealPlan.recipes.map((recipe, index) => (
-                      <RecipeCard key={recipe.id} recipe={recipe} index={index} language={language} />
+                      <RecipeCard
+                        key={recipe.id}
+                        recipe={recipe}
+                        index={index}
+                        language={language}
+                        onOpenModal={setModalRecipe}
+                      />
                     ))}
                   </div>
                 </div>
@@ -613,6 +621,21 @@ function App() {
         </section>
 
       </main>
+
+      {/* Recipe Modal Overlay */}
+      {modalRecipe && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setModalRecipe(null)}
+        >
+          <div
+            className="max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <RecipeCard recipe={modalRecipe} index={0} language={language} showOpenInNewTab={true} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
