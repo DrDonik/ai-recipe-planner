@@ -400,6 +400,7 @@ function App() {
                   >
                     <option value="German">Deutsch</option>
                     <option value="English">English</option>
+                    <option value="Spanish">Español</option>
                     <option value="French">Français</option>
                   </select>
                 </div>
