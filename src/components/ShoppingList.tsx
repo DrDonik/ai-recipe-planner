@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Share2, ExternalLink } from 'lucide-react';
 import type { Ingredient } from '../services/llm';
 import { translations } from '../constants/translations';
@@ -11,6 +11,36 @@ interface ShoppingListProps {
 
 export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) => {
     const t = translations[language as keyof typeof translations];
+
+    // Load checked items from localStorage
+    const [checkedItems, setCheckedItems] = useState<Set<string>>(() => {
+        try {
+            const saved = localStorage.getItem('shopping_list_checked');
+            return saved ? new Set(JSON.parse(saved)) : new Set();
+        } catch {
+            return new Set();
+        }
+    });
+
+    // Save checked items to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('shopping_list_checked', JSON.stringify(Array.from(checkedItems)));
+    }, [checkedItems]);
+
+    // Generate a unique key for each item (using item name + amount)
+    const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
+
+    const toggleItem = (itemKey: string) => {
+        setCheckedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(itemKey)) {
+                newSet.delete(itemKey);
+            } else {
+                newSet.add(itemKey);
+            }
+            return newSet;
+        });
+    };
 
     if (items.length === 0) return null;
 
@@ -112,17 +142,26 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) =
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {items.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-[var(--color-border)]" style={{ padding: '1rem' }}>
-                        <div className="flex items-center gap-3">
-                            <input type="checkbox" className="w-5 h-5 accent-[var(--color-primary)] rounded cursor-pointer" />
-                            <span className="font-medium">{item.item}</span>
+                {items.map((item, i) => {
+                    const itemKey = getItemKey(item);
+                    const isChecked = checkedItems.has(itemKey);
+                    return (
+                        <div key={i} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-[var(--color-border)]" style={{ padding: '1rem' }}>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => toggleItem(itemKey)}
+                                    className="w-5 h-5 accent-[var(--color-primary)] rounded cursor-pointer"
+                                />
+                                <span className={`font-medium ${isChecked ? 'line-through text-[var(--color-text-muted)]' : ''}`}>{item.item}</span>
+                            </div>
+                            <span className="text-sm text-[var(--color-text-muted)] bg-white/50 dark:bg-black/30 rounded text-right" style={{ padding: '0.25rem 0.75rem' }}>
+                                {item.amount}
+                            </span>
                         </div>
-                        <span className="text-sm text-[var(--color-text-muted)] bg-white/50 dark:bg-black/30 rounded text-right" style={{ padding: '0.25rem 0.75rem' }}>
-                            {item.amount}
-                        </span>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
