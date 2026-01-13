@@ -102,6 +102,15 @@ function App() {
     localStorage.setItem('spice_rack_minimized', spiceRackMinimized.toString());
   }, [spiceRackMinimized]);
 
+  const [shoppingListMinimized, setShoppingListMinimized] = useState(() => {
+    const saved = localStorage.getItem('shopping_list_minimized');
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('shopping_list_minimized', shoppingListMinimized.toString());
+  }, [shoppingListMinimized]);
+
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(() => {
     try {
@@ -304,7 +313,7 @@ function App() {
     return (
       <div className="min-h-screen bg-[var(--color-background)] p-8 flex flex-col items-center justify-center">
         <div className="max-w-4xl w-full">
-          <ShoppingList items={viewShoppingList} language={language} />
+          <ShoppingList items={viewShoppingList} language={language} isStandaloneView={true} />
           <button
             onClick={clearViewShoppingList}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
@@ -593,7 +602,12 @@ function App() {
           <div className="lg:col-span-2 space-y-8">
             {mealPlan ? (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <ShoppingList items={mealPlan.shoppingList} language={language} />
+                <ShoppingList
+                  items={mealPlan.shoppingList}
+                  language={language}
+                  isMinimized={shoppingListMinimized}
+                  onToggleMinimize={() => setShoppingListMinimized(!shoppingListMinimized)}
+                />
 
                 <div>
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">

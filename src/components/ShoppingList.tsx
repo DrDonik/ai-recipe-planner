@@ -1,15 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Share2, ExternalLink } from 'lucide-react';
+import { ShoppingCart, Share2, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Ingredient } from '../services/llm';
 import { translations } from '../constants/translations';
 
 interface ShoppingListProps {
     items: Ingredient[];
     language: string;
+    isMinimized?: boolean;
+    onToggleMinimize?: () => void;
+    isStandaloneView?: boolean;
 }
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language, isMinimized = false, onToggleMinimize, isStandaloneView = false }) => {
     const t = translations[language as keyof typeof translations];
 
     // Load checked items from localStorage
@@ -115,22 +118,24 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) =
     };
 
     return (
-        <div className="glass-panel p-6">
-            <div className="flex items-center justify-between mb-5">
+        <div className={`glass-panel ${isMinimized ? 'p-6 pb-6' : 'p-6'}`}>
+            <div className={`flex items-center justify-between ${isMinimized ? 'mb-0' : 'mb-5'}`}>
                 <div className="flex items-center gap-3">
                     <ShoppingCart className="text-[var(--color-secondary)]" size={24} />
                     <h2>{t.shoppingList}</h2>
                 </div>
                 <div className="flex gap-2">
-                    <a
-                        href={shareUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
-                        title="Open in new tab"
-                    >
-                        <ExternalLink size={18} />
-                    </a>
+                    {!isStandaloneView && (
+                        <a
+                            href={shareUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                            title="Open in new tab"
+                        >
+                            <ExternalLink size={18} />
+                        </a>
+                    )}
                     <button
                         onClick={handleShare}
                         className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
@@ -138,10 +143,25 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) =
                     >
                         <Share2 size={18} />
                     </button>
+                    {onToggleMinimize && (
+                        <div className="tooltip-container">
+                            <button
+                                onClick={onToggleMinimize}
+                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
+                                aria-label={isMinimized ? t.shoppingListExpand : t.shoppingListMinimize}
+                            >
+                                {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                            </button>
+                            <div className="tooltip-text">
+                                {isMinimized ? t.shoppingListExpand : t.shoppingListMinimize}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {!isMinimized && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {items.map((item, i) => {
                     const itemKey = getItemKey(item);
                     const isChecked = checkedItems.has(itemKey);
@@ -162,7 +182,8 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, language }) =
                         </div>
                     );
                 })}
-            </div>
+                </div>
+            )}
         </div>
     );
 };
