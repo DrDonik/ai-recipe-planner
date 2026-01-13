@@ -36,7 +36,9 @@ function App() {
     return localStorage.getItem('style_wishes') || '';
   });
 
-  const [language, setLanguage] = useState('German');
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'German';
+  });
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
 
   // Spice Rack State with Persistence
@@ -68,6 +70,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('style_wishes', styleWishes);
   }, [styleWishes]);
+
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
 
   const [headerMinimized, setHeaderMinimized] = useState(() => {
     const saved = localStorage.getItem('header_minimized');
