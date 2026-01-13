@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Clock, ChefHat, AlertCircle, Share2, ExternalLink, Maximize2 } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, Share2, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../services/llm';
 import { translations } from '../constants/translations';
@@ -9,11 +9,10 @@ interface RecipeCardProps {
     recipe: Recipe;
     index: number;
     language: string;
-    onOpenModal?: (recipe: Recipe) => void;
     showOpenInNewTab?: boolean;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language, onOpenModal, showOpenInNewTab = false }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language, showOpenInNewTab = false }) => {
     const t = translations[language as keyof typeof translations];
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -141,15 +140,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language,
                             <span>{recipe.time}</span>
                         </div>
                         <div className="flex gap-2">
-                            {onOpenModal && (
-                                <button
-                                    onClick={() => onOpenModal(recipe)}
-                                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
-                                    title="Open in overlay"
-                                >
-                                    <Maximize2 size={18} />
-                                </button>
-                            )}
                             {showOpenInNewTab && (
                                 <a
                                     href={shareUrl}
