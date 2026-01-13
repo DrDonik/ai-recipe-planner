@@ -47,7 +47,8 @@ export const translations = {
         spiceRackExpand: "Expand spice rack",
         sharedPantry: "Shared Pantry",
         loadPantry: "Load these items into my pantry",
-        noPantryToShare: "No pantry items to share!"
+        noPantryToShare: "No pantry items to share!",
+        openInNewTab: "Open new AI Recipe Planner"
     },
     German: {
         ingredients: "Zutaten",
@@ -75,7 +76,7 @@ export const translations = {
             mostlyVegetarian: "Größtenteils Vegetarisch",
             pescatarian: "Pescetarisch",
             flexitarian: "Flexitarisch",
-            carnivore: "Fleischfresser",
+            carnivore: "Fleischlastig",
         },
         styleWishes: "Stil, Wünsche, etc.",
         styleWishesPlaceholder: "Indisch, Glutenfrei, ...",
@@ -96,6 +97,7 @@ export const translations = {
         spiceRackExpand: "Gewürzregal erweitern",
         sharedPantry: "Geteilter Vorratsschrank",
         loadPantry: "Diese Zutaten in meinen Vorrat laden",
-        noPantryToShare: "Keine Vorratszutaten zum Teilen!"
+        noPantryToShare: "Keine Vorratszutaten zum Teilen!",
+        openInNewTab: "Einen neuen AI Recipe Planner öffnen"
     }
 };

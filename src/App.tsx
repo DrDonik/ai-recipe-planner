@@ -266,7 +266,7 @@ function App() {
             onClick={clearViewRecipe}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
-            ← Back to AI Recipe Planner
+            ← {t.openInNewTab}
           </button>
         </div>
       </div>
@@ -282,7 +282,7 @@ function App() {
             onClick={clearViewShoppingList}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
-            ← Back to AI Recipe Planner
+            ← {t.openInNewTab}
           </button>
         </div>
       </div>
@@ -325,7 +325,7 @@ function App() {
             onClick={clearViewPantry}
             className="mt-8 text-[var(--color-primary)] hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
-            ← Back to AI Recipe Planner
+            ← {t.openInNewTab}
           </button>
         </div>
       </div>
