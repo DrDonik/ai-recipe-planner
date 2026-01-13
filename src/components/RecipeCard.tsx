@@ -62,6 +62,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, language,
             try {
                 await navigator.share({
                     title: recipe.title,
+                    text: recipe.title,
                     url: shareUrl
                 });
                 return;
