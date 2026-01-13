@@ -237,10 +237,6 @@ function App() {
       setError(t.apiKeyError);
       return;
     }
-    if (pantryItems.length === 0) {
-      setError(t.veggieError);
-      return;
-    }
 
     setLoading(true);
     setError(null);

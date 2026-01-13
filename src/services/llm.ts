@@ -52,12 +52,13 @@ export const generateRecipes = async (
     : "";
 
   const prompt = `
-    You are a smart recipe planner. I have these ingredients in my pantry:
-    ${pantryList}
-
-    ${spiceList}
+    You are a smart recipe planner. 
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
+
+    ${ingredients.length > 0 ? `I have these ingredients in my pantry:\n${pantryList}` : `My pantry is empty. Choose suitable ingredients for the recipes.`}
+
+    ${spiceList}
 
     DIETARY PREFERENCE: ${diet}
     LANGUAGE: ${language}
@@ -65,13 +66,13 @@ export const generateRecipes = async (
     
     RULES:
     1. STRICTLY follow the dietary preference: ${diet}.${styleWishes.trim() ? ` Also respect the style/wishes: ${styleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
-    2. Prioritize using as many of my pantry ingredients as possible.
+    2. ${ingredients.length > 0 ? 'Prioritize using as many of my pantry ingredients as possible.' : 'Choose suitable ingredients for delicious, balanced meals.'}
     3. The portion sizes must be realistic for ${people} people.
     4. Ensure variety: The ${meals} meals should be distinct in style and flavor profile.
     5. For every meal, use the five basic flavors - sweetness, sourness, bitterness, saltiness, and umami - and the five basic textures - soft, crispy, chewy, crunchy, and tender - as a guidance. Try to balance them, but never dogmatically.
     6. For every meal, check if a sauce, gravy or dip could enhance the meal.
-    7. If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.
-    8. If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.
+    7. ${ingredients.length > 0 ? `If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.` : `Choose ingredients that work well together and create balanced, delicious meals.`}
+    8. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
     9. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
     10. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
     11. The "ingredients" array must contain EVERY single ingredient needed for the recipe (both what I have and what I need to buy).
