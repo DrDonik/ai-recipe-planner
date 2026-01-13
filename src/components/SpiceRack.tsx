@@ -26,6 +26,9 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
         e.preventDefault();
         if (!newSpice.trim()) return;
 
+        // Check for duplicate spice
+        if (spices.includes(newSpice.trim())) return;
+ 
         onAddSpice(newSpice.trim());
         setNewSpice('');
     };

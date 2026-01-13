@@ -265,7 +265,7 @@ function App() {
 
   const addSpice = (spice: string) => {
     if (!spices.includes(spice)) {
-      setSpices([...spices, spice]);
+      setSpices([...spices, spice].sort((a, b) => a.localeCompare(b)));
     }
   };
 
