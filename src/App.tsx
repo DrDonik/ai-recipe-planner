@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sparkles, Users, Key, Utensils, Globe, Salad, Info, ChevronUp, ChevronDown, ChefHat, Refrigerator } from 'lucide-react';
-import { PantryInput } from './components/PantryInput';
+import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
@@ -10,6 +10,8 @@ import type { PantryItem, MealPlan, Recipe, Ingredient } from './services/llm';
 import { translations } from './constants/translations';
 
 function App() {
+  const pantryInputRef = useRef<PantryInputRef>(null);
+
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
 
   useEffect(() => {
@@ -238,12 +240,18 @@ function App() {
       return;
     }
 
+    // Flush any pending input from PantryInput before generating
+    const pendingItem = pantryInputRef.current?.flushPendingInput();
+
+    // If there was a pending item, include it in the pantry for generation
+    const itemsToUse = pendingItem ? [...pantryItems, pendingItem] : pantryItems;
+
     setLoading(true);
     setError(null);
     setMealPlan(null);
 
     try {
-      const plan = await generateRecipes(apiKey, pantryItems, people, meals, diet, language, spices, styleWishes);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
       setMealPlan(plan);
     } catch (err: any) {
       setError(err.message || "Something went wrong generating recipes.");
@@ -542,6 +550,7 @@ function App() {
             )}
 
             <PantryInput
+              ref={pantryInputRef}
               pantryItems={pantryItems}
               onAddPantryItem={addPantryItem}
               onRemovePantryItem={removePantryItem}

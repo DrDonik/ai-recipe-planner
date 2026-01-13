@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2, Refrigerator, Info, Share2, ExternalLink } from 'lucide-react';
 import type { PantryItem } from '../services/llm';
 import { translations } from '../constants/translations';
@@ -13,18 +13,21 @@ interface PantryInputProps {
     language: string;
 }
 
-export const PantryInput: React.FC<PantryInputProps> = ({
+export interface PantryInputRef {
+    flushPendingInput: () => PantryItem | null;
+}
+
+export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     pantryItems,
     onAddPantryItem,
     onRemovePantryItem,
     language
-}) => {
+}, ref) => {
     const t = translations[language as keyof typeof translations];
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const addCurrentItem = () => {
         if (!name.trim() || !amount.trim()) return;
 
         onAddPantryItem({
@@ -36,6 +39,32 @@ export const PantryInput: React.FC<PantryInputProps> = ({
         setName('');
         setAmount('');
     };
+
+    const flushPendingInput = (): PantryItem | null => {
+        if (!name.trim() || !amount.trim()) return null;
+
+        const newItem: PantryItem = {
+            id: generateId(),
+            name: name.trim(),
+            amount: amount.trim(),
+        };
+
+        onAddPantryItem(newItem);
+        setName('');
+        setAmount('');
+
+        return newItem;
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        addCurrentItem();
+    };
+
+    // Expose flush function to parent via ref
+    useImperativeHandle(ref, () => ({
+        flushPendingInput
+    }));
 
     // Generate URL for sharing and external link
     const json = JSON.stringify(pantryItems);
@@ -203,4 +232,4 @@ export const PantryInput: React.FC<PantryInputProps> = ({
             </div>
         </div>
     );
-};
+});
