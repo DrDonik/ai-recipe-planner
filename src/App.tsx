@@ -97,9 +97,24 @@ function App() {
   }, [spiceRackMinimized]);
 
 
-  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
+  const [mealPlan, setMealPlan] = useState<MealPlan | null>(() => {
+    try {
+      const saved = localStorage.getItem('meal_plan');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mealPlan) {
+      localStorage.setItem('meal_plan', JSON.stringify(mealPlan));
+    } else {
+      localStorage.removeItem('meal_plan');
+    }
+  }, [mealPlan]);
 
 
   const t = translations[language as keyof typeof translations];
