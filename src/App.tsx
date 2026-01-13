@@ -93,6 +93,15 @@ function App() {
     localStorage.setItem('options_minimized', optionsMinimized.toString());
   }, [optionsMinimized]);
 
+  const [pantryMinimized, setPantryMinimized] = useState(() => {
+    const saved = localStorage.getItem('pantry_minimized');
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pantry_minimized', pantryMinimized.toString());
+  }, [pantryMinimized]);
+
   const [spiceRackMinimized, setSpiceRackMinimized] = useState(() => {
     const saved = localStorage.getItem('spice_rack_minimized');
     return saved === 'true';
@@ -585,6 +594,8 @@ function App() {
               onAddPantryItem={addPantryItem}
               onRemovePantryItem={removePantryItem}
               language={language}
+              isMinimized={pantryMinimized}
+              onToggleMinimize={() => setPantryMinimized(!pantryMinimized)}
             />
 
             <SpiceRack
