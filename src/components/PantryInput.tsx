@@ -1,6 +1,6 @@
 
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Plus, Trash2, Refrigerator, Info, Share2, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Refrigerator, Info, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
 import type { PantryItem } from '../services/llm';
 import { translations } from '../constants/translations';
 
@@ -70,80 +70,12 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         flushPendingInput
     }));
 
-    // Generate URL for sharing and external link
+    // Generate URL for external link
     const json = JSON.stringify(pantryItems);
     // UTF-8 friendly base64 encoding
     const base64 = btoa(unescape(encodeURIComponent(json)));
     // Fix: encodeURIComponent because base64 can contain '+' which URLSearchParams treats as space
     const shareUrl = `${window.location.origin}${window.location.pathname}?pantry=${encodeURIComponent(base64)}`;
-
-    const handleShare = async () => {
-        if (pantryItems.length === 0) {
-            alert(t.noPantryToShare || 'No pantry items to share!');
-            return;
-        }
-
-        // 1. Try Web Share API (Mobile/Modern)
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: t.pantry,
-                    url: shareUrl
-                });
-                return;
-            } catch (err: any) {
-                // If user restricted sharing or cancelled, don't show fallback
-                if (err.name === 'AbortError' || err.name === 'NotAllowedError') {
-                    return;
-                }
-                console.log('Share API failed, trying clipboard...', err);
-            }
-        }
-
-        // 2. Try Modern Clipboard API (Secure Contexts)
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(shareUrl);
-                // Simple visual feedback
-                const btn = document.activeElement as HTMLElement;
-                const originalTitle = btn?.title;
-                if (btn) btn.title = "Copied!";
-                alert("Link copied!");
-                if (btn) setTimeout(() => btn.title = originalTitle || "Share Pantry", 2000);
-                return;
-            }
-        } catch (err) {
-            console.log('Clipboard API failed, trying legacy...', err);
-        }
-
-        // 3. Fallback: Legacy execCommand('copy') (Works in some insecure contexts)
-        try {
-            const textArea = document.createElement("textarea");
-            textArea.value = shareUrl;
-
-            // Ensure it's not visible but part of DOM
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            textArea.style.top = "0";
-            document.body.appendChild(textArea);
-
-            textArea.focus();
-            textArea.select();
-
-            const successful = document.execCommand('copy');
-            document.body.removeChild(textArea);
-
-            if (successful) {
-                alert('Link copied to clipboard!');
-                return;
-            }
-        } catch (err) {
-            console.log('Legacy copy failed', err);
-        }
-
-        // 4. Ultimate Fallback: window.prompt
-        window.prompt('Copy this link to share:', shareUrl);
-    };
 
     return (
         <div className="glass-panel p-10 flex flex-col gap-6">
@@ -164,13 +96,6 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                             >
                                 <ExternalLink size={16} />
                             </a>
-                            <button
-                                onClick={handleShare}
-                                className="p-1.5 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"
-                                title="Share Pantry"
-                            >
-                                <Share2 size={16} />
-                            </button>
                         </>
                     )}
                     <div className="tooltip-container">
