@@ -133,36 +133,22 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     </section>
                 )}
 
-                <section>
-                    <h4 className="font-bold uppercase tracking-wider text-xs text-text-muted mb-4 flex items-center gap-2">
-                        <div className="w-1 h-4 bg-primary rounded-full" />
+                <div>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm uppercase tracking-wider text-text-muted">
                         {t.instructions}
                     </h4>
-                    <div className="space-y-4">
-                        {recipe.instructions.map((step, idx) => (
-                            <div
-                                key={idx}
-                                onClick={() => toggleStepHighlight(idx)}
-                                className={`p-4 rounded-xl border transition-all cursor-pointer group/step
-                  ${activeStep === idx
-                                        ? 'bg-primary/5 border-primary/30 shadow-sm'
-                                        : 'bg-white/30 dark:bg-black/10 border-[var(--glass-border)] hover:bg-white/50 dark:hover:bg-black/20'}`}
+                    <ol className="list-decimal list-inside space-y-4 text-sm opacity-90">
+                        {recipe.instructions.map((step, i) => (
+                            <li
+                                key={i}
+                                className={`pl-1 marker:text-primary marker:font-bold cursor-pointer transition-all ${activeStep === i ? 'instruction-step-active' : ''}`}
+                                onClick={() => toggleStepHighlight(i)}
                             >
-                                <div className="flex gap-4">
-                                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors
-                    ${activeStep === idx
-                                            ? 'bg-primary text-white'
-                                            : 'bg-[var(--glass-border)] text-text-muted group-hover/step:bg-primary/20'}`}>
-                                        {idx + 1}
-                                    </span>
-                                    <p className={`text-sm leading-relaxed transition-colors ${activeStep === idx ? 'text-text-main' : 'text-text-muted'}`}>
-                                        {step}
-                                    </p>
-                                </div>
-                            </div>
+                                {step}
+                            </li>
                         ))}
-                    </div>
-                </section>
+                    </ol>
+                </div>
             </div>
         </motion.div>
     );
