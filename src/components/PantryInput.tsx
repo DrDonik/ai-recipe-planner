@@ -129,13 +129,18 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                         {item.amount}
                                     </span>
                                 </div>
-                                <button
-                                    onClick={() => onRemovePantryItem(item.id)}
-                                    className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-1.5 transition-colors"
-                                    title={t.remove}
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                                <div className="tooltip-container">
+                                    <button
+                                        onClick={() => onRemovePantryItem(item.id)}
+                                        className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-1.5 transition-colors"
+                                        aria-label={t.remove}
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                    <div className="tooltip-text">
+                                        {t.remove}
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
