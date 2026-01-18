@@ -4,6 +4,27 @@ import { translations } from '../constants/translations';
 import { STORAGE_KEYS, DEFAULTS } from '../constants';
 
 type TranslationType = typeof translations.English;
+type SupportedLanguage = keyof typeof translations;
+
+const SUPPORTED_LANGUAGES = Object.keys(translations) as SupportedLanguage[];
+
+/**
+ * Type guard to check if a string is a valid supported language.
+ */
+const isValidLanguage = (lang: string): lang is SupportedLanguage => {
+    return SUPPORTED_LANGUAGES.includes(lang as SupportedLanguage);
+};
+
+/**
+ * Get translations for a language with fallback to English if invalid.
+ */
+const getTranslations = (language: string): TranslationType => {
+    if (isValidLanguage(language)) {
+        return translations[language];
+    }
+    console.warn(`Invalid language "${language}", falling back to English`);
+    return translations.English;
+};
 
 interface SettingsContextType {
     apiKey: string;
@@ -31,7 +52,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [styleWishes, setStyleWishes] = useStringLocalStorage(STORAGE_KEYS.STYLE_WISHES, '');
     const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, DEFAULTS.LANGUAGE);
 
-    const t = translations[language as keyof typeof translations];
+    const t = getTranslations(language);
 
     const value = {
         apiKey, setApiKey,
