@@ -1,18 +1,23 @@
 /**
  * Encodes an object into a Base64 string safe for URLs.
+ * Uses TextEncoder for proper UTF-8 handling (replaces deprecated unescape/escape).
  */
 export const encodeForUrl = <T>(data: T): string => {
     const json = JSON.stringify(data);
-    // UTF-8 friendly base64 encoding
-    return btoa(unescape(encodeURIComponent(json)));
+    const bytes = new TextEncoder().encode(json);
+    const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join('');
+    return btoa(binString);
 };
 
 /**
  * Decodes a Base64 string from a URL parameter back into an object.
+ * Uses TextDecoder for proper UTF-8 handling (replaces deprecated unescape/escape).
  */
 export const decodeFromUrl = <T>(base64: string): T | null => {
     try {
-        const json = decodeURIComponent(escape(atob(base64)));
+        const binString = atob(base64);
+        const bytes = Uint8Array.from(binString, (char) => char.codePointAt(0)!);
+        const json = new TextDecoder().decode(bytes);
         return JSON.parse(json) as T;
     } catch (error) {
         console.error("Failed to decode shared data", error);

@@ -51,7 +51,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 schema.cookTime = `PT${minutes}M`;
             }
         }
-        return JSON.stringify(schema);
+        // Escape </script> to prevent XSS when recipe data contains malicious strings
+        return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
     };
 
     // Generate URL for external link
