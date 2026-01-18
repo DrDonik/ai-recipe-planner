@@ -84,7 +84,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         const itemKey = getItemKey(item);
                         const isChecked = checkedItems.has(itemKey);
                         return (
-                            <div key={i} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base" style={{ padding: '1rem' }}>
+                            <div key={`${itemKey}-${i}`} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base" style={{ padding: '1rem' }}>
                                 <div className="flex items-center gap-3">
                                     <input
                                         type="checkbox"

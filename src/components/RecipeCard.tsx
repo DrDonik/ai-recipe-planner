@@ -106,10 +106,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     <ul className="text-sm">
                         {recipe.ingredients.map((ing, idx) => {
                             const isMissing = recipe.missingIngredients?.some(m => m.item.toLowerCase().includes(ing.item.toLowerCase()));
+                            const ingredientKey = `${ing.item}-${ing.amount}-${idx}`;
 
                             return (
                                 <li
-                                    key={idx}
+                                    key={ingredientKey}
                                     className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3 cursor-pointer group/ing"
                                     onClick={() => toggleIngredient(idx)}
                                 >
@@ -138,7 +139,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {recipe.missingIngredients.map((ing, idx) => (
-                                <span key={idx} className="bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/10">
+                                <span key={`missing-${ing.item}-${ing.amount}-${idx}`} className="bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/10">
                                     {ing.amount} {ing.item}
                                 </span>
                             ))}
@@ -153,7 +154,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     <ol className="list-decimal list-inside space-y-4 text-sm opacity-90">
                         {recipe.instructions.map((step, i) => (
                             <li
-                                key={i}
+                                key={`step-${i}-${step.slice(0, 20)}`}
                                 className={`pl-1 marker:text-primary marker:font-bold cursor-pointer transition-all ${activeStep === i ? 'instruction-step-active' : ''}`}
                                 onClick={() => toggleStepHighlight(i)}
                             >
