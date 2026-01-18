@@ -156,7 +156,7 @@ function App() {
             onClick={clearViewRecipe}
             className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
-            ← {t.openInNewTab}
+            ← {t.openMyPlanner}
           </button>
         </div>
       </div>
@@ -172,7 +172,7 @@ function App() {
             onClick={clearViewShoppingList}
             className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
-            ← {t.openInNewTab}
+            ← {t.openMyPlanner}
           </button>
         </div>
       </div>
