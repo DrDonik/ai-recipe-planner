@@ -71,7 +71,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     href={shareUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
+                    className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
                     title={t.openInNewTab}
                 >
                     <ExternalLink size={18} />
