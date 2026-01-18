@@ -1,10 +1,36 @@
 @import "tailwindcss";
 
+@theme {
+  /* Branding Colors */
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-light: var(--color-primary-light);
+  --color-secondary: var(--color-secondary);
+
+  /* Semantic UI Colors */
+  --color-bg-app: var(--color-bg-app);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-bg-surface-hover: var(--color-bg-surface-hover);
+
+  --color-text-main: var(--color-text-main);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-light: var(--color-text-light);
+
+  --color-border-base: var(--color-border);
+  --color-border-hover: var(--color-border-hover);
+
+  /* Radii */
+  --radius-xl: 1rem;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+
+  /* Shadows */
+  --shadow-glass: var(--glass-shadow);
+}
+
 :root {
-  /*
-    Universal Design Palette
-    Base Neutrals: Zinc-like (Cool Greys)
-  */
+  /* Universal Design Palette Base Neutrals: Zinc-like (Cool Greys) */
   --hue-neutral: 240;
 
   /* Primary: Emerald/Teal - Accessible & Fresh */
@@ -17,27 +43,20 @@
 
   /* Light Mode Semantic Colors */
   --color-bg-app: hsl(var(--hue-neutral), 5%, 96%);
-  /* Slightly off-white */
   --color-bg-surface: hsl(255, 100%, 100%);
-  /* Pure white for cards */
   --color-bg-surface-hover: hsl(var(--hue-neutral), 5%, 96%);
 
   --color-text-main: hsl(var(--hue-neutral), 5%, 10%);
-  /* Almost black */
   --color-text-muted: hsl(var(--hue-neutral), 4%, 45%);
-  /* Mid-grey */
   --color-text-light: hsl(var(--hue-neutral), 5%, 98%);
-  /* For dark btns */
 
   --color-border: hsl(var(--hue-neutral), 5%, 85%);
-  /* Subtle border */
   --color-border-hover: hsl(var(--hue-neutral), 5%, 70%);
 
   /* Brand Colors */
   --color-primary: hsl(var(--hue-primary), var(--sat-primary), var(--lig-primary));
   --color-primary-hover: hsl(var(--hue-primary), var(--sat-primary), 35%);
   --color-primary-light: hsl(var(--hue-primary), var(--sat-primary), 92%);
-  /* For badges/highlights */
 
   --color-secondary: hsl(var(--hue-secondary), 70%, 50%);
 
@@ -47,44 +66,28 @@
   --glass-shadow: 0 4px 6px -1px hsla(var(--hue-neutral), 0%, 0%, 0.05),
     0 2px 4px -1px hsla(var(--hue-neutral), 0%, 0%, 0.03);
 
-  /* Typography & Layout */
+  /* Typography */
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  --radius-xl: 1rem;
-  /* 16px */
-  --radius-lg: 0.75rem;
-  /* 12px */
-  --radius-md: 0.5rem;
-  /* 8px */
-  --radius-sm: 0.25rem;
-  /* 4px */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Dark Mode Defaults - Zinc Scale */
     --color-bg-app: hsl(var(--hue-neutral), 5%, 7%);
-    /* Deep textured black */
     --color-bg-surface: hsl(var(--hue-neutral), 5%, 12%);
-    /* Dark Grey */
     --color-bg-surface-hover: hsl(var(--hue-neutral), 5%, 16%);
 
     --color-text-main: hsl(var(--hue-neutral), 5%, 92%);
-    /* Off-white */
     --color-text-muted: hsl(var(--hue-neutral), 4%, 60%);
-    /* Light grey */
 
     --color-border: hsl(var(--hue-neutral), 5%, 20%);
     --color-border-hover: hsl(var(--hue-neutral), 5%, 30%);
 
-    /* Primary adjustments for Dark Mode */
     --color-primary: hsl(var(--hue-primary), 50%, 50%);
     --color-primary-hover: hsl(var(--hue-primary), 50%, 60%);
     --color-primary-light: hsl(var(--hue-primary), 50%, 15%);
 
-    /* Glass Effects Dark */
     --glass-bg: hsla(var(--hue-neutral), 5%, 12%, 0.6);
     --glass-border: hsla(var(--hue-neutral), 5%, 80%, 0.08);
-    /* Subtle highlight */
     --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
       0 2px 4px -1px rgba(0, 0, 0, 0.2);
   }
@@ -107,184 +110,64 @@ body {
   width: 100%;
 }
 
-input,
-button,
-select,
-textarea {
-  font: inherit;
-}
-
-/* Glassmorphism / Surface Utilities */
-.glass-panel {
-  background: var(--color-bg-surface);
-  /* Fallback/Solid for better contrast */
-  border: 1px solid var(--color-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: var(--radius-xl);
-  padding: 2rem;
-}
-
-@supports (backdrop-filter: blur(12px)) {
+@layer components {
   .glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    @apply p-8 border border-border-base shadow-glass bg-bg-surface rounded-xl;
   }
-}
 
-.glass-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
-}
+  @supports (backdrop-filter: blur(12px)) {
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+    }
+  }
 
-.glass-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  /* shadow-lg */
-  border-color: var(--color-border-hover);
-}
+  .glass-card {
+    @apply p-6 border border-border-base bg-bg-surface rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-border-hover;
+  }
 
-/* Layout Utilities */
-.app-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
+  .app-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
 
-/* Form Elements */
-.input-field {
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-surface);
-  color: var(--color-text-main);
-  transition: all 0.2s;
-}
+  .input-field {
+    @apply px-4 py-3 border border-border-base bg-bg-surface text-text-main rounded-md transition-all duration-200 placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-3 focus:ring-primary-light;
+  }
 
-.input-field::placeholder {
-  color: var(--color-text-muted);
-}
+  .btn {
+    @apply px-6 py-3 rounded-md font-semibold cursor-pointer transition-all duration-200 flex items-center justify-center gap-2;
+  }
 
-.input-field:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-  /* Focus ring */
-  outline: none;
-}
+  .btn-primary {
+    @apply bg-primary text-white shadow-md hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
+  }
 
-/* Buttons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
+  .btn-icon {
+    @apply p-2 bg-transparent text-text-muted rounded-md hover:text-text-main hover:bg-bg-surface-hover;
+  }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: #ffffff;
-  /* Always white for legibility on primary */
-  box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
-}
+  .tooltip-container {
+    @apply relative inline-block;
+  }
 
-.btn-primary:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 8px -1px hsla(var(--hue-primary), 60%, 40%, 0.3);
-}
+  .tooltip-text {
+    @apply invisible absolute z-50 bottom-[125%] left-1/2 -ml-[100px] w-[200px] p-2 bg-bg-surface text-text-main text-center text-xs border border-border-base rounded-md shadow-glass opacity-0 transition-opacity duration-300 pointer-events-none;
+  }
 
-.btn-primary:active {
-  transform: translateY(0);
-}
+  .tooltip-container:hover .tooltip-text,
+  .tooltip-container:focus-within .tooltip-text {
+    @apply visible opacity-100;
+  }
 
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
+  .tooltip-text::after {
+    content: "";
+    @apply absolute top-full left-1/2 -ml-[5px] border-[5px] border-solid border-t-border-base border-x-transparent border-b-transparent;
+  }
 
-.btn-icon {
-  padding: 0.5rem;
-  background: transparent;
-  color: var(--color-text-muted);
-  border-radius: var(--radius-md);
-}
-
-.btn-icon:hover {
-  color: var(--color-text-main);
-  background: var(--color-bg-surface-hover);
-}
-
-/* Typography */
-h1,
-h2,
-h3 {
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--color-text-main);
-}
-
-/* h1 font-size is now controlled by Tailwind utility classes for dynamic sizing */
-
-/* Tooltip */
-.tooltip-container {
-  position: relative;
-  display: inline-block;
-}
-
-.tooltip-text {
-  visibility: hidden;
-  width: 200px;
-  background-color: var(--color-bg-surface);
-  color: var(--color-text-main);
-  text-align: center;
-  border-radius: var(--radius-md);
-  padding: 8px;
-  position: absolute;
-  z-index: 100;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -100px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--glass-shadow);
-  font-size: 0.75rem;
-  font-weight: normal;
-  pointer-events: none;
-}
-
-.tooltip-container:hover .tooltip-text,
-.tooltip-container:focus-within .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-
-.tooltip-text::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: var(--color-border) transparent transparent transparent;
-}
-
-.instruction-step-active {
-  background-color: var(--color-primary-light);
-  border-radius: var(--radius-md);
-  box-shadow: 0 0 0 4px var(--color-primary-light);
+  .instruction-step-active {
+    @apply bg-primary-light rounded-md ring-4 ring-primary-light;
+  }
 }

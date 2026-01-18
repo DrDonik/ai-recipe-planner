@@ -1,0 +1,92 @@
+import React from 'react';
+import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
+
+interface HeaderProps {
+    headerMinimized: boolean;
+    setHeaderMinimized: (minimized: boolean) => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+    headerMinimized,
+    setHeaderMinimized,
+}) => {
+    const { apiKey, setApiKey, language, setLanguage, t } = useSettings();
+
+    return (
+        <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
+            <div className="app-container flex flex-col items-center py-1">
+                <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
+                    {/* Floating Leading Icon */}
+                    <div className={`absolute -left-14 sm:-left-16 top-0.5 p-2 bg-primary rounded-xl text-white shadow-lg shadow-primary/30 transition-all duration-300 ${headerMinimized ? 'scale-75' : ''}`}>
+                        <Utensils className={`transition-all duration-300 ${headerMinimized ? 'w-5 h-5' : 'w-6 h-6 sm:w-7 sm:h-7'}`} />
+                    </div>
+
+                    {/* Title with inline toggle button */}
+                    <div className="flex items-center gap-3">
+                        <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${headerMinimized ? 'text-2xl' : 'text-4xl'}`}>
+                            AI Recipe Planner
+                        </h1>
+
+                        {/* Toggle Button */}
+                        <div className="tooltip-container">
+                            <button
+                                onClick={() => setHeaderMinimized(!headerMinimized)}
+                                className="p-1.5 rounded-lg bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/30 transition-all text-text-muted hover:text-primary"
+                                aria-label={headerMinimized ? t.headerExpand : t.headerMinimize}
+                            >
+                                {headerMinimized ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                            </button>
+                            <div className="tooltip-text">
+                                {headerMinimized ? t.headerExpand : t.headerMinimize}
+                            </div>
+                        </div>
+                    </div>
+
+                    {!headerMinimized && (
+                        <>
+                            <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">Turn your pantry into plans</p>
+
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                                <Key size={16} className="ml-2 text-text-muted" />
+                                <input
+                                    type="password"
+                                    placeholder="Paste Gemini API Key"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-sm w-48 px-2"
+                                />
+                                <div className="tooltip-container flex items-center mr-2">
+                                    <button
+                                        type="button"
+                                        className="text-text-muted hover:text-primary transition-colors p-1 rounded-full outline-none focus:text-primary"
+                                        aria-label="API Info"
+                                    >
+                                        <Info size={14} />
+                                    </button>
+                                    <div className="tooltip-text">
+                                        {t.apiInfo}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                                <Globe size={16} className="ml-2 text-text-muted" />
+                                <select
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-text-main w-full"
+                                >
+                                    <option value="German">Deutsch</option>
+                                    <option value="English">English</option>
+                                    <option value="Spanish">Español</option>
+                                    <option value="French">Français</option>
+                                </select>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+        </header>
+    );
+};
