@@ -134,7 +134,7 @@ function App() {
 
     setLoading(true);
     setError(null);
-    setMealPlan(null);
+    // Don't clear mealPlan here - preserve it on failure so user doesn't lose their previous plan
 
     try {
       const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
@@ -142,6 +142,7 @@ function App() {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong generating recipes.";
       setError(message);
+      // Previous meal plan is preserved - user can still see their last successful generation
     } finally {
       setLoading(false);
     }

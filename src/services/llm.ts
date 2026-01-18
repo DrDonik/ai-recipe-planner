@@ -111,14 +111,32 @@ export const generateRecipes = async (
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    if (!text) throw new Error("No recipes generated");
+    if (!text) throw new Error("No recipes generated. The AI returned an empty response.");
 
     // Clean up markdown block if present (sometimes models add ```json ... ```)
     const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    return JSON.parse(cleanedText) as MealPlan;
+    try {
+      return JSON.parse(cleanedText) as MealPlan;
+    } catch (parseError) {
+      console.error("JSON Parse Error. Raw response:", cleanedText);
+      throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
+    }
   } catch (error) {
     console.error("LLM Error:", error);
-    throw error;
+
+    // Handle specific error types with user-friendly messages
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error("Request timed out. Please try again.");
+      }
+      if (error.message.includes('Failed to fetch')) {
+        throw new Error("Network error. Please check your internet connection.");
+      }
+      // Re-throw with original message if already a user-friendly error
+      throw error;
+    }
+
+    throw new Error("An unexpected error occurred. Please try again.");
   }
 };
