@@ -53,7 +53,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
 
     return (
         <div className="glass-panel p-6 flex flex-col gap-6">
-            <div className="flex flex-row items-center justify-between mb-2">
+            <div className="flex flex-row items-center justify-between">
                 <div className="flex flex-row items-center gap-3">
                     <Refrigerator className="text-primary" size={24} />
                     <h2>{t.pantry}</h2>

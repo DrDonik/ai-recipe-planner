@@ -67,7 +67,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: generateSchema() }} />
 
             {showOpenInNewTab && (
-                <div className="tooltip-container absolute top-4 right-4">
+                <div className="tooltip-container absolute top-8 right-8">
                     <a
                         href={shareUrl}
                         target="_blank"
