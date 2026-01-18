@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
-import type { Ingredient } from '../services/llm';
+import type { Ingredient } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';

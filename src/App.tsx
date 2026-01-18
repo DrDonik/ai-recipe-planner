@@ -5,7 +5,7 @@ import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { generateRecipes } from './services/llm';
-import type { PantryItem, MealPlan, Recipe, Ingredient } from './services/llm';
+import type { PantryItem, MealPlan, Recipe, Ingredient } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { decodeFromUrl } from './utils/sharing';
 import { Header } from './components/Header';

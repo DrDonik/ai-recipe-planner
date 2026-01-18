@@ -1,31 +1,8 @@
 import { API_CONFIG } from '../constants';
+import type { PantryItem, MealPlan } from '../types';
 
-export interface PantryItem {
-  id: string;
-  name: string;
-  amount: string;
-}
-
-export interface Ingredient {
-  item: string;
-  amount: string;
-  unit?: string;
-}
-
-export interface Recipe {
-  id: string;
-  title: string;
-  time: string;
-  ingredients: Ingredient[];
-  instructions: string[];
-  usedIngredients: string[]; // List of vegetable IDs used
-  missingIngredients: Ingredient[];
-}
-
-export interface MealPlan {
-  recipes: Recipe[];
-  shoppingList: Ingredient[];
-}
+// Re-export types for backwards compatibility
+export type { PantryItem, Ingredient, Recipe, MealPlan } from '../types';
 
 export const generateRecipes = async (
   apiKey: string,

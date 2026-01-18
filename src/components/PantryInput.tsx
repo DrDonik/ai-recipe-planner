@@ -1,6 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2, Refrigerator, Info, ChevronUp, ChevronDown } from 'lucide-react';
-import type { PantryItem } from '../services/llm';
+import type { PantryItem } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
 

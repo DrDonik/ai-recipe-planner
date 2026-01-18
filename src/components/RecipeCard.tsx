@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, ChefHat, AlertCircle, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { Recipe } from '../services/llm';
+import type { Recipe } from '../types';
 import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
 import { URL_PARAMS } from '../constants';
