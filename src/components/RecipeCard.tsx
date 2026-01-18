@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Clock, ChefHat, AlertCircle, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
@@ -17,7 +17,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
 
-    const toggleIngredient = (idx: number) => {
+    const toggleIngredient = useCallback((idx: number) => {
         setStruckIngredients(prev => {
             const next = new Set(prev);
             if (next.has(idx)) {
@@ -27,13 +27,14 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             }
             return next;
         });
-    };
+    }, []);
 
-    const toggleStepHighlight = (idx: number) => {
+    const toggleStepHighlight = useCallback((idx: number) => {
         setActiveStep(prev => prev === idx ? null : idx);
-    };
+    }, []);
 
-    const generateSchema = () => {
+    // Memoize the JSON-LD schema to avoid regeneration on every render
+    const schemaJson = useMemo(() => {
         const schema: Record<string, unknown> = {
             "@context": "https://schema.org",
             "@type": "Recipe",
@@ -54,10 +55,27 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         }
         // Escape </script> to prevent XSS when recipe data contains malicious strings
         return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
-    };
+    }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time]);
 
-    // Generate URL for external link
-    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipe);
+    // Memoize the share URL
+    const shareUrl = useMemo(() => generateShareUrl(URL_PARAMS.RECIPE, recipe), [recipe]);
+
+    // Memoize the set of missing ingredient names (lowercase) for O(1) lookup
+    const missingIngredientNames = useMemo(() => {
+        if (!recipe.missingIngredients) return new Set<string>();
+        return new Set(recipe.missingIngredients.map(m => m.item.toLowerCase()));
+    }, [recipe.missingIngredients]);
+
+    // Helper to check if an ingredient is missing (O(1) instead of O(n))
+    const isIngredientMissing = useCallback((ingredientName: string) => {
+        const lowerName = ingredientName.toLowerCase();
+        for (const missing of missingIngredientNames) {
+            if (missing.includes(lowerName) || lowerName.includes(missing)) {
+                return true;
+            }
+        }
+        return false;
+    }, [missingIngredientNames]);
 
     return (
         <motion.div
@@ -66,7 +84,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             transition={{ delay: index * 0.1 }}
             className="glass-card p-8 flex flex-col h-full relative"
         >
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: generateSchema() }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />
 
             {showOpenInNewTab && (
                 <div className="tooltip-container absolute top-8 right-8">
@@ -106,7 +124,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     </div>
                     <ul className="text-sm" role="list">
                         {recipe.ingredients.map((ing, idx) => {
-                            const isMissing = recipe.missingIngredients?.some(m => m.item.toLowerCase().includes(ing.item.toLowerCase()));
+                            const isMissing = isIngredientMissing(ing.item);
                             const ingredientKey = `${ing.item}-${ing.amount}-${idx}`;
                             const isStruck = struckIngredients.has(idx);
 

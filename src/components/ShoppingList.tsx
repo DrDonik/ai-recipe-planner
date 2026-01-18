@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Ingredient } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -18,25 +18,29 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
 
     // Load checked items from localStorage
     const [checkedItemsList, setCheckedItemsList] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
-    const checkedItems = new Set(checkedItemsList);
+
+    // Memoize the Set to avoid recreation on every render
+    const checkedItems = useMemo(() => new Set(checkedItemsList), [checkedItemsList]);
 
     // Generate a unique key for each item (using item name + amount)
-    const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
+    const getItemKey = useCallback((item: Ingredient) => `${item.item}|${item.amount}`, []);
 
-    const toggleItem = (itemKey: string) => {
-        const nextSet = new Set(checkedItems);
-        if (nextSet.has(itemKey)) {
-            nextSet.delete(itemKey);
-        } else {
-            nextSet.add(itemKey);
-        }
-        setCheckedItemsList(Array.from(nextSet));
-    };
+    const toggleItem = useCallback((itemKey: string) => {
+        setCheckedItemsList(prev => {
+            const nextSet = new Set(prev);
+            if (nextSet.has(itemKey)) {
+                nextSet.delete(itemKey);
+            } else {
+                nextSet.add(itemKey);
+            }
+            return Array.from(nextSet);
+        });
+    }, [setCheckedItemsList]);
+
+    // Memoize the share URL to avoid regeneration on every render
+    const shareUrl = useMemo(() => generateShareUrl(URL_PARAMS.SHOPPING_LIST, items), [items]);
 
     if (items.length === 0) return null;
-
-    // Generate URL for external link
-    const shareUrl = generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
 
     return (
         <div className={`glass-panel ${isMinimized ? 'p-6 pb-6' : 'p-6'}`}>
