@@ -1,7 +1,7 @@
 /**
  * Encodes an object into a Base64 string safe for URLs.
  */
-export const encodeForUrl = (data: any): string => {
+export const encodeForUrl = <T>(data: T): string => {
     const json = JSON.stringify(data);
     // UTF-8 friendly base64 encoding
     return btoa(unescape(encodeURIComponent(json)));
@@ -23,9 +23,10 @@ export const decodeFromUrl = <T>(base64: string): T | null => {
 /**
  * Generates a full share URL with a specific parameter.
  */
-export const generateShareUrl = (paramName: string, data: any): string => {
+export const generateShareUrl = <T>(paramName: string, data: T): string => {
     const encoded = encodeForUrl(data);
     const url = new URL(window.location.origin + window.location.pathname);
-    url.searchParams.set(paramName, encoded);
+    // encodeURIComponent because base64 can contain '+' which URLSearchParams treats as space
+    url.searchParams.set(paramName, encodeURIComponent(encoded));
     return url.toString();
 };

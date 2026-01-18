@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* Branding Colors */
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-light: var(--color-primary-light);
-  --color-secondary: var(--color-secondary);
+  /* Branding Colors - these reference :root CSS variables for dynamic theming */
+  --color-primary: hsl(155, 50%, 45%);
+  --color-primary-hover: hsl(155, 50%, 35%);
+  --color-primary-light: hsl(155, 50%, 92%);
+  --color-secondary: hsl(205, 70%, 50%);
 
   /* Semantic UI Colors */
-  --color-bg-app: var(--color-bg-app);
-  --color-bg-surface: var(--color-bg-surface);
-  --color-bg-surface-hover: var(--color-bg-surface-hover);
+  --color-bg-app: hsl(240, 5%, 96%);
+  --color-bg-surface: hsl(255, 100%, 100%);
+  --color-bg-surface-hover: hsl(240, 5%, 96%);
 
-  --color-text-main: var(--color-text-main);
-  --color-text-muted: var(--color-text-muted);
-  --color-text-light: var(--color-text-light);
+  --color-text-main: hsl(240, 5%, 10%);
+  --color-text-muted: hsl(240, 4%, 45%);
+  --color-text-light: hsl(240, 5%, 98%);
 
-  --color-border-base: var(--color-border);
-  --color-border-hover: var(--color-border-hover);
+  --color-border-base: hsl(240, 5%, 85%);
+  --color-border-hover: hsl(240, 5%, 70%);
 
   /* Radii */
   --radius-xl: 1rem;
@@ -26,7 +26,7 @@
   --radius-sm: 0.25rem;
 
   /* Shadows */
-  --shadow-glass: var(--glass-shadow);
+  --shadow-glass: 0 4px 6px -1px hsla(240, 0%, 0%, 0.05), 0 2px 4px -1px hsla(240, 0%, 0%, 0.03);
 }
 
 :root {

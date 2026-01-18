@@ -20,7 +20,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
 
     return (
-        <div className="lg:col-span-1 space-y-6">
+        <>
             {/* Preferences Panel */}
             <div className="glass-panel p-10 space-y-2">
                 {/* Diet Preference */}
@@ -150,6 +150,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     {error}
                 </div>
             )}
-        </div>
+        </>
     );
 };

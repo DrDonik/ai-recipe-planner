@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {!headerMinimized && (
                         <>
-                            <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">Turn your pantry into plans</p>
+                            <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">{t.tagline}</p>
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <Key size={16} className="ml-2 text-text-muted" />

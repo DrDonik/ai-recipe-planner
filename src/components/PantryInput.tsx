@@ -107,7 +107,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                         <div className="flex flex-col gap-3">
                             <input
                                 type="text"
-                                placeholder={t.ingredientPlaceholder}
+                                placeholder={t.placeholders.ingredient}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="input-field w-full"
@@ -116,7 +116,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                         <div className="flex gap-2">
                             <input
                                 type="text"
-                                placeholder={t.amountPlaceholder}
+                                placeholder={t.placeholders.amount}
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 className="input-field flex-1"

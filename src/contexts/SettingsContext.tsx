@@ -1,6 +1,8 @@
-import React, { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { useLocalStorage, useStringLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
+
+type TranslationType = typeof translations.English;
 
 interface SettingsContextType {
     apiKey: string;
@@ -15,12 +17,12 @@ interface SettingsContextType {
     setStyleWishes: (wishes: string) => void;
     language: string;
     setLanguage: (lang: string) => void;
-    t: any;
+    t: TranslationType;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [apiKey, setApiKey] = useStringLocalStorage('gemini_api_key', '');
     const [people, setPeople] = useLocalStorage<number>('people_count', 2);
     const [meals, setMeals] = useLocalStorage<number>('meals_count', 4);
@@ -47,6 +49,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSettings = () => {
     const context = useContext(SettingsContext);
     if (context === undefined) {

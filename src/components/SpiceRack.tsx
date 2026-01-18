@@ -84,7 +84,7 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                     <div className="flex flex-wrap gap-2 mt-2">
                         {spices.length === 0 && (
                             <div className="text-text-muted text-center py-4 italic w-full">
-                                {t.noVeg.replace('Zutaten', 'Gewürze').replace('ingredients', 'spices')}
+                                {t.noSpices}
                             </div>
                         )}
 

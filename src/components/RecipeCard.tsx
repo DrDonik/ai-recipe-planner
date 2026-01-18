@@ -33,7 +33,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
     };
 
     const generateSchema = () => {
-        const schema = {
+        const schema: Record<string, unknown> = {
             "@context": "https://schema.org",
             "@type": "Recipe",
             "name": recipe.title,
@@ -44,6 +44,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 "text": step
             }))
         };
+        // Add cookTime if available (e.g., "30 min" -> "PT30M")
+        if (recipe.time) {
+            const minutes = recipe.time.match(/(\d+)/)?.[1];
+            if (minutes) {
+                schema.cookTime = `PT${minutes}M`;
+            }
+        }
         return JSON.stringify(schema);
     };
 

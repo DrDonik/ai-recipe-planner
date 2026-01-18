@@ -162,8 +162,9 @@ function App() {
     try {
       const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
       setMealPlan(plan);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong generating recipes.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong generating recipes.";
+      setError(message);
     } finally {
       setLoading(false);
     }

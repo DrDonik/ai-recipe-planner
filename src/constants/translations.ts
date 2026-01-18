@@ -52,7 +52,11 @@ export const translations = {
         sharedPantry: "Shared Pantry",
         loadPantry: "Load these items into my pantry",
         noPantryToShare: "No pantry items to share!",
-        openInNewTab: "Open my AI Recipe Planner"
+        openInNewTab: "Open my AI Recipe Planner",
+        sharePantry: "Share pantry",
+        sharePantrySuccess: "Pantry URL copied to clipboard!",
+        tagline: "Turn your pantry into plans",
+        noSpices: "No spices added yet."
     },
     German: {
         ingredients: "Zutaten",
@@ -106,7 +110,11 @@ export const translations = {
         sharedPantry: "Geteilter Vorratsschrank",
         loadPantry: "Diese Zutaten in meinen Vorrat laden",
         noPantryToShare: "Keine Vorratszutaten zum Teilen!",
-        openInNewTab: "Meinen AI Recipe Planner öffnen"
+        openInNewTab: "Meinen AI Recipe Planner öffnen",
+        sharePantry: "Vorrat teilen",
+        sharePantrySuccess: "Vorrats-URL in Zwischenablage kopiert!",
+        tagline: "Verwandle deinen Vorrat in Pläne",
+        noSpices: "Noch keine Gewürze hinzugefügt."
     },
     French: {
         ingredients: "Ingrédients",
@@ -160,7 +168,11 @@ export const translations = {
         sharedPantry: "Garde-Manger Partagé",
         loadPantry: "Charger ces articles dans mon garde-manger",
         noPantryToShare: "Aucun article de garde-manger à partager !",
-        openInNewTab: "Ouvrir mon AI Recipe Planner"
+        openInNewTab: "Ouvrir mon AI Recipe Planner",
+        sharePantry: "Partager le garde-manger",
+        sharePantrySuccess: "URL du garde-manger copiée !",
+        tagline: "Transformez votre garde-manger en plans",
+        noSpices: "Aucune épice ajoutée pour le moment."
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -214,6 +226,10 @@ export const translations = {
         sharedPantry: "Despensa Compartida",
         loadPantry: "Cargar estos artículos en mi despensa",
         noPantryToShare: "¡No hay artículos de despensa para compartir!",
-        openInNewTab: "Abrir mi AI Recipe Planner"
+        openInNewTab: "Abrir mi AI Recipe Planner",
+        sharePantry: "Compartir despensa",
+        sharePantrySuccess: "¡URL de despensa copiada al portapapeles!",
+        tagline: "Convierte tu despensa en planes",
+        noSpices: "No se han agregado especias todavía."
     }
 };
