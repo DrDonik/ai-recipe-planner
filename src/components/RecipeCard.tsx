@@ -62,7 +62,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="glass-card p-8 flex flex-col h-full relative group"
+            className="glass-card p-8 flex flex-col h-full relative"
         >
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: generateSchema() }} />
 
@@ -79,7 +79,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             )}
 
             <div className="flex items-start justify-between mb-6 pr-8">
-                <h3 className="text-2xl font-bold leading-tight group-hover:text-primary transition-colors">
+                <h3 className="text-2xl font-bold leading-tight">
                     {recipe.title}
                 </h3>
             </div>

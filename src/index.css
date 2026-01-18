@@ -125,7 +125,7 @@ body {
   }
 
   .glass-card {
-    @apply p-6 border border-border-base bg-bg-surface rounded-lg shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-border-hover;
+    @apply p-6 border border-border-base bg-bg-surface rounded-lg shadow-sm;
   }
 
   .app-container {
@@ -141,7 +141,7 @@ body {
   }
 
   .btn-primary {
-    @apply bg-primary text-white shadow-md hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply bg-primary text-white shadow-md hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
     box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
   }
 
