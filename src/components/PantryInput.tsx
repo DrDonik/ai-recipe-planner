@@ -1,8 +1,9 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Plus, Trash2, Refrigerator, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Refrigerator } from 'lucide-react';
 import type { PantryItem } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
+import { PanelHeader } from './ui';
 
 interface PantryInputProps {
     pantryItems: PantryItem[];
@@ -53,38 +54,16 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
 
     return (
         <div className="glass-panel p-6 flex flex-col gap-6">
-            <div className="flex flex-row items-center justify-between">
-                <div className="flex flex-row items-center gap-3">
-                    <Refrigerator className="text-primary" size={24} />
-                    <h2>{t.pantry}</h2>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="tooltip-container">
-                        <button
-                            type="button"
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label="Pantry Info"
-                        >
-                            <Info size={18} />
-                        </button>
-                        <div className="tooltip-text">
-                            {t.pantryInfo}
-                        </div>
-                    </div>
-                    <div className="tooltip-container">
-                        <button
-                            onClick={onToggleMinimize}
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label={isMinimized ? t.pantryExpand : t.pantryMinimize}
-                        >
-                            {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                        </button>
-                        <div className="tooltip-text">
-                            {isMinimized ? t.pantryExpand : t.pantryMinimize}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PanelHeader
+                icon={<Refrigerator className="text-primary" size={24} />}
+                title={t.pantry}
+                isMinimized={isMinimized}
+                onToggleMinimize={onToggleMinimize}
+                minimizeLabel={t.pantryMinimize}
+                expandLabel={t.pantryExpand}
+                infoTooltip={t.pantryInfo}
+                infoAriaLabel={t.pantryInfo}
+            />
 
             {!isMinimized && (
                 <>

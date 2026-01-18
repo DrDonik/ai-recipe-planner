@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Leaf, Info, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Leaf } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { PanelHeader } from './ui';
 
 interface SpiceRackProps {
     spices: string[];
@@ -33,38 +34,16 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
 
     return (
         <div className="glass-panel p-6 flex flex-col gap-6">
-            <div className="flex flex-row items-center justify-between">
-                <div className="flex flex-row items-center gap-3">
-                    <Leaf className="text-primary" size={24} />
-                    <h2>{t.spiceRack}</h2>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="tooltip-container">
-                        <button
-                            type="button"
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label="Spice Rack Info"
-                        >
-                            <Info size={18} />
-                        </button>
-                        <div className="tooltip-text">
-                            {t.spiceRackInfo}
-                        </div>
-                    </div>
-                    <div className="tooltip-container">
-                        <button
-                            onClick={onToggleMinimize}
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label={isMinimized ? t.spiceRackExpand : t.spiceRackMinimize}
-                        >
-                            {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                        </button>
-                        <div className="tooltip-text">
-                            {isMinimized ? t.spiceRackExpand : t.spiceRackMinimize}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PanelHeader
+                icon={<Leaf className="text-primary" size={24} />}
+                title={t.spiceRack}
+                isMinimized={isMinimized}
+                onToggleMinimize={onToggleMinimize}
+                minimizeLabel={t.spiceRackMinimize}
+                expandLabel={t.spiceRackExpand}
+                infoTooltip={t.spiceRackInfo}
+                infoAriaLabel={t.spiceRackInfo}
+            />
 
             {!isMinimized && (
                 <>
