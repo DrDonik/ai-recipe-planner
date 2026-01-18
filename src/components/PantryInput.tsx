@@ -1,8 +1,7 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Plus, Trash2, Refrigerator, Info, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Refrigerator, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import type { PantryItem } from '../services/llm';
 import { generateId } from '../utils/idGenerator';
-import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface PantryInputProps {
@@ -52,12 +51,6 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         flushPendingInput();
     };
 
-    const sharePantry = () => {
-        const shareUrl = generateShareUrl('pantry', pantryItems);
-        navigator.clipboard.writeText(shareUrl);
-        alert(t.sharePantrySuccess || 'Pantry URL copied to clipboard!');
-    };
-
     return (
         <div className="glass-panel p-10 flex flex-col gap-6">
             <div className="flex flex-row items-center justify-between mb-2">
@@ -78,14 +71,6 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                             {t.pantryInfo}
                         </div>
                     </div>
-                    <button
-                        onClick={sharePantry}
-                        disabled={pantryItems.length === 0}
-                        className="p-1.5 rounded-lg bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/30 transition-all text-text-muted hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={t.sharePantry}
-                    >
-                        <ExternalLink size={16} />
-                    </button>
                     <div className="tooltip-container">
                         <button
                             onClick={onToggleMinimize}
