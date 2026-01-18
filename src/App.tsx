@@ -11,20 +11,21 @@ import { decodeFromUrl } from './utils/sharing';
 import { Header } from './components/Header';
 import { SettingsPanel } from './components/SettingsPanel';
 import { useSettings } from './contexts/SettingsContext';
+import { STORAGE_KEYS, URL_PARAMS } from './constants';
 
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
   const { apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
-  const [spices, setSpices] = useLocalStorage<string[]>('spice_rack_items', []);
+  const [spices, setSpices] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
 
-  const [headerMinimized, setHeaderMinimized] = useLocalStorage<boolean>('header_minimized', false);
-  const [optionsMinimized, setOptionsMinimized] = useLocalStorage<boolean>('options_minimized', false);
-  const [pantryMinimized, setPantryMinimized] = useLocalStorage<boolean>('pantry_minimized', false);
-  const [spiceRackMinimized, setSpiceRackMinimized] = useLocalStorage<boolean>('spice_rack_minimized', false);
-  const [shoppingListMinimized, setShoppingListMinimized] = useLocalStorage<boolean>('shopping_list_minimized', false);
-  const [mealPlan, setMealPlan] = useLocalStorage<MealPlan | null>('meal_plan', null);
+  const [headerMinimized, setHeaderMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
+  const [optionsMinimized, setOptionsMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.OPTIONS_MINIMIZED, false);
+  const [pantryMinimized, setPantryMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.PANTRY_MINIMIZED, false);
+  const [spiceRackMinimized, setSpiceRackMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.SPICE_RACK_MINIMIZED, false);
+  const [shoppingListMinimized, setShoppingListMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.SHOPPING_LIST_MINIMIZED, false);
+  const [mealPlan, setMealPlan] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +37,8 @@ function App() {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const recipeParam = searchParams.get('recipe');
-    const shoppingListParam = searchParams.get('shoppingList');
+    const recipeParam = searchParams.get(URL_PARAMS.RECIPE);
+    const shoppingListParam = searchParams.get(URL_PARAMS.SHOPPING_LIST);
 
     if (recipeParam) {
       const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam));

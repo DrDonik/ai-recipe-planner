@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import type { Recipe } from '../services/llm';
 import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
+import { URL_PARAMS } from '../constants';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -56,7 +57,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
     };
 
     // Generate URL for external link
-    const shareUrl = generateShareUrl('recipe', recipe);
+    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipe);
 
     return (
         <motion.div

@@ -1,3 +1,4 @@
+import { API_CONFIG } from '../constants';
 
 export interface PantryItem {
   id: string;
@@ -102,8 +103,11 @@ export const generateRecipes = async (
   `;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -116,8 +120,11 @@ export const generateRecipes = async (
             },
           ],
         }),
+        signal: controller.signal,
       }
     );
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json();

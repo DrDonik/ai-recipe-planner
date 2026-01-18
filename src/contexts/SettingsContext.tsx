@@ -1,6 +1,7 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useLocalStorage, useStringLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
+import { STORAGE_KEYS, DEFAULTS } from '../constants';
 
 type TranslationType = typeof translations.English;
 
@@ -23,12 +24,12 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [apiKey, setApiKey] = useStringLocalStorage('gemini_api_key', '');
-    const [people, setPeople] = useLocalStorage<number>('people_count', 2);
-    const [meals, setMeals] = useLocalStorage<number>('meals_count', 4);
-    const [diet, setDiet] = useStringLocalStorage('diet_preference', 'Mostly Vegetarian');
-    const [styleWishes, setStyleWishes] = useStringLocalStorage('style_wishes', '');
-    const [language, setLanguage] = useStringLocalStorage('language', 'German');
+    const [apiKey, setApiKey] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
+    const [people, setPeople] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
+    const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
+    const [diet, setDiet] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
+    const [styleWishes, setStyleWishes] = useStringLocalStorage(STORAGE_KEYS.STYLE_WISHES, '');
+    const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, DEFAULTS.LANGUAGE);
 
     const t = translations[language as keyof typeof translations];
 

@@ -4,6 +4,7 @@ import type { Ingredient } from '../services/llm';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
+import { STORAGE_KEYS, URL_PARAMS } from '../constants';
 
 interface ShoppingListProps {
     items: Ingredient[];
@@ -16,7 +17,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
     const { t } = useSettings();
 
     // Load checked items from localStorage
-    const [checkedItemsList, setCheckedItemsList] = useLocalStorage<string[]>('shopping_list_checked', []);
+    const [checkedItemsList, setCheckedItemsList] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
     const checkedItems = new Set(checkedItemsList);
 
     // Generate a unique key for each item (using item name + amount)
@@ -35,7 +36,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
     if (items.length === 0) return null;
 
     // Generate URL for external link
-    const shareUrl = generateShareUrl('shoppingList', items);
+    const shareUrl = generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
 
     return (
         <div className={`glass-panel ${isMinimized ? 'p-6 pb-6' : 'p-6'}`}>
