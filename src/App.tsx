@@ -40,10 +40,10 @@ function App() {
     const shoppingListParam = searchParams.get('shoppingList');
 
     if (recipeParam) {
-      const decoded = decodeFromUrl<Recipe>(recipeParam);
+      const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam));
       if (decoded) setViewRecipe(decoded);
     } else if (shoppingListParam) {
-      const decoded = decodeFromUrl<Ingredient[]>(shoppingListParam);
+      const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam));
       if (decoded) setViewShoppingList(decoded);
     }
   }, []);
