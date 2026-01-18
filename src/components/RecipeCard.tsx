@@ -104,18 +104,24 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         <ChefHat size={20} />
                         <h4 className="font-bold uppercase tracking-wider text-xs">{t.ingredients}</h4>
                     </div>
-                    <ul className="text-sm">
+                    <ul className="text-sm" role="list">
                         {recipe.ingredients.map((ing, idx) => {
                             const isMissing = recipe.missingIngredients?.some(m => m.item.toLowerCase().includes(ing.item.toLowerCase()));
                             const ingredientKey = `${ing.item}-${ing.amount}-${idx}`;
+                            const isStruck = struckIngredients.has(idx);
 
                             return (
                                 <li
                                     key={ingredientKey}
-                                    className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3 cursor-pointer group/ing"
+                                    role="button"
+                                    tabIndex={0}
+                                    className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3 cursor-pointer group/ing focus:outline-none focus:bg-primary/5 rounded"
                                     onClick={() => toggleIngredient(idx)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleIngredient(idx); }}}
+                                    aria-pressed={isStruck}
+                                    aria-label={`${ing.item}, ${ing.amount}${isMissing ? ' (need to buy)' : ''}${isStruck ? ' (crossed off)' : ''}`}
                                 >
-                                    <span className={`text-sm transition-all ${struckIngredients.has(idx)
+                                    <span className={`text-sm transition-all ${isStruck
                                         ? "line-through opacity-50 text-text-muted"
                                         : isMissing
                                             ? "text-amber-600 dark:text-amber-400 font-medium"
@@ -123,7 +129,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                         } flex-1`}>
                                         {ing.item}
                                     </span>
-                                    <span className={`text-text-muted font-mono text-xs whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded transition-opacity ${struckIngredients.has(idx) ? "opacity-30" : ""}`}>
+                                    <span className={`text-text-muted font-mono text-xs whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded transition-opacity ${isStruck ? "opacity-30" : ""}`}>
                                         {ing.amount}
                                     </span>
                                 </li>
@@ -156,8 +162,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         {recipe.instructions.map((step, i) => (
                             <li
                                 key={`step-${i}-${step.slice(0, 20)}`}
-                                className={`pl-1 marker:text-primary marker:font-bold cursor-pointer transition-all ${activeStep === i ? 'instruction-step-active' : ''}`}
+                                tabIndex={0}
+                                className={`pl-1 marker:text-primary marker:font-bold cursor-pointer transition-all focus:outline-none focus:bg-primary/5 rounded ${activeStep === i ? 'instruction-step-active' : ''}`}
                                 onClick={() => toggleStepHighlight(i)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleStepHighlight(i); }}}
+                                aria-current={activeStep === i ? 'step' : undefined}
                             >
                                 {step}
                             </li>

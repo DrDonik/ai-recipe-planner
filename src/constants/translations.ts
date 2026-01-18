@@ -57,7 +57,10 @@ export const translations = {
         sharePantry: "Share pantry",
         sharePantrySuccess: "Pantry URL copied to clipboard!",
         tagline: "Turn your pantry into plans",
-        noSpices: "No spices added yet."
+        noSpices: "No spices added yet.",
+        apiKeyPlaceholder: "Paste Gemini API Key",
+        apiKeyLabel: "Gemini API Key",
+        languageLabel: "Select language"
     },
     German: {
         ingredients: "Zutaten",
@@ -116,7 +119,10 @@ export const translations = {
         sharePantry: "Vorrat teilen",
         sharePantrySuccess: "Vorrats-URL in Zwischenablage kopiert!",
         tagline: "Verwandle deinen Vorrat in Pläne",
-        noSpices: "Noch keine Gewürze hinzugefügt."
+        noSpices: "Noch keine Gewürze hinzugefügt.",
+        apiKeyPlaceholder: "Gemini API-Schlüssel einfügen",
+        apiKeyLabel: "Gemini API-Schlüssel",
+        languageLabel: "Sprache auswählen"
     },
     French: {
         ingredients: "Ingrédients",
@@ -175,7 +181,10 @@ export const translations = {
         sharePantry: "Partager le garde-manger",
         sharePantrySuccess: "URL du garde-manger copiée !",
         tagline: "Transformez votre garde-manger en plans",
-        noSpices: "Aucune épice ajoutée pour le moment."
+        noSpices: "Aucune épice ajoutée pour le moment.",
+        apiKeyPlaceholder: "Coller la clé API Gemini",
+        apiKeyLabel: "Clé API Gemini",
+        languageLabel: "Sélectionner la langue"
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -234,6 +243,9 @@ export const translations = {
         sharePantry: "Compartir despensa",
         sharePantrySuccess: "¡URL de despensa copiada al portapapeles!",
         tagline: "Convierte tu despensa en planes",
-        noSpices: "No se han agregado especias todavía."
+        noSpices: "No se han agregado especias todavía.",
+        apiKeyPlaceholder: "Pegar clave API de Gemini",
+        apiKeyLabel: "Clave API de Gemini",
+        languageLabel: "Seleccionar idioma"
     }
 };

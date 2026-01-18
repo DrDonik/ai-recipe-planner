@@ -80,28 +80,30 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
             </div>
 
             {!isMinimized && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 list-none p-0 m-0" role="list">
                     {items.map((item, i) => {
                         const itemKey = getItemKey(item);
                         const isChecked = checkedItems.has(itemKey);
+                        const checkboxId = `shopping-item-${i}`;
                         return (
-                            <div key={`${itemKey}-${i}`} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base" style={{ padding: '1rem' }}>
-                                <div className="flex items-center gap-3">
+                            <li key={`${itemKey}-${i}`} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base p-4">
+                                <label htmlFor={checkboxId} className="flex items-center gap-3 cursor-pointer flex-1">
                                     <input
+                                        id={checkboxId}
                                         type="checkbox"
                                         checked={isChecked}
                                         onChange={() => toggleItem(itemKey)}
                                         className="w-5 h-5 accent-primary rounded cursor-pointer"
                                     />
                                     <span className={`font-medium ${isChecked ? 'line-through text-text-muted' : ''}`}>{item.item}</span>
-                                </div>
-                                <span className="text-sm text-text-muted bg-white/50 dark:bg-black/30 rounded text-right" style={{ padding: '0.25rem 0.75rem' }}>
+                                </label>
+                                <span className="text-sm text-text-muted bg-white/50 dark:bg-black/30 rounded text-right px-3 py-1">
                                     {item.amount}
                                 </span>
-                            </div>
+                            </li>
                         );
                     })}
-                </div>
+                </ul>
             )}
         </div>
     );

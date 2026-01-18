@@ -48,10 +48,12 @@ export const Header: React.FC<HeaderProps> = ({
                             <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">{t.tagline}</p>
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
-                                <Key size={16} className="ml-2 text-text-muted" />
+                                <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
+                                <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
                                 <input
+                                    id="api-key-input"
                                     type="password"
-                                    placeholder="Paste Gemini API Key"
+                                    placeholder={t.apiKeyPlaceholder}
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
                                     className="bg-transparent border-none outline-none text-sm w-48 px-2"
@@ -60,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
                                     <button
                                         type="button"
                                         className="text-text-muted hover:text-primary transition-colors p-1 rounded-full outline-none focus:text-primary"
-                                        aria-label="API Info"
+                                        aria-label={t.apiInfo}
                                     >
                                         <Info size={14} />
                                     </button>
@@ -71,11 +73,14 @@ export const Header: React.FC<HeaderProps> = ({
                             </div>
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
-                                <Globe size={16} className="ml-2 text-text-muted" />
+                                <label htmlFor="language-select" className="sr-only">{t.languageLabel}</label>
+                                <Globe size={16} className="ml-2 text-text-muted" aria-hidden="true" />
                                 <select
+                                    id="language-select"
                                     value={language}
                                     onChange={(e) => setLanguage(e.target.value)}
                                     className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-text-main w-full"
+                                    aria-label={t.languageLabel}
                                 >
                                     <option value="German">Deutsch</option>
                                     <option value="English">English</option>
