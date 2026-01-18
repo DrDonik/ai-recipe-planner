@@ -22,22 +22,22 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     return (
         <>
             {/* Preferences Panel */}
-            <div className="glass-panel p-10 space-y-2">
+            <div className="glass-panel p-6 space-y-2">
                 {/* Diet Preference */}
                 <div className="flex flex-col items-start gap-3">
                     <div className="flex items-center gap-3 justify-between w-full">
                         <div className="flex items-center gap-3">
                             <Utensils className="text-secondary" size={24} />
-                            <span className="font-semibold">{t.diet}</span>
+                            <span>{t.diet}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="tooltip-container">
                                 <button
                                     onClick={() => setOptionsMinimized(!optionsMinimized)}
-                                    className="p-1.5 rounded-lg bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/30 transition-all text-text-muted hover:text-primary"
+                                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
                                     aria-label={optionsMinimized ? t.optionsExpand : t.optionsMinimize}
                                 >
-                                    {optionsMinimized ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                                    {optionsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
                                 </button>
                                 <div className="tooltip-text">
                                     {optionsMinimized ? t.optionsExpand : t.optionsMinimize}
@@ -70,7 +70,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         <div className="flex flex-col items-start gap-3">
                             <div className="flex items-center gap-3">
                                 <ChefHat className="text-secondary" size={24} />
-                                <span className="font-semibold">{t.styleWishes}</span>
+                                <span>{t.styleWishes}</span>
                             </div>
                             <input
                                 type="text"
@@ -88,7 +88,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         <div className="flex flex-col items-start gap-3">
                             <div className="flex items-center gap-3">
                                 <Users className="text-secondary" size={24} />
-                                <span className="font-semibold">{t.people}</span>
+                                <span>{t.people}</span>
                             </div>
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max">
                                 <button
@@ -110,7 +110,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         <div className="flex flex-col items-start gap-3">
                             <div className="flex items-center gap-3">
                                 <Salad className="text-secondary" size={24} />
-                                <span className="font-semibold">{t.meals}</span>
+                                <span>{t.meals}</span>
                             </div>
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max">
                                 <button

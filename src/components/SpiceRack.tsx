@@ -32,7 +32,7 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
     };
 
     return (
-        <div className="glass-panel p-10 flex flex-col gap-6">
+        <div className="glass-panel p-6 flex flex-col gap-6">
             <div className="flex flex-row items-center justify-between mb-2">
                 <div className="flex flex-row items-center gap-3">
                     <Leaf className="text-primary" size={24} />
@@ -42,7 +42,7 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                     <div className="tooltip-container">
                         <button
                             type="button"
-                            className="text-text-muted hover:text-primary transition-colors p-1.5 rounded-full outline-none focus:text-primary"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
                             aria-label="Spice Rack Info"
                         >
                             <Info size={18} />
@@ -54,10 +54,10 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                     <div className="tooltip-container">
                         <button
                             onClick={onToggleMinimize}
-                            className="p-1.5 rounded-lg bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/30 transition-all text-text-muted hover:text-primary"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
                             aria-label={isMinimized ? t.spiceRackExpand : t.spiceRackMinimize}
                         >
-                            {isMinimized ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                            {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
                         </button>
                         <div className="tooltip-text">
                             {isMinimized ? t.spiceRackExpand : t.spiceRackMinimize}
