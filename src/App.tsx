@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Sparkles, Refrigerator } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
@@ -33,14 +33,11 @@ function App() {
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
   // Single Shopping List View State
   const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
-  // Single Pantry View State
-  const [viewPantry, setViewPantry] = useState<PantryItem[] | null>(null);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const recipeParam = searchParams.get('recipe');
     const shoppingListParam = searchParams.get('shoppingList');
-    const pantryParam = searchParams.get('pantry');
 
     if (recipeParam) {
       const decoded = decodeFromUrl<Recipe>(recipeParam);
@@ -48,9 +45,6 @@ function App() {
     } else if (shoppingListParam) {
       const decoded = decodeFromUrl<Ingredient[]>(shoppingListParam);
       if (decoded) setViewShoppingList(decoded);
-    } else if (pantryParam) {
-      const decoded = decodeFromUrl<PantryItem[]>(pantryParam);
-      if (decoded) setViewPantry(decoded);
     }
   }, []);
 
@@ -87,18 +81,13 @@ function App() {
       const description = 'Your shopping list from AI Recipe Planner';
       const url = window.location.href;
       updateMetaTags(title, description, url);
-    } else if (viewPantry) {
-      const title = `${t.pantry} | AI Recipe Planner`;
-      const description = 'Shared pantry inventory from AI Recipe Planner';
-      const url = window.location.href;
-      updateMetaTags(title, description, url);
     } else {
       const title = 'AI Recipe Planner';
       const description = 'Turn your pantry into delicious meal plans with AI';
       const url = window.location.origin + window.location.pathname;
       updateMetaTags(title, description, url);
     }
-  }, [viewRecipe, viewShoppingList, viewPantry, t.shoppingList, t.pantry]);
+  }, [viewRecipe, viewShoppingList, t.shoppingList]);
 
   const clearViewRecipe = () => {
     setViewRecipe(null);
@@ -110,19 +99,6 @@ function App() {
     setViewShoppingList(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
-  };
-
-  const clearViewPantry = () => {
-    setViewPantry(null);
-    // clean URL
-    window.history.pushState({}, '', window.location.pathname);
-  };
-
-  const loadPantryItems = () => {
-    if (viewPantry) {
-      setPantryItems(viewPantry);
-      clearViewPantry();
-    }
   };
 
   const addPantryItem = (v: PantryItem) => {
@@ -194,49 +170,6 @@ function App() {
           <ShoppingList items={viewShoppingList} isStandaloneView={true} />
           <button
             onClick={clearViewShoppingList}
-            className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
-          >
-            ← {t.openInNewTab}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (viewPantry) {
-    return (
-      <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
-        <div className="max-w-2xl w-full">
-          <div className="glass-panel p-10">
-            <div className="flex items-center gap-3 mb-6">
-              <Refrigerator className="text-primary" size={32} />
-              <h1 className="text-2xl font-bold">{t.sharedPantry || t.pantry}</h1>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2 mb-6">
-              {viewPantry.map((item) => (
-                <div key={item.id} className="glass-card flex flex-row items-center justify-between" style={{ padding: '0.75rem' }}>
-                  <div className="flex flex-row items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-primary"></div>
-                    <span className="font-semibold">{item.name}</span>
-                    <span className="text-text-muted text-sm bg-white/50 dark:bg-white/10 rounded-md shadow-sm" style={{ padding: '0.25rem 0.75rem' }}>
-                      {item.amount}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={loadPantryItems}
-              className="btn btn-primary w-full mb-4"
-            >
-              {t.loadPantry || 'Load these items into my pantry'}
-            </button>
-          </div>
-
-          <button
-            onClick={clearViewPantry}
             className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
           >
             ← {t.openInNewTab}
