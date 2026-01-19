@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
-import type { Ingredient } from '../types';
+import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
@@ -13,32 +13,149 @@ interface ShoppingListProps {
     isStandaloneView?: boolean;
 }
 
+/**
+ * Generate a unique key for an ingredient (for checkbox state tracking).
+ */
+const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
+
+/**
+ * Check if two shopping lists contain the same items (ignoring checked state).
+ */
+const listsMatch = (a: Ingredient[], b: Ingredient[]): boolean => {
+    if (a.length !== b.length) return false;
+    const aKeys = new Set(a.map(getItemKey));
+    return b.every(item => aKeys.has(getItemKey(item)));
+};
+
+/**
+ * Generate a hash for a list of items (for localStorage key).
+ * Simple hash based on sorted item keys.
+ */
+const getListHash = (items: Ingredient[]): string => {
+    const keys = items.map(getItemKey).sort().join('|');
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < keys.length; i++) {
+        const char = keys.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return `shopping_list_shared_${Math.abs(hash).toString(36)}`;
+};
+
 export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false }) => {
     const { t } = useSettings();
 
-    // Load checked items from localStorage
-    const [checkedItemsList, setCheckedItemsList] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
+    // Load checked items from localStorage (used for main view and own list in standalone)
+    const [localStorageChecked, setLocalStorageChecked] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
 
-    // Memoize the Set to avoid recreation on every render
-    const checkedItems = useMemo(() => new Set(checkedItemsList), [checkedItemsList]);
+    // Determine if this is the user's own list (matches their stored meal plan)
+    // Computed once during initialization for standalone view
+    const isOwnList = useMemo(() => {
+        if (!isStandaloneView) return false;
+        const storedPlanJson = localStorage.getItem(STORAGE_KEYS.MEAL_PLAN);
+        if (!storedPlanJson) return false;
+        try {
+            const storedPlan = JSON.parse(storedPlanJson) as MealPlan;
+            if (!storedPlan?.shoppingList) return false;
+            return listsMatch(items, storedPlan.shoppingList);
+        } catch {
+            return false;
+        }
+    }, [isStandaloneView, items]);
 
-    // Generate a unique key for each item (using item name + amount)
-    const getItemKey = useCallback((item: Ingredient) => `${item.item}|${item.amount}`, []);
+    // Get the localStorage key for shared lists (based on content hash)
+    const sharedListStorageKey = useMemo(() => getListHash(items), [items]);
+
+    // For standalone view: track checked state locally, initialized from localStorage
+    const [standaloneChecked, setStandaloneChecked] = useState<Set<string>>(() => {
+        if (!isStandaloneView) return new Set();
+
+        // Check if this is own list - use main localStorage key
+        const storedPlanJson = localStorage.getItem(STORAGE_KEYS.MEAL_PLAN);
+        if (storedPlanJson) {
+            try {
+                const storedPlan = JSON.parse(storedPlanJson) as MealPlan;
+                if (storedPlan?.shoppingList && listsMatch(items, storedPlan.shoppingList)) {
+                    const storedCheckedJson = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+                    if (storedCheckedJson) {
+                        return new Set(JSON.parse(storedCheckedJson) as string[]);
+                    }
+                    return new Set();
+                }
+            } catch {
+                // Fall through to shared list logic
+            }
+        }
+
+        // Shared list - use hashed localStorage key
+        const hashKey = getListHash(items);
+        const storedSharedChecked = localStorage.getItem(hashKey);
+        if (storedSharedChecked) {
+            try {
+                return new Set(JSON.parse(storedSharedChecked) as string[]);
+            } catch {
+                // Fall through to empty state
+            }
+        }
+
+        return new Set();
+    });
+
+    // Get the set of valid item keys for the current list
+    const validItemKeys = useMemo(() => new Set(items.map(getItemKey)), [items]);
+
+    // Get the current checked items based on view mode
+    // Filter to only include items that exist in the current list
+    const checkedItems = useMemo(() => {
+        if (isStandaloneView) {
+            return standaloneChecked;
+        }
+        // Main view: filter localStorage to only items in current list
+        // This handles stale checked items from previous meal plans
+        return new Set(localStorageChecked.filter(key => validItemKeys.has(key)));
+    }, [isStandaloneView, standaloneChecked, localStorageChecked, validItemKeys]);
 
     const toggleItem = useCallback((itemKey: string) => {
-        setCheckedItemsList(prev => {
-            const nextSet = new Set(prev);
-            if (nextSet.has(itemKey)) {
-                nextSet.delete(itemKey);
-            } else {
-                nextSet.add(itemKey);
-            }
-            return Array.from(nextSet);
-        });
-    }, [setCheckedItemsList]);
+        if (isStandaloneView) {
+            // Update standalone state and persist to appropriate localStorage key
+            setStandaloneChecked(prev => {
+                const next = new Set(prev);
+                if (next.has(itemKey)) {
+                    next.delete(itemKey);
+                } else {
+                    next.add(itemKey);
+                }
 
-    // Memoize the share URL to avoid regeneration on every render
-    const shareUrl = useMemo(() => generateShareUrl(URL_PARAMS.SHOPPING_LIST, items), [items]);
+                // Persist to localStorage
+                if (isOwnList) {
+                    // Own list: use main localStorage key (via hook)
+                    setLocalStorageChecked(Array.from(next));
+                } else {
+                    // Shared list: use hashed localStorage key
+                    localStorage.setItem(sharedListStorageKey, JSON.stringify(Array.from(next)));
+                }
+
+                return next;
+            });
+        } else {
+            // Main app view: just update localStorage
+            setLocalStorageChecked(prev => {
+                const nextSet = new Set(prev);
+                if (nextSet.has(itemKey)) {
+                    nextSet.delete(itemKey);
+                } else {
+                    nextSet.add(itemKey);
+                }
+                return Array.from(nextSet);
+            });
+        }
+    }, [isStandaloneView, isOwnList, setLocalStorageChecked, sharedListStorageKey]);
+
+    // Generate share URL (without checkmark state - each recipient tracks their own)
+    const shareUrl = useMemo(() => {
+        return generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
+    }, [items]);
 
     if (items.length === 0) return null;
 

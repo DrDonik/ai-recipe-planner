@@ -139,6 +139,8 @@ function App() {
     try {
       const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
       setMealPlan(plan);
+      // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
+      localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong generating recipes.";
       setError(message);
@@ -222,6 +224,7 @@ function App() {
             {mealPlan ? (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <ShoppingList
+                  key={mealPlan.recipes[0]?.id ?? 'shopping-list'}
                   items={mealPlan.shoppingList}
                   isMinimized={shoppingListMinimized}
                   onToggleMinimize={() => setShoppingListMinimized(!shoppingListMinimized)}
