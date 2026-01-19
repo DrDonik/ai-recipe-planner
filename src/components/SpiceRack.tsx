@@ -71,9 +71,10 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                             <div key={spice} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
                                 <span className="font-medium text-xs text-text-main">{spice}</span>
                                 <button
+                                    type="button"
                                     onClick={() => onRemoveSpice(spice)}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
-                                    title={t.remove}
+                                    aria-label={t.remove}
                                 >
                                     <Trash2 size={10} />
                                 </button>
