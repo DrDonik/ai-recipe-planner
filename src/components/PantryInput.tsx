@@ -98,7 +98,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                             </div>
                         )}
                         {pantryItems.map((item) => (
-                            <div key={item.id} className="glass-card flex flex-row items-center justify-between p-3 animate-in fade-in slide-in-from-left-2 transition-all hover:scale-[1.01]">
+                            <div key={item.id} className="glass-card flex flex-row items-center justify-between p-3 animate-in fade-in slide-in-from-left-2 hover:border-border-hover transition-colors">
                                 <div className="flex flex-row items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-primary shadow-sm shadow-primary/20"></div>
                                     <span className="font-semibold text-text-main">{item.name}</span>
