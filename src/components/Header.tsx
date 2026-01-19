@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {!headerMinimized && (
                         <>
-                            <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">{t.tagline}</p>
+                            <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">Turn your pantry into plans</p>
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
