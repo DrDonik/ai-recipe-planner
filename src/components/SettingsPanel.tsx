@@ -30,20 +30,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             <Utensils className="text-secondary" size={24} />
                             <span>{t.diet}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="tooltip-container">
-                                <button
-                                    onClick={() => setOptionsMinimized(!optionsMinimized)}
-                                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                                    aria-label={optionsMinimized ? t.optionsExpand : t.optionsMinimize}
-                                >
-                                    {optionsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                                </button>
-                                <div className="tooltip-text">
-                                    {optionsMinimized ? t.optionsExpand : t.optionsMinimize}
-                                </div>
-                            </div>
-                        </div>
+                        <button
+                            onClick={() => setOptionsMinimized(!optionsMinimized)}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
+                            aria-label={optionsMinimized ? 'Expand' : 'Collapse'}
+                        >
+                            {optionsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                        </button>
                     </div>
                     {!optionsMinimized && (
                         <>

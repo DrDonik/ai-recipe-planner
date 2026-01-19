@@ -29,18 +29,13 @@ export const Header: React.FC<HeaderProps> = ({
                         </h1>
 
                         {/* Toggle Button */}
-                        <div className="tooltip-container">
-                            <button
-                                onClick={() => setHeaderMinimized(!headerMinimized)}
-                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                                aria-label={headerMinimized ? t.headerExpand : t.headerMinimize}
-                            >
-                                {headerMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                            </button>
-                            <div className="tooltip-text">
-                                {headerMinimized ? t.headerExpand : t.headerMinimize}
-                            </div>
-                        </div>
+                        <button
+                            onClick={() => setHeaderMinimized(!headerMinimized)}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
+                            aria-label={headerMinimized ? 'Expand' : 'Collapse'}
+                        >
+                            {headerMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                        </button>
                     </div>
 
                     {!headerMinimized && (

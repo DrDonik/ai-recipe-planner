@@ -39,8 +39,6 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                 title={t.spiceRack}
                 isMinimized={isMinimized}
                 onToggleMinimize={onToggleMinimize}
-                minimizeLabel={t.spiceRackMinimize}
-                expandLabel={t.spiceRackExpand}
                 infoTooltip={t.spiceRackInfo}
                 infoAriaLabel={t.spiceRackInfo}
             />

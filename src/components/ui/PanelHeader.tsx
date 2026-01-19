@@ -7,8 +7,6 @@ interface PanelHeaderProps {
     title: string;
     isMinimized: boolean;
     onToggleMinimize: () => void;
-    minimizeLabel: string;
-    expandLabel: string;
     infoTooltip?: string;
     infoAriaLabel?: string;
     actions?: ReactNode;
@@ -19,8 +17,6 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
     title,
     isMinimized,
     onToggleMinimize,
-    minimizeLabel,
-    expandLabel,
     infoTooltip,
     infoAriaLabel,
     actions,
@@ -40,12 +36,13 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
                         ariaLabel={infoAriaLabel || 'Info'}
                     />
                 )}
-                <TooltipButton
+                <button
                     onClick={onToggleMinimize}
-                    icon={isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                    tooltip={isMinimized ? expandLabel : minimizeLabel}
-                    ariaLabel={isMinimized ? expandLabel : minimizeLabel}
-                />
+                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary flex items-center justify-center"
+                    aria-label={isMinimized ? 'Expand' : 'Collapse'}
+                >
+                    {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                </button>
             </div>
         </div>
     );

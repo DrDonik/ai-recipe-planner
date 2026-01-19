@@ -59,8 +59,6 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                 title={t.pantry}
                 isMinimized={isMinimized}
                 onToggleMinimize={onToggleMinimize}
-                minimizeLabel={t.pantryMinimize}
-                expandLabel={t.pantryExpand}
                 infoTooltip={t.pantryInfo}
                 infoAriaLabel={t.pantryInfo}
             />

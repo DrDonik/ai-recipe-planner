@@ -67,18 +67,13 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         </div>
                     )}
                     {onToggleMinimize && (
-                        <div className="tooltip-container">
-                            <button
-                                onClick={onToggleMinimize}
-                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
-                                aria-label={isMinimized ? t.shoppingListExpand : t.shoppingListMinimize}
-                            >
-                                {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                            </button>
-                            <div className="tooltip-text">
-                                {isMinimized ? t.shoppingListExpand : t.shoppingListMinimize}
-                            </div>
-                        </div>
+                        <button
+                            onClick={onToggleMinimize}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={isMinimized ? 'Expand' : 'Collapse'}
+                        >
+                            {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                        </button>
                     )}
                 </div>
             </div>
