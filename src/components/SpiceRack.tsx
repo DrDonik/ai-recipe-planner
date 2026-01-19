@@ -23,13 +23,16 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newSpice.trim()) return;
+        const trimmedSpice = newSpice.trim();
+        if (!trimmedSpice) return;
 
-        // Check for duplicate spice
-        if (spices.includes(newSpice.trim())) return;
-
-        onAddSpice(newSpice.trim());
+        // Clear input regardless of whether spice is added
         setNewSpice('');
+
+        // Don't add if it already exists
+        if (spices.includes(trimmedSpice)) return;
+
+        onAddSpice(trimmedSpice);
     };
 
     return (

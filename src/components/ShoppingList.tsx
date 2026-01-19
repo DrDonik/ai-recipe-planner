@@ -85,7 +85,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         const isChecked = checkedItems.has(itemKey);
                         const checkboxId = `shopping-item-${i}`;
                         return (
-                            <li key={`${itemKey}-${i}`} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base hover:border-border-hover transition-colors p-4 shadow-sm">
+                            <li key={`${itemKey}-${i}`} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base hover:border-border-hover transition-colors p-3 shadow-sm">
                                 <label htmlFor={checkboxId} className="flex items-center gap-3 cursor-pointer flex-1">
                                     <input
                                         id={checkboxId}
