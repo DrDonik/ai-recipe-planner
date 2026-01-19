@@ -46,18 +46,22 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         </div>
                     </div>
                     {!optionsMinimized && (
-                        <select
-                            value={diet}
-                            onChange={(e) => setDiet(e.target.value)}
-                            className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm font-medium outline-none focus:border-primary transition-all cursor-pointer"
-                        >
-                            <option value="Vegan">{t.dietOptions.vegan}</option>
-                            <option value="Vegetarian">{t.dietOptions.vegetarian}</option>
-                            <option value="Mostly Vegetarian">{t.dietOptions.mostlyVegetarian}</option>
-                            <option value="Pescatarian">{t.dietOptions.pescatarian}</option>
-                            <option value="Flexitarian">{t.dietOptions.flexitarian}</option>
-                            <option value="Carnivore">{t.dietOptions.carnivore}</option>
-                        </select>
+                        <>
+                            <label htmlFor="diet-select" className="sr-only">{t.diet}</label>
+                            <select
+                                id="diet-select"
+                                value={diet}
+                                onChange={(e) => setDiet(e.target.value)}
+                                className="select-field bg-white/50 dark:bg-black/20 border-[var(--glass-border)]"
+                            >
+                                <option value="Vegan">{t.dietOptions.vegan}</option>
+                                <option value="Vegetarian">{t.dietOptions.vegetarian}</option>
+                                <option value="Mostly Vegetarian">{t.dietOptions.mostlyVegetarian}</option>
+                                <option value="Pescatarian">{t.dietOptions.pescatarian}</option>
+                                <option value="Flexitarian">{t.dietOptions.flexitarian}</option>
+                                <option value="Carnivore">{t.dietOptions.carnivore}</option>
+                            </select>
+                        </>
                     )}
                 </div>
 
@@ -68,16 +72,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                         {/* Style, Wishes, etc. */}
                         <div className="flex flex-col items-start gap-3">
-                            <div className="flex items-center gap-3">
+                            <label htmlFor="style-wishes-input" className="flex items-center gap-3">
                                 <ChefHat className="text-secondary" size={24} />
                                 <span>{t.styleWishes}</span>
-                            </div>
+                            </label>
                             <input
+                                id="style-wishes-input"
                                 type="text"
                                 value={styleWishes}
                                 onChange={(e) => setStyleWishes(e.target.value)}
                                 placeholder={t.styleWishesPlaceholder}
-                                className="bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary transition-all w-full"
+                                className="input-field-sm bg-white/50 dark:bg-black/20 border-[var(--glass-border)] w-full"
                             />
                         </div>
 
@@ -86,19 +91,23 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                         {/* People Count */}
                         <div className="flex flex-col items-start gap-3">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3" id="people-count-label">
                                 <Users className="text-secondary" size={24} />
                                 <span>{t.people}</span>
                             </div>
-                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max">
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max" role="group" aria-labelledby="people-count-label">
                                 <button
+                                    type="button"
                                     onClick={() => setPeople(Math.max(1, people - 1))}
-                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+                                    aria-label={`Decrease people count, currently ${people}`}
                                 >-</button>
-                                <span className="w-8 text-center font-mono font-semibold text-sm">{people}</span>
+                                <span className="w-8 text-center font-mono font-semibold text-sm" aria-live="polite">{people}</span>
                                 <button
-                                    onClick={() => setPeople(people + 1)}
-                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
+                                    type="button"
+                                    onClick={() => setPeople(Math.min(20, people + 1))}
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+                                    aria-label={`Increase people count, currently ${people}`}
                                 >+</button>
                             </div>
                         </div>
@@ -108,19 +117,23 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                         {/* Meals Count */}
                         <div className="flex flex-col items-start gap-3">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3" id="meals-count-label">
                                 <Salad className="text-secondary" size={24} />
                                 <span>{t.meals}</span>
                             </div>
-                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max">
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 rounded-lg p-1 w-max" role="group" aria-labelledby="meals-count-label">
                                 <button
+                                    type="button"
                                     onClick={() => setMeals(Math.max(1, meals - 1))}
-                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+                                    aria-label={`Decrease meals count, currently ${meals}`}
                                 >-</button>
-                                <span className="w-8 text-center font-mono font-semibold text-sm">{meals}</span>
+                                <span className="w-8 text-center font-mono font-semibold text-sm" aria-live="polite">{meals}</span>
                                 <button
-                                    onClick={() => setMeals(meals + 1)}
-                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900"
+                                    type="button"
+                                    onClick={() => setMeals(Math.min(10, meals + 1))}
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
+                                    aria-label={`Increase meals count, currently ${meals}`}
                                 >+</button>
                             </div>
                         </div>

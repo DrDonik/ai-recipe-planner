@@ -136,6 +136,14 @@ body {
     @apply px-4 py-3 border border-border-base bg-bg-surface text-text-main rounded-md transition-all duration-200 placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-3 focus:ring-primary-light;
   }
 
+  .select-field {
+    @apply px-3 py-1.5 border border-border-base bg-bg-surface text-text-main text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:border-primary;
+  }
+
+  .input-field-sm {
+    @apply px-3 py-1.5 border border-border-base bg-bg-surface text-text-main text-sm rounded-lg transition-all duration-200 placeholder:text-text-muted focus:outline-none focus:border-primary;
+  }
+
   .btn {
     @apply px-6 py-3 rounded-md font-semibold cursor-pointer transition-all duration-200 flex items-center justify-center gap-2;
   }
