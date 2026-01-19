@@ -60,7 +60,11 @@ export const translations = {
         noSpices: "No spices added yet.",
         apiKeyPlaceholder: "Paste Gemini API Key",
         apiKeyLabel: "Gemini API Key",
-        languageLabel: "Select language"
+        languageLabel: "Select language",
+        decreasePeople: "Decrease people count",
+        increasePeople: "Increase people count",
+        decreaseMeals: "Decrease meals count",
+        increaseMeals: "Increase meals count"
     },
     German: {
         ingredients: "Zutaten",
@@ -122,7 +126,11 @@ export const translations = {
         noSpices: "Noch keine Gewürze hinzugefügt.",
         apiKeyPlaceholder: "Gemini API-Schlüssel einfügen",
         apiKeyLabel: "Gemini API-Schlüssel",
-        languageLabel: "Sprache auswählen"
+        languageLabel: "Sprache auswählen",
+        decreasePeople: "Personenanzahl verringern",
+        increasePeople: "Personenanzahl erhöhen",
+        decreaseMeals: "Mahlzeitenanzahl verringern",
+        increaseMeals: "Mahlzeitenanzahl erhöhen"
     },
     French: {
         ingredients: "Ingrédients",
@@ -184,7 +192,11 @@ export const translations = {
         noSpices: "Aucune épice ajoutée pour le moment.",
         apiKeyPlaceholder: "Coller la clé API Gemini",
         apiKeyLabel: "Clé API Gemini",
-        languageLabel: "Sélectionner la langue"
+        languageLabel: "Sélectionner la langue",
+        decreasePeople: "Diminuer le nombre de personnes",
+        increasePeople: "Augmenter le nombre de personnes",
+        decreaseMeals: "Diminuer le nombre de repas",
+        increaseMeals: "Augmenter le nombre de repas"
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -246,6 +258,10 @@ export const translations = {
         noSpices: "No se han agregado especias todavía.",
         apiKeyPlaceholder: "Pegar clave API de Gemini",
         apiKeyLabel: "Clave API de Gemini",
-        languageLabel: "Seleccionar idioma"
+        languageLabel: "Seleccionar idioma",
+        decreasePeople: "Disminuir número de personas",
+        increasePeople: "Aumentar número de personas",
+        decreaseMeals: "Disminuir número de comidas",
+        increaseMeals: "Aumentar número de comidas"
     }
 };

@@ -100,14 +100,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                     type="button"
                                     onClick={() => setPeople(Math.max(1, people - 1))}
                                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
-                                    aria-label={`Decrease people count, currently ${people}`}
+                                    aria-label={t.decreasePeople}
                                 >-</button>
                                 <span className="w-8 text-center font-mono font-semibold text-sm" aria-live="polite">{people}</span>
                                 <button
                                     type="button"
                                     onClick={() => setPeople(Math.min(20, people + 1))}
                                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
-                                    aria-label={`Increase people count, currently ${people}`}
+                                    aria-label={t.increasePeople}
                                 >+</button>
                             </div>
                         </div>
@@ -126,14 +126,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                                     type="button"
                                     onClick={() => setMeals(Math.max(1, meals - 1))}
                                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
-                                    aria-label={`Decrease meals count, currently ${meals}`}
+                                    aria-label={t.decreaseMeals}
                                 >-</button>
                                 <span className="w-8 text-center font-mono font-semibold text-sm" aria-live="polite">{meals}</span>
                                 <button
                                     type="button"
                                     onClick={() => setMeals(Math.min(10, meals + 1))}
                                     className="w-8 h-8 flex items-center justify-center rounded bg-white hover:bg-gray-50 shadow-sm text-lg font-bold transition-colors text-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100"
-                                    aria-label={`Increase meals count, currently ${meals}`}
+                                    aria-label={t.increaseMeals}
                                 >+</button>
                             </div>
                         </div>
