@@ -118,7 +118,7 @@ export const generateRecipes = async (
 
     try {
       return JSON.parse(cleanedText) as MealPlan;
-    } catch (parseError) {
+    } catch {
       console.error("JSON Parse Error. Raw response:", cleanedText);
       throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
     }
