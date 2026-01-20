@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info } from 'lucide-react';
 import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { generateShareUrl } from '../utils/sharing';
@@ -166,6 +166,23 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     <ShoppingCart className="text-secondary" size={24} />
                     <h2>{t.shoppingList}</h2>
                 </div>
+                {isStandaloneView && !isOwnList && (
+                    <div className="flex items-center gap-2 ml-auto mr-4">
+                        <span className="text-text-muted text-sm italic">{t.decoupled}</span>
+                        <div className="tooltip-container">
+                            <button
+                                type="button"
+                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary flex items-center justify-center"
+                                aria-label={t.decoupledInfo}
+                            >
+                                <Info size={18} />
+                            </button>
+                            <div className="tooltip-text">
+                                {t.decoupledInfo}
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="flex gap-2">
                     {!isStandaloneView && (
                         <div className="tooltip-container">

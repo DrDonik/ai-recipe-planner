@@ -53,7 +53,9 @@ export const translations = {
         decreasePeople: "Decrease people count",
         increasePeople: "Increase people count",
         decreaseMeals: "Decrease meals count",
-        increaseMeals: "Increase meals count"
+        increaseMeals: "Increase meals count",
+        decoupled: "(decoupled)",
+        decoupledInfo: "This shopping list is different from your most recently generated one. Checkmarks are stored separately and won't sync with your main list."
     },
     German: {
         ingredients: "Zutaten",
@@ -108,7 +110,9 @@ export const translations = {
         decreasePeople: "Personenanzahl verringern",
         increasePeople: "Personenanzahl erhöhen",
         decreaseMeals: "Mahlzeitenanzahl verringern",
-        increaseMeals: "Mahlzeitenanzahl erhöhen"
+        increaseMeals: "Mahlzeitenanzahl erhöhen",
+        decoupled: "(entkoppelt)",
+        decoupledInfo: "Diese Einkaufsliste unterscheidet sich von deiner zuletzt generierten. Häkchen werden separat gespeichert und synchronisieren nicht mit deiner Hauptliste."
     },
     French: {
         ingredients: "Ingrédients",
@@ -163,7 +167,9 @@ export const translations = {
         decreasePeople: "Diminuer le nombre de personnes",
         increasePeople: "Augmenter le nombre de personnes",
         decreaseMeals: "Diminuer le nombre de repas",
-        increaseMeals: "Augmenter le nombre de repas"
+        increaseMeals: "Augmenter le nombre de repas",
+        decoupled: "(découplé)",
+        decoupledInfo: "Cette liste de courses est différente de celle générée le plus récemment. Les cases cochées sont stockées séparément et ne se synchroniseront pas avec votre liste principale."
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -218,6 +224,8 @@ export const translations = {
         decreasePeople: "Disminuir número de personas",
         increasePeople: "Aumentar número de personas",
         decreaseMeals: "Disminuir número de comidas",
-        increaseMeals: "Aumentar número de comidas"
+        increaseMeals: "Aumentar número de comidas",
+        decoupled: "(desacoplado)",
+        decoupledInfo: "Esta lista de compras es diferente de la generada más recientemente. Las marcas de verificación se almacenan por separado y no se sincronizarán con tu lista principal."
     }
 };
