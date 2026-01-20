@@ -219,8 +219,17 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         const isChecked = checkedItems.has(itemKey);
                         const checkboxId = `shopping-item-${i}`;
                         return (
-                            <li key={`${itemKey}-${i}`} className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base hover:border-border-hover transition-colors p-3 shadow-sm">
-                                <label htmlFor={checkboxId} className="flex items-center gap-3 cursor-pointer flex-1">
+                            <li
+                                key={`${itemKey}-${i}`}
+                                className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base hover:border-border-hover transition-colors p-3 shadow-sm cursor-pointer"
+                                onClick={(e) => {
+                                    // Avoid double-toggle when clicking the checkbox directly
+                                    if ((e.target as HTMLElement).tagName !== 'INPUT') {
+                                        toggleItem(itemKey);
+                                    }
+                                }}
+                            >
+                                <label htmlFor={checkboxId} className="flex items-center gap-3 cursor-pointer flex-1" onClick={(e) => e.stopPropagation()}>
                                     <input
                                         id={checkboxId}
                                         type="checkbox"
