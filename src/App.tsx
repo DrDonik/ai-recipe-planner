@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sparkles } from 'lucide-react';
+import { useWakeLock } from './hooks/useWakeLock';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
@@ -34,6 +35,9 @@ function App() {
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
   // Single Shopping List View State
   const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
+
+  // Wake Lock for keeping screen on during cooking
+  const wakeLock = useWakeLock();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -155,7 +159,7 @@ function App() {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
         <div className="max-w-2xl w-full">
-          <RecipeCard recipe={viewRecipe} index={0} />
+          <RecipeCard recipe={viewRecipe} index={0} wakeLock={wakeLock} />
           <button
             onClick={clearViewRecipe}
             className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"

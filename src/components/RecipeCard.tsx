@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { generateShareUrl } from '../utils/sharing';
@@ -10,9 +10,14 @@ interface RecipeCardProps {
     recipe: Recipe;
     index: number;
     showOpenInNewTab?: boolean;
+    wakeLock?: {
+        isSupported: boolean;
+        isActive: boolean;
+        toggle: () => void;
+    };
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, wakeLock }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -96,6 +101,21 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 >
                     <ExternalLink size={18} />
                 </a>
+            )}
+
+            {wakeLock?.isSupported && (
+                <button
+                    onClick={wakeLock.toggle}
+                    className={`absolute top-8 right-8 p-2 rounded-full transition-all flex items-center justify-center ${
+                        wakeLock.isActive
+                            ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                            : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
+                    }`}
+                    aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
+                    aria-pressed={wakeLock.isActive}
+                >
+                    {wakeLock.isActive ? <Sun size={18} /> : <SunDim size={18} />}
+                </button>
             )}
 
             <div className="flex items-start justify-between mb-6 pr-8">
