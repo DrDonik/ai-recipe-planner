@@ -37,16 +37,9 @@ function App() {
   const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
 
   // Wake Lock for keeping screen on during cooking
+  // Note: Auto-activation was removed because Safari/iOS requires explicit user gesture
+  // to acquire a wake lock. The button is prominently displayed for users to tap.
   const wakeLock = useWakeLock();
-
-  // Auto-activate wake lock when viewing a single recipe
-  useEffect(() => {
-    if (viewRecipe && wakeLock.isSupported && !wakeLock.isActive) {
-      wakeLock.request();
-    }
-    // Using specific properties rather than the whole wakeLock object to avoid re-running on every render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewRecipe, wakeLock.isSupported, wakeLock.isActive, wakeLock.request]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);

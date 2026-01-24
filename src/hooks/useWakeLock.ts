@@ -11,28 +11,50 @@ interface UseWakeLockResult {
 export function useWakeLock(): UseWakeLockResult {
   const [isActive, setIsActive] = useState(false);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  // Track if user wants the wake lock on (persists across visibility changes)
+  const userWantsActiveRef = useRef(false);
 
   const isSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
   const request = useCallback(async () => {
     if (!isSupported) return;
 
+    // If we already have an active wake lock, don't request another
+    if (wakeLockRef.current && !wakeLockRef.current.released) {
+      return;
+    }
+
     try {
-      wakeLockRef.current = await navigator.wakeLock.request('screen');
+      const sentinel = await navigator.wakeLock.request('screen');
+      wakeLockRef.current = sentinel;
+      userWantsActiveRef.current = true;
       setIsActive(true);
 
-      wakeLockRef.current.addEventListener('release', () => {
+      // Use a named function so we can reference it
+      const handleRelease = () => {
+        // Only update state, don't clear the ref - system released it
         setIsActive(false);
-      });
+      };
+
+      sentinel.addEventListener('release', handleRelease, { once: true });
     } catch {
-      // Wake lock request failed (e.g., low battery, tab not visible)
+      // Wake lock request failed (e.g., low battery, tab not visible, no user gesture on Safari)
       setIsActive(false);
     }
   }, [isSupported]);
 
   const release = useCallback(async () => {
+    userWantsActiveRef.current = false;
+
     if (wakeLockRef.current) {
-      await wakeLockRef.current.release();
+      try {
+        // Check if not already released before calling release
+        if (!wakeLockRef.current.released) {
+          await wakeLockRef.current.release();
+        }
+      } catch {
+        // Ignore errors during release (may already be released)
+      }
       wakeLockRef.current = null;
       setIsActive(false);
     }
@@ -46,13 +68,16 @@ export function useWakeLock(): UseWakeLockResult {
     }
   }, [isActive, request, release]);
 
-  // Re-acquire wake lock when page becomes visible again
+  // Re-acquire wake lock when page becomes visible again (if user wanted it on)
   useEffect(() => {
     if (!isSupported) return;
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && isActive && !wakeLockRef.current) {
-        request();
+      if (document.visibilityState === 'visible' && userWantsActiveRef.current) {
+        // Check if wake lock was released by the system (tab hidden)
+        if (!wakeLockRef.current || wakeLockRef.current.released) {
+          request();
+        }
       }
     };
 
@@ -60,13 +85,20 @@ export function useWakeLock(): UseWakeLockResult {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isSupported, isActive, request]);
+  }, [isSupported, request]);
 
   // Release wake lock on unmount
   useEffect(() => {
     return () => {
+      userWantsActiveRef.current = false;
       if (wakeLockRef.current) {
-        wakeLockRef.current.release();
+        try {
+          if (!wakeLockRef.current.released) {
+            wakeLockRef.current.release();
+          }
+        } catch {
+          // Ignore errors during cleanup
+        }
         wakeLockRef.current = null;
       }
     };
