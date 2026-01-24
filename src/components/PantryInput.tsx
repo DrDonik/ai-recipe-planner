@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { Plus, Trash2, Refrigerator } from 'lucide-react';
 import type { PantryItem } from '../types';
 import { generateId } from '../utils/idGenerator';
@@ -27,6 +27,13 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     const { t } = useSettings();
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
+    const nameInputRef = useRef<HTMLInputElement>(null);
+    const amountInputRef = useRef<HTMLInputElement>(null);
+
+    // Focus ingredient field on mount
+    useEffect(() => {
+        nameInputRef.current?.focus();
+    }, []);
 
     const flushPendingInput = (): PantryItem | null => {
         if (name.trim()) {
@@ -38,9 +45,18 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
             onAddPantryItem(newItem);
             setName('');
             setAmount('');
+            // Return focus to ingredient field after adding
+            nameInputRef.current?.focus();
             return newItem;
         }
         return null;
+    };
+
+    const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            amountInputRef.current?.focus();
+        }
     };
 
     useImperativeHandle(ref, () => ({
@@ -68,15 +84,18 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <div className="flex flex-col gap-3">
                             <input
+                                ref={nameInputRef}
                                 type="text"
                                 placeholder={t.placeholders.ingredient}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
+                                onKeyDown={handleNameKeyDown}
                                 className="input-field w-full"
                             />
                         </div>
                         <div className="flex gap-2">
                             <input
+                                ref={amountInputRef}
                                 type="text"
                                 placeholder={t.placeholders.amount}
                                 value={amount}
