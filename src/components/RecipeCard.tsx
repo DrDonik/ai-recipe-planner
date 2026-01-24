@@ -87,20 +87,15 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />
 
             {showOpenInNewTab && (
-                <div className="tooltip-container absolute top-8 right-8">
-                    <a
-                        href={shareUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
-                        aria-label={t.openInNewTab}
-                    >
-                        <ExternalLink size={18} />
-                    </a>
-                    <div className="tooltip-text">
-                        {t.openInNewTab}
-                    </div>
-                </div>
+                <a
+                    href={shareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-8 right-8 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                    aria-label={t.openInNewTab}
+                >
+                    <ExternalLink size={18} />
+                </a>
             )}
 
             <div className="flex items-start justify-between mb-6 pr-8">

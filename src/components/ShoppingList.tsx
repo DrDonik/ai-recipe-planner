@@ -185,20 +185,15 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                 )}
                 <div className="flex gap-2">
                     {!isStandaloneView && (
-                        <div className="tooltip-container">
-                            <a
-                                href={shareUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
-                                aria-label={t.openInNewTab}
-                            >
-                                <ExternalLink size={18} />
-                            </a>
-                            <div className="tooltip-text">
-                                {t.openInNewTab}
-                            </div>
-                        </div>
+                        <a
+                            href={shareUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={t.openInNewTab}
+                        >
+                            <ExternalLink size={18} />
+                        </a>
                     )}
                     {onToggleMinimize && (
                         <button
