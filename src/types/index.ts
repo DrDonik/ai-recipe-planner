@@ -21,6 +21,17 @@ export interface Ingredient {
 }
 
 /**
+ * Estimated nutritional information per serving.
+ * Values are rough estimates from the LLM.
+ */
+export interface Nutrition {
+  calories: number;
+  carbs: number;    // grams
+  fat: number;      // grams
+  protein: number;  // grams
+}
+
+/**
  * A generated recipe with ingredients and instructions.
  */
 export interface Recipe {
@@ -31,6 +42,7 @@ export interface Recipe {
   instructions: string[];
   usedIngredients: string[]; // List of PantryItem IDs used
   missingIngredients: Ingredient[];
+  nutrition?: Nutrition; // Optional for backwards compatibility
 }
 
 /**

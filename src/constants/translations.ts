@@ -58,7 +58,12 @@ export const translations = {
         decoupledInfo: "This shopping list is different from your most recently generated one. Checkmarks are stored separately and won't sync with your main list.",
         keepScreenOn: "Keep screen on",
         screenKeptOn: "Screen kept on",
-        deleteRecipe: "Delete recipe"
+        deleteRecipe: "Delete recipe",
+        nutritionPerServing: "Per serving (estimate)",
+        calories: "kcal",
+        carbs: "Carbs",
+        fat: "Fat",
+        protein: "Protein"
     },
     German: {
         ingredients: "Zutaten",
@@ -118,7 +123,12 @@ export const translations = {
         decoupledInfo: "Diese Einkaufsliste unterscheidet sich von deiner zuletzt generierten. Häkchen werden separat gespeichert und synchronisieren nicht mit deiner Hauptliste.",
         keepScreenOn: "Bildschirm anlassen",
         screenKeptOn: "Bildschirm bleibt an",
-        deleteRecipe: "Rezept löschen"
+        deleteRecipe: "Rezept löschen",
+        nutritionPerServing: "Pro Portion (Schätzung)",
+        calories: "kcal",
+        carbs: "Kohlenhydrate",
+        fat: "Fett",
+        protein: "Eiweiß"
     },
     French: {
         ingredients: "Ingrédients",
@@ -178,7 +188,12 @@ export const translations = {
         decoupledInfo: "Cette liste de courses est différente de celle générée le plus récemment. Les cases cochées sont stockées séparément et ne se synchroniseront pas avec votre liste principale.",
         keepScreenOn: "Garder l'écran allumé",
         screenKeptOn: "Écran maintenu allumé",
-        deleteRecipe: "Supprimer la recette"
+        deleteRecipe: "Supprimer la recette",
+        nutritionPerServing: "Par portion (estimation)",
+        calories: "kcal",
+        carbs: "Glucides",
+        fat: "Lipides",
+        protein: "Protéines"
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -238,6 +253,11 @@ export const translations = {
         decoupledInfo: "Esta lista de compras es diferente de la generada más recientemente. Las marcas de verificación se almacenan por separado y no se sincronizarán con tu lista principal.",
         keepScreenOn: "Mantener pantalla encendida",
         screenKeptOn: "Pantalla mantenida encendida",
-        deleteRecipe: "Eliminar receta"
+        deleteRecipe: "Eliminar receta",
+        nutritionPerServing: "Por porción (estimado)",
+        calories: "kcal",
+        carbs: "Carbohidratos",
+        fat: "Grasa",
+        protein: "Proteína"
     }
 };

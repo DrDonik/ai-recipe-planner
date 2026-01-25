@@ -2,7 +2,7 @@ import { API_CONFIG } from '../constants';
 import type { PantryItem, MealPlan } from '../types';
 
 // Re-export types for backwards compatibility
-export type { PantryItem, Ingredient, Recipe, MealPlan } from '../types';
+export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
 
 export const generateRecipes = async (
   apiKey: string,
@@ -70,13 +70,19 @@ export const generateRecipes = async (
           "ingredients": [ {"item": "Name", "amount": "Quantity"} ],
           "instructions": ["Step 1", "Step 2"],
           "usedIngredients": ["pantry_item_id_1", "pantry_item_id_2"],
-          "missingIngredients": [{"item": "Chicken", "amount": "500g"}]
+          "missingIngredients": [{"item": "Chicken", "amount": "500g"}],
+          "nutrition": {"calories": 450, "carbs": 35, "fat": 18, "protein": 28}
         }
       ],
       "shoppingList": [
         {"item": "Chicken", "amount": "500g (Total for all recipes)"}
       ]
     }
+
+    NUTRITION ESTIMATES:
+    - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
+    - "calories" is in kcal. "carbs", "fat", and "protein" are in grams.
+    - These are estimates based on typical ingredient values. Round to whole numbers.
   `;
 
   try {

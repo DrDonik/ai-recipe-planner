@@ -60,9 +60,19 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 schema.cookTime = `PT${minutes}M`;
             }
         }
+        // Add nutrition info if available
+        if (recipe.nutrition) {
+            schema.nutrition = {
+                "@type": "NutritionInformation",
+                "calories": `${recipe.nutrition.calories} calories`,
+                "carbohydrateContent": `${recipe.nutrition.carbs} g`,
+                "fatContent": `${recipe.nutrition.fat} g`,
+                "proteinContent": `${recipe.nutrition.protein} g`
+            };
+        }
         // Escape </script> to prevent XSS when recipe data contains malicious strings
         return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
-    }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time]);
+    }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time, recipe.nutrition]);
 
     // Memoize the share URL (exclude missingIngredients since they're not relevant in standalone view)
     const shareUrl = useMemo(() => {
@@ -129,7 +139,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </h3>
             </div>
 
-            <div className={`flex items-center justify-between mb-8 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
+            <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
                 <div className="flex items-center gap-2 text-primary bg-primary/10 px-3 py-1.5 rounded-full">
                     <Clock size={16} />
                     {recipe.time}
@@ -220,6 +230,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         ))}
                     </ol>
                 </div>
+
+                {recipe.nutrition && (
+                    <div className="pt-4 border-t border-border-base/30">
+                        <div className="flex items-center justify-between text-text-muted text-xs">
+                            <span className="opacity-60">{t.nutritionPerServing}</span>
+                            <div className="flex gap-3">
+                                <span>{recipe.nutrition.calories} {t.calories}</span>
+                                <span>{recipe.nutrition.carbs}g {t.carbs}</span>
+                                <span>{recipe.nutrition.fat}g {t.fat}</span>
+                                <span>{recipe.nutrition.protein}g {t.protein}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </motion.div>
     );
