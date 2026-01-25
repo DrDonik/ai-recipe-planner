@@ -49,5 +49,5 @@ export const DEFAULTS = {
     PEOPLE_COUNT: 2,
     MEALS_COUNT: 3,
     DIET: 'flexitarian',
-    LANGUAGE: 'German',
+    LANGUAGE: 'English',
 } as const;

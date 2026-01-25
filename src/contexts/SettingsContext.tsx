@@ -9,6 +9,36 @@ type SupportedLanguage = keyof typeof translations;
 const SUPPORTED_LANGUAGES = Object.keys(translations) as SupportedLanguage[];
 
 /**
+ * Map browser language codes to app language keys.
+ */
+const BROWSER_LANGUAGE_MAP: Record<string, SupportedLanguage> = {
+    'en': 'English',
+    'de': 'German',
+    'fr': 'French',
+    'es': 'Spanish',
+};
+
+/**
+ * Detect browser language and map to a supported app language.
+ * Falls back to English if browser language is not supported.
+ */
+const detectBrowserLanguage = (): SupportedLanguage => {
+    const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
+    return BROWSER_LANGUAGE_MAP[browserLang] ?? DEFAULTS.LANGUAGE;
+};
+
+/**
+ * Get initial language: use saved preference if exists, otherwise detect from browser.
+ */
+const getInitialLanguage = (): SupportedLanguage => {
+    const saved = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
+    if (saved && isValidLanguage(saved)) {
+        return saved;
+    }
+    return detectBrowserLanguage();
+};
+
+/**
  * Type guard to check if a string is a valid supported language.
  */
 const isValidLanguage = (lang: string): lang is SupportedLanguage => {
@@ -50,7 +80,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
     const [diet, setDiet] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes] = useStringLocalStorage(STORAGE_KEYS.STYLE_WISHES, '');
-    const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, DEFAULTS.LANGUAGE);
+    const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
 
     const t = getTranslations(language);
 
