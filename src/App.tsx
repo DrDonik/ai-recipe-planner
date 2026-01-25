@@ -19,7 +19,7 @@ function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
   const { apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
-  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+  const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
 
   const [headerMinimized, setHeaderMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
@@ -120,6 +120,10 @@ function App() {
 
   const removePantryItem = (id: string) => {
     setPantryItems(pantryItems.filter(v => v.id !== id));
+  };
+
+  const emptyPantry = () => {
+    setPantryItems([]);
   };
 
   const addSpice = (spice: string) => {
@@ -232,6 +236,7 @@ function App() {
               pantryItems={pantryItems}
               onAddPantryItem={addPantryItem}
               onRemovePantryItem={removePantryItem}
+              onEmptyPantry={emptyPantry}
               isMinimized={pantryMinimized}
               onToggleMinimize={() => setPantryMinimized(!pantryMinimized)}
             />

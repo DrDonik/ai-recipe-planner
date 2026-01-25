@@ -22,6 +22,7 @@ export const STORAGE_KEYS = {
     SHOPPING_LIST_CHECKED: 'shopping_list_checked',
     MEAL_PLAN: 'meal_plan',
     WELCOME_DISMISSED: 'welcome_dismissed',
+    PANTRY_ITEMS: 'pantry_items',
 } as const;
 
 /**

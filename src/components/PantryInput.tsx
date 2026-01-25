@@ -9,6 +9,7 @@ interface PantryInputProps {
     pantryItems: PantryItem[];
     onAddPantryItem: (item: PantryItem) => void;
     onRemovePantryItem: (id: string) => void;
+    onEmptyPantry: () => void;
     isMinimized: boolean;
     onToggleMinimize: () => void;
 }
@@ -21,6 +22,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     pantryItems,
     onAddPantryItem,
     onRemovePantryItem,
+    onEmptyPantry,
     isMinimized,
     onToggleMinimize
 }, ref) => {
@@ -140,6 +142,18 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 </div>
                             </div>
                         ))}
+                        {pantryItems.length > 0 && (
+                            <div className="flex justify-end mt-2">
+                                <button
+                                    type="button"
+                                    onClick={onEmptyPantry}
+                                    className="text-sm text-text-muted hover:text-red-500 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                                >
+                                    <Trash2 size={14} />
+                                    {t.emptyPantry}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </>
             )}
