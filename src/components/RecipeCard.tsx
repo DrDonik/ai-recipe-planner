@@ -76,7 +76,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
 
     // Memoize the share URL (exclude missingIngredients since they're not relevant in standalone view)
     const shareUrl = useMemo(() => {
-        const { missingIngredients: _, ...recipeForSharing } = recipe;
+        const { missingIngredients: _excluded, ...recipeForSharing } = recipe;
         return generateShareUrl(URL_PARAMS.RECIPE, recipeForSharing);
     }, [recipe]);
 
