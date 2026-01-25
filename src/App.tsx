@@ -212,6 +212,7 @@ function App() {
       <Header
         headerMinimized={headerMinimized}
         setHeaderMinimized={setHeaderMinimized}
+        onShowHelp={() => setShowWelcome(true)}
       />
 
       <main className="app-container flex flex-col gap-8">

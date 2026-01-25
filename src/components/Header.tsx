@@ -1,15 +1,17 @@
 import React from 'react';
-import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown } from 'lucide-react';
+import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface HeaderProps {
     headerMinimized: boolean;
     setHeaderMinimized: (minimized: boolean) => void;
+    onShowHelp: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
     headerMinimized,
     setHeaderMinimized,
+    onShowHelp,
 }) => {
     const { apiKey, setApiKey, language, setLanguage, t } = useSettings();
 
@@ -40,7 +42,16 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {!headerMinimized && (
                         <>
-                            <p className="text-sm text-text-muted animate-in fade-in slide-in-from-top-2 duration-300">Turn your pantry into plans</p>
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <p className="text-sm text-text-muted">Turn your pantry into plans</p>
+                                <button
+                                    onClick={onShowHelp}
+                                    className="p-1 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-primary"
+                                    aria-label={t.welcome.title}
+                                >
+                                    <CircleHelp size={16} />
+                                </button>
+                            </div>
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>

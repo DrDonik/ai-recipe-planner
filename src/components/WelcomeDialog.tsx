@@ -9,11 +9,15 @@ interface WelcomeDialogProps {
 
 export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
     const { t } = useSettings();
-    const [dontShowAgain, setDontShowAgain] = useState(false);
+    const [dontShowAgain, setDontShowAgain] = useState(() => {
+        return localStorage.getItem(STORAGE_KEYS.WELCOME_DISMISSED) === 'true';
+    });
 
     const handleClose = () => {
         if (dontShowAgain) {
             localStorage.setItem(STORAGE_KEYS.WELCOME_DISMISSED, 'true');
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.WELCOME_DISMISSED);
         }
         onClose();
     };
