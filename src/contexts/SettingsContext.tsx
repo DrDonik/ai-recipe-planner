@@ -1,7 +1,7 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { useLocalStorage, useStringLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
-import { STORAGE_KEYS, DEFAULTS } from '../constants';
+import { STORAGE_KEYS, DEFAULTS, LLM_PROVIDERS, type LLMProviderId } from '../constants';
 
 type TranslationType = typeof translations.English;
 type SupportedLanguage = keyof typeof translations;
@@ -57,6 +57,8 @@ const getTranslations = (language: string): TranslationType => {
 };
 
 interface SettingsContextType {
+    provider: LLMProviderId;
+    setProvider: (provider: LLMProviderId) => void;
     apiKey: string;
     setApiKey: (key: string) => void;
     people: number;
@@ -74,17 +76,64 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+/**
+ * Validate and return a valid provider ID.
+ */
+const isValidProvider = (provider: string): provider is LLMProviderId => {
+    return provider in LLM_PROVIDERS;
+};
+
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [apiKey, setApiKey] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
+    const [provider, setProviderRaw] = useStringLocalStorage(STORAGE_KEYS.LLM_PROVIDER, DEFAULTS.LLM_PROVIDER);
+    const [apiKeyGemini, setApiKeyGemini] = useStringLocalStorage(STORAGE_KEYS.API_KEY_GEMINI, '');
+    const [apiKeyOpenai, setApiKeyOpenai] = useStringLocalStorage(STORAGE_KEYS.API_KEY_OPENAI, '');
+    const [apiKeyMistral, setApiKeyMistral] = useStringLocalStorage(STORAGE_KEYS.API_KEY_MISTRAL, '');
     const [people, setPeople] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
     const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
     const [diet, setDiet] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes] = useStringLocalStorage(STORAGE_KEYS.STYLE_WISHES, '');
     const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
 
+    // Migrate legacy API key to new Gemini key storage
+    useEffect(() => {
+        const legacyKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
+        if (legacyKey && !apiKeyGemini) {
+            setApiKeyGemini(legacyKey);
+            localStorage.removeItem(STORAGE_KEYS.API_KEY);
+        }
+    }, [apiKeyGemini, setApiKeyGemini]);
+
+    // Validate provider and cast to correct type
+    const validProvider: LLMProviderId = isValidProvider(provider) ? provider : DEFAULTS.LLM_PROVIDER;
+
+    const setProvider = (newProvider: LLMProviderId) => {
+        if (isValidProvider(newProvider)) {
+            setProviderRaw(newProvider);
+        }
+    };
+
+    // Get API key for current provider
+    const apiKeyMap: Record<LLMProviderId, string> = {
+        gemini: apiKeyGemini,
+        openai: apiKeyOpenai,
+        mistral: apiKeyMistral,
+    };
+    const apiKey = apiKeyMap[validProvider];
+
+    // Set API key for current provider
+    const setApiKey = (key: string) => {
+        const setterMap: Record<LLMProviderId, (key: string) => void> = {
+            gemini: setApiKeyGemini,
+            openai: setApiKeyOpenai,
+            mistral: setApiKeyMistral,
+        };
+        setterMap[validProvider](key);
+    };
+
     const t = getTranslations(language);
 
     const value = {
+        provider: validProvider, setProvider,
         apiKey, setApiKey,
         people, setPeople,
         meals, setMeals,

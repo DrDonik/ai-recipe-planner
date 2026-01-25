@@ -1,10 +1,109 @@
-import { API_CONFIG } from '../constants';
+import { API_CONFIG, LLM_PROVIDERS, type LLMProviderId } from '../constants';
 import type { PantryItem, MealPlan } from '../types';
 
 // Re-export types for backwards compatibility
 export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
 
+/**
+ * Provider-specific API call implementations.
+ */
+const callGeminiApi = async (
+  apiKey: string,
+  prompt: string,
+  signal: AbortSignal
+): Promise<string> => {
+  const config = LLM_PROVIDERS.gemini;
+  const response = await fetch(
+    `${config.baseUrl}/${config.model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+      signal,
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to fetch recipes from Gemini');
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('No recipes generated. Gemini returned an empty response.');
+  return text;
+};
+
+const callOpenAiApi = async (
+  apiKey: string,
+  prompt: string,
+  signal: AbortSignal
+): Promise<string> => {
+  const config = LLM_PROVIDERS.openai;
+  const response = await fetch(`${config.baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: config.model,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to fetch recipes from OpenAI');
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('No recipes generated. OpenAI returned an empty response.');
+  return text;
+};
+
+const callMistralApi = async (
+  apiKey: string,
+  prompt: string,
+  signal: AbortSignal
+): Promise<string> => {
+  const config = LLM_PROVIDERS.mistral;
+  const response = await fetch(`${config.baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: config.model,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to fetch recipes from Mistral');
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('No recipes generated. Mistral returned an empty response.');
+  return text;
+};
+
+const providerApis: Record<LLMProviderId, typeof callGeminiApi> = {
+  gemini: callGeminiApi,
+  openai: callOpenAiApi,
+  mistral: callMistralApi,
+};
+
 export const generateRecipes = async (
+  provider: LLMProviderId,
   apiKey: string,
   ingredients: PantryItem[],
   people: number,
@@ -89,35 +188,10 @@ export const generateRecipes = async (
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
 
-    const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
-            },
-          ],
-        }),
-        signal: controller.signal,
-      }
-    );
+    const callApi = providerApis[provider];
+    const text = await callApi(apiKey, prompt, controller.signal);
 
     clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || "Failed to fetch recipes");
-    }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) throw new Error("No recipes generated. The AI returned an empty response.");
 
     // Clean up markdown block if present (sometimes models add ```json ... ```)
     const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();

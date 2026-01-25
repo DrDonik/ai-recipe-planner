@@ -17,7 +17,7 @@ import { STORAGE_KEYS, URL_PARAMS } from './constants';
 
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
-  const { apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
+  const { provider, apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
   const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
@@ -163,7 +163,7 @@ function App() {
     // Don't clear mealPlan here - preserve it on failure so user doesn't lose their previous plan
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
+      const plan = await generateRecipes(provider, apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);

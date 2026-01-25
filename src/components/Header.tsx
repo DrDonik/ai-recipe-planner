@@ -1,6 +1,7 @@
 import React from 'react';
-import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp } from 'lucide-react';
+import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, Cpu } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { LLM_PROVIDERS, type LLMProviderId } from '../constants';
 
 interface HeaderProps {
     headerMinimized: boolean;
@@ -13,7 +14,8 @@ export const Header: React.FC<HeaderProps> = ({
     setHeaderMinimized,
     onShowHelp,
 }) => {
-    const { apiKey, setApiKey, language, setLanguage, t } = useSettings();
+    const { provider, setProvider, apiKey, setApiKey, language, setLanguage, t } = useSettings();
+    const currentProvider = LLM_PROVIDERS[provider];
 
     return (
         <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
@@ -53,17 +55,44 @@ export const Header: React.FC<HeaderProps> = ({
                                 </button>
                             </div>
 
+                            {/* Provider Selector */}
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                                <label htmlFor="provider-select" className="sr-only">{t.providerLabel}</label>
+                                <Cpu size={16} className="ml-2 text-text-muted" aria-hidden="true" />
+                                <select
+                                    id="provider-select"
+                                    value={provider}
+                                    onChange={(e) => setProvider(e.target.value as LLMProviderId)}
+                                    className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-text-main"
+                                    aria-label={t.providerLabel}
+                                >
+                                    {Object.values(LLM_PROVIDERS).map((p) => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* API Key Input */}
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
                                 <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
                                 <input
                                     id="api-key-input"
                                     type="password"
-                                    placeholder={t.apiKeyPlaceholder}
+                                    placeholder={`${currentProvider.name} API Key`}
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-sm w-48 px-2"
+                                    className="bg-transparent border-none outline-none text-sm w-40 px-2"
                                 />
+                                <a
+                                    href={currentProvider.keyUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
+                                    title={t.getApiKey}
+                                >
+                                    <ExternalLink size={14} />
+                                </a>
                                 <div className="tooltip-container flex items-center mr-2">
                                     <span
                                         className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
