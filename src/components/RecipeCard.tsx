@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2 } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { generateShareUrl } from '../utils/sharing';
@@ -158,7 +158,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             <div className="space-y-8 flex-grow">
                 <section>
                     <div className="flex items-center gap-2 mb-4 text-secondary">
-                        <ChefHat size={20} />
+                        <ListChecks size={20} />
                         <h4 className={`font-bold uppercase tracking-wider ${isStandalone ? 'text-sm' : 'text-xs'}`}>{t.ingredients}</h4>
                     </div>
                     <ul className={isStandalone ? 'text-base' : 'text-sm'} role="list">
@@ -211,10 +211,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     </section>
                 )}
 
-                <div>
-                    <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isStandalone ? 'text-base' : 'text-sm'} uppercase tracking-wider text-text-muted`}>
-                        {t.instructions}
-                    </h4>
+                <section>
+                    <div className="flex items-center gap-2 mb-4 text-secondary">
+                        <ChefHat size={20} />
+                        <h4 className={`font-bold uppercase tracking-wider ${isStandalone ? 'text-sm' : 'text-xs'}`}>{t.instructions}</h4>
+                    </div>
                     <ol className={`list-decimal list-inside space-y-4 ${isStandalone ? 'text-base' : 'text-sm'} opacity-90`}>
                         {recipe.instructions.map((step, i) => (
                             <li
@@ -229,7 +230,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                             </li>
                         ))}
                     </ol>
-                </div>
+                </section>
 
                 {recipe.nutrition && (
                     <div className="pt-4 border-t border-border-base/30">
