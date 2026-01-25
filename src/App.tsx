@@ -161,7 +161,7 @@ function App() {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
         <div className="max-w-2xl w-full">
-          <RecipeCard recipe={viewRecipe} index={0} wakeLock={wakeLock} />
+          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} />
           <button
             onClick={clearViewRecipe}
             className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"

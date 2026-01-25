@@ -10,6 +10,7 @@ interface RecipeCardProps {
     recipe: Recipe;
     index: number;
     showOpenInNewTab?: boolean;
+    isStandalone?: boolean;
     wakeLock?: {
         isSupported: boolean;
         isActive: boolean;
@@ -17,7 +18,7 @@ interface RecipeCardProps {
     };
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, wakeLock }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -62,8 +63,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
     }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time]);
 
-    // Memoize the share URL
-    const shareUrl = useMemo(() => generateShareUrl(URL_PARAMS.RECIPE, recipe), [recipe]);
+    // Memoize the share URL (exclude missingIngredients since they're not relevant in standalone view)
+    const shareUrl = useMemo(() => {
+        const { missingIngredients: _, ...recipeForSharing } = recipe;
+        return generateShareUrl(URL_PARAMS.RECIPE, recipeForSharing);
+    }, [recipe]);
 
     // Memoize the set of missing ingredient names (lowercase) for O(1) lookup
     const missingIngredientNames = useMemo(() => {
@@ -119,12 +123,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             )}
 
             <div className="flex items-start justify-between mb-6 pr-8">
-                <h3 className="text-2xl font-bold leading-tight">
+                <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight`}>
                     {recipe.title}
                 </h3>
             </div>
 
-            <div className="flex items-center gap-6 mb-8 text-sm font-medium">
+            <div className={`flex items-center gap-6 mb-8 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
                 <div className="flex items-center gap-2 text-primary bg-primary/10 px-3 py-1.5 rounded-full">
                     <Clock size={16} />
                     {recipe.time}
@@ -135,9 +139,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 <section>
                     <div className="flex items-center gap-2 mb-4 text-secondary">
                         <ChefHat size={20} />
-                        <h4 className="font-bold uppercase tracking-wider text-xs">{t.ingredients}</h4>
+                        <h4 className={`font-bold uppercase tracking-wider ${isStandalone ? 'text-sm' : 'text-xs'}`}>{t.ingredients}</h4>
                     </div>
-                    <ul className="text-sm" role="list">
+                    <ul className={isStandalone ? 'text-base' : 'text-sm'} role="list">
                         {recipe.ingredients.map((ing, idx) => {
                             const isMissing = isIngredientMissing(ing.item);
                             const ingredientKey = `${ing.item}-${ing.amount}-${idx}`;
@@ -154,7 +158,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                     aria-pressed={isStruck}
                                     aria-label={`${ing.item}, ${ing.amount}${isMissing ? ' (need to buy)' : ''}${isStruck ? ' (crossed off)' : ''}`}
                                 >
-                                    <span className={`text-sm transition-all ${isStruck
+                                    <span className={`${isStandalone ? 'text-base' : 'text-sm'} transition-all ${isStruck
                                         ? "line-through opacity-50 text-text-muted"
                                         : isMissing
                                             ? "text-amber-600 dark:text-amber-400 font-medium"
@@ -162,7 +166,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                         } flex-1`}>
                                         {ing.item}
                                     </span>
-                                    <span className={`text-text-muted font-mono text-xs whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded transition-opacity ${isStruck ? "opacity-30" : ""}`}>
+                                    <span className={`text-text-muted font-mono ${isStandalone ? 'text-sm' : 'text-xs'} whitespace-nowrap bg-white/40 dark:bg-black/20 px-2 py-0.5 rounded transition-opacity ${isStruck ? "opacity-30" : ""}`}>
                                         {ing.amount}
                                     </span>
                                 </li>
@@ -188,10 +192,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 )}
 
                 <div>
-                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-sm uppercase tracking-wider text-text-muted">
+                    <h4 className={`font-semibold mb-2 flex items-center gap-2 ${isStandalone ? 'text-base' : 'text-sm'} uppercase tracking-wider text-text-muted`}>
                         {t.instructions}
                     </h4>
-                    <ol className="list-decimal list-inside space-y-4 text-sm opacity-90">
+                    <ol className={`list-decimal list-inside space-y-4 ${isStandalone ? 'text-base' : 'text-sm'} opacity-90`}>
                         {recipe.instructions.map((step, i) => (
                             <li
                                 key={`step-${i}-${step.slice(0, 20)}`}
