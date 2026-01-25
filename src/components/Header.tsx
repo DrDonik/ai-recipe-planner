@@ -65,13 +65,13 @@ export const Header: React.FC<HeaderProps> = ({
                                     className="bg-transparent border-none outline-none text-sm w-48 px-2"
                                 />
                                 <div className="tooltip-container flex items-center mr-2">
-                                    <button
-                                        type="button"
-                                        className="text-text-muted hover:text-primary transition-colors p-1 rounded-full outline-none focus:text-primary"
+                                    <span
+                                        className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
                                         aria-label={t.apiInfo}
+                                        role="img"
                                     >
                                         <Info size={14} />
-                                    </button>
+                                    </span>
                                     <div className="tooltip-text">
                                         {t.apiInfo}
                                     </div>

@@ -110,6 +110,10 @@ body {
   width: 100%;
 }
 
+button {
+  cursor: pointer;
+}
+
 @layer components {
   .glass-panel {
     @apply p-8 border border-border-base shadow-glass bg-bg-surface rounded-xl;

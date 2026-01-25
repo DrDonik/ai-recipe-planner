@@ -170,13 +170,13 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     <div className="flex items-center gap-2 ml-auto mr-4">
                         <span className="text-text-muted text-sm italic">{t.decoupled}</span>
                         <div className="tooltip-container">
-                            <button
-                                type="button"
+                            <span
                                 className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary flex items-center justify-center"
                                 aria-label={t.decoupledInfo}
+                                role="img"
                             >
                                 <Info size={18} />
-                            </button>
+                            </span>
                             <div className="tooltip-text">
                                 {t.decoupledInfo}
                             </div>

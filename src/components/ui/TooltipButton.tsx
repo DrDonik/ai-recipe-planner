@@ -27,9 +27,9 @@ export const TooltipButton: React.FC<TooltipButtonProps> = ({
 }) => {
     const combinedClasses = `${baseButtonClasses} ${className}`.trim();
 
-    return (
-        <div className="tooltip-container">
-            {href ? (
+    const renderElement = () => {
+        if (href) {
+            return (
                 <a
                     href={href}
                     target={target}
@@ -39,7 +39,10 @@ export const TooltipButton: React.FC<TooltipButtonProps> = ({
                 >
                     {icon}
                 </a>
-            ) : (
+            );
+        }
+        if (onClick) {
+            return (
                 <button
                     type={type}
                     onClick={onClick}
@@ -48,7 +51,23 @@ export const TooltipButton: React.FC<TooltipButtonProps> = ({
                 >
                     {icon}
                 </button>
-            )}
+            );
+        }
+        // Non-interactive tooltip (info icons)
+        return (
+            <span
+                className={combinedClasses}
+                aria-label={ariaLabel}
+                role="img"
+            >
+                {icon}
+            </span>
+        );
+    };
+
+    return (
+        <div className="tooltip-container">
+            {renderElement()}
             <div className="tooltip-text">
                 {tooltip}
             </div>
