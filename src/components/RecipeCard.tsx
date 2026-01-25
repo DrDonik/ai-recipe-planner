@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { generateShareUrl } from '../utils/sharing';
@@ -16,9 +16,10 @@ interface RecipeCardProps {
         isActive: boolean;
         toggle: () => void;
     };
+    onDelete?: () => void;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -128,11 +129,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </h3>
             </div>
 
-            <div className={`flex items-center gap-6 mb-8 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
+            <div className={`flex items-center justify-between mb-8 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
                 <div className="flex items-center gap-2 text-primary bg-primary/10 px-3 py-1.5 rounded-full">
                     <Clock size={16} />
                     {recipe.time}
                 </div>
+                {onDelete && (
+                    <button
+                        onClick={onDelete}
+                        className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
+                        aria-label={t.deleteRecipe}
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                )}
             </div>
 
             <div className="space-y-8 flex-grow">

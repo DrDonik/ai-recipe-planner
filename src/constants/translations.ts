@@ -57,7 +57,8 @@ export const translations = {
         decoupled: "(decoupled)",
         decoupledInfo: "This shopping list is different from your most recently generated one. Checkmarks are stored separately and won't sync with your main list.",
         keepScreenOn: "Keep screen on",
-        screenKeptOn: "Screen kept on"
+        screenKeptOn: "Screen kept on",
+        deleteRecipe: "Delete recipe"
     },
     German: {
         ingredients: "Zutaten",
@@ -116,7 +117,8 @@ export const translations = {
         decoupled: "(entkoppelt)",
         decoupledInfo: "Diese Einkaufsliste unterscheidet sich von deiner zuletzt generierten. Häkchen werden separat gespeichert und synchronisieren nicht mit deiner Hauptliste.",
         keepScreenOn: "Bildschirm anlassen",
-        screenKeptOn: "Bildschirm bleibt an"
+        screenKeptOn: "Bildschirm bleibt an",
+        deleteRecipe: "Rezept löschen"
     },
     French: {
         ingredients: "Ingrédients",
@@ -175,7 +177,8 @@ export const translations = {
         decoupled: "(découplé)",
         decoupledInfo: "Cette liste de courses est différente de celle générée le plus récemment. Les cases cochées sont stockées séparément et ne se synchroniseront pas avec votre liste principale.",
         keepScreenOn: "Garder l'écran allumé",
-        screenKeptOn: "Écran maintenu allumé"
+        screenKeptOn: "Écran maintenu allumé",
+        deleteRecipe: "Supprimer la recette"
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -234,6 +237,7 @@ export const translations = {
         decoupled: "(desacoplado)",
         decoupledInfo: "Esta lista de compras es diferente de la generada más recientemente. Las marcas de verificación se almacenan por separado y no se sincronizarán con tu lista principal.",
         keepScreenOn: "Mantener pantalla encendida",
-        screenKeptOn: "Pantalla mantenida encendida"
+        screenKeptOn: "Pantalla mantenida encendida",
+        deleteRecipe: "Eliminar receta"
     }
 };

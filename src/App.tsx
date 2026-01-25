@@ -126,6 +126,16 @@ function App() {
     setSpices(spices.filter(s => s !== spiceToRemove));
   };
 
+  const deleteRecipe = (recipeId: string) => {
+    if (!mealPlan) return;
+    const updatedRecipes = mealPlan.recipes.filter(r => r.id !== recipeId);
+    if (updatedRecipes.length === 0) {
+      setMealPlan(null);
+    } else {
+      setMealPlan({ ...mealPlan, recipes: updatedRecipes });
+    }
+  };
+
   const handleGenerate = async () => {
     if (!apiKey) {
       setError(t.apiKeyError);
@@ -249,6 +259,7 @@ function App() {
                         recipe={recipe}
                         index={index}
                         showOpenInNewTab={true}
+                        onDelete={() => deleteRecipe(recipe.id)}
                       />
                     ))}
                   </div>
