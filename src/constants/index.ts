@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
     SHOPPING_LIST_MINIMIZED: 'shopping_list_minimized',
     SHOPPING_LIST_CHECKED: 'shopping_list_checked',
     MEAL_PLAN: 'meal_plan',
+    WELCOME_DISMISSED: 'welcome_dismissed',
 } as const;
 
 /**

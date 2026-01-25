@@ -5,6 +5,7 @@ import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
+import { WelcomeDialog } from './components/WelcomeDialog';
 import { generateRecipes } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -30,6 +31,11 @@ function App() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Welcome Dialog State
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.WELCOME_DISMISSED) !== 'true';
+  });
 
   // Single Recipe View State
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
@@ -201,6 +207,8 @@ function App() {
 
   return (
     <div className="min-h-screen pb-20">
+      {showWelcome && <WelcomeDialog onClose={() => setShowWelcome(false)} />}
+
       <Header
         headerMinimized={headerMinimized}
         setHeaderMinimized={setHeaderMinimized}
