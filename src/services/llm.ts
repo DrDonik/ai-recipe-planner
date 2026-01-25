@@ -60,6 +60,11 @@ export const generateRecipes = async (
     15. If you need to buy spices or staples, use the "missingIngredients" array.
     16. Return ONLY valid JSON. No markdown formatting, no code blocks.
 
+    NUTRITION ESTIMATES:
+    - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
+    - "calories" is in kcal. "carbs", "fat", and "protein" are in grams.
+    - These are estimates based on typical ingredient values. Round to whole numbers.
+
     JSON Structure:
     {
       "recipes": [
@@ -78,11 +83,6 @@ export const generateRecipes = async (
         {"item": "Chicken", "amount": "500g (Total for all recipes)"}
       ]
     }
-
-    NUTRITION ESTIMATES:
-    - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
-    - "calories" is in kcal. "carbs", "fat", and "protein" are in grams.
-    - These are estimates based on typical ingredient values. Round to whole numbers.
   `;
 
   try {
