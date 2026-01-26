@@ -82,7 +82,7 @@ export const translations = {
         },
         copyPaste: {
             title: "Copy & Paste Mode",
-            step1Description: "Copy this prompt and paste it into your favorite AI chat (ChatGPT, Claude, etc.)",
+            step1Description: "Copy the prompt below to use with your favorite AI",
             step2Description: "Paste the AI's response here",
             stepCopy: "Copy Prompt",
             stepPaste: "Paste Response",
@@ -91,7 +91,7 @@ export const translations = {
             next: "Next",
             back: "Back",
             submit: "Generate Recipes",
-            instructions: "After copying, paste this prompt into any AI chat (ChatGPT, Claude, etc.). Then use the copy button (two overlapping squares) on the AI's response and paste it here.",
+            instructions: "Click the button below to copy this prompt. Then paste it into any AI chat (ChatGPT, Claude, Gemini, etc.), copy the AI's JSON response, and return here to paste it.",
             responsePlaceholder: "Paste the AI's JSON response here...",
             responseRequired: "Please paste the AI's response first."
         }
@@ -178,7 +178,7 @@ export const translations = {
         },
         copyPaste: {
             title: "Kopieren & Einfügen Modus",
-            step1Description: "Kopiere diesen Prompt und füge ihn in deinen Lieblings-KI-Chat ein (ChatGPT, Claude, etc.)",
+            step1Description: "Kopiere den Prompt unten für deine Lieblings-KI",
             step2Description: "Füge die Antwort der KI hier ein",
             stepCopy: "Prompt kopieren",
             stepPaste: "Antwort einfügen",
@@ -187,7 +187,7 @@ export const translations = {
             next: "Weiter",
             back: "Zurück",
             submit: "Rezepte erstellen",
-            instructions: "Nach dem Kopieren füge diesen Prompt in einen beliebigen KI-Chat ein (ChatGPT, Claude, etc.). Nutze dann den Kopieren-Button (zwei überlappende Quadrate) bei der KI-Antwort und füge sie hier ein.",
+            instructions: "Klicke auf den Button unten, um den Prompt zu kopieren. Füge ihn dann in einen beliebigen KI-Chat ein (ChatGPT, Claude, Gemini, etc.), kopiere die JSON-Antwort der KI und kehre hierher zurück, um sie einzufügen.",
             responsePlaceholder: "Füge hier die JSON-Antwort der KI ein...",
             responseRequired: "Bitte füge zuerst die Antwort der KI ein."
         }
@@ -274,7 +274,7 @@ export const translations = {
         },
         copyPaste: {
             title: "Mode Copier-Coller",
-            step1Description: "Copiez ce prompt et collez-le dans votre chat IA préféré (ChatGPT, Claude, etc.)",
+            step1Description: "Copiez le prompt ci-dessous pour votre IA préférée",
             step2Description: "Collez la réponse de l'IA ici",
             stepCopy: "Copier le Prompt",
             stepPaste: "Coller la Réponse",
@@ -283,7 +283,7 @@ export const translations = {
             next: "Suivant",
             back: "Retour",
             submit: "Générer les Recettes",
-            instructions: "Après avoir copié, collez ce prompt dans n'importe quel chat IA (ChatGPT, Claude, etc.). Puis utilisez le bouton copier (deux carrés superposés) sur la réponse de l'IA et collez-la ici.",
+            instructions: "Cliquez sur le bouton ci-dessous pour copier ce prompt. Collez-le ensuite dans n'importe quel chat IA (ChatGPT, Claude, Gemini, etc.), copiez la réponse JSON de l'IA et revenez ici pour la coller.",
             responsePlaceholder: "Collez la réponse JSON de l'IA ici...",
             responseRequired: "Veuillez d'abord coller la réponse de l'IA."
         }
@@ -370,7 +370,7 @@ export const translations = {
         },
         copyPaste: {
             title: "Modo Copiar y Pegar",
-            step1Description: "Copia este prompt y pégalo en tu chat de IA favorito (ChatGPT, Claude, etc.)",
+            step1Description: "Copia el prompt de abajo para tu IA favorita",
             step2Description: "Pega la respuesta de la IA aquí",
             stepCopy: "Copiar Prompt",
             stepPaste: "Pegar Respuesta",
@@ -379,7 +379,7 @@ export const translations = {
             next: "Siguiente",
             back: "Atrás",
             submit: "Generar Recetas",
-            instructions: "Después de copiar, pega este prompt en cualquier chat de IA (ChatGPT, Claude, etc.). Luego usa el botón de copiar (dos cuadrados superpuestos) en la respuesta de la IA y pégala aquí.",
+            instructions: "Haz clic en el botón de abajo para copiar este prompt. Luego pégalo en cualquier chat de IA (ChatGPT, Claude, Gemini, etc.), copia la respuesta JSON de la IA y vuelve aquí para pegarla.",
             responsePlaceholder: "Pega la respuesta JSON de la IA aquí...",
             responseRequired: "Por favor, pega primero la respuesta de la IA."
         }

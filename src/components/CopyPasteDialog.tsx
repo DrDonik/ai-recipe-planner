@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Copy, Check, ClipboardPaste, AlertCircle } from 'lucide-react';
+import { X, Copy, Check, AlertCircle } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface CopyPasteDialogProps {
@@ -22,11 +22,9 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
     const [error, setError] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    const handleCopy = async () => {
+    const handleCopyAndProceed = async () => {
         try {
             await navigator.clipboard.writeText(prompt);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
         } catch {
             // Fallback for older browsers
             const textarea = document.createElement('textarea');
@@ -35,14 +33,14 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
         }
-    };
-
-    const handleProceedToPaste = () => {
-        setStep('paste');
-        setTimeout(() => textareaRef.current?.focus(), 100);
+        setCopied(true);
+        // Advance to paste step after a brief moment to show "Copied!" feedback
+        setTimeout(() => {
+            setStep('paste');
+            setCopied(false);
+            setTimeout(() => textareaRef.current?.focus(), 100);
+        }, 600);
     };
 
     const handleSubmit = () => {
@@ -130,28 +128,18 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between gap-3 p-6 border-t border-border-base/30">
+                <div className="flex items-center justify-end gap-3 p-6 border-t border-border-base/30">
                     {step === 'copy' ? (
-                        <>
-                            <button
-                                onClick={handleCopy}
-                                className={`btn flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                                    copied
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30'
-                                }`}
-                            >
-                                {copied ? <Check size={18} /> : <Copy size={18} />}
-                                {copied ? t.copyPaste.copied : t.copyPaste.copyPrompt}
-                            </button>
-                            <button
-                                onClick={handleProceedToPaste}
-                                className="btn btn-primary flex items-center gap-2 px-4 py-2 rounded-lg"
-                            >
-                                {t.copyPaste.next}
-                                <ClipboardPaste size={18} />
-                            </button>
-                        </>
+                        <button
+                            onClick={handleCopyAndProceed}
+                            disabled={copied}
+                            className={`btn btn-primary flex items-center gap-2 px-6 py-2.5 rounded-lg transition-all ${
+                                copied ? 'bg-green-500' : ''
+                            }`}
+                        >
+                            {copied ? <Check size={18} /> : <Copy size={18} />}
+                            {copied ? t.copyPaste.copied : t.copyPaste.copyPrompt}
+                        </button>
                     ) : (
                         <>
                             <button
