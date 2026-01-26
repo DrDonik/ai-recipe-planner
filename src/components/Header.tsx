@@ -73,57 +73,61 @@ export const Header: React.FC<HeaderProps> = ({
                                 </select>
                             </div>
 
-                            {/* Model Selector */}
-                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label htmlFor="model-select" className="sr-only">{t.modelLabel}</label>
-                                <Layers size={16} className="ml-2 text-text-muted" aria-hidden="true" />
-                                <select
-                                    id="model-select"
-                                    value={model}
-                                    onChange={(e) => setModel(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-text-main"
-                                    aria-label={t.modelLabel}
-                                >
-                                    {currentProviderModels.map((m) => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* API Key Input */}
-                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
-                                <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
-                                <input
-                                    id="api-key-input"
-                                    type="password"
-                                    placeholder={`${currentProvider.name} API Key`}
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-sm w-40 px-2"
-                                />
-                                <a
-                                    href={currentProvider.keyUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
-                                    title={t.getApiKey}
-                                >
-                                    <ExternalLink size={14} />
-                                </a>
-                                <div className="tooltip-container flex items-center mr-2">
-                                    <span
-                                        className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
-                                        aria-label={t.apiInfo}
-                                        role="img"
+                            {/* Model Selector - hidden for copy-paste provider */}
+                            {currentProviderModels.length > 0 && (
+                                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <label htmlFor="model-select" className="sr-only">{t.modelLabel}</label>
+                                    <Layers size={16} className="ml-2 text-text-muted" aria-hidden="true" />
+                                    <select
+                                        id="model-select"
+                                        value={model}
+                                        onChange={(e) => setModel(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-text-main"
+                                        aria-label={t.modelLabel}
                                     >
-                                        <Info size={14} />
-                                    </span>
-                                    <div className="tooltip-text">
-                                        {t.apiInfo}
+                                        {currentProviderModels.map((m) => (
+                                            <option key={m.id} value={m.id}>{m.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* API Key Input - hidden for providers that don't require it */}
+                            {currentProvider.requiresApiKey && (
+                                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
+                                    <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
+                                    <input
+                                        id="api-key-input"
+                                        type="password"
+                                        placeholder={`${currentProvider.name} API Key`}
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-sm w-40 px-2"
+                                    />
+                                    <a
+                                        href={currentProvider.keyUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
+                                        title={t.getApiKey}
+                                    >
+                                        <ExternalLink size={14} />
+                                    </a>
+                                    <div className="tooltip-container flex items-center mr-2">
+                                        <span
+                                            className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
+                                            aria-label={t.apiInfo}
+                                            role="img"
+                                        >
+                                            <Info size={14} />
+                                        </span>
+                                        <div className="tooltip-text">
+                                            {t.apiInfo}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label htmlFor="language-select" className="sr-only">{t.languageLabel}</label>

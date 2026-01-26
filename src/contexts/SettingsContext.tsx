@@ -136,6 +136,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         gemini: apiKeyGemini,
         openai: apiKeyOpenai,
         mistral: apiKeyMistral,
+        copypaste: '', // Copy-paste provider doesn't need an API key
     };
     const apiKey = apiKeyMap[validProvider];
 
@@ -145,6 +146,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             gemini: setApiKeyGemini,
             openai: setApiKeyOpenai,
             mistral: setApiKeyMistral,
+            copypaste: () => {}, // No-op for copy-paste provider
         };
         setterMap[validProvider](key);
     };

@@ -33,7 +33,6 @@ export const PROVIDER_MODELS: Record<string, ModelDefinition[]> = {
     ],
     mistral: [
         { id: 'mistral-small-2506', name: 'Mistral Small 3.2', size: 'small' },
-        { id: 'mistral-medium-2508', name: 'Mistral Medium 3.1', size: 'medium' },
         { id: 'mistral-large-2512', name: 'Mistral Large 3', size: 'large' },
     ],
 } as const;
@@ -57,6 +56,7 @@ export const LLM_PROVIDERS = {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
         defaultModel: 'gemini-3-flash-preview',
         keyUrl: 'https://aistudio.google.com/app/apikey',
+        requiresApiKey: true,
     },
     openai: {
         id: 'openai',
@@ -64,13 +64,23 @@ export const LLM_PROVIDERS = {
         baseUrl: 'https://api.openai.com/v1',
         defaultModel: 'gpt-5-mini',
         keyUrl: 'https://platform.openai.com/api-keys',
+        requiresApiKey: true,
     },
     mistral: {
         id: 'mistral',
         name: 'Mistral',
         baseUrl: 'https://api.mistral.ai/v1',
-        defaultModel: 'mistral-medium-2508',
+        defaultModel: 'mistral-small-2506',
         keyUrl: 'https://console.mistral.ai/api-keys',
+        requiresApiKey: true,
+    },
+    copypaste: {
+        id: 'copypaste',
+        name: 'Copy & Paste',
+        baseUrl: '',
+        defaultModel: '',
+        keyUrl: '',
+        requiresApiKey: false,
     },
 } as const;
 

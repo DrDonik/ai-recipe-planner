@@ -15,121 +15,31 @@ type ProviderApiFunction = (
 ) => Promise<string>;
 
 /**
- * Provider-specific API call implementations.
+ * Parameters for building a recipe prompt.
  */
-const callGeminiApi: ProviderApiFunction = async (
-  apiKey,
-  prompt,
-  model,
-  signal
-) => {
-  const config = LLM_PROVIDERS.gemini;
-  const response = await fetch(
-    `${config.baseUrl}/${model}:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-      }),
-      signal,
-    }
-  );
+export interface RecipePromptParams {
+  ingredients: PantryItem[];
+  people: number;
+  meals: number;
+  diet: string;
+  language: string;
+  spices?: string[];
+  styleWishes?: string;
+}
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'Failed to fetch recipes from Gemini');
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('No recipes generated. Gemini returned an empty response.');
-  return text;
-};
-
-const callOpenAiApi: ProviderApiFunction = async (
-  apiKey,
-  prompt,
-  model,
-  signal
-) => {
-  const config = LLM_PROVIDERS.openai;
-  const response = await fetch(`${config.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-    signal,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'Failed to fetch recipes from OpenAI');
-  }
-
-  const data = await response.json();
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error('No recipes generated. OpenAI returned an empty response.');
-  return text;
-};
-
-const callMistralApi: ProviderApiFunction = async (
-  apiKey,
-  prompt,
-  model,
-  signal
-) => {
-  const config = LLM_PROVIDERS.mistral;
-  const response = await fetch(`${config.baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-    signal,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'Failed to fetch recipes from Mistral');
-  }
-
-  const data = await response.json();
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error('No recipes generated. Mistral returned an empty response.');
-  return text;
-};
-
-const providerApis: Record<LLMProviderId, ProviderApiFunction> = {
-  gemini: callGeminiApi,
-  openai: callOpenAiApi,
-  mistral: callMistralApi,
-};
-
-export const generateRecipes = async (
-  provider: LLMProviderId,
-  model: string,
-  apiKey: string,
-  ingredients: PantryItem[],
-  people: number,
-  meals: number,
-  diet: string,
-  language: string,
-  spices: string[] = [],
-  styleWishes: string = ''
-): Promise<MealPlan> => {
-  if (!apiKey) throw new Error("API Key is required");
-
-  // Format ingredients for the prompt
+/**
+ * Builds the prompt for recipe generation.
+ * Exported so it can be used by the copy-paste flow.
+ */
+export const buildRecipePrompt = ({
+  ingredients,
+  people,
+  meals,
+  diet,
+  language,
+  spices = [],
+  styleWishes = '',
+}: RecipePromptParams): string => {
   const pantryList = ingredients
     .map((v) => `- ${v.name} (${v.amount}) [ID: ${v.id}]`)
     .join("\n");
@@ -142,8 +52,8 @@ export const generateRecipes = async (
     ? `STYLE/WISHES: ${styleWishes}`
     : "";
 
-  const prompt = `
-    You are a smart recipe planner. 
+  return `
+    You are a smart recipe planner.
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
 
@@ -154,7 +64,7 @@ export const generateRecipes = async (
     DIETARY PREFERENCE: ${diet}
     LANGUAGE: ${language}
     ${styleWishesText}
-    
+
     RULES:
     1. STRICTLY follow the dietary preference: ${diet}.${styleWishes.trim() ? ` Also respect the style/wishes: ${styleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
     2. ${ingredients.length > 0 ? 'Prioritize using as many of my pantry ingredients as possible.' : 'Choose suitable ingredients for delicious, balanced meals.'}
@@ -197,6 +107,166 @@ export const generateRecipes = async (
       ]
     }
   `;
+};
+
+/**
+ * Removes JSON comments from text.
+ * Handles single-line and multi-line comments.
+ */
+const stripJsonComments = (text: string): string => {
+  // Remove multi-line comments: /* ... */
+  let result = text.replace(/\/\*[\s\S]*?\*\//g, '');
+  // Remove single-line comments: // ... (but not inside strings)
+  // This regex looks for // not preceded by : and " (to avoid URLs and strings)
+  result = result.replace(/(?<![:"'])\/\/.*$/gm, '');
+  return result;
+};
+
+/**
+ * Parses the LLM response text into a MealPlan.
+ * Exported so it can be used by the copy-paste flow.
+ */
+export const parseRecipeResponse = (text: string): MealPlan => {
+  // Clean up markdown block if present (sometimes models add ```json ... ```)
+  let cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  // Remove JSON comments (LLMs sometimes add these despite instructions)
+  cleanedText = stripJsonComments(cleanedText);
+
+  try {
+    return JSON.parse(cleanedText) as MealPlan;
+  } catch {
+    console.error("JSON Parse Error. Raw response:", cleanedText);
+    throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
+  }
+};
+
+/**
+ * Provider-specific API call implementations.
+ */
+const callGeminiApi: ProviderApiFunction = async (
+  apiKey,
+  prompt,
+  model,
+  signal
+) => {
+  const config = LLM_PROVIDERS.gemini;
+  const response = await fetch(
+    `${config.baseUrl}/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+      signal,
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to fetch recipes from Gemini');
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('No recipes generated. Gemini returned an empty response.');
+  return text;
+};
+
+const callOpenAiApi: ProviderApiFunction = async (
+  apiKey,
+  prompt,
+  model,
+  signal
+) => {
+  const config = LLM_PROVIDERS.openai;
+  // Use the Responses API (recommended for reasoning models like GPT-5)
+  const response = await fetch(`${config.baseUrl}/responses`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: model,
+      input: prompt,
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to fetch recipes from OpenAI');
+  }
+
+  const data = await response.json();
+  // Responses API returns output_text for convenience
+  const text = data.output_text;
+  if (!text) throw new Error('No recipes generated. OpenAI returned an empty response.');
+  return text;
+};
+
+const callMistralApi: ProviderApiFunction = async (
+  apiKey,
+  prompt,
+  model,
+  signal
+) => {
+  const config = LLM_PROVIDERS.mistral;
+  const response = await fetch(`${config.baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Failed to fetch recipes from Mistral');
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('No recipes generated. Mistral returned an empty response.');
+  return text;
+};
+
+const providerApis: Record<Exclude<LLMProviderId, 'copypaste'>, ProviderApiFunction> = {
+  gemini: callGeminiApi,
+  openai: callOpenAiApi,
+  mistral: callMistralApi,
+};
+
+export const generateRecipes = async (
+  provider: Exclude<LLMProviderId, 'copypaste'>,
+  model: string,
+  apiKey: string,
+  ingredients: PantryItem[],
+  people: number,
+  meals: number,
+  diet: string,
+  language: string,
+  spices: string[] = [],
+  styleWishes: string = ''
+): Promise<MealPlan> => {
+  if (!apiKey) throw new Error("API Key is required");
+
+  const prompt = buildRecipePrompt({
+    ingredients,
+    people,
+    meals,
+    diet,
+    language,
+    spices,
+    styleWishes,
+  });
 
   try {
     const controller = new AbortController();
@@ -207,15 +277,7 @@ export const generateRecipes = async (
 
     clearTimeout(timeoutId);
 
-    // Clean up markdown block if present (sometimes models add ```json ... ```)
-    const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-    try {
-      return JSON.parse(cleanedText) as MealPlan;
-    } catch {
-      console.error("JSON Parse Error. Raw response:", cleanedText);
-      throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
-    }
+    return parseRecipeResponse(text);
   } catch (error) {
     console.error("LLM Error:", error);
 

@@ -6,8 +6,10 @@ import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
-import { generateRecipes } from './services/llm';
+import { CopyPasteDialog } from './components/CopyPasteDialog';
+import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient } from './types';
+import { LLM_PROVIDERS } from './constants';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { decodeFromUrl } from './utils/sharing';
 import { Header } from './components/Header';
@@ -36,6 +38,10 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.WELCOME_DISMISSED) !== 'true';
   });
+
+  // Copy-Paste Dialog State
+  const [showCopyPasteDialog, setShowCopyPasteDialog] = useState(false);
+  const [copyPastePrompt, setCopyPastePrompt] = useState('');
 
   // Single Recipe View State
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
@@ -147,7 +153,10 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    if (!apiKey) {
+    const providerConfig = LLM_PROVIDERS[provider];
+
+    // Only require API key for providers that need one
+    if (providerConfig.requiresApiKey && !apiKey) {
       setError(t.apiKeyError);
       return;
     }
@@ -157,6 +166,22 @@ function App() {
 
     // If there was a pending item, include it in the pantry for generation
     const itemsToUse = pendingItem ? [...pantryItems, pendingItem] : pantryItems;
+
+    // Handle copy-paste provider differently
+    if (provider === 'copypaste') {
+      const prompt = buildRecipePrompt({
+        ingredients: itemsToUse,
+        people,
+        meals,
+        diet,
+        language,
+        spices,
+        styleWishes,
+      });
+      setCopyPastePrompt(prompt);
+      setShowCopyPasteDialog(true);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -174,6 +199,27 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyPasteSubmit = (response: string) => {
+    setShowCopyPasteDialog(false);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const plan = parseRecipeResponse(response);
+      setMealPlan(plan);
+      localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong parsing the response.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopyPasteCancel = () => {
+    setShowCopyPasteDialog(false);
   };
 
 
@@ -212,6 +258,13 @@ function App() {
   return (
     <div className="min-h-screen pb-20">
       {showWelcome && <WelcomeDialog onClose={() => setShowWelcome(false)} />}
+      {showCopyPasteDialog && (
+        <CopyPasteDialog
+          prompt={copyPastePrompt}
+          onSubmit={handleCopyPasteSubmit}
+          onCancel={handleCopyPasteCancel}
+        />
+      )}
 
       <Header
         headerMinimized={headerMinimized}
