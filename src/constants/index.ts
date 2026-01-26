@@ -27,9 +27,9 @@ export const PROVIDER_MODELS: Record<string, ModelDefinition[]> = {
         { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', size: 'large' },
     ],
     openai: [
-        { id: 'gpt-5-mini', name: 'GPT-5 Mini', size: 'small' },
-        { id: 'gpt-5.2', name: 'GPT-5.2', size: 'medium' },
-        { id: 'gpt-5.2-pro', name: 'GPT-5.2 Pro', size: 'large' },
+        { id: 'gpt-5-nano', name: 'GPT-5 Nano', size: 'small' },
+        { id: 'gpt-5-mini', name: 'GPT-5 Mini', size: 'medium' },
+        { id: 'gpt-5.2', name: 'GPT-5.2', size: 'large' },
     ],
     mistral: [
         { id: 'ministral-8b-latest', name: 'Ministral 8B', size: 'small' },
@@ -62,7 +62,7 @@ export const LLM_PROVIDERS = {
         id: 'openai',
         name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1',
-        defaultModel: 'gpt-5.2',
+        defaultModel: 'gpt-5-mini',
         keyUrl: 'https://platform.openai.com/api-keys',
     },
     mistral: {
