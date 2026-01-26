@@ -32,9 +32,9 @@ export const PROVIDER_MODELS: Record<string, ModelDefinition[]> = {
         { id: 'gpt-5.2', name: 'GPT-5.2', size: 'large' },
     ],
     mistral: [
-        { id: 'ministral-8b-latest', name: 'Ministral 8B', size: 'small' },
-        { id: 'mistral-small-latest', name: 'Mistral Small', size: 'medium' },
-        { id: 'mistral-large-latest', name: 'Mistral Large', size: 'large' },
+        { id: 'mistral-small-2506', name: 'Mistral Small 3.2', size: 'small' },
+        { id: 'mistral-medium-2508', name: 'Mistral Medium 3.1', size: 'medium' },
+        { id: 'mistral-large-2512', name: 'Mistral Large 3', size: 'large' },
     ],
 } as const;
 
@@ -69,7 +69,7 @@ export const LLM_PROVIDERS = {
         id: 'mistral',
         name: 'Mistral',
         baseUrl: 'https://api.mistral.ai/v1',
-        defaultModel: 'mistral-small-latest',
+        defaultModel: 'mistral-medium-2508',
         keyUrl: 'https://console.mistral.ai/api-keys',
     },
 } as const;
