@@ -4,6 +4,50 @@
  */
 
 /**
+ * Model size tiers available for each provider.
+ */
+export type ModelSize = 'small' | 'medium' | 'large';
+
+/**
+ * Model definition with id and display name.
+ */
+export interface ModelDefinition {
+    id: string;
+    name: string;
+    size: ModelSize;
+}
+
+/**
+ * Available models for each provider, organized by size tier.
+ */
+export const PROVIDER_MODELS: Record<string, ModelDefinition[]> = {
+    gemini: [
+        { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', size: 'small' },
+        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', size: 'medium' },
+        { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', size: 'large' },
+    ],
+    openai: [
+        { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', size: 'small' },
+        { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', size: 'medium' },
+        { id: 'gpt-4.1', name: 'GPT-4.1', size: 'large' },
+    ],
+    mistral: [
+        { id: 'ministral-8b-latest', name: 'Ministral 8B', size: 'small' },
+        { id: 'mistral-small-latest', name: 'Mistral Small', size: 'medium' },
+        { id: 'mistral-large-latest', name: 'Mistral Large', size: 'large' },
+    ],
+} as const;
+
+/**
+ * Get default model for a provider (medium tier).
+ */
+export const getDefaultModel = (providerId: string): string => {
+    const models = PROVIDER_MODELS[providerId];
+    const mediumModel = models?.find(m => m.size === 'medium');
+    return mediumModel?.id ?? models?.[0]?.id ?? '';
+};
+
+/**
  * Supported LLM providers with their API configurations and key URLs.
  */
 export const LLM_PROVIDERS = {
@@ -11,21 +55,21 @@ export const LLM_PROVIDERS = {
         id: 'gemini',
         name: 'Google Gemini',
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
-        model: 'gemini-2.0-flash',
+        defaultModel: 'gemini-2.5-flash',
         keyUrl: 'https://aistudio.google.com/app/apikey',
     },
     openai: {
         id: 'openai',
         name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1',
-        model: 'gpt-4o-mini',
+        defaultModel: 'gpt-4.1-mini',
         keyUrl: 'https://platform.openai.com/api-keys',
     },
     mistral: {
         id: 'mistral',
         name: 'Mistral',
         baseUrl: 'https://api.mistral.ai/v1',
-        model: 'mistral-small-latest',
+        defaultModel: 'mistral-small-latest',
         keyUrl: 'https://console.mistral.ai/api-keys',
     },
 } as const;
@@ -37,6 +81,7 @@ export type LLMProviderId = keyof typeof LLM_PROVIDERS;
  */
 export const STORAGE_KEYS = {
     LLM_PROVIDER: 'llm_provider',
+    LLM_MODEL: 'llm_model',
     API_KEY: 'gemini_api_key', // Legacy key for backwards compatibility
     API_KEY_GEMINI: 'api_key_gemini',
     API_KEY_OPENAI: 'api_key_openai',
@@ -82,4 +127,5 @@ export const DEFAULTS = {
     DIET: 'flexitarian',
     LANGUAGE: 'English',
     LLM_PROVIDER: 'gemini' as LLMProviderId,
+    LLM_MODEL: 'gemini-2.5-flash',
 } as const;

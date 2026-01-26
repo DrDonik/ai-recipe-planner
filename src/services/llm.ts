@@ -5,16 +5,27 @@ import type { PantryItem, MealPlan } from '../types';
 export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
 
 /**
- * Provider-specific API call implementations.
+ * Type for provider API call functions.
  */
-const callGeminiApi = async (
+type ProviderApiFunction = (
   apiKey: string,
   prompt: string,
+  model: string,
   signal: AbortSignal
-): Promise<string> => {
+) => Promise<string>;
+
+/**
+ * Provider-specific API call implementations.
+ */
+const callGeminiApi: ProviderApiFunction = async (
+  apiKey,
+  prompt,
+  model,
+  signal
+) => {
   const config = LLM_PROVIDERS.gemini;
   const response = await fetch(
-    `${config.baseUrl}/${config.model}:generateContent?key=${apiKey}`,
+    `${config.baseUrl}/${model}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,11 +47,12 @@ const callGeminiApi = async (
   return text;
 };
 
-const callOpenAiApi = async (
-  apiKey: string,
-  prompt: string,
-  signal: AbortSignal
-): Promise<string> => {
+const callOpenAiApi: ProviderApiFunction = async (
+  apiKey,
+  prompt,
+  model,
+  signal
+) => {
   const config = LLM_PROVIDERS.openai;
   const response = await fetch(`${config.baseUrl}/chat/completions`, {
     method: 'POST',
@@ -49,7 +61,7 @@ const callOpenAiApi = async (
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: config.model,
+      model: model,
       messages: [{ role: 'user', content: prompt }],
     }),
     signal,
@@ -66,11 +78,12 @@ const callOpenAiApi = async (
   return text;
 };
 
-const callMistralApi = async (
-  apiKey: string,
-  prompt: string,
-  signal: AbortSignal
-): Promise<string> => {
+const callMistralApi: ProviderApiFunction = async (
+  apiKey,
+  prompt,
+  model,
+  signal
+) => {
   const config = LLM_PROVIDERS.mistral;
   const response = await fetch(`${config.baseUrl}/chat/completions`, {
     method: 'POST',
@@ -79,7 +92,7 @@ const callMistralApi = async (
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: config.model,
+      model: model,
       messages: [{ role: 'user', content: prompt }],
     }),
     signal,
@@ -96,7 +109,7 @@ const callMistralApi = async (
   return text;
 };
 
-const providerApis: Record<LLMProviderId, typeof callGeminiApi> = {
+const providerApis: Record<LLMProviderId, ProviderApiFunction> = {
   gemini: callGeminiApi,
   openai: callOpenAiApi,
   mistral: callMistralApi,
@@ -104,6 +117,7 @@ const providerApis: Record<LLMProviderId, typeof callGeminiApi> = {
 
 export const generateRecipes = async (
   provider: LLMProviderId,
+  model: string,
   apiKey: string,
   ingredients: PantryItem[],
   people: number,
@@ -189,7 +203,7 @@ export const generateRecipes = async (
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
 
     const callApi = providerApis[provider];
-    const text = await callApi(apiKey, prompt, controller.signal);
+    const text = await callApi(apiKey, prompt, model, controller.signal);
 
     clearTimeout(timeoutId);
 

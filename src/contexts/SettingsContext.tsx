@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { useLocalStorage, useStringLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
-import { STORAGE_KEYS, DEFAULTS, LLM_PROVIDERS, type LLMProviderId } from '../constants';
+import { STORAGE_KEYS, DEFAULTS, LLM_PROVIDERS, PROVIDER_MODELS, getDefaultModel, type LLMProviderId } from '../constants';
 
 type TranslationType = typeof translations.English;
 type SupportedLanguage = keyof typeof translations;
@@ -59,6 +59,8 @@ const getTranslations = (language: string): TranslationType => {
 interface SettingsContextType {
     provider: LLMProviderId;
     setProvider: (provider: LLMProviderId) => void;
+    model: string;
+    setModel: (model: string) => void;
     apiKey: string;
     setApiKey: (key: string) => void;
     people: number;
@@ -85,6 +87,7 @@ const isValidProvider = (provider: string): provider is LLMProviderId => {
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [provider, setProviderRaw] = useStringLocalStorage(STORAGE_KEYS.LLM_PROVIDER, DEFAULTS.LLM_PROVIDER);
+    const [model, setModelRaw] = useStringLocalStorage(STORAGE_KEYS.LLM_MODEL, DEFAULTS.LLM_MODEL);
     const [apiKeyGemini, setApiKeyGemini] = useStringLocalStorage(STORAGE_KEYS.API_KEY_GEMINI, '');
     const [apiKeyOpenai, setApiKeyOpenai] = useStringLocalStorage(STORAGE_KEYS.API_KEY_OPENAI, '');
     const [apiKeyMistral, setApiKeyMistral] = useStringLocalStorage(STORAGE_KEYS.API_KEY_MISTRAL, '');
@@ -106,9 +109,25 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     // Validate provider and cast to correct type
     const validProvider: LLMProviderId = isValidProvider(provider) ? provider : DEFAULTS.LLM_PROVIDER;
 
+    // Validate model belongs to current provider
+    const isValidModel = (modelId: string, providerId: LLMProviderId): boolean => {
+        const models = PROVIDER_MODELS[providerId];
+        return models?.some(m => m.id === modelId) ?? false;
+    };
+
+    const validModel = isValidModel(model, validProvider) ? model : getDefaultModel(validProvider);
+
     const setProvider = (newProvider: LLMProviderId) => {
         if (isValidProvider(newProvider)) {
             setProviderRaw(newProvider);
+            // Reset model to default when provider changes
+            setModelRaw(getDefaultModel(newProvider));
+        }
+    };
+
+    const setModel = (newModel: string) => {
+        if (isValidModel(newModel, validProvider)) {
+            setModelRaw(newModel);
         }
     };
 
@@ -134,6 +153,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
     const value = {
         provider: validProvider, setProvider,
+        model: validModel, setModel,
         apiKey, setApiKey,
         people, setPeople,
         meals, setMeals,
