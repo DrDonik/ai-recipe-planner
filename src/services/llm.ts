@@ -171,7 +171,7 @@ export const generateRecipes = async (
     13. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
     14. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     15. If you need to buy spices or staples, use the "missingIngredients" array.
-    16. Return ONLY valid JSON. No markdown formatting, no code blocks.
+    16. Return ONLY valid JSON. No markdown formatting, no code blocks, no comments (// or /* */).
 
     NUTRITION ESTIMATES:
     - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
