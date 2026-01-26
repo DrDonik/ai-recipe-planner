@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Refrigerator, Leaf, Utensils, Key, Sparkles, HardDrive } from 'lucide-react';
+import { X, Refrigerator, Leaf, Utensils, Layers, Sparkles, HardDrive } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
 
@@ -59,7 +59,7 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                     </div>
 
                     <div className="flex gap-3">
-                        <Key className="text-secondary shrink-0 mt-0.5" size={20} />
+                        <Layers className="text-secondary shrink-0 mt-0.5" size={20} />
                         <p className="text-sm text-text-muted">{t.welcome.apiKey}</p>
                     </div>
 
