@@ -23,13 +23,13 @@ export interface ModelDefinition {
 export const PROVIDER_MODELS: Record<string, ModelDefinition[]> = {
     gemini: [
         { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', size: 'small' },
-        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', size: 'medium' },
-        { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', size: 'large' },
+        { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash', size: 'medium' },
+        { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', size: 'large' },
     ],
     openai: [
-        { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', size: 'small' },
-        { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', size: 'medium' },
-        { id: 'gpt-4.1', name: 'GPT-4.1', size: 'large' },
+        { id: 'gpt-5-mini', name: 'GPT-5 Mini', size: 'small' },
+        { id: 'gpt-5.2', name: 'GPT-5.2', size: 'medium' },
+        { id: 'gpt-5.2-pro', name: 'GPT-5.2 Pro', size: 'large' },
     ],
     mistral: [
         { id: 'ministral-8b-latest', name: 'Ministral 8B', size: 'small' },
@@ -55,14 +55,14 @@ export const LLM_PROVIDERS = {
         id: 'gemini',
         name: 'Google Gemini',
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
-        defaultModel: 'gemini-2.5-flash',
+        defaultModel: 'gemini-3-flash-preview',
         keyUrl: 'https://aistudio.google.com/app/apikey',
     },
     openai: {
         id: 'openai',
         name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1',
-        defaultModel: 'gpt-4.1-mini',
+        defaultModel: 'gpt-5.2',
         keyUrl: 'https://platform.openai.com/api-keys',
     },
     mistral: {
@@ -127,5 +127,5 @@ export const DEFAULTS = {
     DIET: 'flexitarian',
     LANGUAGE: 'English',
     LLM_PROVIDER: 'gemini' as LLMProviderId,
-    LLM_MODEL: 'gemini-2.5-flash',
+    LLM_MODEL: 'gemini-3-flash-preview',
 } as const;
