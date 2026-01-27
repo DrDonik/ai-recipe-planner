@@ -95,18 +95,30 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                 <div className="flex-1 overflow-y-auto p-6">
                     {step === 'copy' ? (
                         <div className="space-y-4">
+                            <div className="flex items-start gap-2 text-sm text-text-muted bg-blue-500/10 rounded-lg p-3">
+                                <AlertCircle size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                                <span>
+                                    {t.copyPaste.instructions}{' '}
+                                    <Copy size={14} className="inline-block align-text-bottom mx-0.5" />
+                                    {' '}{t.copyPaste.instructionsEnd}
+                                </span>
+                            </div>
                             <div className="bg-white/30 dark:bg-black/20 rounded-lg p-4 max-h-[300px] overflow-y-auto">
                                 <pre className="text-xs text-text-base whitespace-pre-wrap font-mono">
                                     {prompt}
                                 </pre>
                             </div>
-                            <div className="flex items-start gap-2 text-sm text-text-muted bg-blue-500/10 rounded-lg p-3">
-                                <AlertCircle size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                                <span>{t.copyPaste.instructions}</span>
-                            </div>
                         </div>
                     ) : (
                         <div className="space-y-4">
+                            <div className="flex items-start gap-2 text-sm text-text-muted bg-blue-500/10 rounded-lg p-3">
+                                <AlertCircle size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                                <span>
+                                    {t.copyPaste.instructionsPaste}{' '}
+                                    <Copy size={14} className="inline-block align-text-bottom mx-0.5" />
+                                    {' '}{t.copyPaste.instructionsPasteEnd}
+                                </span>
+                            </div>
                             <textarea
                                 ref={textareaRef}
                                 value={response}
@@ -133,12 +145,21 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                         <button
                             onClick={handleCopyAndProceed}
                             disabled={copied}
-                            className={`btn btn-primary flex items-center gap-2 px-6 py-2.5 rounded-lg transition-all ${
-                                copied ? 'bg-green-500' : ''
+                            className={`btn btn-primary flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg min-w-[160px] transition-colors ${
+                                copied ? '!bg-green-500' : ''
                             }`}
                         >
-                            {copied ? <Check size={18} /> : <Copy size={18} />}
-                            {copied ? t.copyPaste.copied : t.copyPaste.copyPrompt}
+                            {copied ? (
+                                <>
+                                    <Check size={18} />
+                                    {t.copyPaste.copied}
+                                </>
+                            ) : (
+                                <>
+                                    <Copy size={18} />
+                                    {t.copyPaste.copyPrompt}
+                                </>
+                            )}
                         </button>
                     ) : (
                         <>

@@ -90,8 +90,11 @@ export const translations = {
             next: "Next",
             back: "Back",
             submit: "Import Recipes",
-            instructions: "Click the button below to copy this prompt. Then paste it into any AI chat (ChatGPT, Claude, Gemini, etc.), copy the AI's JSON response, and return here to paste it.",
-            responsePlaceholder: "Paste the AI's JSON response here...",
+            instructions: "Click the button below to copy the prompt. Then paste it into any AI chat (ChatGPT, Claude, Gemini, etc.). Copy the AI's response (use the copy button",
+            instructionsEnd: "right below the response), come back here and paste it.",
+            instructionsPaste: "Paste the exact response from your AI chat into the text field below. It's best to use the copy button",
+            instructionsPasteEnd: "right below the AI's response.",
+            responsePlaceholder: "Paste the exact AI response here...",
             responseRequired: "Please paste the AI's response first."
         }
     },
@@ -185,8 +188,11 @@ export const translations = {
             next: "Weiter",
             back: "Zurück",
             submit: "Rezepte importieren",
-            instructions: "Klicke auf den Button unten, um den Prompt zu kopieren. Füge ihn dann in einen beliebigen KI-Chat ein (ChatGPT, Claude, Gemini, etc.), kopiere die JSON-Antwort der KI und kehre hierher zurück, um sie einzufügen.",
-            responsePlaceholder: "Füge hier die JSON-Antwort der KI ein...",
+            instructions: "Klicke auf den Button unten, um den Prompt zu kopieren. Füge ihn dann in einen beliebigen KI-Chat ein (ChatGPT, Claude, Gemini, etc.). Kopiere die Antwort der KI (nutze den Kopieren-Button",
+            instructionsEnd: "direkt unter der Antwort), komm hierher zurück und füge die Antwort ein.",
+            instructionsPaste: "Füge die exakte Antwort deines KI-Chats in das Textfeld unten ein. Nutze dazu am besten den Kopieren-Button",
+            instructionsPasteEnd: "direkt unter der Antwort der KI.",
+            responsePlaceholder: "Füge hier die exakte Antwort der KI ein...",
             responseRequired: "Bitte füge zuerst die Antwort der KI ein."
         }
     },
@@ -280,8 +286,11 @@ export const translations = {
             next: "Suivant",
             back: "Retour",
             submit: "Importer les recettes",
-            instructions: "Cliquez sur le bouton ci-dessous pour copier ce prompt. Collez-le ensuite dans n'importe quel chat IA (ChatGPT, Claude, Gemini, etc.), copiez la réponse JSON de l'IA et revenez ici pour la coller.",
-            responsePlaceholder: "Collez la réponse JSON de l'IA ici...",
+            instructions: "Cliquez sur le bouton ci-dessous pour copier le prompt. Collez-le ensuite dans n'importe quel chat IA (ChatGPT, Claude, Gemini, etc.). Copiez la réponse de l'IA (utilisez le bouton copier",
+            instructionsEnd: "juste en dessous de la réponse), revenez ici et collez-la.",
+            instructionsPaste: "Collez la réponse exacte de votre chat IA dans le champ ci-dessous. Utilisez de préférence le bouton copier",
+            instructionsPasteEnd: "juste en dessous de la réponse de l'IA.",
+            responsePlaceholder: "Collez ici la réponse exacte de l'IA...",
             responseRequired: "Veuillez d'abord coller la réponse de l'IA."
         }
     },
@@ -375,8 +384,11 @@ export const translations = {
             next: "Siguiente",
             back: "Atrás",
             submit: "Importar recetas",
-            instructions: "Haz clic en el botón de abajo para copiar este prompt. Luego pégalo en cualquier chat de IA (ChatGPT, Claude, Gemini, etc.), copia la respuesta JSON de la IA y vuelve aquí para pegarla.",
-            responsePlaceholder: "Pega la respuesta JSON de la IA aquí...",
+            instructions: "Haz clic en el botón de abajo para copiar el prompt. Luego pégalo en cualquier chat de IA (ChatGPT, Claude, Gemini, etc.). Copia la respuesta de la IA (usa el botón de copiar",
+            instructionsEnd: "justo debajo de la respuesta), vuelve aquí y pégala.",
+            instructionsPaste: "Pega la respuesta exacta de tu chat de IA en el campo de texto de abajo. Es mejor usar el botón de copiar",
+            instructionsPasteEnd: "justo debajo de la respuesta de la IA.",
+            responsePlaceholder: "Pega aquí la respuesta exacta de la IA...",
             responseRequired: "Por favor, pega primero la respuesta de la IA."
         }
     }
