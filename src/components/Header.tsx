@@ -1,6 +1,7 @@
 import React from 'react';
-import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp } from 'lucide-react';
+import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { API_CONFIG } from '../constants';
 
 interface HeaderProps {
     headerMinimized: boolean;
@@ -62,8 +63,17 @@ export const Header: React.FC<HeaderProps> = ({
                                     placeholder={t.apiKeyPlaceholder}
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-sm w-48 px-2"
+                                    className="bg-transparent border-none outline-none text-sm w-40 px-2"
                                 />
+                                <a
+                                    href={API_CONFIG.KEY_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
+                                    title={t.getApiKey}
+                                >
+                                    <ExternalLink size={14} />
+                                </a>
                                 <div className="tooltip-container flex items-center mr-2">
                                     <span
                                         className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"

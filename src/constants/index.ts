@@ -40,6 +40,7 @@ export const API_CONFIG = {
     BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models',
     MODEL: 'gemini-3-flash-preview',
     TIMEOUT_MS: 60000,
+    KEY_URL: 'https://aistudio.google.com/app/apikey',
 } as const;
 
 /**
