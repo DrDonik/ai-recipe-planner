@@ -56,15 +56,10 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex items-start justify-between p-6 border-b border-border-base/30">
-                    <div>
-                        <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
-                            {t.copyPaste.title}
-                        </h2>
-                        <p className="text-sm text-text-muted mt-1">
-                            {step === 'copy' ? t.copyPaste.step1Description : t.copyPaste.step2Description}
-                        </p>
-                    </div>
+                <div className="flex items-center justify-between p-3 border-b border-border-base/30">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
+                        {t.copyPaste.title}
+                    </h2>
                     <button
                         onClick={onCancel}
                         className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
@@ -74,27 +69,10 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                     </button>
                 </div>
 
-                {/* Step Indicator */}
-                <div className="flex items-center gap-2 px-6 py-3 bg-white/20 dark:bg-black/10">
-                    <div className={`flex items-center gap-2 ${step === 'copy' ? 'text-primary font-medium' : 'text-text-muted'}`}>
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 'copy' ? 'bg-primary text-white' : 'bg-white/50 dark:bg-black/20'}`}>
-                            1
-                        </div>
-                        <span className="text-sm">{t.copyPaste.stepCopy}</span>
-                    </div>
-                    <div className="flex-1 h-px bg-border-base/30" />
-                    <div className={`flex items-center gap-2 ${step === 'paste' ? 'text-primary font-medium' : 'text-text-muted'}`}>
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 'paste' ? 'bg-primary text-white' : 'bg-white/50 dark:bg-black/20'}`}>
-                            2
-                        </div>
-                        <span className="text-sm">{t.copyPaste.stepPaste}</span>
-                    </div>
-                </div>
-
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-3 min-h-0 flex flex-col gap-2">
                     {step === 'copy' ? (
-                        <div className="space-y-4">
+                        <>
                             <div className="flex items-start gap-2 text-sm text-text-muted bg-blue-500/10 rounded-lg p-3">
                                 <AlertCircle size={16} className="text-blue-500 shrink-0 mt-0.5" />
                                 <span>
@@ -103,14 +81,14 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                     {' '}{t.copyPaste.instructionsEnd}
                                 </span>
                             </div>
-                            <div className="bg-white/30 dark:bg-black/20 rounded-lg p-4 max-h-[300px] overflow-y-auto">
+                            <div className="bg-white/30 dark:bg-black/20 rounded-lg p-3 flex-1 overflow-y-auto">
                                 <pre className="text-xs text-text-base whitespace-pre-wrap font-mono">
                                     {prompt}
                                 </pre>
                             </div>
-                        </div>
+                        </>
                     ) : (
-                        <div className="space-y-4">
+                        <>
                             <div className="flex items-start gap-2 text-sm text-text-muted bg-blue-500/10 rounded-lg p-3">
                                 <AlertCircle size={16} className="text-blue-500 shrink-0 mt-0.5" />
                                 <span>
@@ -127,7 +105,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                     setError(null);
                                 }}
                                 placeholder={t.copyPaste.responsePlaceholder}
-                                className="w-full h-[300px] bg-white/30 dark:bg-black/20 rounded-lg p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                className="w-full flex-1 bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
                             {error && (
                                 <div className="flex items-center gap-2 text-sm text-red-500">
@@ -135,12 +113,12 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                     <span>{error}</span>
                                 </div>
                             )}
-                        </div>
+                        </>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-3 p-6 border-t border-border-base/30">
+                <div className="flex items-center justify-end gap-3 p-3 border-t border-border-base/30">
                     {step === 'copy' ? (
                         <button
                             onClick={handleCopyAndProceed}

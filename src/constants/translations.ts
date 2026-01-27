@@ -83,7 +83,7 @@ export const translations = {
             copyPaste: "Copy & Paste"
         },
         copyPaste: {
-            title: "Copy & Paste Mode",
+            title: "Copy & Paste",
             description: "Use any AI chat instead of an API key",
             step1Description: "Copy the prompt below to use with your favorite AI",
             step2Description: "Paste the AI's response here",
@@ -185,7 +185,7 @@ export const translations = {
             copyPaste: "Kopieren & Einfügen"
         },
         copyPaste: {
-            title: "Kopieren & Einfügen Modus",
+            title: "Kopieren & Einfügen",
             description: "Verwende einen beliebigen KI-Chat anstelle eines API-Schlüssels",
             step1Description: "Kopiere den Prompt unten für deine Lieblings-KI",
             step2Description: "Füge die Antwort der KI hier ein",
@@ -287,7 +287,7 @@ export const translations = {
             copyPaste: "Copier-Coller"
         },
         copyPaste: {
-            title: "Mode Copier-Coller",
+            title: "Copier-Coller",
             description: "Utilisez n'importe quel chat IA au lieu d'une clé API",
             step1Description: "Copiez le prompt ci-dessous pour votre IA préférée",
             step2Description: "Collez la réponse de l'IA ici",
@@ -389,7 +389,7 @@ export const translations = {
             copyPaste: "Copiar y Pegar"
         },
         copyPaste: {
-            title: "Modo Copiar y Pegar",
+            title: "Copiar y Pegar",
             description: "Usa cualquier chat de IA en lugar de una clave API",
             step1Description: "Copia el prompt de abajo para usarlo con tu IA favorita",
             step2Description: "Pega la respuesta de la IA aquí",
