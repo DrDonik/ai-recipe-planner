@@ -8,6 +8,7 @@
  */
 export const STORAGE_KEYS = {
     API_KEY: 'gemini_api_key',
+    USE_COPY_PASTE: 'use_copy_paste',
     SPICE_RACK: 'spice_rack_items',
     PEOPLE_COUNT: 'people_count',
     MEALS_COUNT: 'meals_count',

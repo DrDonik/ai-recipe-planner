@@ -6,7 +6,8 @@ import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
-import { generateRecipes } from './services/llm';
+import { CopyPasteDialog } from './components/CopyPasteDialog';
+import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { decodeFromUrl } from './utils/sharing';
@@ -17,7 +18,7 @@ import { STORAGE_KEYS, URL_PARAMS } from './constants';
 
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
-  const { apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
+  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
   const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
@@ -36,6 +37,10 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.WELCOME_DISMISSED) !== 'true';
   });
+
+  // Copy-Paste Dialog State
+  const [showCopyPasteDialog, setShowCopyPasteDialog] = useState(false);
+  const [copyPastePrompt, setCopyPastePrompt] = useState('');
 
   // Single Recipe View State
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
@@ -147,16 +152,33 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    if (!apiKey) {
-      setError(t.apiKeyError);
-      return;
-    }
-
     // Flush any pending input from PantryInput before generating
     const pendingItem = pantryInputRef.current?.flushPendingInput();
 
     // If there was a pending item, include it in the pantry for generation
     const itemsToUse = pendingItem ? [...pantryItems, pendingItem] : pantryItems;
+
+    // Handle copy-paste mode differently
+    if (useCopyPaste) {
+      const prompt = buildRecipePrompt({
+        ingredients: itemsToUse,
+        people,
+        meals,
+        diet,
+        language,
+        spices,
+        styleWishes,
+      });
+      setCopyPastePrompt(prompt);
+      setShowCopyPasteDialog(true);
+      return;
+    }
+
+    // API mode - require API key
+    if (!apiKey) {
+      setError(t.apiKeyError);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -174,6 +196,27 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyPasteSubmit = (response: string) => {
+    setShowCopyPasteDialog(false);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const plan = parseRecipeResponse(response);
+      setMealPlan(plan);
+      localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong parsing the response.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopyPasteCancel = () => {
+    setShowCopyPasteDialog(false);
   };
 
 
@@ -212,6 +255,13 @@ function App() {
   return (
     <div className="min-h-screen pb-20">
       {showWelcome && <WelcomeDialog onClose={() => setShowWelcome(false)} />}
+      {showCopyPasteDialog && (
+        <CopyPasteDialog
+          prompt={copyPastePrompt}
+          onSubmit={handleCopyPasteSubmit}
+          onCancel={handleCopyPasteCancel}
+        />
+      )}
 
       <Header
         headerMinimized={headerMinimized}

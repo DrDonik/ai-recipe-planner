@@ -1,5 +1,5 @@
 import React from 'react';
-import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
+import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, ClipboardCopy } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG } from '../constants';
 
@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
     setHeaderMinimized,
     onShowHelp,
 }) => {
-    const { apiKey, setApiKey, language, setLanguage, t } = useSettings();
+    const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, t } = useSettings();
 
     return (
         <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
@@ -54,39 +54,57 @@ export const Header: React.FC<HeaderProps> = ({
                                 </button>
                             </div>
 
-                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
-                                <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
-                                <input
-                                    id="api-key-input"
-                                    type="password"
-                                    placeholder={t.apiKeyPlaceholder}
-                                    value={apiKey}
-                                    onChange={(e) => setApiKey(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-sm w-40 px-2"
-                                />
-                                <a
-                                    href={API_CONFIG.KEY_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
-                                    title={t.getApiKey}
+                            {useCopyPaste ? (
+                                <button
+                                    onClick={() => setUseCopyPaste(false)}
+                                    className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 px-3 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300 hover:bg-white/70 dark:hover:bg-black/30 transition-colors"
+                                    title={t.copyPaste.description}
                                 >
-                                    <ExternalLink size={14} />
-                                </a>
-                                <div className="tooltip-container flex items-center mr-2">
-                                    <span
+                                    <ClipboardCopy size={16} className="text-primary" aria-hidden="true" />
+                                    <span className="text-sm font-medium text-text-main">{t.copyPaste.title}</span>
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
+                                    <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
+                                    <input
+                                        id="api-key-input"
+                                        type="password"
+                                        placeholder={t.apiKeyPlaceholder}
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-sm w-40 px-2"
+                                    />
+                                    <a
+                                        href={API_CONFIG.KEY_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
-                                        aria-label={t.apiInfo}
-                                        role="img"
+                                        title={t.getApiKey}
                                     >
-                                        <Info size={14} />
-                                    </span>
-                                    <div className="tooltip-text">
-                                        {t.apiInfo}
+                                        <ExternalLink size={14} />
+                                    </a>
+                                    <div className="tooltip-container flex items-center">
+                                        <span
+                                            className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
+                                            aria-label={t.apiInfo}
+                                            role="img"
+                                        >
+                                            <Info size={14} />
+                                        </span>
+                                        <div className="tooltip-text">
+                                            {t.apiInfo}
+                                        </div>
                                     </div>
+                                    <button
+                                        onClick={() => setUseCopyPaste(true)}
+                                        className="text-text-muted hover:text-primary transition-colors p-1 mr-1 rounded-full"
+                                        title={t.copyPaste.description}
+                                    >
+                                        <ClipboardCopy size={14} />
+                                    </button>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label htmlFor="language-select" className="sr-only">{t.languageLabel}</label>

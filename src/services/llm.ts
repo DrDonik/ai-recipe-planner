@@ -4,19 +4,32 @@ import type { PantryItem, MealPlan } from '../types';
 // Re-export types for backwards compatibility
 export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
 
-export const generateRecipes = async (
-  apiKey: string,
-  ingredients: PantryItem[],
-  people: number,
-  meals: number,
-  diet: string,
-  language: string,
-  spices: string[] = [],
-  styleWishes: string = ''
-): Promise<MealPlan> => {
-  if (!apiKey) throw new Error("API Key is required");
+/**
+ * Parameters for building a recipe prompt.
+ */
+export interface RecipePromptParams {
+  ingredients: PantryItem[];
+  people: number;
+  meals: number;
+  diet: string;
+  language: string;
+  spices?: string[];
+  styleWishes?: string;
+}
 
-  // Format ingredients for the prompt
+/**
+ * Builds the prompt for recipe generation.
+ * Exported so it can be used by the copy-paste flow.
+ */
+export const buildRecipePrompt = ({
+  ingredients,
+  people,
+  meals,
+  diet,
+  language,
+  spices = [],
+  styleWishes = '',
+}: RecipePromptParams): string => {
   const pantryList = ingredients
     .map((v) => `- ${v.name} (${v.amount}) [ID: ${v.id}]`)
     .join("\n");
@@ -29,7 +42,7 @@ export const generateRecipes = async (
     ? `STYLE/WISHES: ${styleWishes}`
     : "";
 
-  const prompt = `
+  return `
     You are a smart recipe planner. 
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
@@ -84,6 +97,45 @@ export const generateRecipes = async (
       ]
     }
   `;
+};
+
+/**
+ * Parses the LLM response text into a MealPlan.
+ * Exported so it can be used by the copy-paste flow.
+ */
+export const parseRecipeResponse = (text: string): MealPlan => {
+  // Clean up markdown block if present (sometimes models add ```json ... ```)
+  const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  try {
+    return JSON.parse(cleanedText) as MealPlan;
+  } catch {
+    console.error("JSON Parse Error. Raw response:", cleanedText);
+    throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
+  }
+};
+
+export const generateRecipes = async (
+  apiKey: string,
+  ingredients: PantryItem[],
+  people: number,
+  meals: number,
+  diet: string,
+  language: string,
+  spices: string[] = [],
+  styleWishes: string = ''
+): Promise<MealPlan> => {
+  if (!apiKey) throw new Error("API Key is required");
+
+  const prompt = buildRecipePrompt({
+    ingredients,
+    people,
+    meals,
+    diet,
+    language,
+    spices,
+    styleWishes,
+  });
 
   try {
     const controller = new AbortController();
@@ -119,15 +171,7 @@ export const generateRecipes = async (
 
     if (!text) throw new Error("No recipes generated. The AI returned an empty response.");
 
-    // Clean up markdown block if present (sometimes models add ```json ... ```)
-    const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-    try {
-      return JSON.parse(cleanedText) as MealPlan;
-    } catch {
-      console.error("JSON Parse Error. Raw response:", cleanedText);
-      throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
-    }
+    return parseRecipeResponse(text);
   } catch (error) {
     console.error("LLM Error:", error);
 

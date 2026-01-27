@@ -77,6 +77,22 @@ export const translations = {
             localStorage: "Your settings and recipes are saved in your browser's local storage. If you clear your browser data, this information will be lost.",
             dontShowAgain: "Don't show this again",
             getStarted: "Get Started"
+        },
+        copyPaste: {
+            title: "Copy & Paste Mode",
+            description: "Use any AI chat instead of an API key",
+            step1Description: "Copy the prompt below to use with your favorite AI",
+            step2Description: "Paste the AI's response here",
+            stepCopy: "Copy Prompt",
+            stepPaste: "Paste Response",
+            copyPrompt: "Copy Prompt",
+            copied: "Copied!",
+            next: "Next",
+            back: "Back",
+            submit: "Import Recipes",
+            instructions: "Click the button below to copy this prompt. Then paste it into any AI chat (ChatGPT, Claude, Gemini, etc.), copy the AI's JSON response, and return here to paste it.",
+            responsePlaceholder: "Paste the AI's JSON response here...",
+            responseRequired: "Please paste the AI's response first."
         }
     },
     German: {
@@ -156,6 +172,22 @@ export const translations = {
             localStorage: "Deine Einstellungen und Rezepte werden im lokalen Speicher deines Browsers gespeichert. Wenn du deine Browserdaten löschst, gehen diese Informationen verloren.",
             dontShowAgain: "Nicht mehr anzeigen",
             getStarted: "Los geht's"
+        },
+        copyPaste: {
+            title: "Kopieren & Einfügen Modus",
+            description: "Verwende einen beliebigen KI-Chat anstelle eines API-Schlüssels",
+            step1Description: "Kopiere den Prompt unten für deine Lieblings-KI",
+            step2Description: "Füge die Antwort der KI hier ein",
+            stepCopy: "Prompt kopieren",
+            stepPaste: "Antwort einfügen",
+            copyPrompt: "Prompt kopieren",
+            copied: "Kopiert!",
+            next: "Weiter",
+            back: "Zurück",
+            submit: "Rezepte importieren",
+            instructions: "Klicke auf den Button unten, um den Prompt zu kopieren. Füge ihn dann in einen beliebigen KI-Chat ein (ChatGPT, Claude, Gemini, etc.), kopiere die JSON-Antwort der KI und kehre hierher zurück, um sie einzufügen.",
+            responsePlaceholder: "Füge hier die JSON-Antwort der KI ein...",
+            responseRequired: "Bitte füge zuerst die Antwort der KI ein."
         }
     },
     French: {
@@ -235,6 +267,22 @@ export const translations = {
             localStorage: "Vos paramètres et recettes sont sauvegardés dans le stockage local de votre navigateur. Si vous effacez vos données de navigation, ces informations seront perdues.",
             dontShowAgain: "Ne plus afficher",
             getStarted: "Commencer"
+        },
+        copyPaste: {
+            title: "Mode Copier-Coller",
+            description: "Utilisez n'importe quel chat IA au lieu d'une clé API",
+            step1Description: "Copiez le prompt ci-dessous pour votre IA préférée",
+            step2Description: "Collez la réponse de l'IA ici",
+            stepCopy: "Copier le prompt",
+            stepPaste: "Coller la réponse",
+            copyPrompt: "Copier le prompt",
+            copied: "Copié !",
+            next: "Suivant",
+            back: "Retour",
+            submit: "Importer les recettes",
+            instructions: "Cliquez sur le bouton ci-dessous pour copier ce prompt. Collez-le ensuite dans n'importe quel chat IA (ChatGPT, Claude, Gemini, etc.), copiez la réponse JSON de l'IA et revenez ici pour la coller.",
+            responsePlaceholder: "Collez la réponse JSON de l'IA ici...",
+            responseRequired: "Veuillez d'abord coller la réponse de l'IA."
         }
     },
     Spanish: {
@@ -314,6 +362,22 @@ export const translations = {
             localStorage: "Tus configuraciones y recetas se guardan en el almacenamiento local de tu navegador. Si borras los datos del navegador, esta información se perderá.",
             dontShowAgain: "No mostrar de nuevo",
             getStarted: "Empezar"
+        },
+        copyPaste: {
+            title: "Modo Copiar y Pegar",
+            description: "Usa cualquier chat de IA en lugar de una clave API",
+            step1Description: "Copia el prompt de abajo para usarlo con tu IA favorita",
+            step2Description: "Pega la respuesta de la IA aquí",
+            stepCopy: "Copiar prompt",
+            stepPaste: "Pegar respuesta",
+            copyPrompt: "Copiar prompt",
+            copied: "¡Copiado!",
+            next: "Siguiente",
+            back: "Atrás",
+            submit: "Importar recetas",
+            instructions: "Haz clic en el botón de abajo para copiar este prompt. Luego pégalo en cualquier chat de IA (ChatGPT, Claude, Gemini, etc.), copia la respuesta JSON de la IA y vuelve aquí para pegarla.",
+            responsePlaceholder: "Pega la respuesta JSON de la IA aquí...",
+            responseRequired: "Por favor, pega primero la respuesta de la IA."
         }
     }
 };

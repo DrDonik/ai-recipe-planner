@@ -57,6 +57,8 @@ const getTranslations = (language: string): TranslationType => {
 };
 
 interface SettingsContextType {
+    useCopyPaste: boolean;
+    setUseCopyPaste: (use: boolean) => void;
     apiKey: string;
     setApiKey: (key: string) => void;
     people: number;
@@ -75,6 +77,7 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
+    const [useCopyPaste, setUseCopyPaste] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, false);
     const [apiKey, setApiKey] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
     const [people, setPeople] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
     const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
@@ -85,6 +88,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const t = getTranslations(language);
 
     const value = {
+        useCopyPaste, setUseCopyPaste,
         apiKey, setApiKey,
         people, setPeople,
         meals, setMeals,
