@@ -78,6 +78,10 @@ export const translations = {
             dontShowAgain: "Don't show this again",
             getStarted: "Get Started"
         },
+        modeSwitch: {
+            apiKey: "API Key",
+            copyPaste: "Copy & Paste"
+        },
         copyPaste: {
             title: "Copy & Paste Mode",
             description: "Use any AI chat instead of an API key",
@@ -175,6 +179,10 @@ export const translations = {
             localStorage: "Deine Einstellungen und Rezepte werden im lokalen Speicher deines Browsers gespeichert. Wenn du deine Browserdaten löschst, gehen diese Informationen verloren.",
             dontShowAgain: "Nicht mehr anzeigen",
             getStarted: "Los geht's"
+        },
+        modeSwitch: {
+            apiKey: "API-Schlüssel",
+            copyPaste: "Kopieren & Einfügen"
         },
         copyPaste: {
             title: "Kopieren & Einfügen Modus",
@@ -274,6 +282,10 @@ export const translations = {
             dontShowAgain: "Ne plus afficher",
             getStarted: "Commencer"
         },
+        modeSwitch: {
+            apiKey: "Clé API",
+            copyPaste: "Copier-Coller"
+        },
         copyPaste: {
             title: "Mode Copier-Coller",
             description: "Utilisez n'importe quel chat IA au lieu d'une clé API",
@@ -371,6 +383,10 @@ export const translations = {
             localStorage: "Tus configuraciones y recetas se guardan en el almacenamiento local de tu navegador. Si borras los datos del navegador, esta información se perderá.",
             dontShowAgain: "No mostrar de nuevo",
             getStarted: "Empezar"
+        },
+        modeSwitch: {
+            apiKey: "Clave API",
+            copyPaste: "Copiar y Pegar"
         },
         copyPaste: {
             title: "Modo Copiar y Pegar",

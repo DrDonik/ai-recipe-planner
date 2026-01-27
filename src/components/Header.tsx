@@ -1,5 +1,5 @@
 import React from 'react';
-import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, ClipboardCopy } from 'lucide-react';
+import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG } from '../constants';
 
@@ -54,16 +54,28 @@ export const Header: React.FC<HeaderProps> = ({
                                 </button>
                             </div>
 
-                            {useCopyPaste ? (
+                            {/* Mode Toggle Switch */}
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <span className={`text-sm transition-colors ${!useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+                                    {t.modeSwitch.apiKey}
+                                </span>
                                 <button
-                                    onClick={() => setUseCopyPaste(false)}
-                                    className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 px-3 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300 hover:bg-white/70 dark:hover:bg-black/30 transition-colors"
-                                    title={t.copyPaste.description}
+                                    onClick={() => setUseCopyPaste(!useCopyPaste)}
+                                    className="relative w-12 h-6 bg-white/50 dark:bg-black/30 rounded-full border border-[var(--glass-border)] transition-colors hover:bg-white/70 dark:hover:bg-black/40"
+                                    role="switch"
+                                    aria-checked={useCopyPaste}
+                                    aria-label={useCopyPaste ? t.modeSwitch.copyPaste : t.modeSwitch.apiKey}
                                 >
-                                    <ClipboardCopy size={16} className="text-primary" aria-hidden="true" />
-                                    <span className="text-sm font-medium text-text-main">{t.copyPaste.title}</span>
+                                    <span
+                                        className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${useCopyPaste ? 'left-6' : 'left-0.5'}`}
+                                    />
                                 </button>
-                            ) : (
+                                <span className={`text-sm transition-colors ${useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+                                    {t.modeSwitch.copyPaste}
+                                </span>
+                            </div>
+
+                            {!useCopyPaste && (
                                 <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                     <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
                                     <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
@@ -96,13 +108,6 @@ export const Header: React.FC<HeaderProps> = ({
                                             {t.apiInfo}
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => setUseCopyPaste(true)}
-                                        className="text-text-muted hover:text-primary transition-colors p-1 mr-1 rounded-full"
-                                        title={t.copyPaste.description}
-                                    >
-                                        <ClipboardCopy size={14} />
-                                    </button>
                                 </div>
                             )}
 
