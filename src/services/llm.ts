@@ -181,8 +181,7 @@ const callOpenAiApi: ProviderApiFunction = async (
   signal
 ) => {
   const config = LLM_PROVIDERS.openai;
-  // Use the Responses API (recommended for reasoning models like GPT-5)
-  const response = await fetch(`${config.baseUrl}/responses`, {
+  const response = await fetch(`${config.baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -190,7 +189,7 @@ const callOpenAiApi: ProviderApiFunction = async (
     },
     body: JSON.stringify({
       model: model,
-      input: prompt,
+      messages: [{ role: 'user', content: prompt }],
     }),
     signal,
   });
@@ -201,8 +200,7 @@ const callOpenAiApi: ProviderApiFunction = async (
   }
 
   const data = await response.json();
-  // Responses API returns output_text for convenience
-  const text = data.output_text;
+  const text = data.choices?.[0]?.message?.content;
   if (!text) throw new Error('No recipes generated. OpenAI returned an empty response.');
   return text;
 };
