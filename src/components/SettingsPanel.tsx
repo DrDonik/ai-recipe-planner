@@ -19,6 +19,29 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
     const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
 
+    // Helper function to render text with clickable URLs
+    const renderTextWithLinks = (text: string) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = text.split(urlRegex);
+
+        return parts.map((part, index) => {
+            if (urlRegex.test(part)) {
+                return (
+                    <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-red-800 transition-colors"
+                    >
+                        {part}
+                    </a>
+                );
+            }
+            return <span key={index}>{part}</span>;
+        });
+    };
+
     return (
         <>
             {/* Preferences Panel */}
@@ -153,7 +176,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
             {error && (
                 <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2">
-                    {error}
+                    {renderTextWithLinks(error)}
                 </div>
             )}
         </>

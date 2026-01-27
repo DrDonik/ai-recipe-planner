@@ -17,7 +17,7 @@ export const translations = {
         add: "Add",
         remove: "Remove",
         noVeg: "No ingredients added yet.",
-        apiKeyError: "Please enter a valid API Key.",
+        apiKeyError: "Please enter a valid API Key. Get one at: https://aistudio.google.com/apikey",
         veggieError: "Please add at least one ingredient to your pantry.",
         meals: "Meals to plan",
         dietOptions: {
@@ -119,7 +119,7 @@ export const translations = {
         add: "Hinzufügen",
         remove: "Entfernen",
         noVeg: "Noch keine Zutaten hinzugefügt.",
-        apiKeyError: "Bitte gib einen gültigen API-Key ein.",
+        apiKeyError: "Bitte gib einen gültigen API-Key ein. Hol dir einen auf: https://aistudio.google.com/apikey",
         veggieError: "Bitte füge mindestens eine Zutat zu deinem Vorrat hinzu.",
         meals: "Anzahl Mahlzeiten",
         dietOptions: {
@@ -221,7 +221,7 @@ export const translations = {
         add: "Ajouter",
         remove: "Retirer",
         noVeg: "Aucun ingrédient ajouté pour le moment.",
-        apiKeyError: "Veuillez entrer une clé API valide.",
+        apiKeyError: "Veuillez entrer une clé API valide. Obtenez-en une sur : https://aistudio.google.com/apikey",
         veggieError: "Veuillez ajouter au moins un ingrédient à votre garde-manger.",
         meals: "Repas à planifier",
         dietOptions: {
@@ -323,7 +323,7 @@ export const translations = {
         add: "Agregar",
         remove: "Eliminar",
         noVeg: "No se han agregado ingredientes todavía.",
-        apiKeyError: "Por favor ingresa una clave API válida.",
+        apiKeyError: "Por favor ingresa una clave API válida. Obtén una en: https://aistudio.google.com/apikey",
         veggieError: "Por favor agrega al menos un ingrediente a tu despensa.",
         meals: "Comidas a planificar",
         dietOptions: {
