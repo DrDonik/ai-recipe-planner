@@ -72,8 +72,8 @@ export const translations = {
             pantry: "Add your available ingredients to the Pantry. The AI will try to use all of them in your recipes.",
             spiceRack: "The Spice Rack stores staples like spices and oils that you always have on hand.",
             settings: "Choose your diet preference, number of people, and how many meals to plan.",
-            apiKey: "You'll need a Gemini API key to generate recipes. Get one at Google AI Studio.",
-            copyPasteMode: "Alternatively, use Copy & Paste mode to work with any AI chat (ChatGPT, Claude, etc.) without an API key.",
+            copyPasteMode: "Use Copy & Paste mode (default) to work with any AI chat (ChatGPT, Claude, Gemini, etc.) without storing credentials.",
+            apiKey: "Alternatively, you can use a Gemini API key for a more streamlined experience. Get one at Google AI Studio.",
             generates: "Hit 'Generate' and the AI will create personalized recipes with a consolidated shopping list.",
             localStorage: "Your settings and recipes are saved in your browser's local storage. If you clear your browser data, this information will be lost.",
             dontShowAgain: "Don't show this again",
@@ -101,6 +101,23 @@ export const translations = {
             instructionsPasteEnd: "right below the AI's response.",
             responsePlaceholder: "Paste the exact AI response here...",
             responseRequired: "Please paste the AI's response first."
+        },
+        apiKeySecurity: {
+            title: "API Key Storage Notice",
+            description: "Your API key will be stored in your browser's local storage in plain text.",
+            risks: "This means:",
+            risk1: "Anyone with access to this device can view your API key",
+            risk2: "Browser extensions may be able to read it",
+            risk3: "The key persists until you clear browser data",
+            recommendation: "For better security, consider using Copy & Paste mode instead, which doesn't store any credentials.",
+            understand: "I understand, continue",
+            useCopyPaste: "Use Copy & Paste instead"
+        },
+        clearApiKey: {
+            title: "Clear API Key?",
+            description: "Do you want to remove your stored API key from this device?",
+            clear: "Yes, clear it",
+            keep: "No, keep it"
         }
     },
     German: {
@@ -175,8 +192,8 @@ export const translations = {
             pantry: "Füge deine verfügbaren Zutaten zum Vorratsschrank hinzu. Die KI versucht, alle davon zu verwenden.",
             spiceRack: "Das Gewürzregal speichert Grundvorräte wie Gewürze und Öle, die du immer da hast.",
             settings: "Wähle deine Ernährungsvorlieben, Personenanzahl und wie viele Mahlzeiten geplant werden sollen.",
-            apiKey: "Du benötigst einen Gemini API-Schlüssel. Hole dir einen bei Google AI Studio.",
-            copyPasteMode: "Alternativ kannst du den Kopieren & Einfügen-Modus nutzen, um mit jedem KI-Chat (ChatGPT, Claude, etc.) ohne API-Schlüssel zu arbeiten.",
+            copyPasteMode: "Nutze den Kopieren & Einfügen-Modus (Standard), um mit jedem KI-Chat (ChatGPT, Claude, Gemini, etc.) ohne gespeicherte Zugangsdaten zu arbeiten.",
+            apiKey: "Alternativ kannst du einen Gemini API-Schlüssel für ein nahtloseres Erlebnis verwenden. Hole dir einen bei Google AI Studio.",
             generates: "Drücke 'Planen' und die KI erstellt personalisierte Rezepte mit einer zusammengefassten Einkaufsliste.",
             localStorage: "Deine Einstellungen und Rezepte werden im lokalen Speicher deines Browsers gespeichert. Wenn du deine Browserdaten löschst, gehen diese Informationen verloren.",
             dontShowAgain: "Nicht mehr anzeigen",
@@ -204,6 +221,23 @@ export const translations = {
             instructionsPasteEnd: "direkt unter der Antwort der KI.",
             responsePlaceholder: "Füge hier die exakte Antwort der KI ein...",
             responseRequired: "Bitte füge zuerst die Antwort der KI ein."
+        },
+        apiKeySecurity: {
+            title: "Hinweis zur API-Schlüssel-Speicherung",
+            description: "Dein API-Schlüssel wird im lokalen Speicher deines Browsers als Klartext gespeichert.",
+            risks: "Das bedeutet:",
+            risk1: "Jeder mit Zugang zu diesem Gerät kann deinen API-Schlüssel einsehen",
+            risk2: "Browser-Erweiterungen können ihn möglicherweise auslesen",
+            risk3: "Der Schlüssel bleibt gespeichert, bis du die Browserdaten löschst",
+            recommendation: "Für mehr Sicherheit empfehlen wir den Kopieren & Einfügen-Modus, der keine Zugangsdaten speichert.",
+            understand: "Verstanden, fortfahren",
+            useCopyPaste: "Kopieren & Einfügen verwenden"
+        },
+        clearApiKey: {
+            title: "API-Schlüssel löschen?",
+            description: "Möchtest du deinen gespeicherten API-Schlüssel von diesem Gerät entfernen?",
+            clear: "Ja, löschen",
+            keep: "Nein, behalten"
         }
     },
     French: {
@@ -278,8 +312,8 @@ export const translations = {
             pantry: "Ajoutez vos ingrédients disponibles au garde-manger. L'IA essaiera de tous les utiliser.",
             spiceRack: "Le rack à épices stocke les produits de base comme les épices et huiles que vous avez toujours.",
             settings: "Choisissez vos préférences alimentaires, le nombre de personnes et de repas à planifier.",
-            apiKey: "Vous aurez besoin d'une clé API Gemini. Obtenez-en une sur Google AI Studio.",
-            copyPasteMode: "Sinon, utilisez le mode Copier-Coller pour travailler avec n'importe quel chat IA (ChatGPT, Claude, etc.) sans clé API.",
+            copyPasteMode: "Utilisez le mode Copier-Coller (par défaut) pour travailler avec n'importe quel chat IA (ChatGPT, Claude, Gemini, etc.) sans stocker d'identifiants.",
+            apiKey: "Sinon, vous pouvez utiliser une clé API Gemini pour une expérience plus fluide. Obtenez-en une sur Google AI Studio.",
             generates: "Cliquez sur 'Générer' et l'IA créera des recettes personnalisées avec une liste de courses consolidée.",
             localStorage: "Vos paramètres et recettes sont sauvegardés dans le stockage local de votre navigateur. Si vous effacez vos données de navigation, ces informations seront perdues.",
             dontShowAgain: "Ne plus afficher",
@@ -307,6 +341,23 @@ export const translations = {
             instructionsPasteEnd: "juste en dessous de la réponse de l'IA.",
             responsePlaceholder: "Collez ici la réponse exacte de l'IA...",
             responseRequired: "Veuillez d'abord coller la réponse de l'IA."
+        },
+        apiKeySecurity: {
+            title: "Avis de stockage de clé API",
+            description: "Votre clé API sera stockée dans le stockage local de votre navigateur en texte clair.",
+            risks: "Cela signifie :",
+            risk1: "Toute personne ayant accès à cet appareil peut voir votre clé API",
+            risk2: "Les extensions de navigateur peuvent potentiellement la lire",
+            risk3: "La clé persiste jusqu'à ce que vous effaciez les données du navigateur",
+            recommendation: "Pour plus de sécurité, envisagez d'utiliser le mode Copier-Coller, qui ne stocke aucune information d'identification.",
+            understand: "Je comprends, continuer",
+            useCopyPaste: "Utiliser Copier-Coller"
+        },
+        clearApiKey: {
+            title: "Effacer la clé API ?",
+            description: "Voulez-vous supprimer votre clé API stockée de cet appareil ?",
+            clear: "Oui, effacer",
+            keep: "Non, conserver"
         }
     },
     Spanish: {
@@ -381,8 +432,8 @@ export const translations = {
             pantry: "Agrega tus ingredientes disponibles a la despensa. La IA intentará usar todos ellos.",
             spiceRack: "El especiero almacena productos básicos como especias y aceites que siempre tienes a mano.",
             settings: "Elige tus preferencias dietéticas, número de personas y cuántas comidas planificar.",
-            apiKey: "Necesitarás una clave API de Gemini. Obtén una en Google AI Studio.",
-            copyPasteMode: "Alternativamente, usa el modo Copiar y Pegar para trabajar con cualquier chat de IA (ChatGPT, Claude, etc.) sin clave API.",
+            copyPasteMode: "Usa el modo Copiar y Pegar (predeterminado) para trabajar con cualquier chat de IA (ChatGPT, Claude, Gemini, etc.) sin almacenar credenciales.",
+            apiKey: "Alternativamente, puedes usar una clave API de Gemini para una experiencia más fluida. Obtén una en Google AI Studio.",
             generates: "Presiona 'Generar' y la IA creará recetas personalizadas con una lista de compras consolidada.",
             localStorage: "Tus configuraciones y recetas se guardan en el almacenamiento local de tu navegador. Si borras los datos del navegador, esta información se perderá.",
             dontShowAgain: "No mostrar de nuevo",
@@ -410,6 +461,23 @@ export const translations = {
             instructionsPasteEnd: "justo debajo de la respuesta de la IA.",
             responsePlaceholder: "Pega aquí la respuesta exacta de la IA...",
             responseRequired: "Por favor, pega primero la respuesta de la IA."
+        },
+        apiKeySecurity: {
+            title: "Aviso de almacenamiento de clave API",
+            description: "Tu clave API se almacenará en el almacenamiento local de tu navegador en texto plano.",
+            risks: "Esto significa:",
+            risk1: "Cualquier persona con acceso a este dispositivo puede ver tu clave API",
+            risk2: "Las extensiones del navegador pueden leerla",
+            risk3: "La clave permanece hasta que borres los datos del navegador",
+            recommendation: "Para mayor seguridad, considera usar el modo Copiar y Pegar, que no almacena ninguna credencial.",
+            understand: "Entiendo, continuar",
+            useCopyPaste: "Usar Copiar y Pegar"
+        },
+        clearApiKey: {
+            title: "¿Eliminar clave API?",
+            description: "¿Quieres eliminar tu clave API almacenada de este dispositivo?",
+            clear: "Sí, eliminar",
+            keep: "No, mantener"
         }
     }
 };

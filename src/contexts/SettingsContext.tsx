@@ -76,8 +76,27 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+/**
+ * Determine the initial value for useCopyPaste mode:
+ * - Default to true (Copy & Paste mode) for new users
+ * - But if user already has an API key stored, default to false (API Key mode)
+ */
+const getInitialUseCopyPaste = (): boolean => {
+    const savedPreference = localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE);
+    if (savedPreference !== null) {
+        try {
+            return JSON.parse(savedPreference);
+        } catch {
+            // Corrupted value, fall through to default logic
+        }
+    }
+    // New user: check if they have an existing API key (from before this update)
+    const existingApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
+    return !existingApiKey; // true (Copy & Paste) if no key, false (API Key mode) if key exists
+};
+
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [useCopyPaste, setUseCopyPaste] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, false);
+    const [useCopyPaste, setUseCopyPaste] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, getInitialUseCopyPaste());
     const [apiKey, setApiKey] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
     const [people, setPeople] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
     const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
