@@ -70,8 +70,8 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 "proteinContent": `${recipe.nutrition.protein} g`
             };
         }
-        // Escape </script> to prevent XSS when recipe data contains malicious strings
-        return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
+        // JSON.stringify handles all necessary escaping automatically
+        return JSON.stringify(schema);
     }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time, recipe.nutrition]);
 
     // Memoize the share URL (exclude missingIngredients since they're not relevant in standalone view)
@@ -104,7 +104,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             transition={{ delay: index * 0.1 }}
             className="glass-card p-8 flex flex-col h-full relative hover:border-border-hover transition-colors shadow-glass"
         >
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />
+            <script type="application/ld+json">
+                {schemaJson}
+            </script>
 
             {showOpenInNewTab && (
                 <a
