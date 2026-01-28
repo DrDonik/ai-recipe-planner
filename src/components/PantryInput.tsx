@@ -34,7 +34,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
 
     // Focus ingredient field on mount
     useEffect(() => {
-        nameInputRef.current?.focus();
+        nameInputRef.current?.focus({ preventScroll: true });
     }, []);
 
     const flushPendingInput = (): PantryItem | null => {
