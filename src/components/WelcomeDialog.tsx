@@ -59,13 +59,13 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                     </div>
 
                     <div className="flex gap-3">
-                        <Key className="text-secondary shrink-0 mt-0.5" size={20} />
-                        <p className="text-sm text-text-muted">{t.welcome.apiKey}</p>
+                        <ClipboardCopy className="text-secondary shrink-0 mt-0.5" size={20} />
+                        <p className="text-sm text-text-muted">{t.welcome.copyPasteMode}</p>
                     </div>
 
                     <div className="flex gap-3">
-                        <ClipboardCopy className="text-secondary shrink-0 mt-0.5" size={20} />
-                        <p className="text-sm text-text-muted">{t.welcome.copyPasteMode}</p>
+                        <Key className="text-secondary shrink-0 mt-0.5" size={20} />
+                        <p className="text-sm text-text-muted">{t.welcome.apiKey}</p>
                     </div>
 
                     <div className="flex gap-3">

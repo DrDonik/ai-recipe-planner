@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
-import { API_CONFIG } from '../constants';
+import { API_CONFIG, STORAGE_KEYS } from '../constants';
+import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
+import { ClearApiKeyDialog } from './ClearApiKeyDialog';
 
 interface HeaderProps {
     headerMinimized: boolean;
@@ -16,7 +18,83 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, t } = useSettings();
 
+    // Check on mount if existing user needs to see the security warning
+    const [showSecurityDialog, setShowSecurityDialog] = useState(() => {
+        const hasSeenWarning = localStorage.getItem(STORAGE_KEYS.API_KEY_WARNING_SEEN) === 'true';
+        if (hasSeenWarning) return false;
+
+        const storedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
+        if (!storedApiKey) return false;
+
+        const storedUseCopyPaste = localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE);
+        let inApiKeyMode = true; // Default: having API key implies API Key mode
+        if (storedUseCopyPaste) {
+            try {
+                inApiKeyMode = !JSON.parse(storedUseCopyPaste);
+            } catch {
+                // Corrupted value, assume API Key mode
+            }
+        }
+
+        return inApiKeyMode;
+    });
+    const [showClearDialog, setShowClearDialog] = useState(false);
+    const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
+
+    const handleModeToggle = () => {
+        if (useCopyPaste) {
+            // Switching TO API Key mode - always show warning
+            setPendingModeSwitch('toApiKey');
+            setShowSecurityDialog(true);
+        } else {
+            // Switching TO Copy & Paste mode
+            if (apiKey) {
+                setPendingModeSwitch('toCopyPaste');
+                setShowClearDialog(true);
+            } else {
+                setUseCopyPaste(true);
+            }
+        }
+    };
+
+    const handleSecurityAccept = () => {
+        localStorage.setItem(STORAGE_KEYS.API_KEY_WARNING_SEEN, 'true');
+        setShowSecurityDialog(false);
+        if (pendingModeSwitch === 'toApiKey') {
+            setUseCopyPaste(false);
+        }
+        setPendingModeSwitch(null);
+    };
+
+    const handleSecurityUseCopyPaste = () => {
+        localStorage.setItem(STORAGE_KEYS.API_KEY_WARNING_SEEN, 'true');
+        setShowSecurityDialog(false);
+
+        // If there's an API key stored, ask if they want to clear it
+        if (apiKey) {
+            setPendingModeSwitch('toCopyPaste');
+            setShowClearDialog(true);
+        } else {
+            setUseCopyPaste(true);
+            setPendingModeSwitch(null);
+        }
+    };
+
+    const handleClearApiKey = () => {
+        setApiKey('');
+        setShowClearDialog(false);
+        setUseCopyPaste(true);
+        setPendingModeSwitch(null);
+    };
+
+    const handleKeepApiKey = () => {
+        setShowClearDialog(false);
+        setUseCopyPaste(true);
+        setPendingModeSwitch(null);
+    };
+
     return (
+        <>
         <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
             <div className="app-container flex flex-col items-center py-1">
                 <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
@@ -56,22 +134,22 @@ export const Header: React.FC<HeaderProps> = ({
 
                             {/* Mode Toggle Switch */}
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <span className={`text-sm transition-colors ${!useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
-                                    {t.modeSwitch.apiKey}
+                                <span className={`text-sm transition-colors ${useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+                                    {t.modeSwitch.copyPaste}
                                 </span>
                                 <button
-                                    onClick={() => setUseCopyPaste(!useCopyPaste)}
+                                    onClick={handleModeToggle}
                                     className="relative w-12 h-6 bg-white/50 dark:bg-black/30 rounded-full border border-[var(--glass-border)] transition-colors hover:bg-white/70 dark:hover:bg-black/40"
                                     role="switch"
-                                    aria-checked={useCopyPaste}
+                                    aria-checked={!useCopyPaste}
                                     aria-label={useCopyPaste ? t.modeSwitch.copyPaste : t.modeSwitch.apiKey}
                                 >
                                     <span
-                                        className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${useCopyPaste ? 'left-6' : 'left-0.5'}`}
+                                        className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${useCopyPaste ? 'left-0.5' : 'left-6'}`}
                                     />
                                 </button>
-                                <span className={`text-sm transition-colors ${useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
-                                    {t.modeSwitch.copyPaste}
+                                <span className={`text-sm transition-colors ${!useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+                                    {t.modeSwitch.apiKey}
                                 </span>
                             </div>
 
@@ -132,5 +210,20 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
             </div>
         </header>
+
+        {showSecurityDialog && (
+            <ApiKeySecurityDialog
+                onAccept={handleSecurityAccept}
+                onUseCopyPaste={handleSecurityUseCopyPaste}
+            />
+        )}
+
+        {showClearDialog && (
+            <ClearApiKeyDialog
+                onClear={handleClearApiKey}
+                onKeep={handleKeepApiKey}
+            />
+        )}
+        </>
     );
 };
