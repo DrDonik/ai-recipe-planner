@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Utensils, Key, Info, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
@@ -174,18 +174,6 @@ export const Header: React.FC<HeaderProps> = ({
                                     >
                                         <ExternalLink size={14} />
                                     </a>
-                                    <div className="tooltip-container flex items-center">
-                                        <span
-                                            className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
-                                            aria-label={t.apiInfo}
-                                            role="img"
-                                        >
-                                            <Info size={14} />
-                                        </span>
-                                        <div className="tooltip-text">
-                                            {t.apiInfo}
-                                        </div>
-                                    </div>
                                 </div>
                             )}
 
