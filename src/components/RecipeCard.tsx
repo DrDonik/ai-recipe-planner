@@ -114,7 +114,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             {schemaJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />}
 
             {!schemaJson && (
-                <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2 mb-4">
+                <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2 mb-4"
+                >
                     {t.schemaError}
                 </div>
             )}
