@@ -54,6 +54,8 @@ jobs:
           ISSUE_AUTHOR: ${{ steps.issue.outputs.author }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --json-schema '{"type":"object","required":["valid","complexity","ux_impact","safe_to_auto_implement","summary","implementation_notes"],"properties":{"valid":{"type":"boolean","description":"Whether this is a valid issue"},"complexity":{"type":"string","enum":["easy","medium","hard"],"description":"Implementation complexity"},"ux_impact":{"type":"string","enum":["positive","neutral","breaking"],"description":"User experience impact"},"safe_to_auto_implement":{"type":"boolean","description":"Whether safe to auto-implement"},"summary":{"type":"string","description":"Brief summary of assessment"},"implementation_notes":{"type":"string","description":"Implementation notes if valid"}}}'
           prompt: |
             Analyze this GitHub issue and provide an assessment. Read the CLAUDE.md file first to understand the project.
 
@@ -76,47 +78,34 @@ jobs:
                - Positive/Neutral: Improves UX or keeps it the same
                - Breaking: Changes existing behavior, removes features, or breaks backwards compatibility
 
-            After your analysis, you MUST output a JSON block with your assessment. Use this exact format:
-
-            ```json
-            {
-              "valid": true/false,
-              "complexity": "easy" | "medium" | "hard",
-              "ux_impact": "positive" | "neutral" | "breaking",
-              "safe_to_auto_implement": true/false,
-              "summary": "Brief 1-2 sentence summary of the issue and your assessment",
-              "implementation_notes": "Brief notes on how this could be implemented (if valid)"
-            }
-            ```
-
             Set `safe_to_auto_implement` to `true` ONLY if ALL of these are true:
             - valid is true
             - complexity is "easy"
             - ux_impact is "positive" or "neutral"
             - The solution is clear and unlikely to cause problems
 
+            Provide your assessment as structured output matching the JSON schema.
+
       - name: Parse Claude Response
         id: parse
         env:
-          CLAUDE_RESPONSE: ${{ steps.validate.outputs.response }}
+          STRUCTURED_OUTPUT: ${{ steps.validate.outputs.structured_output }}
         uses: actions/github-script@v7
         with:
           script: |
-            const response = process.env.CLAUDE_RESPONSE || '';
-            console.log('Response length:', response.length);
-            console.log('Response preview:', response.substring(0, 500));
+            const structuredOutput = process.env.STRUCTURED_OUTPUT || '';
+            console.log('Structured output length:', structuredOutput.length);
+            console.log('Structured output preview:', structuredOutput.substring(0, 500));
 
-            // Extract JSON from the response
-            const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
-            if (!jsonMatch) {
-              console.log('No JSON block found in response');
+            if (!structuredOutput) {
+              console.log('No structured output received');
               core.setOutput('valid', 'false');
               core.setOutput('safe_to_auto_implement', 'false');
               return;
             }
 
             try {
-              const assessment = JSON.parse(jsonMatch[1]);
+              const assessment = JSON.parse(structuredOutput);
               console.log('Parsed assessment:', JSON.stringify(assessment));
               core.setOutput('valid', String(assessment.valid));
               core.setOutput('complexity', assessment.complexity || 'unknown');
@@ -125,7 +114,7 @@ jobs:
               core.setOutput('summary', assessment.summary || '');
               core.setOutput('implementation_notes', assessment.implementation_notes || '');
             } catch (e) {
-              console.log('Failed to parse JSON:', e);
+              console.log('Failed to parse structured output:', e);
               core.setOutput('valid', 'false');
               core.setOutput('safe_to_auto_implement', 'false');
             }
