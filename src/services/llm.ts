@@ -1,8 +1,42 @@
+import { z } from 'zod';
 import { API_CONFIG } from '../constants';
 import type { PantryItem, MealPlan } from '../types';
 
 // Re-export types for backwards compatibility
 export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
+
+/**
+ * Zod schemas for runtime validation of LLM responses.
+ * These ensure the parsed JSON matches our expected types.
+ */
+const IngredientSchema = z.object({
+  item: z.string(),
+  amount: z.string(),
+  unit: z.string().optional(),
+});
+
+const NutritionSchema = z.object({
+  calories: z.number(),
+  carbs: z.number(),
+  fat: z.number(),
+  protein: z.number(),
+});
+
+const RecipeSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  time: z.string(),
+  ingredients: z.array(IngredientSchema),
+  instructions: z.array(z.string()),
+  usedIngredients: z.array(z.string()),
+  missingIngredients: z.array(IngredientSchema),
+  nutrition: NutritionSchema.optional(),
+});
+
+const MealPlanSchema = z.object({
+  recipes: z.array(RecipeSchema),
+  shoppingList: z.array(IngredientSchema),
+});
 
 /**
  * Parameters for building a recipe prompt.
@@ -103,14 +137,31 @@ export const buildRecipePrompt = ({
 /**
  * Parses the LLM response text into a MealPlan.
  * Exported so it can be used by the copy-paste flow.
+ * Now includes runtime validation using Zod to ensure data structure is correct.
  */
 export const parseRecipeResponse = (text: string): MealPlan => {
   // Clean up markdown block if present (sometimes models add ```json ... ```)
   const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
   try {
-    return JSON.parse(cleanedText) as MealPlan;
-  } catch {
+    const parsed = JSON.parse(cleanedText);
+
+    // Validate the parsed data against our schema
+    const validated = MealPlanSchema.parse(parsed);
+    return validated;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      // Zod validation failed - the JSON structure doesn't match expectations
+      console.error("Validation Error:", error.errors);
+      const firstError = error.errors[0];
+      const path = firstError.path.join('.');
+      throw new Error(
+        `Invalid recipe data structure: ${firstError.message}${path ? ` at ${path}` : ''}. ` +
+        `Please try generating recipes again.`
+      );
+    }
+
+    // JSON parsing failed
     console.error("JSON Parse Error. Raw response:", cleanedText);
     throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
   }
