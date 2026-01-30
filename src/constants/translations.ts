@@ -117,7 +117,8 @@ export const translations = {
             description: "Do you want to remove your stored API key from this device?",
             clear: "Yes, clear it",
             keep: "No, keep it"
-        }
+        },
+        schemaError: "Recipe data issue detected"
     },
     German: {
         ingredients: "Zutaten",
@@ -236,7 +237,8 @@ export const translations = {
             description: "Möchtest du deinen gespeicherten API-Schlüssel von diesem Gerät entfernen?",
             clear: "Ja, löschen",
             keep: "Nein, behalten"
-        }
+        },
+        schemaError: "Rezeptdatenproblem festgestellt"
     },
     French: {
         ingredients: "Ingrédients",
@@ -355,7 +357,8 @@ export const translations = {
             description: "Voulez-vous supprimer votre clé API stockée de cet appareil ?",
             clear: "Oui, effacer",
             keep: "Non, conserver"
-        }
+        },
+        schemaError: "Problème de données de recette détecté"
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -474,6 +477,7 @@ export const translations = {
             description: "¿Quieres eliminar tu clave API almacenada de este dispositivo?",
             clear: "Sí, eliminar",
             keep: "No, mantener"
-        }
+        },
+        schemaError: "Problema con datos de receta detectado"
     }
 };
