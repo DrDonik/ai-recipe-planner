@@ -198,10 +198,10 @@ interface Ingredient {
 }
 
 interface Nutrition {
-  calories: string;
-  carbs: string;
-  fat: string;
-  protein: string;
+  calories: number;
+  carbs: number;    // grams
+  fat: number;      // grams
+  protein: number;  // grams
 }
 
 interface MealPlan {
