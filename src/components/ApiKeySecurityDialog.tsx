@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { X, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ApiKeySecurityDialogProps {
     onAccept: () => void;
@@ -12,19 +12,7 @@ export const ApiKeySecurityDialog = ({
     onUseCopyPaste,
 }: ApiKeySecurityDialogProps) => {
     const { t } = useSettings();
-    const dialogRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onUseCopyPaste();
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        dialogRef.current?.focus();
-
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [onUseCopyPaste]);
+    const dialogRef = useFocusTrap(onUseCopyPaste);
 
     return (
         <div
