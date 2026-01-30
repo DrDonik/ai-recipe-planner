@@ -3,6 +3,12 @@ name: Issue Validation
 on:
   issues:
     types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to validate'
+        required: true
+        type: number
 
 jobs:
   validate-issue:
@@ -18,17 +24,42 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Get issue data
+        id: issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let issue;
+            if (context.eventName === 'workflow_dispatch') {
+              const { data } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ inputs.issue_number || 0 }}
+              });
+              issue = data;
+            } else {
+              issue = context.payload.issue;
+            }
+            core.setOutput('number', issue.number);
+            core.setOutput('title', issue.title);
+            core.setOutput('body', issue.body || '');
+            core.setOutput('author', issue.user.login);
+
       - name: Validate Issue with Claude
         id: validate
         uses: anthropics/claude-code-action@v1
+        env:
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY: ${{ steps.issue.outputs.body }}
+          ISSUE_AUTHOR: ${{ steps.issue.outputs.author }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             Analyze this GitHub issue and provide an assessment. Read the CLAUDE.md file first to understand the project.
 
-            Issue Title: ${{ github.event.issue.title }}
-            Issue Body: ${{ github.event.issue.body }}
-            Issue Author: ${{ github.event.issue.user.login }}
+            Issue Title: ${{ steps.issue.outputs.title }}
+            Issue Body: ${{ steps.issue.outputs.body }}
+            Issue Author: ${{ steps.issue.outputs.author }}
 
             Please evaluate:
 
@@ -66,10 +97,14 @@ jobs:
 
       - name: Parse Claude Response
         id: parse
+        env:
+          CLAUDE_RESPONSE: ${{ steps.validate.outputs.response }}
         uses: actions/github-script@v7
         with:
           script: |
-            const response = `${{ steps.validate.outputs.response }}`;
+            const response = process.env.CLAUDE_RESPONSE || '';
+            console.log('Response length:', response.length);
+            console.log('Response preview:', response.substring(0, 500));
 
             // Extract JSON from the response
             const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
@@ -82,6 +117,7 @@ jobs:
 
             try {
               const assessment = JSON.parse(jsonMatch[1]);
+              console.log('Parsed assessment:', JSON.stringify(assessment));
               core.setOutput('valid', String(assessment.valid));
               core.setOutput('complexity', assessment.complexity || 'unknown');
               core.setOutput('ux_impact', assessment.ux_impact || 'unknown');
@@ -147,14 +183,18 @@ jobs:
               }
             }
 
+            const issueNumber = ${{ steps.issue.outputs.number }};
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: issueNumber,
               labels: labels
             });
 
       - name: Post Assessment Comment
+        env:
+          SUMMARY: ${{ steps.parse.outputs.summary }}
+          IMPL_NOTES: ${{ steps.parse.outputs.implementation_notes }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -162,9 +202,10 @@ jobs:
             const complexity = '${{ steps.parse.outputs.complexity }}';
             const uxImpact = '${{ steps.parse.outputs.ux_impact }}';
             const safeToAutoImpl = '${{ steps.parse.outputs.safe_to_auto_implement }}' === 'true';
-            const summary = `${{ steps.parse.outputs.summary }}`;
-            const implNotes = `${{ steps.parse.outputs.implementation_notes }}`;
-            const issueAuthor = '${{ github.event.issue.user.login }}';
+            const summary = process.env.SUMMARY || '';
+            const implNotes = process.env.IMPL_NOTES || '';
+            const issueAuthor = '${{ steps.issue.outputs.author }}';
+            const issueNumber = ${{ steps.issue.outputs.number }};
             const trustedActors = ['DrDonik'];
             const isTrustedActor = trustedActors.includes(issueAuthor);
 
@@ -203,6 +244,6 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              issue_number: issueNumber,
               body: comment
             });
