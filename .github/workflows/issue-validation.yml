@@ -1,0 +1,208 @@
+name: Issue Validation
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  validate-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate Issue with Claude
+        id: validate
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Analyze this GitHub issue and provide an assessment. Read the CLAUDE.md file first to understand the project.
+
+            Issue Title: ${{ github.event.issue.title }}
+            Issue Body: ${{ github.event.issue.body }}
+            Issue Author: ${{ github.event.issue.user.login }}
+
+            Please evaluate:
+
+            1. **Validity**: Is this a valid issue that addresses a real problem, bug, concern, or enhancement request?
+               - Look for: clear description, reproducible problem, or reasonable feature request
+               - Invalid examples: spam, unrelated to project, too vague to act on
+
+            2. **Implementation Complexity**: How difficult would this be to implement?
+               - Easy: Single file change, clear solution, no architectural changes
+               - Medium: Multiple files, some design decisions needed
+               - Hard: Architectural changes, major refactoring, or unclear solution
+
+            3. **User Experience Impact**: How would this affect users?
+               - Positive/Neutral: Improves UX or keeps it the same
+               - Breaking: Changes existing behavior, removes features, or breaks backwards compatibility
+
+            After your analysis, you MUST output a JSON block with your assessment. Use this exact format:
+
+            ```json
+            {
+              "valid": true/false,
+              "complexity": "easy" | "medium" | "hard",
+              "ux_impact": "positive" | "neutral" | "breaking",
+              "safe_to_auto_implement": true/false,
+              "summary": "Brief 1-2 sentence summary of the issue and your assessment",
+              "implementation_notes": "Brief notes on how this could be implemented (if valid)"
+            }
+            ```
+
+            Set `safe_to_auto_implement` to `true` ONLY if ALL of these are true:
+            - valid is true
+            - complexity is "easy"
+            - ux_impact is "positive" or "neutral"
+            - The solution is clear and unlikely to cause problems
+
+      - name: Parse Claude Response
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const response = `${{ steps.validate.outputs.response }}`;
+
+            // Extract JSON from the response
+            const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
+            if (!jsonMatch) {
+              console.log('No JSON block found in response');
+              core.setOutput('valid', 'false');
+              core.setOutput('safe_to_auto_implement', 'false');
+              return;
+            }
+
+            try {
+              const assessment = JSON.parse(jsonMatch[1]);
+              core.setOutput('valid', String(assessment.valid));
+              core.setOutput('complexity', assessment.complexity || 'unknown');
+              core.setOutput('ux_impact', assessment.ux_impact || 'unknown');
+              core.setOutput('safe_to_auto_implement', String(assessment.safe_to_auto_implement));
+              core.setOutput('summary', assessment.summary || '');
+              core.setOutput('implementation_notes', assessment.implementation_notes || '');
+            } catch (e) {
+              console.log('Failed to parse JSON:', e);
+              core.setOutput('valid', 'false');
+              core.setOutput('safe_to_auto_implement', 'false');
+            }
+
+      - name: Add Assessment Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const valid = '${{ steps.parse.outputs.valid }}' === 'true';
+            const complexity = '${{ steps.parse.outputs.complexity }}';
+            const uxImpact = '${{ steps.parse.outputs.ux_impact }}';
+            const safeToAutoImpl = '${{ steps.parse.outputs.safe_to_auto_implement }}' === 'true';
+
+            const labels = [];
+
+            if (valid) {
+              labels.push('validated');
+              labels.push(`complexity:${complexity}`);
+              labels.push(`ux:${uxImpact}`);
+
+              if (safeToAutoImpl) {
+                labels.push('auto-implementable');
+              }
+            } else {
+              labels.push('needs-clarification');
+            }
+
+            // Ensure labels exist before adding
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label
+                });
+              } catch (e) {
+                // Label doesn't exist, create it
+                const colors = {
+                  'validated': '0e8a16',
+                  'needs-clarification': 'fbca04',
+                  'complexity:easy': 'c5def5',
+                  'complexity:medium': '1d76db',
+                  'complexity:hard': 'd93f0b',
+                  'ux:positive': '0e8a16',
+                  'ux:neutral': 'c5def5',
+                  'ux:breaking': 'd93f0b',
+                  'auto-implementable': '5319e7'
+                };
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color: colors[label] || 'ededed'
+                });
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+
+      - name: Post Assessment Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const valid = '${{ steps.parse.outputs.valid }}' === 'true';
+            const complexity = '${{ steps.parse.outputs.complexity }}';
+            const uxImpact = '${{ steps.parse.outputs.ux_impact }}';
+            const safeToAutoImpl = '${{ steps.parse.outputs.safe_to_auto_implement }}' === 'true';
+            const summary = `${{ steps.parse.outputs.summary }}`;
+            const implNotes = `${{ steps.parse.outputs.implementation_notes }}`;
+            const issueAuthor = '${{ github.event.issue.user.login }}';
+            const trustedActors = ['DrDonik'];
+            const isTrustedActor = trustedActors.includes(issueAuthor);
+
+            let comment = `## Issue Validation Assessment\n\n`;
+            comment += `| Criterion | Result |\n`;
+            comment += `|-----------|--------|\n`;
+            comment += `| Valid Issue | ${valid ? '✅ Yes' : '❌ No'} |\n`;
+            comment += `| Complexity | ${complexity === 'easy' ? '🟢' : complexity === 'medium' ? '🟡' : '🔴'} ${complexity} |\n`;
+            comment += `| UX Impact | ${uxImpact === 'positive' ? '🟢' : uxImpact === 'neutral' ? '🟡' : '🔴'} ${uxImpact} |\n`;
+            comment += `| Safe to Auto-Implement | ${safeToAutoImpl ? '✅ Yes' : '❌ No'} |\n\n`;
+
+            if (summary) {
+              comment += `**Summary:** ${summary}\n\n`;
+            }
+
+            if (implNotes && valid) {
+              comment += `**Implementation Notes:** ${implNotes}\n\n`;
+            }
+
+            comment += `---\n\n`;
+
+            if (safeToAutoImpl && isTrustedActor) {
+              comment += `🤖 This issue has been automatically flagged for implementation by @claude.\n\n`;
+              comment += `@claude Please implement the fix/enhancement described in this issue.`;
+            } else if (safeToAutoImpl && !isTrustedActor) {
+              comment += `ℹ️ This issue appears safe to auto-implement, but requires approval from a maintainer.\n`;
+              comment += `Maintainers: Add the \`approved-for-auto-impl\` label or comment \`@claude\` to trigger implementation.`;
+            } else if (valid) {
+              comment += `ℹ️ This issue requires manual review before implementation.\n`;
+              comment += `Maintainers: Comment \`@claude\` to request implementation when ready.`;
+            } else {
+              comment += `⚠️ This issue needs clarification before it can be addressed.\n`;
+              comment += `Please provide more details about the problem or enhancement you're requesting.`;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
