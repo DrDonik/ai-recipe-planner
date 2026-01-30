@@ -41,37 +41,44 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
     }, []);
 
     // Memoize the JSON-LD schema to avoid regeneration on every render
+    // Wrap in try-catch to prevent malformed data from crashing the component
     const schemaJson = useMemo(() => {
-        const schema: Record<string, unknown> = {
-            "@context": "https://schema.org",
-            "@type": "Recipe",
-            "name": recipe.title,
-            "description": `A recipe for ${recipe.title}`,
-            "recipeIngredient": recipe.ingredients.map(i => `${i.amount} ${i.item}`),
-            "recipeInstructions": recipe.instructions.map(step => ({
-                "@type": "HowToStep",
-                "text": step
-            }))
-        };
-        // Add cookTime if available (e.g., "30 min" -> "PT30M")
-        if (recipe.time) {
-            const minutes = recipe.time.match(/(\d+)/)?.[1];
-            if (minutes) {
-                schema.cookTime = `PT${minutes}M`;
-            }
-        }
-        // Add nutrition info if available
-        if (recipe.nutrition) {
-            schema.nutrition = {
-                "@type": "NutritionInformation",
-                "calories": `${recipe.nutrition.calories} calories`,
-                "carbohydrateContent": `${recipe.nutrition.carbs} g`,
-                "fatContent": `${recipe.nutrition.fat} g`,
-                "proteinContent": `${recipe.nutrition.protein} g`
+        try {
+            const schema: Record<string, unknown> = {
+                "@context": "https://schema.org",
+                "@type": "Recipe",
+                "name": recipe.title,
+                "description": `A recipe for ${recipe.title}`,
+                "recipeIngredient": recipe.ingredients.map(i => `${i.amount} ${i.item}`),
+                "recipeInstructions": recipe.instructions.map(step => ({
+                    "@type": "HowToStep",
+                    "text": step
+                }))
             };
+            // Add cookTime if available (e.g., "30 min" -> "PT30M")
+            if (recipe.time) {
+                const minutes = recipe.time.match(/(\d+)/)?.[1];
+                if (minutes) {
+                    schema.cookTime = `PT${minutes}M`;
+                }
+            }
+            // Add nutrition info if available
+            if (recipe.nutrition) {
+                schema.nutrition = {
+                    "@type": "NutritionInformation",
+                    "calories": `${recipe.nutrition.calories} calories`,
+                    "carbohydrateContent": `${recipe.nutrition.carbs} g`,
+                    "fatContent": `${recipe.nutrition.fat} g`,
+                    "proteinContent": `${recipe.nutrition.protein} g`
+                };
+            }
+            // Escape </script> to prevent XSS when recipe data contains malicious strings
+            return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
+        } catch (error) {
+            // Log error for debugging but don't crash the component
+            console.error('Failed to generate JSON-LD schema for recipe:', recipe.title, error);
+            return null;
         }
-        // Escape </script> to prevent XSS when recipe data contains malicious strings
-        return JSON.stringify(schema).replace(/<\/script>/gi, '<\\/script>');
     }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time, recipe.nutrition]);
 
     // Memoize the share URL (exclude missingIngredients since they're not relevant in standalone view)
@@ -104,7 +111,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             transition={{ delay: index * 0.1 }}
             className="glass-card p-8 flex flex-col h-full relative hover:border-border-hover transition-colors shadow-glass"
         >
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />
+            {schemaJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />}
 
             {showOpenInNewTab && (
                 <a
