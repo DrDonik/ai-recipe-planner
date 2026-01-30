@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { X, Key, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ClearApiKeyDialogProps {
     onClear: () => void;
@@ -12,19 +12,7 @@ export const ClearApiKeyDialog = ({
     onKeep,
 }: ClearApiKeyDialogProps) => {
     const { t } = useSettings();
-    const dialogRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onKeep();
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        dialogRef.current?.focus();
-
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [onKeep]);
+    const dialogRef = useFocusTrap(onKeep);
 
     return (
         <div

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Copy, Check, AlertCircle } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface CopyPasteDialogProps {
     prompt: string;
@@ -21,6 +22,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
     const [response, setResponse] = useState('');
     const [error, setError] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const dialogRef = useFocusTrap(onCancel);
 
     const handleCopyAndProceed = async () => {
         try {
@@ -53,11 +55,20 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+        <div
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="copy-paste-dialog-title"
+        >
+            <div
+                ref={dialogRef}
+                tabIndex={-1}
+                className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 outline-none"
+            >
                 {/* Header */}
                 <div className="flex items-center justify-between p-3 border-b border-border-base/30">
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
+                    <h2 id="copy-paste-dialog-title" className="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
                         {t.copyPaste.title}
                     </h2>
                     <button
