@@ -108,7 +108,11 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                 className="w-full flex-1 bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
                             {error && (
-                                <div className="flex items-center gap-2 text-sm text-red-500">
+                                <div
+                                    role="alert"
+                                    aria-live="assertive"
+                                    className="flex items-center gap-2 text-sm text-red-500"
+                                >
                                     <AlertCircle size={16} />
                                     <span>{error}</span>
                                 </div>

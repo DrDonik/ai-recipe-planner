@@ -175,7 +175,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </button>
 
             {error && (
-                <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2">
+                <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2"
+                >
                     {renderTextWithLinks(error)}
                 </div>
             )}
