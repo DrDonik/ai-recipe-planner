@@ -162,7 +162,7 @@ The prompt in `buildRecipePrompt()` has specific rules that prevent common LLM m
 - **Icons**: Lucide React
 - **LLM Provider**: Google Gemini API (`gemini-3-flash-preview`)
 - **Linting**: ESLint 9 (flat config) with TypeScript-ESLint
-- **Package Manager**: Yarn 4.5.3
+- **Package Manager**: npm
 
 ## Configuration Files
 
