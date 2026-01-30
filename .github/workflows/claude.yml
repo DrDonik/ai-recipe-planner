@@ -50,6 +50,9 @@ jobs:
           additional_permissions: |
             actions: read
 
+          # Provide a prompt for label-triggered events (no @claude mention to parse)
+          prompt: ${{ github.event.action == 'labeled' && github.event.label.name == 'approved-for-auto-impl' && 'Please implement the fix/enhancement described in this issue.' || '' }}
+
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
