@@ -12,11 +12,12 @@ on:
 
 jobs:
   claude-review:
-    if: github.actor == 'DrDonik'
+    # Allow repo owner, org members, collaborators, and previous contributors
+    if: contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
 

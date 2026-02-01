@@ -2,30 +2,31 @@ name: Claude Code
 
 on:
   issue_comment:
-    types: [created]
+    types: [created, edited]
   pull_request_review_comment:
-    types: [created]
+    types: [created, edited]
   issues:
-    types: [opened, assigned, labeled]
+    types: [opened, edited]
   pull_request_review:
-    types: [submitted]
+    types: [submitted, edited]
 
 jobs:
   claude:
     if: |
       (
-        (github.actor == 'DrDonik' || github.actor == 'github-actions[bot]') &&
+        (
+          contains(fromJSON('["github-actions[bot]", "claude[bot]"]'), github.actor) ||
+          (github.event_name == 'issue_comment' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)) ||
+          (github.event_name == 'pull_request_review_comment' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)) ||
+          (github.event_name == 'pull_request_review' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.review.author_association)) ||
+          (github.event_name == 'issues' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association))
+        ) &&
         (
           (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
           (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
           (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-          (github.event_name == 'issues' && github.event.action != 'labeled' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+          (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
         )
-      ) ||
-      (
-        github.event_name == 'issues' &&
-        github.event.action == 'labeled' &&
-        github.event.label.name == 'approved-for-auto-impl'
       )
     runs-on: ubuntu-latest
     permissions:
@@ -34,6 +35,7 @@ jobs:
       issues: write
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,8 +52,7 @@ jobs:
           additional_permissions: |
             actions: read
 
-          # Provide a prompt for label-triggered events (no @claude mention to parse)
-          prompt: ${{ github.event.action == 'labeled' && github.event.label.name == 'approved-for-auto-impl' && format('@claude Please implement the fix/enhancement described in issue #{0}: {1}', github.event.issue.number, github.event.issue.html_url) || '' }}
+          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.          # prompt: 'Update the pull request description to include a summary of changes.'
 
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
