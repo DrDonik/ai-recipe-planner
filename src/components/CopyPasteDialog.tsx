@@ -73,7 +73,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                     </h2>
                     <button
                         onClick={onCancel}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
+                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -138,6 +138,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                         <button
                             onClick={handleCopyAndProceed}
                             disabled={copied}
+                            autoFocus
                             className={`btn btn-primary flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg min-w-[160px] transition-colors ${
                                 copied ? '!bg-green-500' : ''
                             }`}

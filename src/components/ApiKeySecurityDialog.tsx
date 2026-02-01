@@ -37,7 +37,7 @@ export const ApiKeySecurityDialog = ({
                     </div>
                     <button
                         onClick={onUseCopyPaste}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
+                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -75,6 +75,7 @@ export const ApiKeySecurityDialog = ({
                 <div className="flex flex-col gap-3">
                     <button
                         onClick={onUseCopyPaste}
+                        autoFocus
                         className="btn btn-primary w-full py-3 rounded-xl shadow-lg shadow-primary/20"
                     >
                         {t.apiKeySecurity.useCopyPaste}
