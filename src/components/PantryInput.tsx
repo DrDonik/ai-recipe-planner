@@ -93,6 +93,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 onChange={(e) => setName(e.target.value)}
                                 onKeyDown={handleNameKeyDown}
                                 className="input-field w-full"
+                                aria-label={t.placeholders.ingredient}
                             />
                         </div>
                         <div className="flex gap-2">
@@ -103,6 +104,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 className="input-field flex-1"
+                                aria-label={t.placeholders.amount}
                             />
                         </div>
                         <div className="flex gap-2">
