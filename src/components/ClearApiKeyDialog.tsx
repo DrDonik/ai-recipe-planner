@@ -37,7 +37,7 @@ export const ClearApiKeyDialog = ({
                     </div>
                     <button
                         onClick={onKeep}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
+                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -50,17 +50,18 @@ export const ClearApiKeyDialog = ({
 
                 <div className="flex flex-col gap-3">
                     <button
+                        onClick={onKeep}
+                        autoFocus
+                        className="btn bg-white/50 hover:bg-white/70 dark:bg-black/30 dark:hover:bg-black/40 text-text-main w-full py-3 rounded-xl border border-[var(--glass-border)]"
+                    >
+                        {t.clearApiKey.keep}
+                    </button>
+                    <button
                         onClick={onClear}
                         className="btn bg-red-500 hover:bg-red-600 text-white w-full py-3 rounded-xl shadow-lg flex items-center justify-center gap-2"
                     >
                         <Trash2 size={18} />
                         {t.clearApiKey.clear}
-                    </button>
-                    <button
-                        onClick={onKeep}
-                        className="btn bg-white/50 hover:bg-white/70 dark:bg-black/30 dark:hover:bg-black/40 text-text-main w-full py-3 rounded-xl border border-[var(--glass-border)]"
-                    >
-                        {t.clearApiKey.keep}
                     </button>
                 </div>
             </div>

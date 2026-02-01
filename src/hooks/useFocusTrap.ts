@@ -38,13 +38,17 @@ export function useFocusTrap(onClose: () => void) {
             );
         };
 
-        // Focus the first focusable element
+        // Focus the first focusable element, unless something inside already has focus (e.g., autoFocus)
         const focusableElements = getFocusableElements();
-        if (focusableElements.length > 0) {
-            focusableElements[0].focus();
-        } else {
-            // If no focusable elements, focus the dialog itself
-            dialogRef.current?.focus();
+        const isAlreadyFocusedInside = dialogRef.current?.contains(document.activeElement);
+
+        if (!isAlreadyFocusedInside) {
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            } else {
+                // If no focusable elements, focus the dialog itself
+                dialogRef.current?.focus();
+            }
         }
 
         // Handle keyboard events
@@ -55,27 +59,25 @@ export function useFocusTrap(onClose: () => void) {
                 return;
             }
 
-            // Trap focus on Tab
+            // Trap focus on Tab - handle ALL Tab presses manually to ensure focus stays in dialog
             if (e.key === 'Tab') {
+                e.preventDefault();
+
                 const focusableElements = getFocusableElements();
                 if (focusableElements.length === 0) return;
 
-                const firstElement = focusableElements[0];
-                const lastElement = focusableElements[focusableElements.length - 1];
+                const currentIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
 
+                let nextIndex: number;
                 if (e.shiftKey) {
                     // Shift + Tab: moving backwards
-                    if (document.activeElement === firstElement) {
-                        e.preventDefault();
-                        lastElement.focus();
-                    }
+                    nextIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
                 } else {
                     // Tab: moving forwards
-                    if (document.activeElement === lastElement) {
-                        e.preventDefault();
-                        firstElement.focus();
-                    }
+                    nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
                 }
+
+                focusableElements[nextIndex].focus();
             }
         };
 

@@ -42,7 +42,7 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
+                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -105,6 +105,7 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
 
                     <button
                         onClick={handleClose}
+                        autoFocus
                         className="btn btn-primary w-full py-3 rounded-xl shadow-lg shadow-primary/20"
                     >
                         {t.welcome.getStarted}
