@@ -80,7 +80,7 @@ jobs:
                - If auto-implementable AND author is "DrDonik":
                  "🤖 This issue has been automatically flagged for implementation by @claude.
 
-                 @claude Please implement the fix/enhancement described in this issue."
+                 @claude Please implement the fix/enhancement described in this issue. After implementing, create a pull request with your changes."
                - If auto-implementable but author is NOT "DrDonik":
                  "ℹ️ This issue appears safe to auto-implement, but requires approval from a maintainer.
                  Maintainers: Explicitley call claude to trigger implementation."
