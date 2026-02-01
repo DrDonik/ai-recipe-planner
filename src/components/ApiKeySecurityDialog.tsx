@@ -74,16 +74,16 @@ export const ApiKeySecurityDialog = ({
 
                 <div className="flex flex-col gap-3">
                     <button
-                        onClick={onAccept}
-                        className="btn bg-amber-500 hover:bg-amber-600 text-white w-full py-3 rounded-xl shadow-lg"
-                    >
-                        {t.apiKeySecurity.understand}
-                    </button>
-                    <button
                         onClick={onUseCopyPaste}
                         className="btn btn-primary w-full py-3 rounded-xl shadow-lg shadow-primary/20"
                     >
                         {t.apiKeySecurity.useCopyPaste}
+                    </button>
+                    <button
+                        onClick={onAccept}
+                        className="btn bg-amber-500 hover:bg-amber-600 text-white w-full py-3 rounded-xl shadow-lg"
+                    >
+                        {t.apiKeySecurity.understand}
                     </button>
                 </div>
             </div>
