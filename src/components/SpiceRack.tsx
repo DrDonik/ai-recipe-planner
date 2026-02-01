@@ -55,6 +55,7 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
                             value={newSpice}
                             onChange={(e) => setNewSpice(e.target.value)}
                             className="input-field w-full flex-1"
+                            aria-label={t.spicesPlaceholder}
                         />
                         <button type="submit" className="btn btn-primary whitespace-nowrap">
                             <Plus size={18} /> {t.add}
