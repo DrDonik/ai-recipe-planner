@@ -38,9 +38,3 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
 
-      - name: Request human review
-        if: success()
-        run: gh pr edit ${{ github.event.pull_request.number }} --add-reviewer DrDonik
-        env:
-          GH_TOKEN: ${{ github.token }}
-
