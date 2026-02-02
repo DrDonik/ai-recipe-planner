@@ -41,7 +41,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
   usedIngredients: string[]; // List of PantryItem IDs used
-  missingIngredients: Ingredient[];
+  missingIngredients?: Ingredient[]; // Optional: excluded in shared recipes
   nutrition?: Nutrition; // Optional for backwards compatibility
 }
 
