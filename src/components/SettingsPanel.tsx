@@ -160,12 +160,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <button
                 onClick={handleGenerate}
                 disabled={loading}
+                aria-busy={loading}
                 className={`btn btn-primary w-full py-4 text-lg rounded-xl shadow-lg shadow-primary/20 ${loading ? 'opacity-80 cursor-wait' : ''}`}
             >
                 {loading ? (
                     <>
-                        <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
-                        {t.planning}
+                        <span
+                            className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"
+                            role="status"
+                            aria-label={t.planning}
+                        ></span>
+                        <span aria-live="polite">{t.planning}</span>
                     </>
                 ) : (
                     <>
