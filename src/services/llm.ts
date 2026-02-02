@@ -69,6 +69,24 @@ export const MealPlanSchema = z.object({
 /**
  * Parameters for building a recipe prompt.
  */
+/**
+ * Error translations for user-facing error messages.
+ */
+export interface ErrorTranslations {
+  invalidStructure: string;
+  tryAgain: string;
+  invalidJson: string;
+  apiKeyRequired: string;
+  fetchFailed: string;
+  emptyResponse: string;
+  timeout: string;
+  networkError: string;
+  unexpectedError: string;
+}
+
+/**
+ * Parameters for building a recipe prompt.
+ */
 export interface RecipePromptParams {
   ingredients: PantryItem[];
   people: number;
@@ -170,9 +188,22 @@ export const buildRecipePrompt = ({
  * Exported so it can be used by the copy-paste flow.
  * Now includes runtime validation using Zod to ensure data structure is correct.
  */
-export const parseRecipeResponse = (text: string): MealPlan => {
+export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTranslations): MealPlan => {
   // Clean up markdown block if present (sometimes models add ```json ... ```)
   const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  // Default English error messages for backwards compatibility
+  const errors = errorTranslations ?? {
+    invalidStructure: "Invalid recipe data structure",
+    tryAgain: "Please try generating recipes again.",
+    invalidJson: "Failed to parse recipe data. The AI returned invalid JSON.",
+    apiKeyRequired: "API Key is required",
+    fetchFailed: "Failed to fetch recipes",
+    emptyResponse: "No recipes generated. The AI returned an empty response.",
+    timeout: "Request timed out. Please try again.",
+    networkError: "Network error. Please check your internet connection.",
+    unexpectedError: "An unexpected error occurred. Please try again.",
+  };
 
   try {
     const parsed = JSON.parse(cleanedText);
@@ -187,14 +218,14 @@ export const parseRecipeResponse = (text: string): MealPlan => {
       const firstError = error.errors[0];
       const path = firstError.path.join('.');
       throw new Error(
-        `Invalid recipe data structure: ${firstError.message}${path ? ` at ${path}` : ''}. ` +
-        `Please try generating recipes again.`
+        `${errors.invalidStructure}: ${firstError.message}${path ? ` at ${path}` : ''}. ` +
+        errors.tryAgain
       );
     }
 
     // JSON parsing failed
     console.error("JSON Parse Error. Raw response:", cleanedText);
-    throw new Error("Failed to parse recipe data. The AI returned invalid JSON.");
+    throw new Error(errors.invalidJson);
   }
 };
 
@@ -206,9 +237,23 @@ export const generateRecipes = async (
   diet: string,
   language: string,
   spices: string[] = [],
-  styleWishes: string = ''
+  styleWishes: string = '',
+  errorTranslations?: ErrorTranslations
 ): Promise<MealPlan> => {
-  if (!apiKey) throw new Error("API Key is required");
+  // Default English error messages for backwards compatibility
+  const errors = errorTranslations ?? {
+    invalidStructure: "Invalid recipe data structure",
+    tryAgain: "Please try generating recipes again.",
+    invalidJson: "Failed to parse recipe data. The AI returned invalid JSON.",
+    apiKeyRequired: "API Key is required",
+    fetchFailed: "Failed to fetch recipes",
+    emptyResponse: "No recipes generated. The AI returned an empty response.",
+    timeout: "Request timed out. Please try again.",
+    networkError: "Network error. Please check your internet connection.",
+    unexpectedError: "An unexpected error occurred. Please try again.",
+  };
+
+  if (!apiKey) throw new Error(errors.apiKeyRequired);
 
   const prompt = buildRecipePrompt({
     ingredients,
@@ -246,30 +291,30 @@ export const generateRecipes = async (
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || "Failed to fetch recipes");
+      throw new Error(errorData.error?.message || errors.fetchFailed);
     }
 
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    if (!text) throw new Error("No recipes generated. The AI returned an empty response.");
+    if (!text) throw new Error(errors.emptyResponse);
 
-    return parseRecipeResponse(text);
+    return parseRecipeResponse(text, errors);
   } catch (error) {
     console.error("LLM Error:", error);
 
     // Handle specific error types with user-friendly messages
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        throw new Error("Request timed out. Please try again.");
+        throw new Error(errors.timeout);
       }
       if (error.message.includes('Failed to fetch')) {
-        throw new Error("Network error. Please check your internet connection.");
+        throw new Error(errors.networkError);
       }
       // Re-throw with original message if already a user-friendly error
       throw error;
     }
 
-    throw new Error("An unexpected error occurred. Please try again.");
+    throw new Error(errors.unexpectedError);
   }
 };

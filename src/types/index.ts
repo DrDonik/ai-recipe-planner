@@ -52,3 +52,16 @@ export interface MealPlan {
   recipes: Recipe[];
   shoppingList: Ingredient[];
 }
+
+/**
+ * A notification displayed to the user (error or undo message).
+ */
+export interface Notification {
+  message: string;
+  type: 'error' | 'undo';
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+  timeout?: number; // Auto-dismiss after X milliseconds
+}

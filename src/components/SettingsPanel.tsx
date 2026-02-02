@@ -1,13 +1,14 @@
 import React from 'react';
 import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import type { Notification } from '../types';
 
 interface SettingsPanelProps {
     optionsMinimized: boolean;
     setOptionsMinimized: (minimized: boolean) => void;
     loading: boolean;
     handleGenerate: () => void;
-    error: string | null;
+    notification: Notification | null;
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -15,7 +16,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     setOptionsMinimized,
     loading,
     handleGenerate,
-    error
+    notification
 }) => {
     const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
 
@@ -179,13 +180,29 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 )}
             </button>
 
-            {error && (
+            {notification && (
                 <div
                     role="alert"
                     aria-live="assertive"
-                    className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2"
+                    className={`p-4 rounded-xl border text-sm animate-in fade-in slide-in-from-top-2 flex items-center justify-between gap-3 ${
+                        notification.type === 'error'
+                            ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900'
+                            : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800'
+                    }`}
                 >
-                    {renderTextWithLinks(error)}
+                    <span className="flex-1">{renderTextWithLinks(notification.message)}</span>
+                    {notification.action && (
+                        <button
+                            onClick={notification.action.onClick}
+                            className={`px-3 py-1 rounded-lg font-medium text-sm transition-colors shrink-0 ${
+                                notification.type === 'error'
+                                    ? 'bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800'
+                                    : 'bg-amber-200 hover:bg-amber-300 dark:bg-amber-800 dark:hover:bg-amber-700'
+                            }`}
+                        >
+                            {notification.action.label}
+                        </button>
+                    )}
                 </div>
             )}
         </>
