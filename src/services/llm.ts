@@ -6,6 +6,32 @@ import type { PantryItem, MealPlan } from '../types';
 export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
 
 /**
+ * Sanitizes user input to prevent prompt injection attacks.
+ *
+ * @param input - The user-provided string to sanitize
+ * @param maxLength - Maximum allowed length (default: 200 for short fields, 1000 for long fields)
+ * @returns Sanitized string safe for inclusion in LLM prompts
+ */
+const sanitizeUserInput = (input: string, maxLength: number = 200): string => {
+  if (!input) return '';
+
+  // Limit length to prevent excessively long inputs
+  let sanitized = input.slice(0, maxLength);
+
+  // Replace newlines with spaces to prevent multi-line prompt injection
+  sanitized = sanitized.replace(/[\r\n]+/g, ' ');
+
+  // Remove control characters that could break prompt structure
+  // eslint-disable-next-line no-control-regex
+  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+
+  // Trim excessive whitespace
+  sanitized = sanitized.replace(/\s+/g, ' ').trim();
+
+  return sanitized;
+};
+
+/**
  * Zod schemas for runtime validation of LLM responses.
  * These ensure the parsed JSON matches our expected types.
  */
@@ -65,16 +91,19 @@ export const buildRecipePrompt = ({
   styleWishes = '',
 }: RecipePromptParams): string => {
   const pantryList = ingredients
-    .map((v) => `- ${v.name} (${v.amount}) [ID: ${v.id}]`)
+    .map((v) => `- ${sanitizeUserInput(v.name)} (${sanitizeUserInput(v.amount)}) [ID: ${v.id}]`)
     .join("\n");
 
   const spiceList = spices.length > 0
-    ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.join(", ")}`
+    ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.map(s => sanitizeUserInput(s)).join(", ")}`
     : "No extra spices available.";
 
-  const styleWishesText = styleWishes.trim()
-    ? `STYLE/WISHES: ${styleWishes}`
+  const sanitizedStyleWishes = sanitizeUserInput(styleWishes, 1000);
+  const styleWishesText = sanitizedStyleWishes
+    ? `STYLE/WISHES: ${sanitizedStyleWishes}`
     : "";
+
+  const sanitizedDiet = sanitizeUserInput(diet, 200);
 
   return `
     You are a smart recipe planner. 
@@ -85,12 +114,12 @@ export const buildRecipePrompt = ({
 
     ${spiceList}
 
-    DIETARY PREFERENCE: ${diet}
+    DIETARY PREFERENCE: ${sanitizedDiet}
     LANGUAGE: ${language}
     ${styleWishesText}
-    
+
     RULES:
-    1. STRICTLY follow the dietary preference: ${diet}.${styleWishes.trim() ? ` Also respect the style/wishes: ${styleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
+    1. STRICTLY follow the dietary preference: ${sanitizedDiet}.${sanitizedStyleWishes ? ` Also respect the style/wishes: ${sanitizedStyleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
     2. ${ingredients.length > 0 ? 'Prioritize using as many of my pantry ingredients as possible.' : 'Choose suitable ingredients for delicious, balanced meals.'}
     3. The portion sizes must be realistic for ${people} people.
     4. Ensure variety: The ${meals} meals should be distinct in style and flavor profile.
