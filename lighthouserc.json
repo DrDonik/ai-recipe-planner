@@ -1,8 +1,9 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist",
-      "url": ["/"],
+      "startServerCommand": "npm run preview",
+      "startServerReadyPattern": "Local:",
+      "url": ["/ai-recipe-planner/"],
       "numberOfRuns": 3
     },
     "assert": {
