@@ -1,4 +1,4 @@
-import { X, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, AlertTriangle } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -26,22 +26,13 @@ export const ApiKeySecurityDialog = ({
                 tabIndex={-1}
                 className="glass-panel w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200 outline-none"
             >
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-amber-500/20 rounded-xl">
-                            <ShieldAlert className="text-amber-500" size={24} />
-                        </div>
-                        <h2 id="security-dialog-title" className="text-lg font-bold text-text-main">
-                            {t.apiKeySecurity.title}
-                        </h2>
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-amber-500/20 rounded-xl">
+                        <ShieldAlert className="text-amber-500" size={24} />
                     </div>
-                    <button
-                        onClick={onUseCopyPaste}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                        aria-label="Close"
-                    >
-                        <X size={20} />
-                    </button>
+                    <h2 id="security-dialog-title" className="text-lg font-bold text-text-main">
+                        {t.apiKeySecurity.title}
+                    </h2>
                 </div>
 
                 <p className="text-text-base mb-4">
