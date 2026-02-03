@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
@@ -52,6 +52,13 @@ function App() {
   // Note: Auto-activation was removed because Safari/iOS requires explicit user gesture
   // to acquire a wake lock. The button is prominently displayed for users to tap.
   const wakeLock = useWakeLock();
+
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleCloseWelcome = useCallback(() => setShowWelcome(false), []);
+  const handleShowHelp = useCallback(() => setShowWelcome(true), []);
+  const handleTogglePantryMinimize = useCallback(() => setPantryMinimized(!pantryMinimized), [pantryMinimized, setPantryMinimized]);
+  const handleToggleSpiceRackMinimize = useCallback(() => setSpiceRackMinimized(!spiceRackMinimized), [spiceRackMinimized, setSpiceRackMinimized]);
+  const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(!shoppingListMinimized), [shoppingListMinimized, setShoppingListMinimized]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -152,7 +159,7 @@ function App() {
     setSpices(spices.filter(s => s !== spiceToRemove));
   };
 
-  const deleteRecipe = (recipeId: string) => {
+  const deleteRecipe = useCallback((recipeId: string) => {
     if (!mealPlan) return;
     const updatedRecipes = mealPlan.recipes.filter(r => r.id !== recipeId);
     if (updatedRecipes.length === 0) {
@@ -160,7 +167,7 @@ function App() {
     } else {
       setMealPlan({ ...mealPlan, recipes: updatedRecipes });
     }
-  };
+  }, [mealPlan, setMealPlan]);
 
   const handleGenerate = async () => {
     // Flush any pending input from PantryInput before generating
@@ -265,7 +272,7 @@ function App() {
 
   return (
     <div className="min-h-screen pb-20">
-      {showWelcome && <WelcomeDialog onClose={() => setShowWelcome(false)} />}
+      {showWelcome && <WelcomeDialog onClose={handleCloseWelcome} />}
       {showCopyPasteDialog && (
         <CopyPasteDialog
           prompt={copyPastePrompt}
@@ -277,7 +284,7 @@ function App() {
       <Header
         headerMinimized={headerMinimized}
         setHeaderMinimized={setHeaderMinimized}
-        onShowHelp={() => setShowWelcome(true)}
+        onShowHelp={handleShowHelp}
       />
 
       <main className="app-container flex flex-col gap-8">
@@ -299,7 +306,7 @@ function App() {
               onRemovePantryItem={removePantryItem}
               onEmptyPantry={emptyPantry}
               isMinimized={pantryMinimized}
-              onToggleMinimize={() => setPantryMinimized(!pantryMinimized)}
+              onToggleMinimize={handleTogglePantryMinimize}
             />
 
             <SpiceRack
@@ -307,7 +314,7 @@ function App() {
               onAddSpice={addSpice}
               onRemoveSpice={removeSpice}
               isMinimized={spiceRackMinimized}
-              onToggleMinimize={() => setSpiceRackMinimized(!spiceRackMinimized)}
+              onToggleMinimize={handleToggleSpiceRackMinimize}
             />
           </div>
 
@@ -318,7 +325,7 @@ function App() {
                   key={mealPlan.recipes[0]?.id ?? 'shopping-list'}
                   items={mealPlan.shoppingList}
                   isMinimized={shoppingListMinimized}
-                  onToggleMinimize={() => setShoppingListMinimized(!shoppingListMinimized)}
+                  onToggleMinimize={handleToggleShoppingListMinimize}
                 />
 
                 <div>
