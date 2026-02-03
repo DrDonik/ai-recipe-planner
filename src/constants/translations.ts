@@ -21,6 +21,19 @@ export const translations = {
         veggieError: "Please add at least one ingredient to your pantry.",
         schemaError: "Recipe data issue detected",
         invalidSharedData: "Invalid shared data. The link may be corrupted.",
+        generateError: "Something went wrong generating recipes.",
+        parseError: "Something went wrong parsing the response.",
+        errors: {
+            invalidStructure: "Invalid recipe data structure",
+            tryAgain: "Please try generating recipes again.",
+            invalidJson: "Failed to parse recipe data. The AI returned invalid JSON.",
+            apiKeyRequired: "API Key is required",
+            fetchFailed: "Failed to fetch recipes",
+            emptyResponse: "No recipes generated. The AI returned an empty response.",
+            timeout: "Request timed out. Please try again.",
+            networkError: "Network error. Please check your internet connection.",
+            unexpectedError: "An unexpected error occurred. Please try again.",
+        },
         meals: "Meals to plan",
         dietOptions: {
             vegan: "Vegan",
@@ -119,6 +132,12 @@ export const translations = {
             description: "Do you want to remove your stored API key from this device?",
             clear: "Yes, clear it",
             keep: "No, keep it"
+        },
+        undo: {
+            pantryEmptied: "Pantry emptied",
+            recipeDeleted: "Recipe deleted",
+            apiKeyCleared: "API key cleared",
+            action: "Undo"
         }
     },
     German: {
@@ -142,6 +161,19 @@ export const translations = {
         veggieError: "Bitte füge mindestens eine Zutat zu deinem Vorrat hinzu.",
         schemaError: "Rezeptdatenproblem festgestellt",
         invalidSharedData: "Ungültige geteilte Daten. Der Link könnte beschädigt sein.",
+        generateError: "Beim Generieren der Rezepte ist ein Fehler aufgetreten.",
+        parseError: "Beim Verarbeiten der Antwort ist ein Fehler aufgetreten.",
+        errors: {
+            invalidStructure: "Ungültige Rezeptdatenstruktur",
+            tryAgain: "Bitte versuche erneut, Rezepte zu generieren.",
+            invalidJson: "Rezeptdaten konnten nicht verarbeitet werden. Die KI hat ungültiges JSON zurückgegeben.",
+            apiKeyRequired: "API-Schlüssel erforderlich",
+            fetchFailed: "Rezepte konnten nicht abgerufen werden",
+            emptyResponse: "Keine Rezepte generiert. Die KI hat eine leere Antwort zurückgegeben.",
+            timeout: "Zeitüberschreitung. Bitte versuche es erneut.",
+            networkError: "Netzwerkfehler. Bitte überprüfe deine Internetverbindung.",
+            unexpectedError: "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+        },
         meals: "Anzahl Mahlzeiten",
         dietOptions: {
             vegan: "Vegan",
@@ -240,6 +272,12 @@ export const translations = {
             description: "Möchtest du deinen gespeicherten API-Schlüssel von diesem Gerät entfernen?",
             clear: "Ja, löschen",
             keep: "Nein, behalten"
+        },
+        undo: {
+            pantryEmptied: "Vorrat geleert",
+            recipeDeleted: "Rezept gelöscht",
+            apiKeyCleared: "API-Schlüssel gelöscht",
+            action: "Rückgängig"
         }
     },
     French: {
@@ -263,6 +301,19 @@ export const translations = {
         veggieError: "Veuillez ajouter au moins un ingrédient à votre garde-manger.",
         schemaError: "Problème de données de recette détecté",
         invalidSharedData: "Données partagées invalides. Le lien peut être corrompu.",
+        generateError: "Une erreur s'est produite lors de la génération des recettes.",
+        parseError: "Une erreur s'est produite lors de l'analyse de la réponse.",
+        errors: {
+            invalidStructure: "Structure de données de recette invalide",
+            tryAgain: "Veuillez réessayer de générer des recettes.",
+            invalidJson: "Échec de l'analyse des données de recette. L'IA a renvoyé un JSON invalide.",
+            apiKeyRequired: "Clé API requise",
+            fetchFailed: "Échec de la récupération des recettes",
+            emptyResponse: "Aucune recette générée. L'IA a renvoyé une réponse vide.",
+            timeout: "Délai d'attente dépassé. Veuillez réessayer.",
+            networkError: "Erreur réseau. Veuillez vérifier votre connexion Internet.",
+            unexpectedError: "Une erreur inattendue s'est produite. Veuillez réessayer.",
+        },
         meals: "Repas à planifier",
         dietOptions: {
             vegan: "Végétalien",
@@ -361,6 +412,12 @@ export const translations = {
             description: "Voulez-vous supprimer votre clé API stockée de cet appareil ?",
             clear: "Oui, effacer",
             keep: "Non, conserver"
+        },
+        undo: {
+            pantryEmptied: "Garde-manger vidé",
+            recipeDeleted: "Recette supprimée",
+            apiKeyCleared: "Clé API effacée",
+            action: "Annuler"
         }
     },
     Spanish: {
@@ -384,6 +441,19 @@ export const translations = {
         veggieError: "Por favor agrega al menos un ingrediente a tu despensa.",
         schemaError: "Problema con datos de receta detectado",
         invalidSharedData: "Datos compartidos inválidos. El enlace puede estar corrupto.",
+        generateError: "Algo salió mal al generar las recetas.",
+        parseError: "Algo salió mal al procesar la respuesta.",
+        errors: {
+            invalidStructure: "Estructura de datos de receta inválida",
+            tryAgain: "Por favor, intenta generar recetas de nuevo.",
+            invalidJson: "Error al analizar los datos de la receta. La IA devolvió JSON inválido.",
+            apiKeyRequired: "Se requiere clave API",
+            fetchFailed: "Error al obtener las recetas",
+            emptyResponse: "No se generaron recetas. La IA devolvió una respuesta vacía.",
+            timeout: "Tiempo de espera agotado. Por favor, inténtalo de nuevo.",
+            networkError: "Error de red. Por favor, verifica tu conexión a Internet.",
+            unexpectedError: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
+        },
         meals: "Comidas a planificar",
         dietOptions: {
             vegan: "Vegano",
@@ -482,6 +552,12 @@ export const translations = {
             description: "¿Quieres eliminar tu clave API almacenada de este dispositivo?",
             clear: "Sí, eliminar",
             keep: "No, mantener"
+        },
+        undo: {
+            pantryEmptied: "Despensa vaciada",
+            recipeDeleted: "Receta eliminada",
+            apiKeyCleared: "Clave API eliminada",
+            action: "Deshacer"
         }
     }
 };

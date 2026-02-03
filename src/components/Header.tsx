@@ -4,17 +4,22 @@ import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
+import type { Notification } from '../types';
 
 interface HeaderProps {
     headerMinimized: boolean;
     setHeaderMinimized: (minimized: boolean) => void;
     onShowHelp: () => void;
+    onShowNotification: (notification: Notification) => void;
+    onClearNotification: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
     headerMinimized,
     setHeaderMinimized,
     onShowHelp,
+    onShowNotification,
+    onClearNotification,
 }) => {
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, t } = useSettings();
 
@@ -41,6 +46,25 @@ export const Header: React.FC<HeaderProps> = ({
     const [showClearDialog, setShowClearDialog] = useState(false);
     const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
 
+    const clearApiKeyWithUndo = () => {
+        const backupKey = apiKey;
+        setApiKey('');
+        setUseCopyPaste(true);
+        onShowNotification({
+            message: t.undo.apiKeyCleared,
+            type: 'undo',
+            action: {
+                label: t.undo.action,
+                onClick: () => {
+                    setApiKey(backupKey);
+                    setUseCopyPaste(false);
+                    onClearNotification();
+                }
+            },
+            timeout: 5000
+        });
+    };
+
     const handleModeToggle = () => {
         if (useCopyPaste) {
             // Switching TO API Key mode - always show warning
@@ -49,6 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
         } else {
             // Switching TO Copy & Paste mode
             if (apiKey) {
+                // Ask if user wants to clear or keep the API key
                 setPendingModeSwitch('toCopyPaste');
                 setShowClearDialog(true);
             } else {
@@ -70,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
         localStorage.setItem(STORAGE_KEYS.API_KEY_WARNING_SEEN, 'true');
         setShowSecurityDialog(false);
 
-        // If there's an API key stored, ask if they want to clear it
+        // Ask if user wants to clear or keep the API key
         if (apiKey) {
             setPendingModeSwitch('toCopyPaste');
             setShowClearDialog(true);
@@ -81,10 +106,9 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     const handleClearApiKey = () => {
-        setApiKey('');
         setShowClearDialog(false);
-        setUseCopyPaste(true);
         setPendingModeSwitch(null);
+        clearApiKeyWithUndo();
     };
 
     const handleKeepApiKey = () => {

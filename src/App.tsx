@@ -8,7 +8,7 @@ import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse, RecipeSchema, IngredientSchema } from './services/llm';
-import type { PantryItem, MealPlan, Recipe, Ingredient } from './types';
+import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { decodeFromUrl } from './utils/sharing';
 import { Header } from './components/Header';
@@ -32,7 +32,8 @@ function App() {
   const [mealPlan, setMealPlan] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<Notification | null>(null);
+  const notificationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Welcome Dialog State
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -60,6 +61,40 @@ function App() {
   const handleToggleSpiceRackMinimize = useCallback(() => setSpiceRackMinimized(!spiceRackMinimized), [spiceRackMinimized, setSpiceRackMinimized]);
   const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(!shoppingListMinimized), [shoppingListMinimized, setShoppingListMinimized]);
 
+  const showNotification = useCallback((notif: Notification) => {
+    // Clear any existing timeout
+    if (notificationTimeoutRef.current) {
+      clearTimeout(notificationTimeoutRef.current);
+      notificationTimeoutRef.current = null;
+    }
+    setNotification(notif);
+    // Auto-dismiss if timeout is set
+    if (notif.timeout) {
+      notificationTimeoutRef.current = setTimeout(() => {
+        setNotification(null);
+        notificationTimeoutRef.current = null;
+      }, notif.timeout);
+    }
+  }, []);
+
+  const clearNotification = useCallback(() => {
+    if (notificationTimeoutRef.current) {
+      clearTimeout(notificationTimeoutRef.current);
+      notificationTimeoutRef.current = null;
+    }
+    setNotification(null);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (notificationTimeoutRef.current) {
+        clearTimeout(notificationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const recipeParam = searchParams.get(URL_PARAMS.RECIPE);
@@ -71,7 +106,7 @@ function App() {
         setViewRecipe(decoded);
       } else {
         // Invalid or malformed recipe data - show error
-        setError(t.invalidSharedData || "Invalid shared recipe data. The link may be corrupted.");
+        showNotification({ message: t.invalidSharedData || "Invalid shared recipe data. The link may be corrupted.", type: 'error' });
       }
     } else if (shoppingListParam) {
       const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam), z.array(IngredientSchema));
@@ -79,7 +114,7 @@ function App() {
         setViewShoppingList(decoded);
       } else {
         // Invalid or malformed shopping list data - show error
-        setError(t.invalidSharedData || "Invalid shared shopping list data. The link may be corrupted.");
+        showNotification({ message: t.invalidSharedData || "Invalid shared shopping list data. The link may be corrupted.", type: 'error' });
       }
     }
   }, [t.invalidSharedData]);
@@ -146,7 +181,20 @@ function App() {
   };
 
   const emptyPantry = () => {
+    const backup = [...pantryItems];
     setPantryItems([]);
+    showNotification({
+      message: t.undo.pantryEmptied,
+      type: 'undo',
+      action: {
+        label: t.undo.action,
+        onClick: () => {
+          setPantryItems(backup);
+          clearNotification();
+        }
+      },
+      timeout: 5000
+    });
   };
 
   const addSpice = (spice: string) => {
@@ -161,13 +209,26 @@ function App() {
 
   const deleteRecipe = useCallback((recipeId: string) => {
     if (!mealPlan) return;
+    const backup = mealPlan;
     const updatedRecipes = mealPlan.recipes.filter(r => r.id !== recipeId);
     if (updatedRecipes.length === 0) {
       setMealPlan(null);
     } else {
       setMealPlan({ ...mealPlan, recipes: updatedRecipes });
     }
-  }, [mealPlan, setMealPlan]);
+    showNotification({
+      message: t.undo.recipeDeleted,
+      type: 'undo',
+      action: {
+        label: t.undo.action,
+        onClick: () => {
+          setMealPlan(backup);
+          clearNotification();
+        }
+      },
+      timeout: 5000
+    });
+  }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
   const handleGenerate = async () => {
     // Flush any pending input from PantryInput before generating
@@ -194,22 +255,22 @@ function App() {
 
     // API mode - require API key
     if (!apiKey) {
-      setError(t.apiKeyError);
+      showNotification({ message: t.apiKeyError, type: 'error' });
       return;
     }
 
     setLoading(true);
-    setError(null);
+    clearNotification();
     // Don't clear mealPlan here - preserve it on failure so user doesn't lose their previous plan
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes, t.errors);
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong generating recipes.";
-      setError(message);
+      const message = err instanceof Error ? err.message : t.generateError;
+      showNotification({ message, type: 'error' });
       // Previous meal plan is preserved - user can still see their last successful generation
     } finally {
       setLoading(false);
@@ -219,15 +280,15 @@ function App() {
   const handleCopyPasteSubmit = (response: string) => {
     setShowCopyPasteDialog(false);
     setLoading(true);
-    setError(null);
+    clearNotification();
 
     try {
-      const plan = parseRecipeResponse(response);
+      const plan = parseRecipeResponse(response, t.errors);
       setMealPlan(plan);
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong parsing the response.";
-      setError(message);
+      const message = err instanceof Error ? err.message : t.parseError;
+      showNotification({ message, type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -285,6 +346,8 @@ function App() {
         headerMinimized={headerMinimized}
         setHeaderMinimized={setHeaderMinimized}
         onShowHelp={handleShowHelp}
+        onShowNotification={showNotification}
+        onClearNotification={clearNotification}
       />
 
       <main className="app-container flex flex-col gap-8">
@@ -296,7 +359,7 @@ function App() {
               setOptionsMinimized={setOptionsMinimized}
               loading={loading}
               handleGenerate={handleGenerate}
-              error={error}
+              notification={notification}
             />
 
             <PantryInput

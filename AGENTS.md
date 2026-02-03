@@ -94,7 +94,7 @@ App.tsx                     # Main app, routing (normal/shared recipe/shared sho
 ├─ WelcomeDialog.tsx        # Onboarding dialog (dismissible)
 ├─ CopyPasteDialog.tsx      # Two-step dialog for Copy & Paste mode
 ├─ ApiKeySecurityDialog.tsx # Security warning when enabling API Key mode
-├─ ClearApiKeyDialog.tsx    # Confirmation for clearing stored API key
+├─ ClearApiKeyDialog.tsx    # Choice dialog for clearing or keeping stored API key
 └─ ErrorBoundary.tsx        # Error boundary with refresh button
 ```
 
