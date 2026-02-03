@@ -1,4 +1,4 @@
-import { X, Key, Trash2 } from 'lucide-react';
+import { Key, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -26,22 +26,13 @@ export const ClearApiKeyDialog = ({
                 tabIndex={-1}
                 className="glass-panel w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95 duration-200 outline-none"
             >
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/20 rounded-xl">
-                            <Key className="text-primary" size={24} />
-                        </div>
-                        <h2 id="clear-api-key-dialog-title" className="text-lg font-bold text-text-main">
-                            {t.clearApiKey.title}
-                        </h2>
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/20 rounded-xl">
+                        <Key className="text-primary" size={24} />
                     </div>
-                    <button
-                        onClick={onKeep}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                        aria-label="Close"
-                    >
-                        <X size={20} />
-                    </button>
+                    <h2 id="clear-api-key-dialog-title" className="text-lg font-bold text-text-main">
+                        {t.clearApiKey.title}
+                    </h2>
                 </div>
 
                 <p className="text-text-muted mb-6">

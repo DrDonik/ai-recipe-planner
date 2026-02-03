@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Refrigerator, Leaf, Utensils, Key, ClipboardCopy, Sparkles, HardDrive } from 'lucide-react';
+import { Refrigerator, Leaf, Utensils, Key, ClipboardCopy, Sparkles, HardDrive } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -36,18 +36,9 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                 tabIndex={-1}
                 className="glass-panel w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl animate-in zoom-in-95 duration-200 outline-none"
             >
-                <div className="flex items-start justify-between mb-4">
-                    <h2 id="welcome-dialog-title" className="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
-                        {t.welcome.title}
-                    </h2>
-                    <button
-                        onClick={handleClose}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                        aria-label="Close"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
+                <h2 id="welcome-dialog-title" className="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text mb-4">
+                    {t.welcome.title}
+                </h2>
 
                 <p className="text-text-base mb-5">
                     {t.welcome.intro}
