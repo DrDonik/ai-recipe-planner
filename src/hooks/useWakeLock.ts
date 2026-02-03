@@ -13,6 +13,8 @@ export function useWakeLock(): UseWakeLockResult {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   // Track if user wants the wake lock on (persists across visibility changes)
   const userWantsActiveRef = useRef(false);
+  // Track the release handler to prevent memory leaks from multiple listeners
+  const releaseHandlerRef = useRef<(() => void) | null>(null);
 
   const isSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
@@ -26,6 +28,12 @@ export function useWakeLock(): UseWakeLockResult {
 
     try {
       const sentinel = await navigator.wakeLock.request('screen');
+
+      // Clean up previous release handler if it exists
+      if (releaseHandlerRef.current && wakeLockRef.current) {
+        wakeLockRef.current.removeEventListener('release', releaseHandlerRef.current);
+      }
+
       wakeLockRef.current = sentinel;
       userWantsActiveRef.current = true;
       setIsActive(true);
@@ -36,6 +44,8 @@ export function useWakeLock(): UseWakeLockResult {
         setIsActive(false);
       };
 
+      // Store the handler in a ref for cleanup
+      releaseHandlerRef.current = handleRelease;
       sentinel.addEventListener('release', handleRelease, { once: true });
     } catch {
       // Wake lock request failed (e.g., low battery, tab not visible, no user gesture on Safari)
@@ -47,6 +57,12 @@ export function useWakeLock(): UseWakeLockResult {
     userWantsActiveRef.current = false;
 
     if (wakeLockRef.current) {
+      // Clean up release handler
+      if (releaseHandlerRef.current) {
+        wakeLockRef.current.removeEventListener('release', releaseHandlerRef.current);
+        releaseHandlerRef.current = null;
+      }
+
       try {
         // Check if not already released before calling release
         if (!wakeLockRef.current.released) {
@@ -92,6 +108,12 @@ export function useWakeLock(): UseWakeLockResult {
     return () => {
       userWantsActiveRef.current = false;
       if (wakeLockRef.current) {
+        // Clean up release handler
+        if (releaseHandlerRef.current) {
+          wakeLockRef.current.removeEventListener('release', releaseHandlerRef.current);
+          releaseHandlerRef.current = null;
+        }
+
         try {
           if (!wakeLockRef.current.released) {
             wakeLockRef.current.release();
