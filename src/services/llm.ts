@@ -34,32 +34,34 @@ const sanitizeUserInput = (input: string, maxLength: number = 200): string => {
 /**
  * Zod schemas for runtime validation of LLM responses.
  * These ensure the parsed JSON matches our expected types.
+ * Exported for reuse in URL parameter validation.
  */
-const IngredientSchema = z.object({
+export const IngredientSchema = z.object({
   item: z.string(),
   amount: z.string(),
   unit: z.string().optional(),
 });
 
-const NutritionSchema = z.object({
+export const NutritionSchema = z.object({
   calories: z.number(),
   carbs: z.number(),
   fat: z.number(),
   protein: z.number(),
 });
 
-const RecipeSchema = z.object({
+export const RecipeSchema = z.object({
   id: z.string(),
   title: z.string(),
   time: z.string(),
   ingredients: z.array(IngredientSchema),
   instructions: z.array(z.string()),
   usedIngredients: z.array(z.string()),
-  missingIngredients: z.array(IngredientSchema),
+  // Optional because shared recipes exclude missingIngredients (not relevant in standalone view)
+  missingIngredients: z.array(IngredientSchema).optional(),
   nutrition: NutritionSchema.optional(),
 });
 
-const MealPlanSchema = z.object({
+export const MealPlanSchema = z.object({
   recipes: z.array(RecipeSchema),
   shoppingList: z.array(IngredientSchema),
 });

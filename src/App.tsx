@@ -7,7 +7,7 @@ import { SpiceRack } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
-import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
+import { generateRecipes, buildRecipePrompt, parseRecipeResponse, RecipeSchema, IngredientSchema } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { decodeFromUrl } from './utils/sharing';
@@ -15,6 +15,7 @@ import { Header } from './components/Header';
 import { SettingsPanel } from './components/SettingsPanel';
 import { useSettings } from './contexts/SettingsContext';
 import { STORAGE_KEYS, URL_PARAMS } from './constants';
+import { z } from 'zod';
 
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
@@ -58,13 +59,23 @@ function App() {
     const shoppingListParam = searchParams.get(URL_PARAMS.SHOPPING_LIST);
 
     if (recipeParam) {
-      const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam));
-      if (decoded) setViewRecipe(decoded);
+      const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam), RecipeSchema);
+      if (decoded) {
+        setViewRecipe(decoded);
+      } else {
+        // Invalid or malformed recipe data - show error
+        setError(t.invalidSharedData || "Invalid shared recipe data. The link may be corrupted.");
+      }
     } else if (shoppingListParam) {
-      const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam));
-      if (decoded) setViewShoppingList(decoded);
+      const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam), z.array(IngredientSchema));
+      if (decoded) {
+        setViewShoppingList(decoded);
+      } else {
+        // Invalid or malformed shopping list data - show error
+        setError(t.invalidSharedData || "Invalid shared shopping list data. The link may be corrupted.");
+      }
     }
-  }, []);
+  }, [t.invalidSharedData]);
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {

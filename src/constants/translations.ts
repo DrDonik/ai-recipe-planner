@@ -20,6 +20,7 @@ export const translations = {
         apiKeyError: "Please enter a valid API Key. Get one at: https://aistudio.google.com/apikey",
         veggieError: "Please add at least one ingredient to your pantry.",
         schemaError: "Recipe data issue detected",
+        invalidSharedData: "Invalid shared data. The link may be corrupted.",
         meals: "Meals to plan",
         dietOptions: {
             vegan: "Vegan",
@@ -140,6 +141,7 @@ export const translations = {
         apiKeyError: "Bitte gib einen gültigen API-Key ein. Hol dir einen auf: https://aistudio.google.com/apikey",
         veggieError: "Bitte füge mindestens eine Zutat zu deinem Vorrat hinzu.",
         schemaError: "Rezeptdatenproblem festgestellt",
+        invalidSharedData: "Ungültige geteilte Daten. Der Link könnte beschädigt sein.",
         meals: "Anzahl Mahlzeiten",
         dietOptions: {
             vegan: "Vegan",
@@ -260,6 +262,7 @@ export const translations = {
         apiKeyError: "Veuillez entrer une clé API valide. Obtenez-en une sur : https://aistudio.google.com/apikey",
         veggieError: "Veuillez ajouter au moins un ingrédient à votre garde-manger.",
         schemaError: "Problème de données de recette détecté",
+        invalidSharedData: "Données partagées invalides. Le lien peut être corrompu.",
         meals: "Repas à planifier",
         dietOptions: {
             vegan: "Végétalien",
@@ -380,6 +383,7 @@ export const translations = {
         apiKeyError: "Por favor ingresa una clave API válida. Obtén una en: https://aistudio.google.com/apikey",
         veggieError: "Por favor agrega al menos un ingrediente a tu despensa.",
         schemaError: "Problema con datos de receta detectado",
+        invalidSharedData: "Datos compartidos inválidos. El enlace puede estar corrupto.",
         meals: "Comidas a planificar",
         dietOptions: {
             vegan: "Vegano",
