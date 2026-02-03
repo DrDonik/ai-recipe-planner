@@ -62,6 +62,7 @@ export interface Notification {
   action?: {
     label: string;
     onClick: () => void;
+    ariaLabel?: string; // Contextual aria-label for screen readers
   };
   timeout?: number; // Auto-dismiss after X milliseconds
 }

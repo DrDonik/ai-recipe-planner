@@ -188,6 +188,7 @@ function App() {
       type: 'undo',
       action: {
         label: t.undo.action,
+        ariaLabel: `${t.undo.action} ${t.undo.pantryEmptied.toLowerCase()}`,
         onClick: () => {
           setPantryItems(backup);
           clearNotification();
@@ -221,6 +222,7 @@ function App() {
       type: 'undo',
       action: {
         label: t.undo.action,
+        ariaLabel: `${t.undo.action} ${t.undo.recipeDeleted.toLowerCase()}`,
         onClick: () => {
           setMealPlan(backup);
           clearNotification();
