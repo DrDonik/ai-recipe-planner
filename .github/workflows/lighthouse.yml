@@ -1,4 +1,4 @@
-name: CI
+name: Lighthouse CI
 
 on:
   pull_request:
@@ -6,9 +6,10 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
-  check:
+  lighthouse:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,8 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter
-        run: npm run lint
-
       - name: Build project
         run: npm run build
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
