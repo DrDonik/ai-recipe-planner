@@ -51,6 +51,6 @@ export const API_CONFIG = {
 export const DEFAULTS = {
     PEOPLE_COUNT: 2,
     MEALS_COUNT: 3,
-    DIET: 'flexitarian',
+    DIET: 'Flexitarian',
     LANGUAGE: 'English',
 } as const;
