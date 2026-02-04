@@ -130,7 +130,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         window.location.href = shareUrl;
                     }}
                     className="absolute top-8 right-8 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
-                    aria-label={t.openInNewTab}
+                    aria-label={t.viewRecipe}
                 >
                     <ExternalLink size={18} />
                 </button>
