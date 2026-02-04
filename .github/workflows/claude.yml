@@ -76,10 +76,11 @@ jobs:
           )
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STRUCTURED_OUTPUT: ${{ steps.claude.outputs.structured_output }}
         run: |
-          # Extract PR title and body from structured output
-          PR_TITLE=$(echo '${{ steps.claude.outputs.structured_output }}' | jq -r '.pr_title // "Automated PR from Claude"')
-          PR_BODY=$(echo '${{ steps.claude.outputs.structured_output }}' | jq -r '.pr_body // "Automatically implemented by Claude."')
+          # Extract PR title and body from structured output (passed via env var to avoid shell escaping issues)
+          PR_TITLE=$(echo "$STRUCTURED_OUTPUT" | jq -r '.pr_title // "Automated PR from Claude"')
+          PR_BODY=$(echo "$STRUCTURED_OUTPUT" | jq -r '.pr_body // "Automatically implemented by Claude."')
 
           # Get issue number for linking
           ISSUE_NUMBER="${{ github.event.issue.number }}"
