@@ -76,5 +76,10 @@ describe.skipIf(SKIP_INTEGRATION)('LLM Service - Integration Tests (Real API)', 
     expect(result).toHaveProperty('shoppingList');
     expect(Array.isArray(result.recipes)).toBe(true);
     expect(Array.isArray(result.shoppingList)).toBe(true);
+
+    // Verify empty pantry means no used ingredients
+    expect(result.recipes.length).toBeGreaterThan(0);
+    expect(result.recipes[0].usedIngredients).toHaveLength(0);
+    expect(result.recipes[0].missingIngredients.length).toBeGreaterThan(0);
   }, 60000);
 });
