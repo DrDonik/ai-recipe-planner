@@ -60,4 +60,37 @@ jobs:
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue:*)" "Bash(gh pr:*)" "Bash(npm install)" "Bash(npm run build)" "Bash(npm run lint)" "Bash(npm run test)"'
+          claude_args: |
+            --allowed-tools "Bash(gh issue:*)" "Bash(gh pr:*)" "Bash(npm install)" "Bash(npm run build)" "Bash(npm run lint)" "Bash(npm run test)"
+            --json-schema '{"type":"object","properties":{"pr_title":{"type":"string","description":"Title for the pull request if changes were made"},"pr_body":{"type":"string","description":"Description for the pull request body if changes were made"},"made_changes":{"type":"boolean","description":"Whether any code changes were committed"}},"required":["made_changes"]}'
+
+      # Create a PR if Claude made changes and this was triggered by an issue (not an existing PR)
+      - name: Create Pull Request
+        if: |
+          steps.claude.outputs.branch_name != '' &&
+          steps.claude.outputs.structured_output != '' &&
+          fromJSON(steps.claude.outputs.structured_output).made_changes == true &&
+          (
+            github.event_name == 'issues' ||
+            (github.event_name == 'issue_comment' && github.event.issue.pull_request == null)
+          )
+        env:
+          GH_TOKEN: ${{ steps.claude.outputs.github_token }}
+        run: |
+          # Extract PR title and body from structured output
+          PR_TITLE=$(echo '${{ steps.claude.outputs.structured_output }}' | jq -r '.pr_title // "Automated PR from Claude"')
+          PR_BODY=$(echo '${{ steps.claude.outputs.structured_output }}' | jq -r '.pr_body // "Automatically implemented by Claude."')
+
+          # Get issue number for linking
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+
+          # Append issue reference to body
+          PR_BODY="${PR_BODY}
+
+          Closes #${ISSUE_NUMBER}"
+
+          # Create the pull request
+          gh pr create \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --head "${{ steps.claude.outputs.branch_name }}"
