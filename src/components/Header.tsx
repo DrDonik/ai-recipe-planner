@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
+import { TooltipButton } from './ui/TooltipButton';
 import type { Notification } from '../types';
 
 interface HeaderProps {
@@ -134,6 +135,16 @@ export const Header: React.FC<HeaderProps> = ({
                             AI Recipe Planner
                         </h1>
 
+                        {/* API Key Warning Indicator (when minimized) */}
+                        {headerMinimized && useCopyPaste && apiKey && (
+                            <TooltipButton
+                                icon={<AlertTriangle size={16} className="text-red-500" />}
+                                tooltip={t.apiKeyStoredWarning}
+                                ariaLabel={t.apiKeyStoredWarning}
+                                className="!p-1"
+                            />
+                        )}
+
                         {/* Toggle Button */}
                         <button
                             onClick={() => setHeaderMinimized(!headerMinimized)}
@@ -174,9 +185,20 @@ export const Header: React.FC<HeaderProps> = ({
                                         className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${useCopyPaste ? 'left-0.5' : 'left-6'}`}
                                     />
                                 </button>
-                                <span className={`text-sm transition-colors ${!useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
-                                    {t.modeSwitch.apiKey}
-                                </span>
+                                <div className="flex items-center gap-1">
+                                    <span className={`text-sm transition-colors ${!useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+                                        {t.modeSwitch.apiKey}
+                                    </span>
+                                    {/* API Key Warning Indicator (when expanded) */}
+                                    {useCopyPaste && apiKey && (
+                                        <TooltipButton
+                                            icon={<AlertTriangle size={16} className="text-red-500" />}
+                                            tooltip={t.apiKeyStoredWarning}
+                                            ariaLabel={t.apiKeyStoredWarning}
+                                            className="!p-1"
+                                        />
+                                    )}
+                                </div>
                             </div>
 
                             {!useCopyPaste && (

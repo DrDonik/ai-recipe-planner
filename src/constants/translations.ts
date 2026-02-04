@@ -139,7 +139,8 @@ export const translations = {
             recipeDeleted: "Recipe deleted",
             apiKeyCleared: "API key cleared",
             action: "Undo"
-        }
+        },
+        apiKeyStoredWarning: "API key stored in local storage"
     },
     German: {
         ingredients: "Zutaten",
@@ -280,7 +281,8 @@ export const translations = {
             recipeDeleted: "Rezept gelöscht",
             apiKeyCleared: "API-Schlüssel gelöscht",
             action: "Rückgängig"
-        }
+        },
+        apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert"
     },
     French: {
         ingredients: "Ingrédients",
@@ -421,7 +423,8 @@ export const translations = {
             recipeDeleted: "Recette supprimée",
             apiKeyCleared: "Clé API effacée",
             action: "Annuler"
-        }
+        },
+        apiKeyStoredWarning: "Clé API stockée dans le stockage local"
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -562,6 +565,7 @@ export const translations = {
             recipeDeleted: "Receta eliminada",
             apiKeyCleared: "Clave API eliminada",
             action: "Deshacer"
-        }
+        },
+        apiKeyStoredWarning: "Clave API almacenada en almacenamiento local"
     }
 };
