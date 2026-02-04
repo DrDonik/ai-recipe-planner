@@ -122,6 +122,7 @@ describe('MyComponent', () => {
 The project uses MSW (Mock Service Worker) for API mocking. See `src/__tests__/mocks/handlers.ts` for examples.
 
 ```typescript
+import { beforeAll, afterEach, afterAll } from 'vitest';
 import { setupServer } from 'msw/node';
 import { handlers } from '@/__tests__/mocks/handlers';
 import { http, HttpResponse } from 'msw';
@@ -185,7 +186,7 @@ open coverage/index.html
 
 ### Coverage Reports
 
-Coverage is tracked in CI and uploaded to Codecov. The badge in the README shows current coverage percentage.
+Coverage is tracked in CI and can be uploaded to Codecov when the `CODECOV_TOKEN` secret is configured in repository settings. A coverage badge can be added to the README (see Task 12).
 
 ## Integration Tests
 
@@ -256,7 +257,11 @@ The test setup provides a localStorage mock. If you see localStorage errors:
 Ensure the MSW server is running:
 
 ```typescript
-import { server } from '@/__tests__/mocks/server';
+import { beforeAll, afterEach, afterAll } from 'vitest';
+import { setupServer } from 'msw/node';
+import { handlers } from '@/__tests__/mocks/handlers';
+
+const server = setupServer(...handlers);
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
