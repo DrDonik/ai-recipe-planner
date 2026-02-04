@@ -384,6 +384,9 @@ function App() {
           </div>
 
           <div className="lg:col-span-2 space-y-8">
+            {/* Divider between input and results sections - narrow viewport only */}
+            <hr className="lg:hidden border-t-2 border-primary/30 -mt-4" />
+
             {mealPlan ? (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <ShoppingList
