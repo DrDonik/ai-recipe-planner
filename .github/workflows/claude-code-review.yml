@@ -12,8 +12,10 @@ on:
 
 jobs:
   claude-review:
-    # Allow repo owner, org members, collaborators, and previous contributors
-    if: contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+    # Allow repo owner, org members, collaborators, previous contributors, and github-actions bot
+    if: |
+      github.actor == 'github-actions[bot]' ||
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,7 +40,8 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           
-          # Allow Claude bot to trigger this workflow (for issue-validation chaining)
-          allowed_bots: 'claude'
+          # Allow Claude bot and github-actions bot to trigger this workflow
+          # (for issue-validation and auto-PR creation chaining)
+          allowed_bots: 'claude,github-actions'
 
 
