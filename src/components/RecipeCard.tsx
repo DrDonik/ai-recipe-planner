@@ -124,15 +124,16 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             )}
 
             {showOpenInNewTab && (
-                <a
-                    href={shareUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <button
+                    onClick={() => {
+                        window.history.pushState({}, '', shareUrl);
+                        window.location.href = shareUrl;
+                    }}
                     className="absolute top-8 right-8 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
                     aria-label={t.openInNewTab}
                 >
                     <ExternalLink size={18} />
-                </a>
+                </button>
             )}
 
             {wakeLock?.isSupported && (
