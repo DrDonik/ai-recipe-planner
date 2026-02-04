@@ -1,8 +1,29 @@
-import { describe, it, expect } from 'vitest';
-import { buildRecipePrompt, parseRecipeResponse } from '../../services/llm';
+import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
+import { setupServer } from 'msw/node';
+import { buildRecipePrompt, parseRecipeResponse, generateRecipes } from '../../services/llm';
 import type { PantryItem } from '../../types';
+import {
+  handlers,
+  malformedJsonHandler,
+  emptyResponseHandler,
+  networkErrorHandler,
+  apiErrorHandler,
+  timeoutHandler,
+  markdownHandler,
+} from '../mocks/handlers';
+
+// Set up MSW server for API mocking
+const server = setupServer(...handlers);
 
 describe('llm service', () => {
+  // Start server before all tests
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+
+  // Reset handlers after each test to ensure test isolation
+  afterEach(() => server.resetHandlers());
+
+  // Clean up after all tests
+  afterAll(() => server.close());
   describe('buildRecipePrompt', () => {
     it('should build a prompt with all required parameters', () => {
       const ingredients: PantryItem[] = [
@@ -358,6 +379,154 @@ describe('llm service', () => {
       const result = parseRecipeResponse(withoutMissingIngredients);
 
       expect(result.recipes[0].missingIngredients).toBeUndefined();
+    });
+  });
+
+  describe('generateRecipes', () => {
+    const testIngredients: PantryItem[] = [
+      { id: 'id1', name: 'Chicken', amount: '500g' },
+      { id: 'id2', name: 'Rice', amount: '200g' },
+    ];
+
+    it('should successfully generate recipes with valid API key', async () => {
+      const result = await generateRecipes(
+        'test-api-key',
+        testIngredients,
+        2,
+        3,
+        'No restrictions',
+        'English'
+      );
+
+      expect(result).toBeDefined();
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].title).toBe('Chicken with Rice');
+      expect(result.shoppingList).toBeDefined();
+    });
+
+    it('should throw error when API key is missing', async () => {
+      await expect(
+        generateRecipes('', testIngredients, 2, 3, 'No restrictions', 'English')
+      ).rejects.toThrow('API Key is required');
+    });
+
+    it('should handle malformed JSON response', async () => {
+      server.use(malformedJsonHandler);
+
+      await expect(
+        generateRecipes(
+          'test-api-key',
+          testIngredients,
+          2,
+          3,
+          'No restrictions',
+          'English'
+        )
+      ).rejects.toThrow('Failed to parse recipe data');
+    });
+
+    it('should handle empty response from API', async () => {
+      server.use(emptyResponseHandler);
+
+      await expect(
+        generateRecipes(
+          'test-api-key',
+          testIngredients,
+          2,
+          3,
+          'No restrictions',
+          'English'
+        )
+      ).rejects.toThrow('No recipes generated');
+    });
+
+    it('should handle network errors', async () => {
+      server.use(networkErrorHandler);
+
+      await expect(
+        generateRecipes(
+          'test-api-key',
+          testIngredients,
+          2,
+          3,
+          'No restrictions',
+          'English'
+        )
+      ).rejects.toThrow('Network error');
+    });
+
+    it('should handle API errors with error message', async () => {
+      server.use(apiErrorHandler);
+
+      await expect(
+        generateRecipes(
+          'test-api-key',
+          testIngredients,
+          2,
+          3,
+          'No restrictions',
+          'English'
+        )
+      ).rejects.toThrow('Invalid API key');
+    });
+
+    it('should pass all parameters to the API correctly', async () => {
+      const result = await generateRecipes(
+        'test-api-key',
+        testIngredients,
+        4, // people
+        2, // meals
+        'Vegan',
+        'German',
+        ['Salt', 'Pepper'],
+        'Quick meals'
+      );
+
+      expect(result).toBeDefined();
+      expect(result.recipes).toBeDefined();
+    });
+
+    it('should handle timeout errors', async () => {
+      server.use(timeoutHandler);
+
+      await expect(
+        generateRecipes(
+          'test-api-key',
+          testIngredients,
+          2,
+          3,
+          'No restrictions',
+          'English'
+        )
+      ).rejects.toThrow('Request timed out');
+    }, 65000); // Increase test timeout to allow for the simulated timeout
+
+    it('should use custom error translations when provided', async () => {
+      const customErrors = {
+        invalidStructure: 'Custom structure error',
+        tryAgain: 'Custom try again',
+        invalidJson: 'Custom JSON error',
+        apiKeyRequired: 'Custom API key required',
+        fetchFailed: 'Custom fetch error',
+        emptyResponse: 'Custom empty response',
+        timeout: 'Custom timeout error',
+        networkError: 'Custom network error',
+        unexpectedError: 'Custom unexpected error',
+      };
+
+      await expect(
+        generateRecipes(
+          '',
+          testIngredients,
+          2,
+          3,
+          'No restrictions',
+          'English',
+          [],
+          '',
+          customErrors
+        )
+      ).rejects.toThrow('Custom API key required');
     });
   });
 });
