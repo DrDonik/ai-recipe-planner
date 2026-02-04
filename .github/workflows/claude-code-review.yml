@@ -41,7 +41,4 @@ jobs:
           # Allow Claude bot to trigger this workflow (for issue-validation chaining)
           allowed_bots: 'claude'
 
-          # Allow Claude bot to trigger this workflow (for issue-validation chaining)
-          allowed_bots: 'claude'
-
 
