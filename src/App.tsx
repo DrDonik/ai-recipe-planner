@@ -399,7 +399,7 @@ function App() {
                       {t.menuTitle}
                     </span>
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
                     {mealPlan.recipes.map((recipe, index) => (
                       <RecipeCard
                         key={recipe.id}
