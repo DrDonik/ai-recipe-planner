@@ -9,7 +9,6 @@ import {
   networkErrorHandler,
   apiErrorHandler,
   timeoutHandler,
-  markdownHandler,
 } from '../mocks/handlers';
 
 // Set up MSW server for API mocking
