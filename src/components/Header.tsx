@@ -55,6 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
             type: 'undo',
             action: {
                 label: t.undo.action,
+                ariaLabel: `${t.undo.action} ${t.undo.apiKeyCleared.toLowerCase()}`,
                 onClick: () => {
                     setApiKey(backupKey);
                     setUseCopyPaste(false);
@@ -138,6 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
                             onClick={() => setHeaderMinimized(!headerMinimized)}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
                             aria-label={headerMinimized ? 'Expand' : 'Collapse'}
+                            aria-expanded={!headerMinimized}
                         >
                             {headerMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
                         </button>

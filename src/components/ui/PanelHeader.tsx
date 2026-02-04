@@ -40,6 +40,7 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
                     onClick={onToggleMinimize}
                     className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary flex items-center justify-center"
                     aria-label={isMinimized ? 'Expand' : 'Collapse'}
+                    aria-expanded={!isMinimized}
                 >
                     {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
                 </button>

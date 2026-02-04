@@ -58,6 +58,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                             onClick={() => setOptionsMinimized(!optionsMinimized)}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
                             aria-label={optionsMinimized ? 'Expand' : 'Collapse'}
+                            aria-expanded={!optionsMinimized}
                         >
                             {optionsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
                         </button>
@@ -184,6 +185,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <div
                     role="alert"
                     aria-live="assertive"
+                    aria-atomic="true"
                     className={`p-4 rounded-xl border text-sm animate-in fade-in slide-in-from-top-2 flex items-center justify-between gap-3 ${
                         notification.type === 'error'
                             ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900'
@@ -194,6 +196,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     {notification.action && (
                         <button
                             onClick={notification.action.onClick}
+                            aria-label={notification.action.ariaLabel || notification.action.label}
                             className={`px-3 py-1 rounded-lg font-medium text-sm transition-colors shrink-0 ${
                                 notification.type === 'error'
                                     ? 'bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800'
