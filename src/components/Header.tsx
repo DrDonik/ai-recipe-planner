@@ -141,7 +141,8 @@ export const Header: React.FC<HeaderProps> = ({
                                 icon={<AlertTriangle size={16} className="text-red-500" />}
                                 tooltip={t.apiKeyStoredWarning}
                                 ariaLabel={t.apiKeyStoredWarning}
-                                className="!p-1"
+                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setShowClearDialog(true)}
                             />
                         )}
 
@@ -195,7 +196,8 @@ export const Header: React.FC<HeaderProps> = ({
                                             icon={<AlertTriangle size={16} className="text-red-500" />}
                                             tooltip={t.apiKeyStoredWarning}
                                             ariaLabel={t.apiKeyStoredWarning}
-                                            className="!p-1"
+                                            className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => setShowClearDialog(true)}
                                         />
                                     )}
                                 </div>
