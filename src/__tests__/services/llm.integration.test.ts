@@ -1,16 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { generateRecipes } from '@/services/llm';
 import type { PantryItem } from '@/types';
 
 const SKIP_INTEGRATION = !process.env.GEMINI_API_KEY;
 
 describe.skipIf(SKIP_INTEGRATION)('LLM Service - Integration Tests (Real API)', () => {
-  beforeAll(() => {
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn('Skipping integration tests: Set GEMINI_API_KEY to run these tests');
-    }
-  });
-
   const testIngredients: PantryItem[] = [
     { id: 'id1', name: 'Tomatoes', amount: '500g' },
     { id: 'id2', name: 'Pasta', amount: '250g' },
