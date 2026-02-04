@@ -10,6 +10,9 @@ This document covers testing practices and guidelines for the AI Recipe Planner 
 - [Coverage](#coverage)
 - [Integration Tests](#integration-tests)
 - [CI/CD](#cicd)
+- [Troubleshooting](#troubleshooting)
+- [Best Practices](#best-practices)
+- [Resources](#resources)
 
 ## Running Tests
 
@@ -36,6 +39,14 @@ npm run test:coverage
 ```
 
 Generates a coverage report in the `coverage/` directory.
+
+### Interactive UI
+
+```bash
+npm run test:ui
+```
+
+Opens Vitest UI in browser for interactive test running and debugging.
 
 ### Watch Specific Files
 
@@ -111,8 +122,15 @@ describe('MyComponent', () => {
 The project uses MSW (Mock Service Worker) for API mocking. See `src/__tests__/mocks/handlers.ts` for examples.
 
 ```typescript
-import { server } from '@/__tests__/mocks/server';
+import { setupServer } from 'msw/node';
+import { handlers } from '@/__tests__/mocks/handlers';
 import { http, HttpResponse } from 'msw';
+
+const server = setupServer(...handlers);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 it('should handle API errors', async () => {
   server.use(
@@ -134,7 +152,6 @@ src/__tests__/
   ├── setup.ts              # Global test configuration
   ├── mocks/
   │   ├── handlers.ts       # MSW API handlers
-  │   ├── server.ts         # MSW server setup
   │   └── localStorage.ts   # localStorage mock
   ├── utils/
   │   ├── idGenerator.test.ts
