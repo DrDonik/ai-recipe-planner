@@ -11,7 +11,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:integration": "vitest --run integration"
+    "test:integration": "vitest run llm.integration"
   },
   "dependencies": {
     "framer-motion": "^12.23.26",
