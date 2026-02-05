@@ -1,5 +1,8 @@
 # AI Recipe Planner 🥗
 
+![Tests](https://github.com/DrDonik/ai-recipe-planner/workflows/Tests/badge.svg)
+[![codecov](https://codecov.io/gh/DrDonik/ai-recipe-planner/branch/main/graph/badge.svg)](https://codecov.io/gh/DrDonik/ai-recipe-planner)
+
 A smart, AI-powered meal planner that turns your pantry or vegetable box deliveries into recipes and a shopping list.
 
 Try it out on github pages: [AI Recipe Planner](https://drdonik.github.io/ai-recipe-planner/)
@@ -54,6 +57,19 @@ Try it out on github pages: [AI Recipe Planner](https://drdonik.github.io/ai-rec
 3.  Add spices and staples to your spice rack.
 4.  Select your diet, number of people, and number of meals.
 5.  Click **Generate** to get your personalized menu directly!
+
+## Testing
+
+This project has comprehensive test coverage. See [docs/TESTING.md](docs/TESTING.md) for:
+- Running tests
+- Writing new tests
+- Coverage reports
+- Integration tests
+
+Run tests with:
+```bash
+npm test
+```
 
 ## License
 
