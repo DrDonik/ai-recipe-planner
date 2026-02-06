@@ -5,8 +5,6 @@ on:
     types: [created, edited]
   pull_request_review_comment:
     types: [created, edited]
-  issues:
-    types: [opened, edited]
   pull_request_review:
     types: [submitted, edited]
 
@@ -15,17 +13,18 @@ jobs:
     if: |
       (
         (
-          contains(fromJSON('["github-actions[bot]", "claude[bot]"]'), github.actor) ||
+          (
+            contains(fromJSON('["github-actions[bot]"]'), github.actor) &&
+            contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association)
+          ) ||
           (github.event_name == 'issue_comment' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)) ||
           (github.event_name == 'pull_request_review_comment' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)) ||
-          (github.event_name == 'pull_request_review' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.review.author_association)) ||
-          (github.event_name == 'issues' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association))
+          (github.event_name == 'pull_request_review' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.review.author_association))
         ) &&
         (
           (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
           (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-          (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-          (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+          (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
         )
       )
     runs-on: ubuntu-latest
@@ -48,8 +47,8 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Allow Claude bot to trigger this workflow (for issue-validation chaining)
-          allowed_bots: 'claude'
+          # Allow github-actions bot to trigger this workflow (for issue-validation chaining)
+          allowed_bots: 'github-actions'
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
@@ -64,14 +63,13 @@ jobs:
             --allowed-tools "Bash(gh issue:*)" "Bash(gh pr:*)" "Bash(npm install)" "Bash(npm run build)" "Bash(npm run lint)" "Bash(npm run test)"
             --json-schema '{"type":"object","properties":{"pr_title":{"type":"string","description":"Title for the pull request if changes were made"},"pr_body":{"type":"string","description":"Description for the pull request body if changes were made"},"made_changes":{"type":"boolean","description":"Whether any code changes were committed"}},"required":["made_changes"]}'
 
-      # Create a PR if Claude made changes and this was triggered by an issue (not an existing PR)
+      # Create a PR if Claude made changes and this was triggered by an issue comment (not an existing PR)
       - name: Create Pull Request
         if: |
           steps.claude.outputs.branch_name != '' &&
           steps.claude.outputs.structured_output != '' &&
           fromJSON(steps.claude.outputs.structured_output).made_changes == true &&
           (
-            github.event_name == 'issues' ||
             (github.event_name == 'issue_comment' && github.event.issue.pull_request == null)
           )
         env:
