@@ -25,6 +25,7 @@ jobs:
           fetch-depth: 1
 
       - name: Validate Issue with Claude
+        id: validate
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -45,7 +46,7 @@ jobs:
 
             3. **Add labels** using `gh issue edit <number> --add-label <label>`:
                - If valid: add `validated`, `complexity:<level>`, `ux:<impact>`
-               - If valid + easy + positive/neutral UX: also add `auto-implementable`
+               - If valid + easy + positive/neutral UX: **you MUST also add `auto-implementable`**
                - If invalid: add `needs-clarification`
 
                Create any missing labels first with `gh label create <name> --color <hex>`:
@@ -70,23 +71,49 @@ jobs:
                **Summary:** <your assessment>
 
                **Implementation Notes:** <if valid, brief implementation guidance>
-
-               ---
-
-               <appropriate footer - see below>
                ```
 
-               Footer options:
-               - If auto-implementable AND author is "DrDonik":
-                 "🤖 This issue has been automatically flagged for implementation by @claude.
+            ## IMPORTANT RULES
+            - Do NOT include any footer in the comment. A subsequent workflow step will handle that.
+            - Do NOT mention @claude anywhere in your output or comments. Never tag or reference claude.
 
-                 @claude Please implement the fix/enhancement described in this issue."
-               - If auto-implementable but author is NOT "DrDonik":
-                 "ℹ️ This issue appears safe to auto-implement, but requires approval from a maintainer.
-                 Maintainers: Explicitly call claude to trigger implementation."
-               - If valid but not auto-implementable:
-                 "ℹ️ This issue requires manual review before implementation.
-                 Maintainers: Explicitly call claude to request implementation when ready."
-               - If invalid:
-                 "⚠️ This issue needs clarification before it can be addressed.
-                 Please provide more details about the problem or enhancement you're requesting."
+      - name: Post footer comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          AUTHOR_ASSOCIATION: ${{ github.event.issue.author_association }}
+        run: |
+          # Fetch the current labels on the issue
+          LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name')
+
+          HAS_AUTO_IMPLEMENTABLE=$(echo "$LABELS" | grep -c '^auto-implementable$' || true)
+          HAS_VALIDATED=$(echo "$LABELS" | grep -c '^validated$' || true)
+
+          if [ "$HAS_AUTO_IMPLEMENTABLE" -gt 0 ]; then
+            if [ "$AUTHOR_ASSOCIATION" = "OWNER" ] || [ "$AUTHOR_ASSOCIATION" = "MEMBER" ] || [ "$AUTHOR_ASSOCIATION" = "COLLABORATOR" ] || [ "$AUTHOR_ASSOCIATION" = "CONTRIBUTOR" ]; then
+              gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          🤖 This issue has been automatically flagged for implementation.
+
+          @claude Please implement the fix/enhancement described in this issue.
+          EOF
+              )"
+            else
+              gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          ℹ️ This issue appears safe to auto-implement, but requires approval from a maintainer.
+          Maintainers: Explicitly call claude to trigger implementation.
+          EOF
+              )"
+            fi
+          elif [ "$HAS_VALIDATED" -gt 0 ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          ℹ️ This issue requires manual review before implementation.
+          Maintainers: Explicitly call claude to request implementation when ready.
+          EOF
+            )"
+          else
+            gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          ⚠️ This issue needs clarification before it can be addressed.
+          Please provide more details about the problem or enhancement you're requesting.
+          EOF
+            )"
+          fi
