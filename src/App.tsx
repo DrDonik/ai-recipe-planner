@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
@@ -304,14 +304,15 @@ function App() {
   if (viewRecipe) {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
-        <div className="max-w-2xl w-full">
-          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} />
+        <div className="max-w-2xl w-full relative">
           <button
             onClick={clearViewRecipe}
-            className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
+            className="absolute top-0 right-0 z-10 p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Close"
           >
-            ← {t.openMyPlanner}
+            <X size={20} />
           </button>
+          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} />
         </div>
       </div>
     );
@@ -320,14 +321,15 @@ function App() {
   if (viewShoppingList) {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
-        <div className="max-w-4xl w-full">
-          <ShoppingList items={viewShoppingList} isStandaloneView={true} />
+        <div className="max-w-4xl w-full relative">
           <button
             onClick={clearViewShoppingList}
-            className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
+            className="absolute top-0 right-0 z-10 p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Close"
           >
-            ← {t.openMyPlanner}
+            <X size={20} />
           </button>
+          <ShoppingList items={viewShoppingList} isStandaloneView={true} />
         </div>
       </div>
     );
