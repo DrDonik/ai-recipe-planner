@@ -26,7 +26,61 @@ npm run preview
 
 # Run linter
 npm run lint
+
+# Run tests (watch mode)
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests with interactive UI
+npm run test:ui
+
+# Run integration tests (requires GEMINI_API_KEY env var)
+GEMINI_API_KEY=your_key npm run test:integration
 ```
+
+> **Node.js 20** is required (specified in CI workflows).
+
+## Testing
+
+### Framework & Tools
+
+- **Test Runner**: Vitest 4 with `happy-dom` environment
+- **Component Testing**: `@testing-library/react` + `@testing-library/user-event`
+- **Assertions**: `@testing-library/jest-dom` for DOM matchers
+- **API Mocking**: MSW (Mock Service Worker) for intercepting Gemini API calls
+- **Coverage**: `@vitest/coverage-v8` (v8 provider)
+- **Config**: `vitest.config.ts` (globals enabled, path alias `@` → `./src`)
+
+### Test File Structure
+
+Tests live in `src/__tests__/`, mirroring the source tree:
+
+```
+src/__tests__/
+├── setup.ts                          # Global setup: localStorage mock, cleanup
+├── setup.test.ts                     # Validates test environment works
+├── mocks/
+│   ├── handlers.ts                   # MSW handlers for Gemini API scenarios
+│   └── localStorage.ts               # Mock localStorage (Map-based)
+├── services/
+│   ├── llm.test.ts                   # Unit tests for prompt building, response parsing, generation
+│   └── llm.integration.test.ts       # Real API tests (skipped without GEMINI_API_KEY)
+└── utils/
+    ├── idGenerator.test.ts           # UUID generation and format tests
+    └── sharing.test.ts               # URL encoding/decoding, base64, edge cases
+```
+
+### When Writing Tests
+
+- **All code changes must include tests** — new features need new tests, modified code needs updated tests.
+- Place test files in `src/__tests__/` following the source directory structure.
+- Use MSW handlers in `src/__tests__/mocks/handlers.ts` when mocking API calls. Swap handlers per test with `server.use()`.
+- The `localStorage` mock in `setup.ts` auto-resets between tests — no manual cleanup needed.
+- Integration tests that require a real API key should be gated with a check for the `GEMINI_API_KEY` env var and skipped otherwise.
+- Run `npm run test:coverage` to verify coverage before submitting changes.
+- See `docs/TESTING.md` for the full testing guide.
 
 ## Architecture
 
@@ -131,6 +185,7 @@ App.tsx                     # Main app, routing (normal/shared recipe/shared sho
   - `welcome_dismissed` - Welcome dialog dismissed
 - **Type Safety**: All LLM response data uses strict TypeScript interfaces (`Recipe`, `MealPlan`, `Ingredient`, `PantryItem`, `Nutrition`)
 - **Error Handling**: User-facing errors displayed via `error` state in App.tsx
+- **Testing**: Write or update tests for all code changes. Run `npm run test:coverage` before committing.
 
 ### When Modifying LLM Prompts
 
@@ -162,6 +217,7 @@ The prompt in `buildRecipePrompt()` has specific rules that prevent common LLM m
 - **Icons**: Lucide React
 - **LLM Provider**: Google Gemini API (`gemini-3-flash-preview`)
 - **Linting**: ESLint 9 (flat config) with TypeScript-ESLint
+- **Testing**: Vitest 4 + Testing Library + MSW
 - **Package Manager**: npm
 
 ## Configuration Files
@@ -170,6 +226,21 @@ The prompt in `buildRecipePrompt()` has specific rules that prevent common LLM m
 - `eslint.config.js` - Flat config format (ESLint 9)
 - `tsconfig.json` - Composite TypeScript project with app/node references
 - `tailwind.config.js` - Minimal config (v4 uses CSS-based configuration)
+- `vitest.config.ts` - Test runner config (happy-dom, coverage, path aliases)
+- `lighthouserc.json` - Lighthouse CI thresholds (perf 80%, a11y 90%, best practices 90%, SEO 90%)
+
+## CI/CD Pipeline
+
+GitHub Actions workflows enforce quality gates on every PR to `main`:
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| `ci.yml` | PR to main | Lint + build |
+| `test.yml` | Push/PR to main | Run tests + upload coverage |
+| `lighthouse.yml` | PR to main | Lighthouse performance audit |
+| `deploy.yml` | Push to main | Deploy to GitHub Pages |
+
+PRs must pass lint, build, and tests before merging. Lighthouse CI warns on performance regressions.
 
 ## Data Types
 
