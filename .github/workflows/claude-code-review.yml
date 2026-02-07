@@ -15,6 +15,7 @@ jobs:
     # Allow repo owner, org members, collaborators, previous contributors, and github-actions bot
     if: |
       github.actor == 'github-actions[bot]' ||
+      github.actor == 'drdoniks-bot[bot]' ||
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
     runs-on: ubuntu-latest
     permissions:
@@ -42,6 +43,6 @@ jobs:
           
           # Allow Claude bot and github-actions bot to trigger this workflow
           # (for issue-validation and auto-PR creation chaining)
-          allowed_bots: 'claude,github-actions'
+          allowed_bots: 'claude,github-actions,drdoniks-bot'
 
 
