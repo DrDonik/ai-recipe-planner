@@ -128,20 +128,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </button>
             )}
 
-            {wakeLock?.isSupported && (
-                <button
-                    onClick={wakeLock.toggle}
-                    className={`absolute top-8 right-8 p-2 rounded-full transition-all flex items-center justify-center ${
-                        wakeLock.isActive
-                            ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                            : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
-                    }`}
-                    aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
-                    aria-pressed={wakeLock.isActive}
-                >
-                    {wakeLock.isActive ? <Sun size={18} /> : <SunDim size={18} />}
-                </button>
-            )}
 
             <div className="flex items-start justify-between mb-6 gap-4">
                 <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight flex-1`}>
@@ -159,19 +145,35 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             </div>
 
             <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
-                <div className="flex items-center gap-2 text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                <div className={`flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`}>
                     <Clock size={16} />
                     {recipe.time}
                 </div>
-                {onDelete && (
-                    <button
-                        onClick={onDelete}
-                        className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
-                        aria-label={t.deleteRecipe}
-                    >
-                        <Trash2 size={18} />
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {wakeLock?.isSupported && isStandalone && (
+                        <button
+                            onClick={wakeLock.toggle}
+                            className={`rounded-full transition-all flex items-center justify-center ${isStandalone ? 'h-9 w-9' : 'h-8 w-8'} ${
+                                wakeLock.isActive
+                                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                                    : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
+                            }`}
+                            aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
+                            aria-pressed={wakeLock.isActive}
+                        >
+                            {wakeLock.isActive ? <Sun size={16} /> : <SunDim size={16} />}
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={onDelete}
+                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
+                            aria-label={t.deleteRecipe}
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="space-y-8 flex-grow">
