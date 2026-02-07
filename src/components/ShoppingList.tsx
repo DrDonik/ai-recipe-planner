@@ -199,7 +199,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     {isStandaloneView && onClose && (
                         <button
                             onClick={onClose}
-                            className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30  rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
                             aria-label="Close"
                         >
                             <X size={20} />

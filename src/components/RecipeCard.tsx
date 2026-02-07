@@ -118,30 +118,32 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             )}
 
-            {showOpenInNewTab && onViewSingle && (
-                <button
-                    onClick={onViewSingle}
-                    className="absolute top-8 right-8 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
-                    aria-label={t.viewRecipe}
-                >
-                    <ExternalLink size={18} />
-                </button>
-            )}
-
 
             <div className="flex items-start justify-between mb-6 gap-4">
                 <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight flex-1`}>
                     {recipe.title}
                 </h3>
-                {isStandalone && onClose && (
-                    <button
-                        onClick={onClose}
-                        className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary shrink-0"
-                        aria-label="Close"
-                    >
-                        <X size={20} />
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {showOpenInNewTab && onViewSingle && (
+                        <button
+                            onClick={onViewSingle}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={t.viewRecipe}
+                        >
+                            <ExternalLink size={18} />
+                        </button>
+                    )}
+
+                    {isStandalone && onClose && (
+                        <button
+                            onClick={onClose}
+                            className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-all text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary shrink-0"
+                            aria-label="Close"
+                        >
+                            <X size={20} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
@@ -153,7 +155,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {wakeLock?.isSupported && isStandalone && (
                         <button
                             onClick={wakeLock.toggle}
-                            className={`rounded-full transition-all flex items-center justify-center ${isStandalone ? 'h-9 w-9' : 'h-8 w-8'} ${
+                            className={`rounded-full transition-all flex items-center justify-center h-9 w-9 ${
                                 wakeLock.isActive
                                     ? 'bg-primary/20 text-primary hover:bg-primary/30'
                                     : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
