@@ -1,10 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
-import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
-import { URL_PARAMS } from '../constants';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -17,9 +15,11 @@ interface RecipeCardProps {
         toggle: () => void;
     };
     onDelete?: () => void;
+    onViewSingle?: () => void;
+    onClose?: () => void;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -81,11 +81,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         }
     }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time, recipe.nutrition]);
 
-    // Memoize the share URL (exclude missingIngredients since they're not relevant in standalone view)
-    const shareUrl = useMemo(() => {
-        const { missingIngredients: _excluded, ...recipeForSharing } = recipe;
-        return generateShareUrl(URL_PARAMS.RECIPE, recipeForSharing);
-    }, [recipe]);
 
     // Memoize the set of missing ingredient names (lowercase) for O(1) lookup
     const missingIngredientNames = useMemo(() => {
@@ -108,7 +103,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: (index+1) * 0.1 }}
             className="glass-card p-8 flex flex-col h-full relative hover:border-border-hover transition-colors shadow-glass"
         >
             {schemaJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />}
@@ -123,54 +118,64 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             )}
 
-            {showOpenInNewTab && (
-                <button
-                    onClick={() => {
-                        window.history.pushState({}, '', shareUrl);
-                        window.location.href = shareUrl;
-                    }}
-                    className="absolute top-8 right-8 p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
-                    aria-label={t.viewRecipe}
-                >
-                    <ExternalLink size={18} />
-                </button>
-            )}
 
-            {wakeLock?.isSupported && (
-                <button
-                    onClick={wakeLock.toggle}
-                    className={`absolute top-8 right-8 p-2 rounded-full transition-all flex items-center justify-center ${
-                        wakeLock.isActive
-                            ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                            : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
-                    }`}
-                    aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
-                    aria-pressed={wakeLock.isActive}
-                >
-                    {wakeLock.isActive ? <Sun size={18} /> : <SunDim size={18} />}
-                </button>
-            )}
-
-            <div className="flex items-start justify-between mb-6 pr-8">
-                <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight`}>
+            <div className="flex items-start justify-between mb-6 gap-4">
+                <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight flex-1`}>
                     {recipe.title}
                 </h3>
+                <div className="flex items-center gap-2">
+                    {showOpenInNewTab && onViewSingle && (
+                        <button
+                            onClick={onViewSingle}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={t.viewRecipe}
+                        >
+                            <ExternalLink size={18} />
+                        </button>
+                    )}
+
+                    {isStandalone && onClose && (
+                        <button
+                            onClick={onClose}
+                            className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-all text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary shrink-0"
+                            aria-label="Close"
+                        >
+                            <X size={20} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
-                <div className="flex items-center gap-2 text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                <div className={`flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`}>
                     <Clock size={16} />
                     {recipe.time}
                 </div>
-                {onDelete && (
-                    <button
-                        onClick={onDelete}
-                        className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
-                        aria-label={t.deleteRecipe}
-                    >
-                        <Trash2 size={18} />
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {wakeLock?.isSupported && isStandalone && (
+                        <button
+                            onClick={wakeLock.toggle}
+                            className={`rounded-full transition-all flex items-center justify-center h-9 w-9 ${
+                                wakeLock.isActive
+                                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                                    : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
+                            }`}
+                            aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
+                            aria-pressed={wakeLock.isActive}
+                        >
+                            {wakeLock.isActive ? <Sun size={16} /> : <SunDim size={16} />}
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={onDelete}
+                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
+                            aria-label={t.deleteRecipe}
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="space-y-8 flex-grow">

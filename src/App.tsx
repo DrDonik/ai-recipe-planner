@@ -10,7 +10,7 @@ import { CopyPasteDialog } from './components/CopyPasteDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse, RecipeSchema, IngredientSchema } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { decodeFromUrl } from './utils/sharing';
+import { decodeFromUrl, generateShareUrl } from './utils/sharing';
 import { Header } from './components/Header';
 import { SettingsPanel } from './components/SettingsPanel';
 import { useSettings } from './contexts/SettingsContext';
@@ -117,7 +117,7 @@ function App() {
         showNotification({ message: t.invalidSharedData || "Invalid shared shopping list data. The link may be corrupted.", type: 'error' });
       }
     }
-  }, [t.invalidSharedData]);
+  }, [t.invalidSharedData, showNotification]);
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {
@@ -160,17 +160,32 @@ function App() {
     }
   }, [viewRecipe, viewShoppingList, t.shoppingList]);
 
-  const clearViewRecipe = () => {
+  const openRecipeView = useCallback((recipe: Recipe) => {
+    setViewRecipe(recipe);
+    // Update URL without reload
+    const { missingIngredients: _excluded, ...recipeForSharing } = recipe;
+    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipeForSharing);
+    window.history.pushState({}, '', shareUrl);
+  }, []);
+
+  const openShoppingListView = useCallback((items: Ingredient[]) => {
+    setViewShoppingList(items);
+    // Update URL without reload
+    const shareUrl = generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
+    window.history.pushState({}, '', shareUrl);
+  }, []);
+
+  const clearViewRecipe = useCallback(() => {
     setViewRecipe(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
-  };
+  }, []);
 
-  const clearViewShoppingList = () => {
+  const clearViewShoppingList = useCallback(() => {
     setViewShoppingList(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
-  };
+  }, []);
 
   const addPantryItem = (v: PantryItem) => {
     setPantryItems([...pantryItems, v]);
@@ -305,13 +320,7 @@ function App() {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
         <div className="max-w-2xl w-full">
-          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} />
-          <button
-            onClick={clearViewRecipe}
-            className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
-          >
-            ← {t.openMyPlanner}
-          </button>
+          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} onClose={clearViewRecipe} />
         </div>
       </div>
     );
@@ -321,13 +330,7 @@ function App() {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
         <div className="max-w-4xl w-full">
-          <ShoppingList items={viewShoppingList} isStandaloneView={true} />
-          <button
-            onClick={clearViewShoppingList}
-            className="mt-8 text-primary hover:underline flex items-center justify-center gap-2 w-full font-medium"
-          >
-            ← {t.openMyPlanner}
-          </button>
+          <ShoppingList items={viewShoppingList} isStandaloneView={true} onClose={clearViewShoppingList} />
         </div>
       </div>
     );
@@ -394,6 +397,7 @@ function App() {
                   items={mealPlan.shoppingList}
                   isMinimized={shoppingListMinimized}
                   onToggleMinimize={handleToggleShoppingListMinimize}
+                  onViewSingle={() => openShoppingListView(mealPlan.shoppingList)}
                 />
 
                 <div>
@@ -410,6 +414,7 @@ function App() {
                         index={index}
                         showOpenInNewTab={true}
                         onDelete={() => deleteRecipe(recipe.id)}
+                        onViewSingle={() => openRecipeView(recipe)}
                       />
                     ))}
                   </div>
