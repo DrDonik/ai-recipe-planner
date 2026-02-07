@@ -77,9 +77,16 @@ jobs:
             - Do NOT include any footer in the comment. A subsequent workflow step will handle that.
             - Do NOT mention @claude anywhere in your output or comments. Never tag or reference claude.
 
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Post footer comment
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
           AUTHOR_ASSOCIATION: ${{ github.event.issue.author_association }}
         run: |
