@@ -103,7 +103,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: (index+1) * 0.1 }}
             className="glass-card p-8 flex flex-col h-full relative hover:border-border-hover transition-colors shadow-glass"
         >
             {schemaJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />}

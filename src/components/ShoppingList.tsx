@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useSettings } from '../contexts/SettingsContext';
@@ -157,7 +158,12 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
     if (items.length === 0) return null;
 
     return (
-        <div className={`glass-panel ${isMinimized ? 'p-6 pb-6' : 'p-6'}`}>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0 }}
+            className={`glass-panel ${isMinimized ? 'p-6 pb-6' : 'p-6'}`}
+        >
             <div className={`flex items-center justify-between ${isMinimized ? 'mb-0' : 'mb-5'}`}>
                 <div className="flex items-center gap-3">
                     <ShoppingCart className="text-secondary" size={24} />
@@ -247,6 +253,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     })}
                 </ul>
             )}
-        </div>
+        </motion.div>
     );
 };
