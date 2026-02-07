@@ -1,16 +1,17 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info } from 'lucide-react';
+import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X } from 'lucide-react';
 import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { generateShareUrl } from '../utils/sharing';
 import { useSettings } from '../contexts/SettingsContext';
-import { STORAGE_KEYS, URL_PARAMS } from '../constants';
+import { STORAGE_KEYS } from '../constants';
 
 interface ShoppingListProps {
     items: Ingredient[];
     isMinimized?: boolean;
     onToggleMinimize?: () => void;
     isStandaloneView?: boolean;
+    onViewSingle?: () => void;
+    onClose?: () => void;
 }
 
 /**
@@ -43,7 +44,7 @@ const getListHash = (items: Ingredient[]): string => {
     return `shopping_list_shared_${Math.abs(hash).toString(36)}`;
 };
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose }) => {
     const { t } = useSettings();
 
     // Load checked items from localStorage (used for main view and own list in standalone)
@@ -152,10 +153,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
         }
     }, [isStandaloneView, isOwnList, setLocalStorageChecked, sharedListStorageKey]);
 
-    // Generate share URL (without checkmark state - each recipient tracks their own)
-    const shareUrl = useMemo(() => {
-        return generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
-    }, [items]);
 
     if (items.length === 0) return null;
 
@@ -184,16 +181,22 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     </div>
                 )}
                 <div className="flex gap-2">
-                    {!isStandaloneView && (
+                    {!isStandaloneView && onViewSingle && (
                         <button
-                            onClick={() => {
-                                window.history.pushState({}, '', shareUrl);
-                                window.location.href = shareUrl;
-                            }}
+                            onClick={onViewSingle}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
                             aria-label={t.openInNewTab}
                         >
                             <ExternalLink size={18} />
+                        </button>
+                    )}
+                    {isStandaloneView && onClose && (
+                        <button
+                            onClick={onClose}
+                            className="p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                            aria-label="Close"
+                        >
+                            <X size={20} />
                         </button>
                     )}
                     {onToggleMinimize && (

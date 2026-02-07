@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
@@ -10,7 +10,7 @@ import { CopyPasteDialog } from './components/CopyPasteDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse, RecipeSchema, IngredientSchema } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { decodeFromUrl } from './utils/sharing';
+import { decodeFromUrl, generateShareUrl } from './utils/sharing';
 import { Header } from './components/Header';
 import { SettingsPanel } from './components/SettingsPanel';
 import { useSettings } from './contexts/SettingsContext';
@@ -160,17 +160,32 @@ function App() {
     }
   }, [viewRecipe, viewShoppingList, t.shoppingList]);
 
-  const clearViewRecipe = () => {
+  const openRecipeView = useCallback((recipe: Recipe) => {
+    setViewRecipe(recipe);
+    // Update URL without reload
+    const { missingIngredients: _excluded, ...recipeForSharing } = recipe;
+    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipeForSharing);
+    window.history.pushState({}, '', shareUrl);
+  }, []);
+
+  const openShoppingListView = useCallback((items: Ingredient[]) => {
+    setViewShoppingList(items);
+    // Update URL without reload
+    const shareUrl = generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
+    window.history.pushState({}, '', shareUrl);
+  }, []);
+
+  const clearViewRecipe = useCallback(() => {
     setViewRecipe(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
-  };
+  }, []);
 
-  const clearViewShoppingList = () => {
+  const clearViewShoppingList = useCallback(() => {
     setViewShoppingList(null);
     // clean URL
     window.history.pushState({}, '', window.location.pathname);
-  };
+  }, []);
 
   const addPantryItem = (v: PantryItem) => {
     setPantryItems([...pantryItems, v]);
@@ -304,15 +319,8 @@ function App() {
   if (viewRecipe) {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
-        <div className="max-w-2xl w-full relative">
-          <button
-            onClick={clearViewRecipe}
-            className="absolute top-0 right-0 z-10 p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} />
+        <div className="max-w-2xl w-full">
+          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} onClose={clearViewRecipe} />
         </div>
       </div>
     );
@@ -321,15 +329,8 @@ function App() {
   if (viewShoppingList) {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
-        <div className="max-w-4xl w-full relative">
-          <button
-            onClick={clearViewShoppingList}
-            className="absolute top-0 right-0 z-10 p-1.5 hover:bg-white/50 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-          <ShoppingList items={viewShoppingList} isStandaloneView={true} />
+        <div className="max-w-4xl w-full">
+          <ShoppingList items={viewShoppingList} isStandaloneView={true} onClose={clearViewShoppingList} />
         </div>
       </div>
     );
@@ -396,6 +397,7 @@ function App() {
                   items={mealPlan.shoppingList}
                   isMinimized={shoppingListMinimized}
                   onToggleMinimize={handleToggleShoppingListMinimize}
+                  onViewSingle={() => openShoppingListView(mealPlan.shoppingList)}
                 />
 
                 <div>
@@ -412,6 +414,7 @@ function App() {
                         index={index}
                         showOpenInNewTab={true}
                         onDelete={() => deleteRecipe(recipe.id)}
+                        onViewSingle={() => openRecipeView(recipe)}
                       />
                     ))}
                   </div>
