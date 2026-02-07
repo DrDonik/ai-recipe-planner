@@ -117,7 +117,7 @@ function App() {
         showNotification({ message: t.invalidSharedData || "Invalid shared shopping list data. The link may be corrupted.", type: 'error' });
       }
     }
-  }, [t.invalidSharedData]);
+  }, [t.invalidSharedData, showNotification]);
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {
