@@ -163,8 +163,7 @@ function App() {
   const openRecipeView = useCallback((recipe: Recipe) => {
     setViewRecipe(recipe);
     // Update URL without reload
-    const { missingIngredients: _excluded, ...recipeForSharing } = recipe;
-    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipeForSharing);
+    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipe);
     window.history.pushState({}, '', shareUrl);
   }, []);
 

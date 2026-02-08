@@ -146,5 +146,27 @@ describe('sharing utilities', () => {
       expect(parsedUrl.origin).toBe(window.location.origin);
       expect(parsedUrl.pathname).toBe(window.location.pathname);
     });
+
+    it('should preserve all recipe fields including missingIngredients', () => {
+      const recipe = {
+        id: 'recipe-1',
+        title: 'Test Recipe',
+        time: '30 min',
+        ingredients: [{ item: 'Tomato', amount: '2' }],
+        instructions: ['Step 1'],
+        usedIngredients: ['ingredient-1'],
+        missingIngredients: [{ item: 'Salt', amount: '1 tsp' }],
+      };
+
+      const url = generateShareUrl('recipe', recipe);
+      const parsedUrl = new URL(url);
+      const paramValue = parsedUrl.searchParams.get('recipe');
+
+      expect(paramValue).toBeTruthy();
+      const decoded = decodeFromUrl<typeof recipe>(decodeURIComponent(paramValue!));
+
+      expect(decoded).toEqual(recipe);
+      expect(decoded?.missingIngredients).toEqual([{ item: 'Salt', amount: '1 tsp' }]);
+    });
   });
 });
