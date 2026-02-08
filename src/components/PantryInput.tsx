@@ -9,6 +9,7 @@ interface PantryInputProps {
     pantryItems: PantryItem[];
     onAddPantryItem: (item: PantryItem) => void;
     onRemovePantryItem: (id: string) => void;
+    onUpdatePantryItem: (id: string, newAmount: string) => void;
     onEmptyPantry: () => void;
     isMinimized: boolean;
     onToggleMinimize: () => void;
@@ -22,6 +23,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     pantryItems,
     onAddPantryItem,
     onRemovePantryItem,
+    onUpdatePantryItem,
     onEmptyPantry,
     isMinimized,
     onToggleMinimize
@@ -29,8 +31,11 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     const { t } = useSettings();
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
+    const [editingItemId, setEditingItemId] = useState<string | null>(null);
+    const [editingAmount, setEditingAmount] = useState('');
     const nameInputRef = useRef<HTMLInputElement>(null);
     const amountInputRef = useRef<HTMLInputElement>(null);
+    const editAmountInputRef = useRef<HTMLInputElement>(null);
 
     // Focus ingredient field on mount
     useEffect(() => {
@@ -69,6 +74,42 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         e.preventDefault();
         flushPendingInput();
     };
+
+    const startEditingAmount = (item: PantryItem) => {
+        setEditingItemId(item.id);
+        setEditingAmount(item.amount);
+    };
+
+    const cancelEditingAmount = () => {
+        setEditingItemId(null);
+        setEditingAmount('');
+    };
+
+    const saveEditingAmount = () => {
+        if (editingItemId && editingAmount.trim()) {
+            onUpdatePantryItem(editingItemId, editingAmount.trim());
+        }
+        setEditingItemId(null);
+        setEditingAmount('');
+    };
+
+    const handleEditAmountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveEditingAmount();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            cancelEditingAmount();
+        }
+    };
+
+    // Auto-focus the edit input when editing starts
+    useEffect(() => {
+        if (editingItemId && editAmountInputRef.current) {
+            editAmountInputRef.current.focus();
+            editAmountInputRef.current.select();
+        }
+    }, [editingItemId]);
 
     return (
         <div className="glass-panel p-6 flex flex-col gap-6">
@@ -125,9 +166,27 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 <div className="flex flex-row items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-primary shadow-sm shadow-primary/20"></div>
                                     <span className="font-semibold text-text-main">{item.name}</span>
-                                    <span className="text-text-muted text-xs bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md shadow-sm border border-[var(--glass-border)]">
-                                        {item.amount}
-                                    </span>
+                                    {editingItemId === item.id ? (
+                                        <input
+                                            ref={editAmountInputRef}
+                                            type="text"
+                                            value={editingAmount}
+                                            onChange={(e) => setEditingAmount(e.target.value)}
+                                            onKeyDown={handleEditAmountKeyDown}
+                                            onBlur={saveEditingAmount}
+                                            className="text-text-muted text-xs bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md shadow-sm border border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 w-20"
+                                            aria-label={`${t.placeholders.amount} ${item.name}`}
+                                        />
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => startEditingAmount(item)}
+                                            className="text-text-muted text-xs bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md shadow-sm border border-[var(--glass-border)] hover:border-primary hover:bg-white/70 dark:hover:bg-white/20 transition-colors cursor-pointer"
+                                            aria-label={`${t.placeholders.amount}: ${item.amount}. ${t.clickToEdit}`}
+                                        >
+                                            {item.amount}
+                                        </button>
+                                    )}
                                 </div>
                                 <button
                                     type="button"
