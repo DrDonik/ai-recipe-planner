@@ -36,6 +36,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     const nameInputRef = useRef<HTMLInputElement>(null);
     const amountInputRef = useRef<HTMLInputElement>(null);
     const editAmountInputRef = useRef<HTMLInputElement>(null);
+    const isCancellingRef = useRef(false);
 
     // Focus ingredient field on mount
     useEffect(() => {
@@ -81,11 +82,16 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     };
 
     const cancelEditingAmount = () => {
+        isCancellingRef.current = true;
         setEditingItemId(null);
         setEditingAmount('');
+        setTimeout(() => { isCancellingRef.current = false; }, 0);
     };
 
     const saveEditingAmount = () => {
+        if (isCancellingRef.current) {
+            return; // Don't save if cancelling
+        }
         if (editingItemId && editingAmount.trim()) {
             onUpdatePantryItem(editingItemId, editingAmount.trim());
         }
