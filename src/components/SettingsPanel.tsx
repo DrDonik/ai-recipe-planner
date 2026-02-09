@@ -107,6 +107,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                 <option value="Mostly Vegetarian">{t.dietOptions.mostlyVegetarian}</option>
                                 <option value="Pescatarian">{t.dietOptions.pescatarian}</option>
                                 <option value="Flexitarian">{t.dietOptions.flexitarian}</option>
+                                <option value="Omnivore">{t.dietOptions.omnivore}</option>
                                 <option value="Carnivore">{t.dietOptions.carnivore}</option>
                             </select>
                         </>
