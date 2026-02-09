@@ -43,6 +43,6 @@ jobs:
           
           # Allow Claude bot and github-actions bot to trigger this workflow
           # (for issue-validation and auto-PR creation chaining)
-          allowed_bots: 'claude,github-actions,drdoniks-bot'
+          allowed_bots: 'claude,github-actions,drdoniks-bot,dependabot'
 
 
