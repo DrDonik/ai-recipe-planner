@@ -194,6 +194,12 @@ function App() {
     setPantryItems(pantryItems.filter(v => v.id !== id));
   };
 
+  const updatePantryItem = (id: string, newAmount: string) => {
+    setPantryItems(pantryItems.map(item =>
+      item.id === id ? { ...item, amount: newAmount } : item
+    ));
+  };
+
   const emptyPantry = () => {
     const backup = [...pantryItems];
     setPantryItems([]);
@@ -371,6 +377,7 @@ function App() {
               pantryItems={pantryItems}
               onAddPantryItem={addPantryItem}
               onRemovePantryItem={removePantryItem}
+              onUpdatePantryItem={updatePantryItem}
               onEmptyPantry={emptyPantry}
               isMinimized={pantryMinimized}
               onToggleMinimize={handleTogglePantryMinimize}
