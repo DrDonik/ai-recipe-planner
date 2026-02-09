@@ -59,6 +59,7 @@ export const RecipeSchema = z.object({
   // Optional because shared recipes exclude missingIngredients (not relevant in standalone view)
   missingIngredients: z.array(IngredientSchema).optional(),
   nutrition: NutritionSchema.optional(),
+  comments: z.string().optional(),
 });
 
 export const MealPlanSchema = z.object({

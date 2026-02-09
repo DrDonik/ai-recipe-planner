@@ -43,6 +43,7 @@ export interface Recipe {
   usedIngredients: string[]; // List of PantryItem IDs used
   missingIngredients?: Ingredient[]; // Optional: excluded in shared recipes
   nutrition?: Nutrition; // Optional for backwards compatibility
+  comments?: string; // Optional fun fact or remark from the LLM
 }
 
 /**
