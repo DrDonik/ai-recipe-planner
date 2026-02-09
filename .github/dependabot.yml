@@ -6,6 +6,12 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    ignore:
+      # Wait for eslint-plugin-react-hooks to support ESLint 10
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         patterns:
