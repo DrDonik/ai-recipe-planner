@@ -214,8 +214,8 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Zod validation failed - the JSON structure doesn't match expectations
-      console.error("Validation Error:", error.errors);
-      const firstError = error.errors[0];
+      console.error("Validation Error:", error.issues);
+      const firstError = error.issues[0];
       const path = firstError.path.join('.');
       throw new Error(
         `${errors.invalidStructure}: ${firstError.message}${path ? ` at ${path}` : ''}. ` +

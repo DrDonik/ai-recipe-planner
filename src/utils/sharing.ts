@@ -36,7 +36,7 @@ export const decodeFromUrl = <T>(base64: string, schema?: z.ZodSchema<T>): T | n
         return parsed as T;
     } catch (error) {
         if (error instanceof z.ZodError) {
-            console.error("Validation failed for shared data:", error.errors);
+            console.error("Validation failed for shared data:", error.issues);
         } else {
             console.error("Failed to decode shared data:", error);
         }
