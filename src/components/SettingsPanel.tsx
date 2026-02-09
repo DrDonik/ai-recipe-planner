@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import type { Notification } from '../types';
+
+export interface SettingsPanelRef {
+    flushPendingInput: () => string | null;
+}
 
 interface SettingsPanelProps {
     optionsMinimized: boolean;
@@ -11,28 +15,35 @@ interface SettingsPanelProps {
     notification: Notification | null;
 }
 
-export const SettingsPanel: React.FC<SettingsPanelProps> = ({
+export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
     optionsMinimized,
     setOptionsMinimized,
     loading,
     handleGenerate,
     notification
-}) => {
+}, ref) => {
     const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
     const [newStyleWish, setNewStyleWish] = useState('');
 
-    const handleAddStyleWish = (e: React.FormEvent) => {
-        e.preventDefault();
+    const flushPendingInput = (): string | null => {
         const trimmed = newStyleWish.trim();
-        if (!trimmed) return;
+        if (!trimmed) return null;
 
-        // Clear input regardless of whether item is added
         setNewStyleWish('');
 
-        // Don't add if it already exists
-        if (styleWishes.includes(trimmed)) return;
+        if (styleWishes.includes(trimmed)) return null;
 
         setStyleWishes([...styleWishes, trimmed]);
+        return trimmed;
+    };
+
+    useImperativeHandle(ref, () => ({
+        flushPendingInput,
+    }));
+
+    const handleAddStyleWish = (e: React.FormEvent) => {
+        e.preventDefault();
+        flushPendingInput();
     };
 
     const handleRemoveStyleWish = (wishToRemove: string) => {
@@ -259,4 +270,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             )}
         </>
     );
-};
+});
+
+SettingsPanel.displayName = 'SettingsPanel';

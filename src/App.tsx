@@ -3,7 +3,7 @@ import { Sparkles } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
-import { SpiceRack } from './components/SpiceRack';
+import { SpiceRack, type SpiceRackRef } from './components/SpiceRack';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
@@ -12,13 +12,15 @@ import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './t
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { decodeFromUrl, generateShareUrl } from './utils/sharing';
 import { Header } from './components/Header';
-import { SettingsPanel } from './components/SettingsPanel';
+import { SettingsPanel, type SettingsPanelRef } from './components/SettingsPanel';
 import { useSettings } from './contexts/SettingsContext';
 import { STORAGE_KEYS, URL_PARAMS } from './constants';
 import { z } from 'zod';
 
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
+  const settingsPanelRef = useRef<SettingsPanelRef>(null);
+  const spiceRackRef = useRef<SpiceRackRef>(null);
   const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
   const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
@@ -253,11 +255,15 @@ function App() {
   }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
   const handleGenerate = async () => {
-    // Flush any pending input from PantryInput before generating
+    // Flush any pending input from PantryInput, StyleWish or SpiceRack before generating
     const pendingItem = pantryInputRef.current?.flushPendingInput();
+    const pendingStyleWish = settingsPanelRef.current?.flushPendingInput();
+    const pendingSpice = spiceRackRef.current?.flushPendingInput();
 
-    // If there was a pending item, include it in the pantry for generation
+    // If there was a pending item, include it in the pantry, style wishes or spicerack for generation
     const itemsToUse = pendingItem ? [...pantryItems, pendingItem] : pantryItems;
+    const styleWishesToUse = pendingStyleWish ? [...styleWishes, pendingStyleWish] : styleWishes;
+    const spicesToUse = pendingSpice ? [...spices, pendingSpice] : spices;
 
     // Handle copy-paste mode differently
     if (useCopyPaste) {
@@ -267,8 +273,8 @@ function App() {
         meals,
         diet,
         language,
-        spices,
-        styleWishes,
+        spices: spicesToUse,
+        styleWishes: styleWishesToUse,
       });
       setCopyPastePrompt(prompt);
       setShowCopyPasteDialog(true);
@@ -286,7 +292,7 @@ function App() {
     // Don't clear mealPlan here - preserve it on failure so user doesn't lose their previous plan
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spices, styleWishes, t.errors);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, styleWishesToUse, t.errors);
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
@@ -365,6 +371,7 @@ function App() {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
           <div className="lg:col-span-1 space-y-6 relative z-10">
             <SettingsPanel
+              ref={settingsPanelRef}
               optionsMinimized={optionsMinimized}
               setOptionsMinimized={setOptionsMinimized}
               loading={loading}
@@ -384,6 +391,7 @@ function App() {
             />
 
             <SpiceRack
+              ref={spiceRackRef}
               spices={spices}
               onAddSpice={addSpice}
               onRemoveSpice={removeSpice}

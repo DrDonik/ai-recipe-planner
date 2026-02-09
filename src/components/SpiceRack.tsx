@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2, Leaf } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { PanelHeader } from './ui';
+
+export interface SpiceRackRef {
+    flushPendingInput: () => string | null;
+}
 
 interface SpiceRackProps {
     spices: string[];
@@ -11,28 +15,35 @@ interface SpiceRackProps {
     onToggleMinimize: () => void;
 }
 
-export const SpiceRack: React.FC<SpiceRackProps> = ({
+export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
     spices,
     onAddSpice,
     onRemoveSpice,
     isMinimized,
     onToggleMinimize
-}) => {
+}, ref) => {
     const { t } = useSettings();
     const [newSpice, setNewSpice] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const flushPendingInput = (): string | null => {
         const trimmedSpice = newSpice.trim();
-        if (!trimmedSpice) return;
+        if (!trimmedSpice) return null;
 
-        // Clear input regardless of whether spice is added
         setNewSpice('');
 
-        // Don't add if it already exists
-        if (spices.includes(trimmedSpice)) return;
+        if (spices.includes(trimmedSpice)) return null;
 
         onAddSpice(trimmedSpice);
+        return trimmedSpice;
+    };
+
+    useImperativeHandle(ref, () => ({
+        flushPendingInput,
+    }));
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        flushPendingInput();
     };
 
     return (
@@ -87,4 +98,6 @@ export const SpiceRack: React.FC<SpiceRackProps> = ({
             )}
         </div>
     );
-};
+});
+
+SpiceRack.displayName = 'SpiceRack';
