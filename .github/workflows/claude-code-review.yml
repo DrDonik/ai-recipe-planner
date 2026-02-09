@@ -40,9 +40,13 @@ jobs:
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
-          
+
           # Allow Claude bot and github-actions bot to trigger this workflow
           # (for issue-validation and auto-PR creation chaining)
           allowed_bots: 'claude,github-actions,drdoniks-bot,dependabot'
+
+          # Allow necessary tools for code review plugin to post PR comments
+          claude_args: |
+            --allowed-tools "Bash(gh *)" "Bash(git *)" "Bash(npm *)"
 
 
