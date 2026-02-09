@@ -46,6 +46,7 @@ export const translations = {
         },
         styleWishes: "Style, Wishes, etc.",
         styleWishesPlaceholder: "Indian, Gluten-free, ...",
+        noStyleWishes: "No style preferences added yet.",
         spiceRack: "Spice Rack & Staples",
         spicesPlaceholder: "Add spices, oils, sauces...",
         placeholders: {
@@ -189,6 +190,7 @@ export const translations = {
         },
         styleWishes: "Stil, Wünsche, etc.",
         styleWishesPlaceholder: "Indisch, Glutenfrei, ...",
+        noStyleWishes: "Noch keine Stil-Präferenzen hinzugefügt.",
         spiceRack: "Gewürzregal & Grundvorräte",
         spicesPlaceholder: "Gewürze, Öl, Soßen hinzufügen...",
         placeholders: {
@@ -332,6 +334,7 @@ export const translations = {
         },
         styleWishes: "Style, Souhaits, etc.",
         styleWishesPlaceholder: "Indien, Sans gluten, ...",
+        noStyleWishes: "Aucune préférence de style ajoutée pour le moment.",
         spiceRack: "Épices & Produits de Base",
         spicesPlaceholder: "Ajouter épices, huiles, sauces...",
         placeholders: {
@@ -475,6 +478,7 @@ export const translations = {
         },
         styleWishes: "Estilo, Deseos, etc.",
         styleWishesPlaceholder: "Indio, Sin gluten, ...",
+        noStyleWishes: "No se han agregado preferencias de estilo todavía.",
         spiceRack: "Especiero y Productos Básicos",
         spicesPlaceholder: "Agregar especias, aceites, salsas...",
         placeholders: {

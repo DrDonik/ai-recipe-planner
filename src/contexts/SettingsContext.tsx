@@ -67,8 +67,8 @@ interface SettingsContextType {
     setMeals: (count: number) => void;
     diet: string;
     setDiet: (diet: string) => void;
-    styleWishes: string;
-    setStyleWishes: (wishes: string) => void;
+    styleWishes: string[];
+    setStyleWishes: (wishes: string[]) => void;
     language: string;
     setLanguage: (lang: string) => void;
     t: TranslationType;
@@ -95,13 +95,38 @@ const getInitialUseCopyPaste = (): boolean => {
     return !existingApiKey; // true (Copy & Paste) if no key, false (API Key mode) if key exists
 };
 
+/**
+ * Migrate old string-based style wishes to array format.
+ * Returns an empty array if no data exists, or converts old string to single-item array.
+ */
+const getInitialStyleWishes = (): string[] => {
+    const saved = localStorage.getItem(STORAGE_KEYS.STYLE_WISHES);
+    if (!saved) return [];
+
+    try {
+        // Try parsing as JSON array first (new format)
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+            return parsed;
+        }
+        // If it's a JSON string but not an array, fall through to string handling
+    } catch {
+        // Not JSON, treat as old string format
+    }
+
+    // Old format: plain string or JSON-encoded string
+    // If it's a non-empty string, convert to array with single item
+    const trimmed = saved.replace(/^"|"$/g, '').trim();
+    return trimmed ? [trimmed] : [];
+};
+
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [useCopyPaste, setUseCopyPaste] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, getInitialUseCopyPaste());
     const [apiKey, setApiKey] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
     const [people, setPeople] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
     const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
     const [diet, setDiet] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
-    const [styleWishes, setStyleWishes] = useStringLocalStorage(STORAGE_KEYS.STYLE_WISHES, '');
+    const [styleWishes, setStyleWishes] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
     const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
 
     const t = getTranslations(language);

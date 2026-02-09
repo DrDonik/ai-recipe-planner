@@ -1,5 +1,5 @@
-import React from 'react';
-import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import type { Notification } from '../types';
 
@@ -19,6 +19,25 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     notification
 }) => {
     const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
+    const [newStyleWish, setNewStyleWish] = useState('');
+
+    const handleAddStyleWish = (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmed = newStyleWish.trim();
+        if (!trimmed) return;
+
+        // Clear input regardless of whether item is added
+        setNewStyleWish('');
+
+        // Don't add if it already exists
+        if (styleWishes.includes(trimmed)) return;
+
+        setStyleWishes([...styleWishes, trimmed]);
+    };
+
+    const handleRemoveStyleWish = (wishToRemove: string) => {
+        setStyleWishes(styleWishes.filter(wish => wish !== wishToRemove));
+    };
 
     // Helper function to render text with clickable URLs
     const renderTextWithLinks = (text: string) => {
@@ -90,18 +109,48 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
                         {/* Style, Wishes, etc. */}
                         <div className="flex flex-col items-start gap-3">
-                            <label htmlFor="style-wishes-input" className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
                                 <ChefHat className="text-secondary" size={24} />
                                 <span>{t.styleWishes}</span>
-                            </label>
-                            <input
-                                id="style-wishes-input"
-                                type="text"
-                                value={styleWishes}
-                                onChange={(e) => setStyleWishes(e.target.value)}
-                                placeholder={t.styleWishesPlaceholder}
-                                className="input-field-sm bg-white/50 dark:bg-black/20 border-[var(--glass-border)] w-full"
-                            />
+                            </div>
+                            <form onSubmit={handleAddStyleWish} className="flex items-center gap-2 w-full">
+                                <input
+                                    id="style-wishes-input"
+                                    type="text"
+                                    value={newStyleWish}
+                                    onChange={(e) => setNewStyleWish(e.target.value)}
+                                    placeholder={t.styleWishesPlaceholder}
+                                    className="input-field-sm bg-white/50 dark:bg-black/20 border-[var(--glass-border)] flex-1"
+                                    aria-label={t.styleWishesPlaceholder}
+                                />
+                                <button
+                                    type="submit"
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-primary hover:bg-primary-dark text-white shadow-sm transition-colors shrink-0"
+                                    aria-label={t.add}
+                                >
+                                    <Plus size={18} />
+                                </button>
+                            </form>
+                            <div className="flex flex-wrap gap-2 w-full">
+                                {styleWishes.length === 0 && (
+                                    <div className="text-text-muted text-center py-2 italic w-full text-sm">
+                                        {t.noStyleWishes}
+                                    </div>
+                                )}
+                                {styleWishes.map((wish) => (
+                                    <div key={wish} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
+                                        <span className="font-medium text-xs text-text-main">{wish}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveStyleWish(wish)}
+                                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
+                                            aria-label={t.remove}
+                                        >
+                                            <Trash2 size={10} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Separator */}

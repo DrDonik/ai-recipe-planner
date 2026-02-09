@@ -94,7 +94,7 @@ export interface RecipePromptParams {
   diet: string;
   language: string;
   spices?: string[];
-  styleWishes?: string;
+  styleWishes?: string[];
 }
 
 /**
@@ -108,7 +108,7 @@ export const buildRecipePrompt = ({
   diet,
   language,
   spices = [],
-  styleWishes = '',
+  styleWishes = [],
 }: RecipePromptParams): string => {
   const pantryList = ingredients
     .map((v) => `- ${sanitizeUserInput(v.name)} (${sanitizeUserInput(v.amount)}) [ID: ${v.id}]`)
@@ -118,7 +118,10 @@ export const buildRecipePrompt = ({
     ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.map(s => sanitizeUserInput(s)).join(", ")}`
     : "No extra spices available.";
 
-  const sanitizedStyleWishes = sanitizeUserInput(styleWishes, 1000);
+  const sanitizedStyleWishes = styleWishes
+    .map(wish => sanitizeUserInput(wish, 200))
+    .filter(wish => wish.length > 0)
+    .join(", ");
   const styleWishesText = sanitizedStyleWishes
     ? `STYLE/WISHES: ${sanitizedStyleWishes}`
     : "";
@@ -237,7 +240,7 @@ export const generateRecipes = async (
   diet: string,
   language: string,
   spices: string[] = [],
-  styleWishes: string = '',
+  styleWishes: string[] = [],
   errorTranslations?: ErrorTranslations
 ): Promise<MealPlan> => {
   // Default English error messages for backwards compatibility
