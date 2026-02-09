@@ -33,6 +33,7 @@ export const validRecipeResponse = {
                   usedIngredients: ['id1', 'id2'],
                   missingIngredients: [],
                   nutrition: { calories: 450, carbs: 35, fat: 18, protein: 28 },
+                  comments: 'Rice is the staple food for more than half the world\'s population.',
                 },
               ],
               shoppingList: [],

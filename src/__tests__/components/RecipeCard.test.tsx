@@ -31,6 +31,11 @@ const mockRecipe: Recipe = {
     },
 };
 
+const mockRecipeWithComments: Recipe = {
+    ...mockRecipe,
+    comments: 'Tomatoes were once considered poisonous in Europe.',
+};
+
 const renderWithSettings = (ui: React.ReactElement) => {
     return render(<SettingsProvider>{ui}</SettingsProvider>);
 };
@@ -299,6 +304,44 @@ describe('RecipeCard', () => {
 
             // Missing ingredients are displayed as "amount item" in a badge
             expect(screen.getByText(/1 tsp Salt/i)).toBeInTheDocument();
+        });
+    });
+
+    describe('Comments (fun facts)', () => {
+        it('renders comments in standalone mode when present', () => {
+            renderWithSettings(
+                <RecipeCard
+                    recipe={mockRecipeWithComments}
+                    index={0}
+                    isStandalone={true}
+                />
+            );
+
+            expect(screen.getByText('Tomatoes were once considered poisonous in Europe.')).toBeInTheDocument();
+        });
+
+        it('does not render comments in overview mode even when present', () => {
+            renderWithSettings(
+                <RecipeCard
+                    recipe={mockRecipeWithComments}
+                    index={0}
+                    isStandalone={false}
+                />
+            );
+
+            expect(screen.queryByText('Tomatoes were once considered poisonous in Europe.')).not.toBeInTheDocument();
+        });
+
+        it('does not render comments section when comments field is absent', () => {
+            renderWithSettings(
+                <RecipeCard
+                    recipe={mockRecipe}
+                    index={0}
+                    isStandalone={true}
+                />
+            );
+
+            expect(screen.queryByText('Tomatoes were once considered poisonous in Europe.')).not.toBeInTheDocument();
         });
     });
 

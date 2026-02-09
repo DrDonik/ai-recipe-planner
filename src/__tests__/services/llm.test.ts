@@ -191,6 +191,19 @@ describe('llm service', () => {
       expect(prompt).toContain('Jalapeño 🌶️');
     });
 
+    it('should include optional comments instruction in the prompt', () => {
+      const prompt = buildRecipePrompt({
+        ingredients: [],
+        people: 2,
+        meals: 1,
+        diet: 'No restrictions',
+        language: 'English',
+      });
+
+      expect(prompt).toContain('comments');
+      expect(prompt).toContain('fun');
+    });
+
     it('should respect language parameter in instructions', () => {
       const ingredients: PantryItem[] = [
         { id: 'id1', name: 'Chicken', amount: '500g' },
@@ -390,6 +403,47 @@ describe('llm service', () => {
       expect(() => parseRecipeResponse(invalidJson, customErrors)).toThrow(
         'Custom JSON error'
       );
+    });
+
+    it('should handle optional comments field', () => {
+      const withoutComments = JSON.stringify({
+        recipes: [
+          {
+            id: '1',
+            title: 'Test',
+            time: '20 mins',
+            ingredients: [{ item: 'Salt', amount: '1g' }],
+            instructions: ['Cook'],
+            usedIngredients: [],
+            missingIngredients: [],
+          },
+        ],
+        shoppingList: [],
+      });
+
+      const result = parseRecipeResponse(withoutComments);
+      expect(result.recipes[0].comments).toBeUndefined();
+    });
+
+    it('should parse comments field when present', () => {
+      const withComments = JSON.stringify({
+        recipes: [
+          {
+            id: '1',
+            title: 'Test',
+            time: '20 mins',
+            ingredients: [{ item: 'Salt', amount: '1g' }],
+            instructions: ['Cook'],
+            usedIngredients: [],
+            missingIngredients: [],
+            comments: 'Salt was once used as currency in ancient Rome.',
+          },
+        ],
+        shoppingList: [],
+      });
+
+      const result = parseRecipeResponse(withComments);
+      expect(result.recipes[0].comments).toBe('Salt was once used as currency in ancient Rome.');
     });
 
     it('should handle optional missingIngredients field', () => {

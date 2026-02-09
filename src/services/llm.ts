@@ -59,6 +59,7 @@ export const RecipeSchema = z.object({
   // Optional because shared recipes exclude missingIngredients (not relevant in standalone view)
   missingIngredients: z.array(IngredientSchema).optional(),
   nutrition: NutritionSchema.optional(),
+  comments: z.string().optional(),
 });
 
 export const MealPlanSchema = z.object({
@@ -159,6 +160,7 @@ export const buildRecipePrompt = ({
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON ...
+    18. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them.
     
     NUTRITION ESTIMATES:
     - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
@@ -176,7 +178,8 @@ export const buildRecipePrompt = ({
           "instructions": ["Step 1", "Step 2"],
           "usedIngredients": ["pantry_item_id_1", "pantry_item_id_2"],
           "missingIngredients": [{"item": "Chicken", "amount": "500g"}],
-          "nutrition": {"calories": 450, "carbs": 35, "fat": 18, "protein": 28}
+          "nutrition": {"calories": 450, "carbs": 35, "fat": 18, "protein": 28},
+          "comments": "Fun fact about this recipe or its ingredients."
         }
       ],
       "shoppingList": [

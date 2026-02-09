@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
@@ -266,6 +266,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                 <span>{recipe.nutrition.protein}g {t.protein}</span>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {isStandalone && recipe.comments && (
+                    <div className="pt-4 border-t border-border-base/30 flex items-start gap-2 text-text-muted text-xs">
+                        <Lightbulb size={14} className="shrink-0 mt-0.5 opacity-60" />
+                        <span className="opacity-60 italic">{recipe.comments}</span>
                     </div>
                 )}
             </div>
