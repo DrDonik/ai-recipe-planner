@@ -31,6 +31,7 @@ function App() {
   const [pantryMinimized, setPantryMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.PANTRY_MINIMIZED, false);
   const [spiceRackMinimized, setSpiceRackMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.SPICE_RACK_MINIMIZED, false);
   const [shoppingListMinimized, setShoppingListMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.SHOPPING_LIST_MINIMIZED, false);
+  const [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.RECIPE_MISSING_INGREDIENTS_MINIMIZED, false);
   const [mealPlan, setMealPlan] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
 
   const [loading, setLoading] = useState(false);
@@ -62,6 +63,7 @@ function App() {
   const handleTogglePantryMinimize = useCallback(() => setPantryMinimized(!pantryMinimized), [pantryMinimized, setPantryMinimized]);
   const handleToggleSpiceRackMinimize = useCallback(() => setSpiceRackMinimized(!spiceRackMinimized), [spiceRackMinimized, setSpiceRackMinimized]);
   const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(!shoppingListMinimized), [shoppingListMinimized, setShoppingListMinimized]);
+  const handleToggleRecipeMissingIngredientsMinimize = useCallback(() => setRecipeMissingIngredientsMinimized(!recipeMissingIngredientsMinimized), [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized]);
 
   const showNotification = useCallback((notif: Notification) => {
     // Clear any existing timeout
@@ -331,7 +333,15 @@ function App() {
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
         <div className="max-w-2xl w-full">
-          <RecipeCard recipe={viewRecipe} index={0} isStandalone wakeLock={wakeLock} onClose={clearViewRecipe} />
+          <RecipeCard
+            recipe={viewRecipe}
+            index={0}
+            isStandalone
+            wakeLock={wakeLock}
+            onClose={clearViewRecipe}
+            missingIngredientsMinimized={recipeMissingIngredientsMinimized}
+            onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
+          />
         </div>
       </div>
     );
@@ -437,6 +447,8 @@ function App() {
                         showOpenInNewTab={true}
                         onDelete={() => deleteRecipe(recipe.id)}
                         onViewSingle={() => openRecipeView(recipe)}
+                        missingIngredientsMinimized={recipeMissingIngredientsMinimized}
+                        onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
                       />
                     ))}
                   </div>

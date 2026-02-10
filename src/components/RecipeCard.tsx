@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
@@ -17,9 +17,11 @@ interface RecipeCardProps {
     onDelete?: () => void;
     onViewSingle?: () => void;
     onClose?: () => void;
+    missingIngredientsMinimized?: boolean;
+    onToggleMissingIngredientsMinimize?: () => void;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -220,17 +222,31 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
 
                 {recipe.missingIngredients && recipe.missingIngredients.length > 0 && (
                     <section className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
-                        <div className="flex items-center gap-2 mb-3 text-amber-600 dark:text-amber-400">
-                            <AlertCircle size={18} />
-                            <h4 className="font-bold uppercase tracking-wider text-xs">{t.needToBuy}</h4>
+                        <div className={`flex items-center justify-between ${!missingIngredientsMinimized ? 'mb-3' : ''}`}>
+                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                                <AlertCircle size={18} />
+                                <h4 className="font-bold uppercase tracking-wider text-xs">{t.needToBuy}</h4>
+                            </div>
+                            {onToggleMissingIngredientsMinimize && (
+                                <button
+                                    onClick={onToggleMissingIngredientsMinimize}
+                                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center justify-center"
+                                    aria-label={missingIngredientsMinimized ? 'Expand' : 'Collapse'}
+                                    aria-expanded={!missingIngredientsMinimized}
+                                >
+                                    {missingIngredientsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+                                </button>
+                            )}
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                            {recipe.missingIngredients.map((ing, idx) => (
-                                <span key={`missing-${ing.item}-${ing.amount}-${idx}`} className="bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/10">
-                                    {ing.amount} {ing.item}
-                                </span>
-                            ))}
-                        </div>
+                        {!missingIngredientsMinimized && (
+                            <div className="flex flex-wrap gap-2">
+                                {recipe.missingIngredients.map((ing, idx) => (
+                                    <span key={`missing-${ing.item}-${ing.amount}-${idx}`} className="bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/10">
+                                        {ing.amount} {ing.item}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </section>
                 )}
 

@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
     PANTRY_MINIMIZED: 'pantry_minimized',
     SPICE_RACK_MINIMIZED: 'spice_rack_minimized',
     SHOPPING_LIST_MINIMIZED: 'shopping_list_minimized',
+    RECIPE_MISSING_INGREDIENTS_MINIMIZED: 'recipe_missing_ingredients_minimized',
     SHOPPING_LIST_CHECKED: 'shopping_list_checked',
     MEAL_PLAN: 'meal_plan',
     WELCOME_DISMISSED: 'welcome_dismissed',
