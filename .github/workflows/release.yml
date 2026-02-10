@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test -- --run
+
+      - name: Build project
+        run: npm run build
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed -n '2p')
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # If no previous tag, get all commits
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $GITHUB_REF)
+          else
+            # Get commits between previous tag and current tag
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..$GITHUB_REF)
+          fi
+
+          # Write changelog to file to preserve multiline content
+          echo "$CHANGELOG" > changelog.txt
+
+          # Also create a summary
+          echo "## Changes" >> $GITHUB_STEP_SUMMARY
+          echo "$CHANGELOG" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release v${{ steps.version.outputs.version }}
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+          token: ${{ steps.app-token.outputs.token }}
