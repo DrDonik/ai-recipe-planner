@@ -420,6 +420,14 @@ function App() {
                       {t.menuTitle}
                     </span>
                   </h2>
+
+                  {/* AI Disclaimer */}
+                  <div className="mb-6 p-3 rounded-lg bg-white/30 dark:bg-black/30 backdrop-blur-sm border border-border-base/30">
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      {t.aiDisclaimer}
+                    </p>
+                  </div>
+
                   <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
                     {mealPlan.recipes.map((recipe, index) => (
                       <RecipeCard

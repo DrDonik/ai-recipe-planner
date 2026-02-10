@@ -143,7 +143,8 @@ export const translations = {
             apiKeyCleared: "API key cleared",
             action: "Undo"
         },
-        apiKeyStoredWarning: "API key stored in local storage"
+        apiKeyStoredWarning: "API key stored in local storage",
+        aiDisclaimer: "The recipes are generated directly by AI. AI can make mistakes. Always cook with common sense."
     },
     German: {
         ingredients: "Zutaten",
@@ -288,7 +289,8 @@ export const translations = {
             apiKeyCleared: "API-Schlüssel gelöscht",
             action: "Rückgängig"
         },
-        apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert"
+        apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert",
+        aiDisclaimer: "Die Rezepte werden direkt von der KI generiert. Die KI kann Fehler machen. Kochen Sie immer auch mit gesundem Menschenverstand."
     },
     French: {
         ingredients: "Ingrédients",
@@ -433,7 +435,8 @@ export const translations = {
             apiKeyCleared: "Clé API effacée",
             action: "Annuler"
         },
-        apiKeyStoredWarning: "Clé API stockée dans le stockage local"
+        apiKeyStoredWarning: "Clé API stockée dans le stockage local",
+        aiDisclaimer: "Les recettes sont générées directement par l'IA. L'IA peut faire des erreurs. Cuisinez toujours avec bon sens."
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -578,6 +581,7 @@ export const translations = {
             apiKeyCleared: "Clave API eliminada",
             action: "Deshacer"
         },
-        apiKeyStoredWarning: "Clave API almacenada en almacenamiento local"
+        apiKeyStoredWarning: "Clave API almacenada en almacenamiento local",
+        aiDisclaimer: "Las recetas son generadas directamente por IA. La IA puede cometer errores. Cocine siempre con sentido común."
     }
 };
