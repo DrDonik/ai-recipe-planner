@@ -6,6 +6,24 @@ This file provides guidance to AI agents when working with code in this reposito
 
 AI Recipe Planner (Rezept-Planer) is a React-based meal planning application that uses AI (Google Gemini API) to generate personalized recipes based on available pantry ingredients. The app supports multiple languages (English, German, Spanish, French) and dietary preferences, and includes recipe sharing functionality via URL parameters.
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/) (SemVer):
+
+- **Major version (1.x.x)**: Breaking changes, major architectural changes, incompatible API changes
+- **Minor version (x.1.x)**: New features, enhancements, backwards-compatible functionality additions
+- **Patch version (x.x.1)**: Bug fixes, minor improvements, documentation updates
+
+**Current version**: 1.0.0
+
+### Version Management Workflow
+
+1. Update version in `package.json`
+2. Commit changes with message: `chore: bump version to X.Y.Z`
+3. Create git tag: `git tag -a vX.Y.Z -m "Release version X.Y.Z"`
+4. Push commits and tags: `git push && git push --tags`
+5. Create GitHub Release with changelog
+
 ### Deployment & Purpose
 
 - **Hosting**: Static site deployed on GitHub Pages at `/ai-recipe-planner/`
