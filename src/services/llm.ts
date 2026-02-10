@@ -195,8 +195,22 @@ export const buildRecipePrompt = ({
  * Now includes runtime validation using Zod to ensure data structure is correct.
  */
 export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTranslations): MealPlan => {
-  // Clean up markdown block if present (sometimes models add ```json ... ```)
-  const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+  let cleanedText = text;
+
+  // Step 1: Clean up markdown code blocks first (sometimes models add ```json ... ```)
+  cleanedText = cleanedText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  // Step 2: Strip everything after the last closing brace
+  // This removes trailing content like source references that some LLMs append
+  const lastBraceIndex = cleanedText.lastIndexOf('}');
+  if (lastBraceIndex !== -1) {
+    cleanedText = cleanedText.substring(0, lastBraceIndex + 1);
+  }
+
+  // Step 3: Strip inline markdown links entirely (some LLMs like Perplexity add these)
+  // Pattern: " [text](url)" -> "" (removes the entire markdown link including whitespace)
+  // The [^\]\n]+ ensures we don't match across newlines (which would accidentally match JSON array brackets)
+  cleanedText = cleanedText.replace(/\s*\[([^\]\n]+)\]\([^)\n]+\)/g, '');
 
   // Default English error messages for backwards compatibility
   const errors = errorTranslations ?? {

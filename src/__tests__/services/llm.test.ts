@@ -466,6 +466,112 @@ describe('llm service', () => {
 
       expect(result.recipes[0].missingIngredients).toBeUndefined();
     });
+
+    it('should strip trailing source references (Perplexity references format)', () => {
+      const responseWithTrailingSources = `{
+  "recipes": [{
+    "id": "1",
+    "title": "Test Recipe",
+    "time": "30 mins",
+    "ingredients": [{"item": "Salt", "amount": "1g"}],
+    "instructions": ["Cook it"],
+    "usedIngredients": [],
+    "missingIngredients": []
+  }],
+  "shoppingList": []
+}
+
+Quellen
+[1] Source 1 https://example.com/1
+[2] Source 2 https://example.com/2`;
+
+      const result = parseRecipeResponse(responseWithTrailingSources);
+
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].title).toBe('Test Recipe');
+      expect(result.shoppingList).toHaveLength(0);
+    });
+
+    it('should strip inline markdown links at end of strings (Perplexity inline format)', () => {
+      const responseWithInlineLinks = `{
+  "recipes": [{
+    "id": "1",
+    "title": "Test Recipe",
+    "time": "30 mins",
+    "ingredients": [{"item": "Salt", "amount": "1g"}],
+    "instructions": [
+      "Cook it",
+      "Serve with rice or salad." [example-source](https://example.com)
+    ],
+    "usedIngredients": [],
+    "missingIngredients": []
+  }],
+  "shoppingList": []
+}`;
+
+      const result = parseRecipeResponse(responseWithInlineLinks);
+
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].instructions).toHaveLength(2);
+      expect(result.recipes[0].instructions[1]).toBe('Serve with rice or salad.');
+    });
+
+    it('should strip multiple inline markdown links in middle of arrays (Perplexity inline format)', () => {
+      const responseWithMultipleInlineLinks = `{
+  "recipes": [{
+    "id": "1",
+    "title": "Test Recipe",
+    "time": "30 mins",
+    "ingredients": [{"item": "Salt", "amount": "1g"}],
+    "instructions": [
+      "Preheat oven to 180°C.",
+      "Mix ingredients in bowl.", [source1](https://example.com/1)
+      "Bake for 20 minutes.", [source2](https://example.com/2)
+      "Let cool and serve."
+    ],
+    "usedIngredients": [],
+    "missingIngredients": []
+  }],
+  "shoppingList": []
+}`;
+
+      const result = parseRecipeResponse(responseWithMultipleInlineLinks);
+
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].instructions).toHaveLength(4);
+      expect(result.recipes[0].instructions[1]).toBe('Mix ingredients in bowl.');
+      expect(result.recipes[0].instructions[2]).toBe('Bake for 20 minutes.');
+      expect(result.recipes[0].instructions[3]).toBe('Let cool and serve.');
+    });
+
+    it('should handle combination of markdown blocks and inline links', () => {
+      const responseWithBoth = `\`\`\`json
+{
+  "recipes": [{
+    "id": "1",
+    "title": "Test Recipe",
+    "time": "30 mins",
+    "ingredients": [{"item": "Salt", "amount": "1g"}],
+    "instructions": [
+      "Mix ingredients in bowl.", [source1](https://example.com/1)
+      "Cook it." [source](https://example.com)
+    ],
+    "usedIngredients": [],
+    "missingIngredients": []
+  }],
+  "shoppingList": []
+}
+\`\`\`
+
+Sources
+[1] https://example.com`;
+
+      const result = parseRecipeResponse(responseWithBoth);
+
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].instructions[0]).toBe('Mix ingredients in bowl.');
+      expect(result.recipes[0].instructions[1]).toBe('Cook it.');
+    });
   });
 
   describe('generateRecipes', () => {
