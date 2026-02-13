@@ -60,7 +60,7 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           claude_args: |
-            --allowed-tools "Bash(gh issue:*)" "Bash(gh pr:*)" "Bash(npm install)" "Bash(npm run build)" "Bash(npm run lint)" "Bash(npm run test)"
+            --allowed-tools "Bash(git add:*)" "Bash(git commit:*)" "Bash(git push:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git rm:*)" "Bash(gh issue:*)" "Bash(gh pr:*)" "Bash(npm install)" "Bash(npm run build)" "Bash(npm run lint)" "Bash(npm run test:*)" "Bash(npm test:*)"
             --json-schema '{"type":"object","properties":{"pr_title":{"type":"string","description":"Title for the pull request if changes were made"},"pr_body":{"type":"string","description":"Description for the pull request body if changes were made"},"made_changes":{"type":"boolean","description":"Whether any code changes were committed"}},"required":["made_changes"]}'
 
       - name: Generate app token for PR
