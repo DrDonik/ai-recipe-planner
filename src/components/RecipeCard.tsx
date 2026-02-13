@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { Recipe } from '../types';
+import type { Recipe, Notification } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface RecipeCardProps {
@@ -19,12 +19,38 @@ interface RecipeCardProps {
     onClose?: () => void;
     missingIngredientsMinimized?: boolean;
     onToggleMissingIngredientsMinimize?: () => void;
+    onShowNotification?: (notif: Notification) => void;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onShowNotification }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
+
+    const copyRecipeAsText = useCallback(() => {
+        const text = `${recipe.title}
+⏱️ ${recipe.time}
+
+INGREDIENTS:
+${recipe.ingredients.map(ing => `• ${ing.amount} ${ing.item}`).join('\n')}
+
+INSTRUCTIONS:
+${recipe.instructions.map((step, i) => `${i + 1}. ${step}`).join('\n')}
+${recipe.nutrition ? `\nNUTRITION (per serving):
+• Calories: ${recipe.nutrition.calories} kcal
+• Carbs: ${recipe.nutrition.carbs}g
+• Fat: ${recipe.nutrition.fat}g
+• Protein: ${recipe.nutrition.protein}g` : ''}
+${recipe.comments ? `\n💡 ${recipe.comments}` : ''}`;
+
+        navigator.clipboard.writeText(text).then(() => {
+            if (onShowNotification) {
+                onShowNotification({ message: t.recipeCopied, type: 'success', timeout: 3000 });
+            }
+        }).catch((err) => {
+            console.error('Failed to copy recipe:', err);
+        });
+    }, [recipe, t.recipeCopied, onShowNotification]);
 
     const toggleIngredient = useCallback((idx: number) => {
         setStruckIngredients(prev => {
@@ -154,6 +180,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {recipe.time}
                 </div>
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={copyRecipeAsText}
+                        className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                        aria-label={t.copyRecipe}
+                    >
+                        <Copy size={18} />
+                    </button>
                     {wakeLock?.isSupported && isStandalone && (
                         <button
                             onClick={wakeLock.toggle}

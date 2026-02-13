@@ -55,11 +55,11 @@ export interface MealPlan {
 }
 
 /**
- * A notification displayed to the user (error or undo message).
+ * A notification displayed to the user (error, undo, success, or info message).
  */
 export interface Notification {
   message: string;
-  type: 'error' | 'undo';
+  type: 'error' | 'undo' | 'success' | 'info';
   action?: {
     label: string;
     onClick: () => void;

@@ -341,6 +341,7 @@ function App() {
             onClose={clearViewRecipe}
             missingIngredientsMinimized={recipeMissingIngredientsMinimized}
             onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
+            onShowNotification={showNotification}
           />
         </div>
       </div>
@@ -449,6 +450,7 @@ function App() {
                         onViewSingle={() => openRecipeView(recipe)}
                         missingIngredientsMinimized={recipeMissingIngredientsMinimized}
                         onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
+                        onShowNotification={showNotification}
                       />
                     ))}
                   </div>

@@ -183,3 +183,66 @@ button {
     @apply bg-primary-light rounded-md ring-4 ring-primary-light;
   }
 }
+
+/* Print Styles - Make recipes print beautifully */
+@media print {
+  /* Hide unnecessary UI elements */
+  header,
+  .glass-panel,
+  button,
+  .btn,
+  [aria-label="Delete recipe"],
+  [aria-label="Open in new tab"],
+  [aria-label="Close"],
+  [aria-label="Keep screen on"],
+  [aria-label="Screen kept on"] {
+    display: none !important;
+  }
+
+  /* Optimize page layout for printing */
+  body {
+    background: white;
+    color: black;
+  }
+
+  .glass-card {
+    border: 1px solid #333;
+    box-shadow: none;
+    background: white;
+    page-break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+
+  /* Ensure recipe titles are prominent */
+  h3 {
+    color: black;
+    font-size: 24pt;
+  }
+
+  /* Make ingredient lists readable */
+  ul, ol {
+    margin-left: 1rem;
+  }
+
+  /* Prevent orphaned list items */
+  li {
+    page-break-inside: avoid;
+  }
+
+  /* Optimize nutrition info for print */
+  .text-text-muted {
+    color: #555;
+  }
+
+  /* Remove animations and transitions */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Force print in color if available */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
