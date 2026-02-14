@@ -54,7 +54,7 @@ jobs:
                - validated: 0e8a16, needs-clarification: fbca04
                - complexity:easy: c5def5, complexity:medium: 1d76db, complexity:hard: d93f0b
                - ux:positive: 0e8a16, ux:neutral: c5def5, ux:breaking: d93f0b
-               - auto-implementable: 5319e7
+               - auto-implementable: 5319e7, security-sensitive: d93f0b
 
             4. **Post an assessment comment** using `gh issue comment <number> --body "<comment>"`:
 
