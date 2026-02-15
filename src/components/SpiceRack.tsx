@@ -65,6 +65,7 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
                             placeholder={t.spicesPlaceholder}
                             value={newSpice}
                             onChange={(e) => setNewSpice(e.target.value)}
+                            maxLength={200}
                             className="input-field w-full flex-1"
                             aria-label={t.spicesPlaceholder}
                         />

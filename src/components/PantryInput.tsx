@@ -139,6 +139,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 onKeyDown={handleNameKeyDown}
+                                maxLength={200}
                                 className="input-field w-full"
                                 aria-label={t.placeholders.ingredient}
                             />
@@ -150,6 +151,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 placeholder={t.placeholders.amount}
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
+                                maxLength={200}
                                 className="input-field flex-1"
                                 aria-label={t.placeholders.amount}
                             />

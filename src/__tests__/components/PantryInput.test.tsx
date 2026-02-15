@@ -232,4 +232,30 @@ describe('PantryInput', () => {
             })
         );
     });
+
+    it('enforces maxLength of 200 on ingredient and amount inputs', () => {
+        const mockAdd = vi.fn();
+        const mockRemove = vi.fn();
+        const mockUpdate = vi.fn();
+        const mockEmpty = vi.fn();
+        const mockToggle = vi.fn();
+
+        renderWithSettings(
+            <PantryInput
+                pantryItems={[]}
+                onAddPantryItem={mockAdd}
+                onRemovePantryItem={mockRemove}
+                onUpdatePantryItem={mockUpdate}
+                onEmptyPantry={mockEmpty}
+                isMinimized={false}
+                onToggleMinimize={mockToggle}
+            />
+        );
+
+        const ingredientInput = screen.getByPlaceholderText(/Ingredient/i);
+        const amountInput = screen.getByPlaceholderText(/Amount/i);
+
+        expect(ingredientInput).toHaveAttribute('maxLength', '200');
+        expect(amountInput).toHaveAttribute('maxLength', '200');
+    });
 });

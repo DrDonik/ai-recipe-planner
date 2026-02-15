@@ -132,6 +132,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                     value={newStyleWish}
                                     onChange={(e) => setNewStyleWish(e.target.value)}
                                     placeholder={t.styleWishesPlaceholder}
+                                    maxLength={200}
                                     className="input-field-sm bg-white/50 dark:bg-black/20 border-[var(--glass-border)] flex-1"
                                     aria-label={t.styleWishesPlaceholder}
                                 />
