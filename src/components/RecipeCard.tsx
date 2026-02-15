@@ -90,15 +90,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         return new Set(recipe.missingIngredients.map(m => m.item.toLowerCase()));
     }, [recipe.missingIngredients]);
 
-    // Helper to check if an ingredient is missing (O(1) instead of O(n))
+    // Helper to check if an ingredient is missing (O(1) Set lookup)
     const isIngredientMissing = useCallback((ingredientName: string) => {
-        const lowerName = ingredientName.toLowerCase();
-        for (const missing of missingIngredientNames) {
-            if (missing.includes(lowerName) || lowerName.includes(missing)) {
-                return true;
-            }
-        }
-        return false;
+        return missingIngredientNames.has(ingredientName.toLowerCase());
     }, [missingIngredientNames]);
 
     return (
