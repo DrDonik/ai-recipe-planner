@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { API_CONFIG } from '../constants';
+import { translations } from '../constants/translations';
 import type { PantryItem, MealPlan } from '../types';
 
 // Re-export types for backwards compatibility
@@ -85,21 +86,6 @@ export interface ErrorTranslations {
   unexpectedError: string;
 }
 
-/**
- * Default English error messages for backwards compatibility.
- * Used as fallback when errorTranslations parameter is not provided.
- */
-const DEFAULT_ERROR_TRANSLATIONS: ErrorTranslations = {
-  invalidStructure: "Invalid recipe data structure",
-  tryAgain: "Please try generating recipes again.",
-  invalidJson: "Failed to parse recipe data. The AI returned invalid JSON.",
-  apiKeyRequired: "API Key is required",
-  fetchFailed: "Failed to fetch recipes",
-  emptyResponse: "No recipes generated. The AI returned an empty response.",
-  timeout: "Request timed out. Please try again.",
-  networkError: "Network error. Please check your internet connection.",
-  unexpectedError: "An unexpected error occurred. Please try again.",
-};
 
 /**
  * Parameters for building a recipe prompt.
@@ -228,7 +214,7 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
   // The [^\]\n]+ ensures we don't match across newlines (which would accidentally match JSON array brackets)
   cleanedText = cleanedText.replace(/\s*\[([^\]\n]+)\]\([^)\n]+\)/g, '');
 
-  const errors = errorTranslations ?? DEFAULT_ERROR_TRANSLATIONS;
+  const errors = errorTranslations ?? translations.English.errors;
 
   try {
     const parsed = JSON.parse(cleanedText);
@@ -265,7 +251,7 @@ export const generateRecipes = async (
   styleWishes: string[] = [],
   errorTranslations?: ErrorTranslations
 ): Promise<MealPlan> => {
-  const errors = errorTranslations ?? DEFAULT_ERROR_TRANSLATIONS;
+  const errors = errorTranslations ?? translations.English.errors;
 
   if (!apiKey) throw new Error(errors.apiKeyRequired);
 
