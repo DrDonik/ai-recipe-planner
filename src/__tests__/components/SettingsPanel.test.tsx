@@ -8,38 +8,28 @@ const renderWithSettings = (ui: React.ReactElement) => {
     return render(<SettingsProvider>{ui}</SettingsProvider>);
 };
 
+const setup = (props = {}) => {
+    const defaultProps = {
+        optionsMinimized: false,
+        setOptionsMinimized: vi.fn(),
+        loading: false,
+        handleGenerate: vi.fn(),
+        notification: null,
+        ...props,
+    };
+    renderWithSettings(<SettingsPanel {...defaultProps} />);
+    return { user: userEvent.setup(), props: defaultProps };
+};
+
 describe('SettingsPanel', () => {
     it('renders diet preferences and settings', () => {
-        const mockGenerate = vi.fn();
-        const mockSetMinimized = vi.fn();
-
-        renderWithSettings(
-            <SettingsPanel
-                optionsMinimized={false}
-                setOptionsMinimized={mockSetMinimized}
-                loading={false}
-                handleGenerate={mockGenerate}
-                notification={null}
-            />
-        );
+        setup();
 
         expect(screen.getByLabelText(/Diet/i)).toBeInTheDocument();
     });
 
     it('adds new style wish when form is submitted', async () => {
-        const user = userEvent.setup();
-        const mockGenerate = vi.fn();
-        const mockSetMinimized = vi.fn();
-
-        renderWithSettings(
-            <SettingsPanel
-                optionsMinimized={false}
-                setOptionsMinimized={mockSetMinimized}
-                loading={false}
-                handleGenerate={mockGenerate}
-                notification={null}
-            />
-        );
+        const { user } = setup();
 
         const styleWishInput = screen.getByPlaceholderText(/Indian, Gluten-free/i);
         const addButton = screen.getByRole('button', { name: /Add/i });
@@ -53,37 +43,14 @@ describe('SettingsPanel', () => {
     });
 
     it('enforces maxLength of 200 on style wishes input', () => {
-        const mockGenerate = vi.fn();
-        const mockSetMinimized = vi.fn();
-
-        renderWithSettings(
-            <SettingsPanel
-                optionsMinimized={false}
-                setOptionsMinimized={mockSetMinimized}
-                loading={false}
-                handleGenerate={mockGenerate}
-                notification={null}
-            />
-        );
+        setup();
 
         const styleWishInput = screen.getByPlaceholderText(/Indian, Gluten-free/i);
         expect(styleWishInput).toHaveAttribute('maxLength', '200');
     });
 
     it('does not add duplicate style wishes', async () => {
-        const user = userEvent.setup();
-        const mockGenerate = vi.fn();
-        const mockSetMinimized = vi.fn();
-
-        renderWithSettings(
-            <SettingsPanel
-                optionsMinimized={false}
-                setOptionsMinimized={mockSetMinimized}
-                loading={false}
-                handleGenerate={mockGenerate}
-                notification={null}
-            />
-        );
+        const { user } = setup();
 
         const styleWishInput = screen.getByPlaceholderText(/Indian, Gluten-free/i);
         const addButton = screen.getByRole('button', { name: /Add/i });

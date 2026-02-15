@@ -4,6 +4,7 @@ import type { PantryItem } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
 import { PanelHeader } from './ui';
+import { VALIDATION } from '../constants';
 
 interface PantryInputProps {
     pantryItems: PantryItem[];
@@ -139,7 +140,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 onKeyDown={handleNameKeyDown}
-                                maxLength={200}
+                                maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                 className="input-field w-full"
                                 aria-label={t.placeholders.ingredient}
                             />
@@ -151,7 +152,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 placeholder={t.placeholders.amount}
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
-                                maxLength={200}
+                                maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                 className="input-field flex-1"
                                 aria-label={t.placeholders.amount}
                             />
