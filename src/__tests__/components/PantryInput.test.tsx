@@ -1,18 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PantryInput } from '../../components/PantryInput';
-import { SettingsProvider } from '../../contexts/SettingsContext';
 import type { PantryItem } from '../../types';
+import { renderWithSettings } from '../testUtils';
 
 const mockPantryItems: PantryItem[] = [
     { id: '1', name: 'Carrots', amount: '2kg' },
     { id: '2', name: 'Tomatoes', amount: '500g' },
 ];
-
-const renderWithSettings = (ui: React.ReactElement) => {
-    return render(<SettingsProvider>{ui}</SettingsProvider>);
-};
 
 describe('PantryInput', () => {
     it('renders pantry items with clickable amounts', () => {
@@ -231,5 +227,25 @@ describe('PantryInput', () => {
                 amount: '1kg',
             })
         );
+    });
+
+    it('enforces maxLength of 200 on ingredient and amount inputs', () => {
+        renderWithSettings(
+            <PantryInput
+                pantryItems={[]}
+                onAddPantryItem={vi.fn()}
+                onRemovePantryItem={vi.fn()}
+                onUpdatePantryItem={vi.fn()}
+                onEmptyPantry={vi.fn()}
+                isMinimized={false}
+                onToggleMinimize={vi.fn()}
+            />
+        );
+
+        const ingredientInput = screen.getByPlaceholderText(/Ingredient/i);
+        const amountInput = screen.getByPlaceholderText(/Amount/i);
+
+        expect(ingredientInput).toHaveAttribute('maxLength', '200');
+        expect(amountInput).toHaveAttribute('maxLength', '200');
     });
 });

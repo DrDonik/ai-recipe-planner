@@ -2,6 +2,7 @@ import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2, Leaf } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { PanelHeader } from './ui';
+import { VALIDATION } from '../constants';
 
 export interface SpiceRackRef {
     flushPendingInput: () => string | null;
@@ -65,6 +66,7 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
                             placeholder={t.spicesPlaceholder}
                             value={newSpice}
                             onChange={(e) => setNewSpice(e.target.value)}
+                            maxLength={VALIDATION.MAX_INPUT_LENGTH}
                             className="input-field w-full flex-1"
                             aria-label={t.spicesPlaceholder}
                         />

@@ -55,3 +55,10 @@ export const DEFAULTS = {
     DIET: 'Flexitarian',
     LANGUAGE: 'English',
 } as const;
+
+/**
+ * Input validation constraints.
+ */
+export const VALIDATION = {
+    MAX_INPUT_LENGTH: 200,
+} as const;

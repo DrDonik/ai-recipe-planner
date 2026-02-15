@@ -4,6 +4,7 @@ import type { PantryItem } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
 import { PanelHeader } from './ui';
+import { VALIDATION } from '../constants';
 
 interface PantryInputProps {
     pantryItems: PantryItem[];
@@ -139,6 +140,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 onKeyDown={handleNameKeyDown}
+                                maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                 className="input-field w-full"
                                 aria-label={t.placeholders.ingredient}
                             />
@@ -150,6 +152,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 placeholder={t.placeholders.amount}
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
+                                maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                 className="input-field flex-1"
                                 aria-label={t.placeholders.amount}
                             />
@@ -180,6 +183,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                             onChange={(e) => setEditingAmount(e.target.value)}
                                             onKeyDown={handleEditAmountKeyDown}
                                             onBlur={saveEditingAmount}
+                                            maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                             className="text-text-muted text-xs bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md shadow-sm border border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 w-20"
                                             aria-label={`${t.placeholders.amount} ${item.name}`}
                                         />

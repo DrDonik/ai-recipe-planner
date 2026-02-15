@@ -2,6 +2,7 @@ import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import type { Notification } from '../types';
+import { VALIDATION } from '../constants';
 
 export interface SettingsPanelRef {
     flushPendingInput: () => string | null;
@@ -132,6 +133,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                     value={newStyleWish}
                                     onChange={(e) => setNewStyleWish(e.target.value)}
                                     placeholder={t.styleWishesPlaceholder}
+                                    maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                     className="input-field-sm bg-white/50 dark:bg-black/20 border-[var(--glass-border)] flex-1"
                                     aria-label={t.styleWishesPlaceholder}
                                 />
