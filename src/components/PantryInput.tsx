@@ -183,6 +183,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                             onChange={(e) => setEditingAmount(e.target.value)}
                                             onKeyDown={handleEditAmountKeyDown}
                                             onBlur={saveEditingAmount}
+                                            maxLength={VALIDATION.MAX_INPUT_LENGTH}
                                             className="text-text-muted text-xs bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md shadow-sm border border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 w-20"
                                             aria-label={`${t.placeholders.amount} ${item.name}`}
                                         />

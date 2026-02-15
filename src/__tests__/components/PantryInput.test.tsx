@@ -1,18 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PantryInput } from '../../components/PantryInput';
-import { SettingsProvider } from '../../contexts/SettingsContext';
 import type { PantryItem } from '../../types';
+import { renderWithSettings } from '../testUtils';
 
 const mockPantryItems: PantryItem[] = [
     { id: '1', name: 'Carrots', amount: '2kg' },
     { id: '2', name: 'Tomatoes', amount: '500g' },
 ];
-
-const renderWithSettings = (ui: React.ReactElement) => {
-    return render(<SettingsProvider>{ui}</SettingsProvider>);
-};
 
 describe('PantryInput', () => {
     it('renders pantry items with clickable amounts', () => {
@@ -234,21 +230,15 @@ describe('PantryInput', () => {
     });
 
     it('enforces maxLength of 200 on ingredient and amount inputs', () => {
-        const mockAdd = vi.fn();
-        const mockRemove = vi.fn();
-        const mockUpdate = vi.fn();
-        const mockEmpty = vi.fn();
-        const mockToggle = vi.fn();
-
         renderWithSettings(
             <PantryInput
                 pantryItems={[]}
-                onAddPantryItem={mockAdd}
-                onRemovePantryItem={mockRemove}
-                onUpdatePantryItem={mockUpdate}
-                onEmptyPantry={mockEmpty}
+                onAddPantryItem={vi.fn()}
+                onRemovePantryItem={vi.fn()}
+                onUpdatePantryItem={vi.fn()}
+                onEmptyPantry={vi.fn()}
                 isMinimized={false}
-                onToggleMinimize={mockToggle}
+                onToggleMinimize={vi.fn()}
             />
         );
 

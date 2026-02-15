@@ -1,12 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SpiceRack } from '../../components/SpiceRack';
-import { SettingsProvider } from '../../contexts/SettingsContext';
-
-const renderWithSettings = (ui: React.ReactElement) => {
-    return render(<SettingsProvider>{ui}</SettingsProvider>);
-};
+import { renderWithSettings } from '../testUtils';
 
 const setup = (props = {}) => {
     const defaultProps = {
