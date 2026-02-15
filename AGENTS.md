@@ -267,6 +267,7 @@ These rules apply when Claude operates in CI — during issue validation, implem
 ### Scope Discipline
 - **One issue, one change**: Each issue maps to a single, focused change. Do not bundle unrelated modifications.
 - **No drive-by improvements**: Only touch code directly related to the task. Do not refactor, reformat, or "improve" surrounding code.
+- **Minimal changes**: Prefer the smallest diff that correctly solves the issue. Avoid unnecessary restructuring, renaming, or abstraction.
 - **Stick to the request**: Implement what was asked — nothing more, nothing less.
 
 ### Protected Files
