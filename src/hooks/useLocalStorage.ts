@@ -16,7 +16,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
             if (state === null || state === undefined) {
                 localStorage.removeItem(key);
             } else {
-                localStorage.setItem(key, typeof state === 'string' ? state : JSON.stringify(state));
+                localStorage.setItem(key, JSON.stringify(state));
             }
         } catch (error) {
             console.error(`Error saving localStorage key "${key}":`, error);
