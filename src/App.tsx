@@ -98,7 +98,13 @@ function App() {
     };
   }, []);
 
+  // Ref to capture translation for URL decode effect
+  const invalidSharedDataRef = useRef(t.invalidSharedData);
+  useEffect(() => {
+    invalidSharedDataRef.current = t.invalidSharedData;
+  }, [t.invalidSharedData]);
 
+  // URL parameter decode effect - runs only once on mount
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const recipeParam = searchParams.get(URL_PARAMS.RECIPE);
@@ -110,7 +116,7 @@ function App() {
         setViewRecipe(decoded);
       } else {
         // Invalid or malformed recipe data - show error
-        showNotification({ message: t.invalidSharedData || "Invalid shared recipe data. The link may be corrupted.", type: 'error' });
+        showNotification({ message: invalidSharedDataRef.current || "Invalid shared recipe data. The link may be corrupted.", type: 'error' });
       }
     } else if (shoppingListParam) {
       const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam), z.array(IngredientSchema));
@@ -118,10 +124,11 @@ function App() {
         setViewShoppingList(decoded);
       } else {
         // Invalid or malformed shopping list data - show error
-        showNotification({ message: t.invalidSharedData || "Invalid shared shopping list data. The link may be corrupted.", type: 'error' });
+        showNotification({ message: invalidSharedDataRef.current || "Invalid shared shopping list data. The link may be corrupted.", type: 'error' });
       }
     }
-  }, [t.invalidSharedData, showNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {
