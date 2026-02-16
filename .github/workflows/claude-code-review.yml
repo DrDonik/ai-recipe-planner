@@ -46,7 +46,9 @@ jobs:
           allowed_bots: 'claude,github-actions,drdoniks-bot'
 
           # Allow necessary tools for code review plugin to post PR comments
+          # MCP servers: list both server name (for initialization) and specific tools (for permissions)
+          # See: https://github.com/anthropics/claude-code-action/issues/723
           claude_args: |
-            --allowed-tools "Bash(gh *)" "Bash(git *)" "Bash(npm *)"
+            --allowedTools "mcp__github,mcp__github__create_issue_comment,mcp__github_inline_comment,mcp__github_inline_comment__create_inline_comment,mcp__github_comment,mcp__github_comment__update_claude_comment,Bash(gh api:*),Bash(gh pr:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(npm run build),Bash(npm run lint),Bash(npm test)"
 
 
