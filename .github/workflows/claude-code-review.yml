@@ -47,6 +47,6 @@ jobs:
 
           # Allow necessary tools for code review plugin to post PR comments
           claude_args: |
-            --allowed-tools "Bash(gh *)" "Bash(git *)" "Bash(npm *)"
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh api:*),Bash(gh pr:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(npm run build),Bash(npm run lint),Bash(npm test)"
 
 
