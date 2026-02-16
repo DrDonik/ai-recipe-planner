@@ -363,6 +363,34 @@ describe('ShoppingList', () => {
             expect(checkboxes[2]).not.toBeChecked();
         });
 
+        it('initializes own list with no checked items when localStorage has no checked state', () => {
+            // Set up meal plan matching the items
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: mockItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            // Do NOT set SHOPPING_LIST_CHECKED - simulating first time user views their list
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            const checkboxes = screen.getAllByRole('checkbox');
+            // All checkboxes should be unchecked
+            expect(checkboxes[0]).not.toBeChecked();
+            expect(checkboxes[1]).not.toBeChecked();
+            expect(checkboxes[2]).not.toBeChecked();
+
+            // Should NOT show decoupled indicator (this is own list, not shared)
+            const decoupledText = screen.queryByText(/decoupled/i);
+            expect(decoupledText).not.toBeInTheDocument();
+        });
+
         it('initializes checked state from hash-based localStorage for shared list', () => {
             // Set up a different meal plan (so items are treated as shared)
             const differentItems: Ingredient[] = [
