@@ -104,17 +104,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         >
             {schemaJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />}
 
-            {!schemaJson && (
-                <div
-                    role="alert"
-                    aria-live="assertive"
-                    className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm animate-in fade-in slide-in-from-top-2 mb-4"
-                >
-                    {t.schemaError}
-                </div>
-            )}
-
-
             <div className="flex items-start justify-between mb-6 gap-4">
                 <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight flex-1`}>
                     {recipe.title}
