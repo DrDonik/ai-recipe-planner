@@ -15,6 +15,12 @@ import { useEffect, useRef } from 'react';
 export function useFocusTrap(onClose: () => void) {
     const dialogRef = useRef<HTMLDivElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
+    const onCloseRef = useRef(onClose);
+
+    // Keep the ref up to date without re-running the effect
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
 
     useEffect(() => {
         // Store the currently focused element
@@ -55,7 +61,7 @@ export function useFocusTrap(onClose: () => void) {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Close on Escape
             if (e.key === 'Escape') {
-                onClose();
+                onCloseRef.current();
                 return;
             }
 
@@ -88,7 +94,7 @@ export function useFocusTrap(onClose: () => void) {
             document.removeEventListener('keydown', handleKeyDown);
             previousFocusRef.current?.focus();
         };
-    }, [onClose]);
+    }, []); // Empty dependency array - effect runs only once on mount
 
     return dialogRef;
 }
