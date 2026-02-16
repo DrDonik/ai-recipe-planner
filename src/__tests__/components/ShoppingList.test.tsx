@@ -2,8 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ShoppingList } from '../../components/ShoppingList';
-import type { Ingredient } from '../../types';
+import type { Ingredient, MealPlan } from '../../types';
 import { SettingsProvider } from '../../contexts/SettingsContext';
+import { STORAGE_KEYS } from '../../constants';
 
 const mockItems: Ingredient[] = [
     { item: 'Tomato', amount: '2' },
@@ -288,6 +289,149 @@ describe('ShoppingList', () => {
 
             const decoupledText = screen.queryByText(/decoupled/i);
             expect(decoupledText).not.toBeInTheDocument();
+        });
+    });
+
+    describe('Own List vs Shared List Detection', () => {
+        it('correctly identifies own list when shopping list matches stored meal plan', () => {
+            // Set up a meal plan in localStorage with matching shopping list
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: mockItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            // Should NOT show decoupled indicator for own list
+            const decoupledText = screen.queryByText(/decoupled/i);
+            expect(decoupledText).not.toBeInTheDocument();
+        });
+
+        it('correctly identifies shared list when shopping list does not match stored meal plan', () => {
+            // Set up a meal plan with different shopping list
+            const differentItems: Ingredient[] = [
+                { item: 'Potato', amount: '3' },
+                { item: 'Carrot', amount: '2' },
+            ];
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: differentItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            // Should show decoupled indicator for shared list
+            expect(screen.getByText(/decoupled/i)).toBeInTheDocument();
+        });
+
+        it('initializes checked state from main localStorage for own list', () => {
+            // Set up meal plan matching the items
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: mockItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            // Set checked state for the first item
+            const checkedKeys = ['Tomato|2'];
+            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.stringify(checkedKeys));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            const checkboxes = screen.getAllByRole('checkbox');
+            // First checkbox should be checked (from localStorage)
+            expect(checkboxes[0]).toBeChecked();
+            // Others should not be checked
+            expect(checkboxes[1]).not.toBeChecked();
+            expect(checkboxes[2]).not.toBeChecked();
+        });
+
+        it('initializes checked state from hash-based localStorage for shared list', () => {
+            // Set up a different meal plan (so items are treated as shared)
+            const differentItems: Ingredient[] = [
+                { item: 'Potato', amount: '3' },
+            ];
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: differentItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            // Calculate the hash for mockItems and set checked state
+            // This mimics what the component does internally
+            const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
+            const getListHash = (items: Ingredient[]): string => {
+                const keys = items.map(getItemKey).sort().join('|');
+                let hash = 0;
+                for (let i = 0; i < keys.length; i++) {
+                    const char = keys.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return `shopping_list_shared_${Math.abs(hash).toString(36)}`;
+            };
+            const hashKey = getListHash(mockItems);
+            const checkedKeys = ['Onion|1'];
+            localStorage.setItem(hashKey, JSON.stringify(checkedKeys));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            const checkboxes = screen.getAllByRole('checkbox');
+            // Second checkbox should be checked (from hash-based localStorage)
+            expect(checkboxes[0]).not.toBeChecked();
+            expect(checkboxes[1]).toBeChecked();
+            expect(checkboxes[2]).not.toBeChecked();
+        });
+
+        it('does not parse localStorage multiple times on mount', () => {
+            // Spy on localStorage.getItem to count calls
+            const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: mockItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            // Count how many times MEAL_PLAN was accessed
+            const mealPlanCalls = getItemSpy.mock.calls.filter(
+                call => call[0] === STORAGE_KEYS.MEAL_PLAN
+            );
+
+            // Should only be called once (or at most twice during React's double-render in dev mode)
+            // but definitely not 3+ times as before the refactoring
+            expect(mealPlanCalls.length).toBeLessThanOrEqual(2);
+
+            getItemSpy.mockRestore();
         });
     });
 });
