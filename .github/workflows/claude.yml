@@ -13,10 +13,6 @@ jobs:
     if: |
       (
         (
-          (
-            contains(fromJSON('["github-actions[bot]", "drdoniks-bot[bot]"]'), github.actor) &&
-            contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association)
-          ) ||
           (github.event_name == 'issue_comment' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)) ||
           (github.event_name == 'pull_request_review_comment' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.comment.author_association)) ||
           (github.event_name == 'pull_request_review' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.review.author_association))
