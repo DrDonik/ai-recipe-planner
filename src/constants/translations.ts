@@ -127,6 +127,7 @@ export const translations = {
             risk1: "Anyone with access to this device can view your API key",
             risk2: "Browser extensions may be able to read it",
             risk3: "The key persists until you clear browser data",
+            risk4: "The key will be visible in network requests (browser DevTools, network logs, proxies)",
             recommendation: "For better security, consider using Copy & Paste mode instead, which doesn't store any credentials.",
             understand: "I understand, continue",
             useCopyPaste: "Use Copy & Paste instead"
@@ -273,6 +274,7 @@ export const translations = {
             risk1: "Jeder mit Zugang zu diesem Gerät kann deinen API-Schlüssel einsehen",
             risk2: "Browser-Erweiterungen können ihn möglicherweise auslesen",
             risk3: "Der Schlüssel bleibt gespeichert, bis du die Browserdaten löschst",
+            risk4: "Der Schlüssel ist in Netzwerkanfragen sichtbar (Browser-DevTools, Netzwerkprotokolle, Proxys)",
             recommendation: "Für mehr Sicherheit empfehlen wir den Kopieren & Einfügen-Modus, der keine Zugangsdaten speichert.",
             understand: "Verstanden, fortfahren",
             useCopyPaste: "Kopieren & Einfügen verwenden"
@@ -419,6 +421,7 @@ export const translations = {
             risk1: "Toute personne ayant accès à cet appareil peut voir votre clé API",
             risk2: "Les extensions de navigateur peuvent potentiellement la lire",
             risk3: "La clé persiste jusqu'à ce que vous effaciez les données du navigateur",
+            risk4: "La clé sera visible dans les requêtes réseau (DevTools du navigateur, journaux réseau, proxys)",
             recommendation: "Pour plus de sécurité, envisagez d'utiliser le mode Copier-Coller, qui ne stocke aucune information d'identification.",
             understand: "Je comprends, continuer",
             useCopyPaste: "Utiliser Copier-Coller"
@@ -565,6 +568,7 @@ export const translations = {
             risk1: "Cualquier persona con acceso a este dispositivo puede ver tu clave API",
             risk2: "Las extensiones del navegador pueden leerla",
             risk3: "La clave permanece hasta que borres los datos del navegador",
+            risk4: "La clave será visible en solicitudes de red (DevTools del navegador, registros de red, proxies)",
             recommendation: "Para mayor seguridad, considera usar el modo Copiar y Pegar, que no almacena ninguna credencial.",
             understand: "Entiendo, continuar",
             useCopyPaste: "Usar Copiar y Pegar"
