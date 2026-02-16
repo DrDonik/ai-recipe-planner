@@ -13,10 +13,13 @@ on:
 jobs:
   claude-review:
     # Allow repo owner, org members, collaborators, previous contributors, and github-actions bot
+    # Exclude dependabot — automated dependency bumps don't benefit from AI review
     if: |
-      github.actor == 'github-actions[bot]' ||
-      github.actor == 'drdoniks-bot[bot]' ||
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+      github.actor != 'dependabot[bot]' && (
+        github.actor == 'github-actions[bot]' ||
+        github.actor == 'drdoniks-bot[bot]' ||
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
