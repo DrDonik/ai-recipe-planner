@@ -56,6 +56,10 @@ export const ApiKeySecurityDialog = ({
                             <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
                             <span>{t.apiKeySecurity.risk3}</span>
                         </li>
+                        <li className="flex items-start gap-2">
+                            <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                            <span>{t.apiKeySecurity.risk4}</span>
+                        </li>
                     </ul>
                 </div>
 
