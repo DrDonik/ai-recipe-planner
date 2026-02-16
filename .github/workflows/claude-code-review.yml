@@ -12,10 +12,10 @@ on:
 
 jobs:
   claude-review:
-    # Allow repo owner, org members, collaborators, previous contributors, and github-actions bot
+    # Allow repo owner, org members, collaborators, and previous contributors
+    # Exclude dependabot — automated dependency bumps don't benefit from AI review
     if: |
-      github.actor == 'github-actions[bot]' ||
-      github.actor == 'drdoniks-bot[bot]' ||
+      github.actor != 'dependabot[bot]' &&
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
     runs-on: ubuntu-latest
     permissions:
@@ -43,7 +43,7 @@ jobs:
 
           # Allow Claude bot and github-actions bot to trigger this workflow
           # (for issue-validation and auto-PR creation chaining)
-          allowed_bots: 'claude,github-actions,drdoniks-bot,dependabot'
+          allowed_bots: 'claude,github-actions,drdoniks-bot'
 
           # Allow necessary tools for code review plugin to post PR comments
           claude_args: |
