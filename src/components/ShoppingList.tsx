@@ -79,8 +79,8 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
         if (!isStandaloneView) return new Set();
 
         // Own list: use the checked state from the consolidated computation
-        if (isOwnList && ownListCheckedState) {
-            return new Set(ownListCheckedState);
+        if (isOwnList) {
+            return new Set(ownListCheckedState ?? []);
         }
 
         // Shared list: use hashed localStorage key
