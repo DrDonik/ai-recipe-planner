@@ -9,24 +9,26 @@ interface Props {
 interface State {
     hasError: boolean;
     error: Error | null;
+    errorInfo: React.ErrorInfo | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
     constructor(props: Props) {
         super(props);
-        this.state = { hasError: false, error: null };
+        this.state = { hasError: false, error: null, errorInfo: null };
     }
 
     static getDerivedStateFromError(error: Error): State {
-        return { hasError: true, error };
+        return { hasError: true, error, errorInfo: null };
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
         console.error('ErrorBoundary caught an error:', error, errorInfo);
+        this.setState({ errorInfo });
     }
 
     handleReset = (): void => {
-        this.setState({ hasError: false, error: null });
+        this.setState({ hasError: false, error: null, errorInfo: null });
     };
 
     render(): ReactNode {
@@ -50,9 +52,24 @@ export class ErrorBoundary extends Component<Props, State> {
                                 <summary className="cursor-pointer text-sm font-medium text-text-muted">
                                     Error details
                                 </summary>
-                                <pre className="mt-2 text-xs overflow-auto text-red-600 dark:text-red-400">
-                                    {this.state.error.message}
-                                </pre>
+                                <div className="mt-2 text-xs overflow-auto text-red-600 dark:text-red-400 space-y-2">
+                                    <div>
+                                        <strong>Message:</strong>
+                                        <pre className="mt-1">{this.state.error.message}</pre>
+                                    </div>
+                                    {this.state.error.stack && (
+                                        <div>
+                                            <strong>Stack:</strong>
+                                            <pre className="mt-1">{this.state.error.stack}</pre>
+                                        </div>
+                                    )}
+                                    {this.state.errorInfo?.componentStack && (
+                                        <div>
+                                            <strong>Component Stack:</strong>
+                                            <pre className="mt-1">{this.state.errorInfo.componentStack}</pre>
+                                        </div>
+                                    )}
+                                </div>
                             </details>
                         )}
                         <button
