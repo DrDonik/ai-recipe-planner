@@ -43,7 +43,7 @@ jobs:
 
           # Allow Claude bot and github-actions bot to trigger this workflow
           # (for issue-validation and auto-PR creation chaining)
-          allowed_bots: 'claude,github-actions,drdoniks-bot,dependabot'
+          allowed_bots: 'claude,github-actions,drdoniks-bot'
 
           # Allow necessary tools for code review plugin to post PR comments
           claude_args: |
