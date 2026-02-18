@@ -7,8 +7,11 @@ import type { Recipe, Ingredient } from '../types';
 
 // Mock window.location
 const mockLocation = new URL('http://localhost:3000');
-delete (window as any).location;
-window.location = mockLocation as any;
+Object.defineProperty(window, 'location', {
+    value: mockLocation,
+    writable: true,
+    configurable: true,
+});
 
 // Mock window.history
 const mockPushState = vi.fn();
