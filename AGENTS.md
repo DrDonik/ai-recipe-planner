@@ -247,6 +247,21 @@ The prompt in `buildRecipePrompt()` has specific rules that prevent common LLM m
 - `vitest.config.ts` - Test runner config (happy-dom, coverage, path aliases)
 - `lighthouserc.json` - Lighthouse CI thresholds (perf 80%, a11y 90%, best practices 90%, SEO 90%)
 
+## Issue & PR Tracking
+
+Open issues and pull requests are tracked on the **[ai-recipe-planner workboard](https://github.com/users/DrDonik/projects/1)** (GitHub Projects v2).
+
+Status columns: **Todo** → **In Progress** → **Review** → **Done**
+
+When working on an issue:
+- The issue moves to **In Progress** when implementation begins.
+- The issue and its PR both move to **Review** when the PR is opened.
+- Both close as **Done** when the PR is merged.
+
+Known cross-dependencies (check before implementing):
+- **#109** (ShoppingList hash) must be implemented *after* PR **#132** merges — both modify `ShoppingList.tsx`.
+- **#143** and **#145** both modify `RecipeCard.tsx` — whichever merges second needs a rebase.
+
 ## CI/CD Pipeline
 
 GitHub Actions workflows enforce quality gates on every PR to `main`:
