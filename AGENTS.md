@@ -259,8 +259,8 @@ When working on an issue:
 - Both close as **Done** when the PR is merged.
 
 Known cross-dependencies (check before implementing):
-- **#109** (ShoppingList hash) must be implemented *after* PR **#132** merges — both modify `ShoppingList.tsx`.
-- **#143** and **#145** both modify `RecipeCard.tsx` — whichever merges second needs a rebase.
+- Before starting work, check the issue for declared dependencies (e.g., "blocked by" labels or comments).
+- Be aware of other in-progress PRs that might modify the same files, as this may require a rebase.
 
 ## CI/CD Pipeline
 
