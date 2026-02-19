@@ -4,7 +4,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project Overview
 
-AI Recipe Planner (Rezept-Planer) is a React-based meal planning application that uses AI (Google Gemini API) to generate personalized recipes based on available pantry ingredients. The app supports multiple languages (English, German, Spanish, French) and dietary preferences, and includes recipe sharing functionality via URL parameters.
+AI Recipe Planner is a React-based meal planning application that uses AI (Google Gemini API) to generate personalized recipes based on available pantry ingredients. The app supports multiple languages (English, German, Spanish, French) and dietary preferences, and includes recipe sharing functionality via URL parameters.
 
 ## Versioning
 
