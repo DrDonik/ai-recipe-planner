@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import App from '../App';
 import { renderWithSettings } from './testUtils';
 import { encodeForUrl } from '../utils/sharing';
-import type { Recipe, Ingredient } from '../types';
+import type { Recipe, Ingredient, MealPlan } from '../types';
 
 // Mock window.location
 const mockLocation = new URL('http://localhost:3000');
@@ -111,6 +111,75 @@ describe('App URL Parameter Decoding', () => {
                                 screen.queryByText(/The link may be corrupted/i);
                 expect(errorText).toBeInTheDocument();
             }, { timeout: 3000 });
+        });
+    });
+
+    describe('Scroll behavior', () => {
+        const testMealPlan: MealPlan = {
+            recipes: [
+                {
+                    id: 'recipe-scroll-1',
+                    title: 'Scroll Test Recipe',
+                    time: '20 min',
+                    ingredients: [{ item: 'Egg', amount: '2', unit: 'pcs' }],
+                    instructions: ['Boil eggs'],
+                    usedIngredients: [],
+                    missingIngredients: []
+                }
+            ],
+            shoppingList: []
+        };
+
+        beforeEach(() => {
+            // Seed meal plan into localStorage so App renders recipe cards
+            localStorage.setItem('meal_plan', JSON.stringify(testMealPlan));
+            localStorage.setItem('welcome_dismissed', 'true');
+            // Mock window.scrollTo
+            vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+            // Mock window.scrollY to simulate a scrolled position
+            Object.defineProperty(window, 'scrollY', { value: 400, writable: true, configurable: true });
+        });
+
+        it('scrolls to top when opening single recipe view', async () => {
+            renderWithSettings(<App />);
+
+            await waitFor(() => {
+                expect(screen.getByText('Scroll Test Recipe')).toBeInTheDocument();
+            });
+
+            const viewButton = screen.getByRole('button', { name: 'View recipe' });
+            fireEvent.click(viewButton);
+
+            await waitFor(() => {
+                expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+            });
+        });
+
+        it('restores scroll position when closing single recipe view', async () => {
+            renderWithSettings(<App />);
+
+            await waitFor(() => {
+                expect(screen.getByText('Scroll Test Recipe')).toBeInTheDocument();
+            });
+
+            // Open single recipe view (scroll position 400 is saved)
+            const viewButton = screen.getByRole('button', { name: 'View recipe' });
+            fireEvent.click(viewButton);
+
+            await waitFor(() => {
+                expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+            });
+
+            // Reset mock call count to isolate the close action
+            vi.mocked(window.scrollTo).mockClear();
+
+            // Close single recipe view
+            const closeButton = screen.getByRole('button', { name: 'Close' });
+            fireEvent.click(closeButton);
+
+            await waitFor(() => {
+                expect(window.scrollTo).toHaveBeenCalledWith(0, 400);
+            });
         });
     });
 
