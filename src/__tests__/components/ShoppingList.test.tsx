@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { ShoppingList } from '../../components/ShoppingList';
+import { ShoppingList, getListHash } from '../../components/ShoppingList';
 import type { Ingredient, MealPlan } from '../../types';
 import { SettingsProvider } from '../../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../../constants';
@@ -391,6 +391,35 @@ describe('ShoppingList', () => {
             expect(decoupledText).not.toBeInTheDocument();
         });
 
+        it('gracefully handles corrupted checked state JSON for own list', () => {
+            // Set up meal plan matching the items
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: mockItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            // Set corrupted JSON in SHOPPING_LIST_CHECKED
+            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, 'not-valid-json');
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            const checkboxes = screen.getAllByRole('checkbox');
+            // All checkboxes should be unchecked (graceful fallback)
+            expect(checkboxes[0]).not.toBeChecked();
+            expect(checkboxes[1]).not.toBeChecked();
+            expect(checkboxes[2]).not.toBeChecked();
+
+            // Should NOT show decoupled indicator (still identified as own list)
+            const decoupledText = screen.queryByText(/decoupled/i);
+            expect(decoupledText).not.toBeInTheDocument();
+        });
+
         it('initializes checked state from hash-based localStorage for shared list', () => {
             // Set up a different meal plan (so items are treated as shared)
             const differentItems: Ingredient[] = [
@@ -402,19 +431,7 @@ describe('ShoppingList', () => {
             };
             localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
 
-            // Calculate the hash for mockItems and set checked state
-            // This mimics what the component does internally
-            const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
-            const getListHash = (items: Ingredient[]): string => {
-                const keys = items.map(getItemKey).sort().join('|');
-                let hash = 0;
-                for (let i = 0; i < keys.length; i++) {
-                    const char = keys.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash;
-                }
-                return `shopping_list_shared_${Math.abs(hash).toString(36)}`;
-            };
+            // Calculate the hash for mockItems and set checked state using exported helper
             const hashKey = getListHash(mockItems);
             const checkedKeys = ['Onion|1'];
             localStorage.setItem(hashKey, JSON.stringify(checkedKeys));
