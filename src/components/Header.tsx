@@ -27,22 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
     // Check on mount if existing user needs to see the security warning
     const [showSecurityDialog, setShowSecurityDialog] = useState(() => {
         const hasSeenWarning = localStorage.getItem(STORAGE_KEYS.API_KEY_WARNING_SEEN) === 'true';
-        if (hasSeenWarning) return false;
-
-        const storedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
-        if (!storedApiKey) return false;
-
-        const storedUseCopyPaste = localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE);
-        let inApiKeyMode = true; // Default: having API key implies API Key mode
-        if (storedUseCopyPaste) {
-            try {
-                inApiKeyMode = !JSON.parse(storedUseCopyPaste);
-            } catch {
-                // Corrupted value, assume API Key mode
-            }
-        }
-
-        return inApiKeyMode;
+        return !hasSeenWarning && !!apiKey && !useCopyPaste;
     });
     const [showClearDialog, setShowClearDialog] = useState(false);
     const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
