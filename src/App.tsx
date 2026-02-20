@@ -21,6 +21,9 @@ function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
   const settingsPanelRef = useRef<SettingsPanelRef>(null);
   const spiceRackRef = useRef<SpiceRackRef>(null);
+  const savedScrollPositionRef = useRef<number>(0);
+  const prevViewRecipeRef = useRef<Recipe | null>(null);
+  const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
   const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
   const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
@@ -98,6 +101,22 @@ function App() {
     };
   }, []);
 
+  // Scroll management for standalone view transitions (recipe or shopping list)
+  useEffect(() => {
+    const isSingleView = viewRecipe !== null || viewShoppingList !== null;
+    const wasSingleView = prevViewRecipeRef.current !== null || prevViewShoppingListRef.current !== null;
+
+    if (isSingleView) {
+      // Entering a standalone view - scroll to top
+      window.scrollTo(0, 0);
+    } else if (wasSingleView) {
+      // Returning to overview - restore saved position
+      window.scrollTo(0, savedScrollPositionRef.current);
+    }
+    prevViewRecipeRef.current = viewRecipe;
+    prevViewShoppingListRef.current = viewShoppingList;
+  }, [viewRecipe, viewShoppingList]);
+
   // Ref to capture translation for URL decode effect
   const invalidSharedDataRef = useRef(t.invalidSharedData);
   useEffect(() => {
@@ -172,6 +191,7 @@ function App() {
   }, [viewRecipe, viewShoppingList, t.shoppingList]);
 
   const openRecipeView = useCallback((recipe: Recipe) => {
+    savedScrollPositionRef.current = window.scrollY;
     setViewRecipe(recipe);
     // Update URL without reload
     const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipe);
@@ -179,6 +199,7 @@ function App() {
   }, []);
 
   const openShoppingListView = useCallback((items: Ingredient[]) => {
+    savedScrollPositionRef.current = window.scrollY;
     setViewShoppingList(items);
     // Update URL without reload
     const shareUrl = generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);
