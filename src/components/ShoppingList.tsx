@@ -18,7 +18,7 @@ interface ShoppingListProps {
 /**
  * Generate a unique key for an ingredient (for checkbox state tracking).
  */
-const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
+export const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
 
 /**
  * Check if two shopping lists contain the same items (ignoring checked state).
@@ -33,7 +33,7 @@ const listsMatch = (a: Ingredient[], b: Ingredient[]): boolean => {
  * Generate a hash for a list of items (for localStorage key).
  * Simple hash based on sorted item keys.
  */
-const getListHash = (items: Ingredient[]): string => {
+export const getListHash = (items: Ingredient[]): string => {
     const keys = items.map(getItemKey).sort().join('|');
     // Simple hash function
     let hash = 0;
@@ -64,7 +64,14 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
             if (!match) return { isOwnList: false, ownListCheckedState: null };
             // This is the user's own list - load their checked state
             const checkedJson = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
-            const checked = checkedJson ? JSON.parse(checkedJson) as string[] : null;
+            let checked: string[] | null = null;
+            if (checkedJson) {
+                try {
+                    checked = JSON.parse(checkedJson) as string[];
+                } catch {
+                    // Malformed JSON in localStorage, treat as no items checked.
+                }
+            }
             return { isOwnList: true, ownListCheckedState: checked };
         } catch {
             return { isOwnList: false, ownListCheckedState: null };
