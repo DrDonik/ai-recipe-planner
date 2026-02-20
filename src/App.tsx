@@ -23,6 +23,7 @@ function App() {
   const spiceRackRef = useRef<SpiceRackRef>(null);
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
+  const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
   const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
 
   const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
@@ -100,17 +101,21 @@ function App() {
     };
   }, []);
 
-  // Scroll management for single recipe view transitions
+  // Scroll management for standalone view transitions (recipe or shopping list)
   useEffect(() => {
-    if (viewRecipe !== null) {
-      // Entering single recipe view - scroll to top
+    const isSingleView = viewRecipe !== null || viewShoppingList !== null;
+    const wasSingleView = prevViewRecipeRef.current !== null || prevViewShoppingListRef.current !== null;
+
+    if (isSingleView) {
+      // Entering a standalone view - scroll to top
       window.scrollTo(0, 0);
-    } else if (prevViewRecipeRef.current !== null) {
-      // Returning from single recipe view to overview - restore saved position
+    } else if (wasSingleView) {
+      // Returning to overview - restore saved position
       window.scrollTo(0, savedScrollPositionRef.current);
     }
     prevViewRecipeRef.current = viewRecipe;
-  }, [viewRecipe]);
+    prevViewShoppingListRef.current = viewShoppingList;
+  }, [viewRecipe, viewShoppingList]);
 
   // Ref to capture translation for URL decode effect
   const invalidSharedDataRef = useRef(t.invalidSharedData);
@@ -194,6 +199,7 @@ function App() {
   }, []);
 
   const openShoppingListView = useCallback((items: Ingredient[]) => {
+    savedScrollPositionRef.current = window.scrollY;
     setViewShoppingList(items);
     // Update URL without reload
     const shareUrl = generateShareUrl(URL_PARAMS.SHOPPING_LIST, items);

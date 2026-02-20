@@ -127,7 +127,7 @@ describe('App URL Parameter Decoding', () => {
                     missingIngredients: []
                 }
             ],
-            shoppingList: []
+            shoppingList: [{ item: 'Flour', amount: '500', unit: 'g' }]
         };
 
         beforeEach(() => {
@@ -174,6 +174,48 @@ describe('App URL Parameter Decoding', () => {
             vi.mocked(window.scrollTo).mockClear();
 
             // Close single recipe view
+            const closeButton = screen.getByRole('button', { name: 'Close' });
+            fireEvent.click(closeButton);
+
+            await waitFor(() => {
+                expect(window.scrollTo).toHaveBeenCalledWith(0, 400);
+            });
+        });
+
+        it('scrolls to top when opening shopping list view', async () => {
+            renderWithSettings(<App />);
+
+            await waitFor(() => {
+                expect(screen.getByText('Scroll Test Recipe')).toBeInTheDocument();
+            });
+
+            const viewButton = screen.getByRole('button', { name: 'Open in new tab' });
+            fireEvent.click(viewButton);
+
+            await waitFor(() => {
+                expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+            });
+        });
+
+        it('restores scroll position when closing shopping list view', async () => {
+            renderWithSettings(<App />);
+
+            await waitFor(() => {
+                expect(screen.getByText('Scroll Test Recipe')).toBeInTheDocument();
+            });
+
+            // Open shopping list view (scroll position 400 is saved)
+            const viewButton = screen.getByRole('button', { name: 'Open in new tab' });
+            fireEvent.click(viewButton);
+
+            await waitFor(() => {
+                expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+            });
+
+            // Reset mock call count to isolate the close action
+            vi.mocked(window.scrollTo).mockClear();
+
+            // Close shopping list view
             const closeButton = screen.getByRole('button', { name: 'Close' });
             fireEvent.click(closeButton);
 
