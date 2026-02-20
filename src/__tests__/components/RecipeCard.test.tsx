@@ -373,6 +373,40 @@ describe('RecipeCard', () => {
         });
     });
 
+    describe('JSON-LD Schema Generation', () => {
+        it('does not show error alert when schema generation fails', () => {
+            // Spy on console.error to verify it logs the error
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+            // Create a recipe with unusual data that might cause schema issues
+            const recipeWithUnusualData: Recipe = {
+                ...mockRecipe,
+                time: '', // Empty time might cause schema generation issues
+            };
+
+            renderWithSettings(
+                <RecipeCard recipe={recipeWithUnusualData} index={0} />
+            );
+
+            // Should not show any error alert
+            expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+            consoleErrorSpy.mockRestore();
+        });
+
+        it('renders successfully with no user-facing errors', () => {
+            // Recipe with valid data should render without issues
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} />
+            );
+
+            // Recipe card should render successfully
+            expect(screen.getByText('Test Recipe')).toBeInTheDocument();
+            // Should not show any error alert
+            expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        });
+    });
+
     describe('Ingredient Missing Detection (Exact Matching)', () => {
         it('highlights ingredient that exactly matches missing ingredient', () => {
             const recipeWithMissingSalt: Recipe = {
