@@ -54,10 +54,11 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
     // Helper function to render text with clickable URLs
     const renderTextWithLinks = (text: string) => {
         const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const isUrl = (part: string) => /^https?:\/\/[^\s]+$/.test(part);
         const parts = text.split(urlRegex);
 
         return parts.map((part, index) => {
-            if (urlRegex.test(part)) {
+            if (isUrl(part)) {
                 return (
                     <a
                         key={index}
