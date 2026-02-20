@@ -3,9 +3,6 @@ import { API_CONFIG } from '../constants';
 import { translations } from '../constants/translations';
 import type { PantryItem, MealPlan } from '../types';
 
-// Re-export types for backwards compatibility
-export type { PantryItem, Ingredient, Recipe, MealPlan, Nutrition } from '../types';
-
 /**
  * Sanitizes user input to prevent prompt injection attacks.
  *
