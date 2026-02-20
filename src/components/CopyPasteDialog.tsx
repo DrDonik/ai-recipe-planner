@@ -25,17 +25,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
     const dialogRef = useFocusTrap(onCancel);
 
     const handleCopyAndProceed = async () => {
-        try {
-            await navigator.clipboard.writeText(prompt);
-        } catch {
-            // Fallback for older browsers
-            const textarea = document.createElement('textarea');
-            textarea.value = prompt;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-        }
+        await navigator.clipboard.writeText(prompt);
         setCopied(true);
         // Advance to paste step after a brief moment to show "Copied!" feedback
         setTimeout(() => {
