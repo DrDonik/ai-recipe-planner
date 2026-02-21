@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { ShoppingList, getListHash } from '../../components/ShoppingList';
+import { ShoppingList } from '../../components/ShoppingList';
+import { getListHash } from '../../utils/shoppingListHelpers';
 import type { Ingredient, MealPlan } from '../../types';
 import { SettingsProvider } from '../../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../../constants';
