@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "39f9c3faea0a",
+  "session_id": "2b4f1a79-4f51-43c9-9404-b7301d2038e4",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-21T20:17:46.548546Z",
+  "branch": "claude/issue-117-20260216-2055",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/components/CopyPasteDialog.tsx"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "0dee4f9d-f024-445e-9ebb-37478bd4027c",
+  "token_usage": {
+    "input_tokens": 15,
+    "cache_creation_tokens": 49600,
+    "cache_read_tokens": 456982,
+    "output_tokens": 136,
+    "api_call_count": 11
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-21T20:17:46.535963Z",
+    "agent_lines": 5,
+    "human_added": 28,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 33,
+    "agent_percentage": 15.151515151515152
+  }
+}
