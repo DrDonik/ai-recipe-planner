@@ -1,0 +1,13 @@
+I don't understand PR 138, fixing issue 117. There are a few comments, and I am not sure whether mergin is safe.
+
+---
+
+Go ahead and fix the try/catch issue first.
+
+---
+
+There seems to have been an error on npm test, or am I mistaken?
+
+---
+
+Yes, add the tests
