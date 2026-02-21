@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "2c8cb1089135",
+  "strategy": "manual-commit",
+  "branch": "claude/issue-117-20260216-2055",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/__tests__/components/CopyPasteDialog.test.tsx",
+    "src/components/CopyPasteDialog.tsx",
+    "src/constants/translations.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/2c/8cb1089135/0/metadata.json",
+      "transcript": "/2c/8cb1089135/0/full.jsonl",
+      "context": "/2c/8cb1089135/0/context.md",
+      "content_hash": "/2c/8cb1089135/0/content_hash.txt",
+      "prompt": "/2c/8cb1089135/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 22,
+    "cache_creation_tokens": 9022,
+    "cache_read_tokens": 1702336,
+    "output_tokens": 289,
+    "api_call_count": 18
+  }
+}
