@@ -1,0 +1,24 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+There are a few contributors and reviewers on this PR 129, fixing issue 119. I don't understand what is going on. Please guide me through this.
+
+### Prompt 2
+
+Yes, please check.
+
+### Prompt 3
+
+Could you look at the full diff and let me know if everything is in order?
+
+### Prompt 4
+
+Go ahead.
+
+### Prompt 5
+
+Yes, go ahead
+

@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "99536aef0080",
+  "strategy": "manual-commit",
+  "branch": "fix-favicon-paths-163644341615393504",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "index.html"
+  ],
+  "sessions": [
+    {
+      "metadata": "/99/536aef0080/0/metadata.json",
+      "transcript": "/99/536aef0080/0/full.jsonl",
+      "context": "/99/536aef0080/0/context.md",
+      "content_hash": "/99/536aef0080/0/content_hash.txt",
+      "prompt": "/99/536aef0080/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 27,
+    "cache_creation_tokens": 52293,
+    "cache_read_tokens": 670435,
+    "output_tokens": 132,
+    "api_call_count": 15
+  }
+}
