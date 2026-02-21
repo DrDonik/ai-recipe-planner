@@ -81,14 +81,14 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             console.error('Failed to generate JSON-LD schema for recipe:', recipe.title, error);
             return null;
         }
-    }, [recipe.title, recipe.ingredients, recipe.instructions, recipe.time, recipe.nutrition]);
+    }, [recipe.id]);
 
 
     // Memoize the set of missing ingredient names (lowercase) for O(1) lookup
     const missingIngredientNames = useMemo(() => {
         if (!recipe.missingIngredients) return new Set<string>();
         return new Set(recipe.missingIngredients.map(m => m.item.toLowerCase()));
-    }, [recipe.missingIngredients]);
+    }, [recipe.id]);
 
     // Helper to check if an ingredient is missing (O(1) Set lookup)
     const isIngredientMissing = useCallback((ingredientName: string) => {
