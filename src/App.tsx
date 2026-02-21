@@ -218,21 +218,21 @@ function App() {
     window.history.pushState({}, '', window.location.pathname);
   }, []);
 
-  const addPantryItem = (v: PantryItem) => {
-    setPantryItems([...pantryItems, v]);
-  };
+  const addPantryItem = useCallback((v: PantryItem) => {
+    setPantryItems(prev => [...prev, v]);
+  }, [setPantryItems]);
 
-  const removePantryItem = (id: string) => {
-    setPantryItems(pantryItems.filter(v => v.id !== id));
-  };
+  const removePantryItem = useCallback((id: string) => {
+    setPantryItems(prev => prev.filter(v => v.id !== id));
+  }, [setPantryItems]);
 
-  const updatePantryItem = (id: string, newAmount: string) => {
-    setPantryItems(pantryItems.map(item =>
+  const updatePantryItem = useCallback((id: string, newAmount: string) => {
+    setPantryItems(prev => prev.map(item =>
       item.id === id ? { ...item, amount: newAmount } : item
     ));
-  };
+  }, [setPantryItems]);
 
-  const emptyPantry = () => {
+  const emptyPantry = useCallback(() => {
     const backup = [...pantryItems];
     setPantryItems([]);
     showNotification({
@@ -248,17 +248,18 @@ function App() {
       },
       timeout: 5000
     });
-  };
+  }, [pantryItems, setPantryItems, showNotification, clearNotification, t.undo.pantryEmptied, t.undo.action]);
 
-  const addSpice = (spice: string) => {
-    if (!spices.includes(spice)) {
-      setSpices([...spices, spice].sort((a, b) => a.localeCompare(b)));
-    }
-  };
+  const addSpice = useCallback((spice: string) => {
+    setSpices(prev => {
+      if (prev.includes(spice)) return prev;
+      return [...prev, spice].sort((a, b) => a.localeCompare(b));
+    });
+  }, [setSpices]);
 
-  const removeSpice = (spiceToRemove: string) => {
-    setSpices(spices.filter(s => s !== spiceToRemove));
-  };
+  const removeSpice = useCallback((spiceToRemove: string) => {
+    setSpices(prev => prev.filter(s => s !== spiceToRemove));
+  }, [setSpices]);
 
   const deleteRecipe = useCallback((recipeId: string) => {
     if (!mealPlan) return;
@@ -284,7 +285,7 @@ function App() {
     });
   }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     // Flush any pending input from PantryInput, StyleWish or SpiceRack before generating
     const pendingItem = pantryInputRef.current?.flushPendingInput();
     const pendingStyleWish = settingsPanelRef.current?.flushPendingInput();
@@ -333,9 +334,9 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pantryItems, spices, styleWishes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan]);
 
-  const handleCopyPasteSubmit = (response: string) => {
+  const handleCopyPasteSubmit = useCallback((response: string) => {
     setShowCopyPasteDialog(false);
     setLoading(true);
     clearNotification();
@@ -350,11 +351,11 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t.errors, t.parseError, setMealPlan, clearNotification, showNotification, setShowCopyPasteDialog]);
 
-  const handleCopyPasteCancel = () => {
+  const handleCopyPasteCancel = useCallback(() => {
     setShowCopyPasteDialog(false);
-  };
+  }, [setShowCopyPasteDialog]);
 
 
   if (viewRecipe) {
