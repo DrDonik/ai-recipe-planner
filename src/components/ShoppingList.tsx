@@ -5,6 +5,7 @@ import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
+import { getItemKey, getListHash, listsMatch } from '../utils/shoppingListHelpers';
 
 interface ShoppingListProps {
     items: Ingredient[];
@@ -15,54 +16,36 @@ interface ShoppingListProps {
     onClose?: () => void;
 }
 
-/**
- * Generate a unique key for an ingredient (for checkbox state tracking).
- */
-const getItemKey = (item: Ingredient) => `${item.item}|${item.amount}`;
-
-/**
- * Check if two shopping lists contain the same items (ignoring checked state).
- */
-const listsMatch = (a: Ingredient[], b: Ingredient[]): boolean => {
-    if (a.length !== b.length) return false;
-    const aKeys = new Set(a.map(getItemKey));
-    return b.every(item => aKeys.has(getItemKey(item)));
-};
-
-/**
- * Generate a hash for a list of items (for localStorage key).
- * Simple hash based on sorted item keys.
- */
-const getListHash = (items: Ingredient[]): string => {
-    const keys = items.map(getItemKey).sort().join('|');
-    // Simple hash function
-    let hash = 0;
-    for (let i = 0; i < keys.length; i++) {
-        const char = keys.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return `shopping_list_shared_${Math.abs(hash).toString(36)}`;
-};
-
 export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose }) => {
     const { t } = useSettings();
 
     // Load checked items from localStorage (used for main view and own list in standalone)
     const [localStorageChecked, setLocalStorageChecked] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
 
-    // Determine if this is the user's own list (matches their stored meal plan)
-    // Computed once during initialization for standalone view
-    const isOwnList = useMemo(() => {
-        if (!isStandaloneView) return false;
+    // Determine if this is the user's own list and get initial checked state
+    // Consolidates duplicate localStorage parsing and listsMatch calls
+    const { isOwnList, ownListCheckedState } = useMemo(() => {
+        if (!isStandaloneView) return { isOwnList: false, ownListCheckedState: null };
         const storedPlanJson = localStorage.getItem(STORAGE_KEYS.MEAL_PLAN);
-        if (!storedPlanJson) return false;
+        if (!storedPlanJson) return { isOwnList: false, ownListCheckedState: null };
         try {
             const storedPlan = JSON.parse(storedPlanJson) as MealPlan;
-            if (!storedPlan?.shoppingList) return false;
-            return listsMatch(items, storedPlan.shoppingList);
+            if (!storedPlan?.shoppingList) return { isOwnList: false, ownListCheckedState: null };
+            const match = listsMatch(items, storedPlan.shoppingList);
+            if (!match) return { isOwnList: false, ownListCheckedState: null };
+            // This is the user's own list - load their checked state
+            const checkedJson = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+            let checked: string[] | null = null;
+            if (checkedJson) {
+                try {
+                    checked = JSON.parse(checkedJson) as string[];
+                } catch {
+                    // Malformed JSON in localStorage, treat as no items checked.
+                }
+            }
+            return { isOwnList: true, ownListCheckedState: checked };
         } catch {
-            return false;
+            return { isOwnList: false, ownListCheckedState: null };
         }
     }, [isStandaloneView, items]);
 
@@ -73,26 +56,13 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
     const [standaloneChecked, setStandaloneChecked] = useState<Set<string>>(() => {
         if (!isStandaloneView) return new Set();
 
-        // Check if this is own list - use main localStorage key
-        const storedPlanJson = localStorage.getItem(STORAGE_KEYS.MEAL_PLAN);
-        if (storedPlanJson) {
-            try {
-                const storedPlan = JSON.parse(storedPlanJson) as MealPlan;
-                if (storedPlan?.shoppingList && listsMatch(items, storedPlan.shoppingList)) {
-                    const storedCheckedJson = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
-                    if (storedCheckedJson) {
-                        return new Set(JSON.parse(storedCheckedJson) as string[]);
-                    }
-                    return new Set();
-                }
-            } catch {
-                // Fall through to shared list logic
-            }
+        // Own list: use the checked state from the consolidated computation
+        if (isOwnList) {
+            return new Set(ownListCheckedState ?? []);
         }
 
-        // Shared list - use hashed localStorage key
-        const hashKey = getListHash(items);
-        const storedSharedChecked = localStorage.getItem(hashKey);
+        // Shared list: use hashed localStorage key
+        const storedSharedChecked = localStorage.getItem(sharedListStorageKey);
         if (storedSharedChecked) {
             try {
                 return new Set(JSON.parse(storedSharedChecked) as string[]);
