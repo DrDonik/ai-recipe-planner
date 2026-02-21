@@ -71,19 +71,17 @@ describe('CopyPasteDialog', () => {
             expect(screen.getByPlaceholderText(/Paste the exact AI response/i)).toBeInTheDocument();
         });
 
-        it('still advances to paste step when clipboard write fails', async () => {
+        it('stays on copy step and shows error when clipboard write fails', async () => {
             vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new DOMException('Permission denied'));
             const { user } = setup();
 
             await user.click(screen.getByRole('button', { name: /Copy Prompt/i }));
 
-            // Should still show Copied! feedback despite failure
-            expect(screen.getByText('Copied!')).toBeInTheDocument();
-
-            // Should still advance to paste step
-            await waitFor(() => {
-                expect(screen.getByPlaceholderText(/Paste the exact AI response/i)).toBeInTheDocument();
-            });
+            // Should stay on copy step with error message
+            expect(screen.getByRole('alert')).toBeInTheDocument();
+            expect(screen.getByText(/couldn't copy automatically/i)).toBeInTheDocument();
+            // Should still show the copy button (not advanced to paste step)
+            expect(screen.getByRole('button', { name: /Copy Prompt/i })).toBeInTheDocument();
         });
     });
 
