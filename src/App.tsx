@@ -63,10 +63,10 @@ function App() {
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCloseWelcome = useCallback(() => setShowWelcome(false), []);
   const handleShowHelp = useCallback(() => setShowWelcome(true), []);
-  const handleTogglePantryMinimize = useCallback(() => setPantryMinimized(prev => !prev), [setPantryMinimized]);
-  const handleToggleSpiceRackMinimize = useCallback(() => setSpiceRackMinimized(prev => !prev), [setSpiceRackMinimized]);
-  const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(prev => !prev), [setShoppingListMinimized]);
-  const handleToggleRecipeMissingIngredientsMinimize = useCallback(() => setRecipeMissingIngredientsMinimized(prev => !prev), [setRecipeMissingIngredientsMinimized]);
+  const handleTogglePantryMinimize = useCallback(() => setPantryMinimized(prev => !prev), []);
+  const handleToggleSpiceRackMinimize = useCallback(() => setSpiceRackMinimized(prev => !prev), []);
+  const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(prev => !prev), []);
+  const handleToggleRecipeMissingIngredientsMinimize = useCallback(() => setRecipeMissingIngredientsMinimized(prev => !prev), []);
 
   const showNotification = useCallback((notif: Notification) => {
     // Clear any existing timeout
