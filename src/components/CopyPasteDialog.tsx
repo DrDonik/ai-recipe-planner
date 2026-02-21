@@ -28,14 +28,10 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
         try {
             await navigator.clipboard.writeText(prompt);
         } catch {
-            // Fallback for older browsers
-            const textarea = document.createElement('textarea');
-            textarea.value = prompt;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
+            setError(t.copyPaste.copyFailed);
+            return;
         }
+        setError(null);
         setCopied(true);
         // Advance to paste step after a brief moment to show "Copied!" feedback
         setTimeout(() => {
@@ -93,10 +89,20 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                 </span>
                             </div>
                             <div className="bg-white/30 dark:bg-black/20 rounded-lg p-3 flex-1 overflow-y-auto">
-                                <pre className="text-xs text-text-base whitespace-pre-wrap font-mono">
+                                <pre className="text-xs text-text-base whitespace-pre-wrap font-mono select-all">
                                     {prompt}
                                 </pre>
                             </div>
+                            {error && (
+                                <div
+                                    role="alert"
+                                    aria-live="assertive"
+                                    className="flex items-center gap-2 text-sm text-red-500"
+                                >
+                                    <AlertCircle size={16} className="shrink-0" />
+                                    <span>{error}</span>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>

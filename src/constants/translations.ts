@@ -117,7 +117,8 @@ export const translations = {
             instructionsPaste: "Paste the exact response from your AI chat into the text field below. It's best to use the copy button",
             instructionsPasteEnd: "right below the AI's response.",
             responsePlaceholder: "Paste the exact AI response here...",
-            responseRequired: "Please paste the AI's response first."
+            responseRequired: "Please paste the AI's response first.",
+            copyFailed: "Couldn't copy automatically. Please select the text above and copy it manually."
         },
         apiKeySecurity: {
             title: "API Key Storage Notice",
@@ -263,7 +264,8 @@ export const translations = {
             instructionsPaste: "Füge die exakte Antwort deines KI-Chats in das Textfeld unten ein. Nutze dazu am besten den Kopieren-Button",
             instructionsPasteEnd: "direkt unter der Antwort der KI.",
             responsePlaceholder: "Füge hier die exakte Antwort der KI ein...",
-            responseRequired: "Bitte füge zuerst die Antwort der KI ein."
+            responseRequired: "Bitte füge zuerst die Antwort der KI ein.",
+            copyFailed: "Automatisches Kopieren fehlgeschlagen. Bitte markiere den Text oben und kopiere ihn manuell."
         },
         apiKeySecurity: {
             title: "Hinweis zur API-Schlüssel-Speicherung",
@@ -409,7 +411,8 @@ export const translations = {
             instructionsPaste: "Collez la réponse exacte de votre chat IA dans le champ ci-dessous. Utilisez de préférence le bouton copier",
             instructionsPasteEnd: "juste en dessous de la réponse de l'IA.",
             responsePlaceholder: "Collez ici la réponse exacte de l'IA...",
-            responseRequired: "Veuillez d'abord coller la réponse de l'IA."
+            responseRequired: "Veuillez d'abord coller la réponse de l'IA.",
+            copyFailed: "La copie automatique a échoué. Veuillez sélectionner le texte ci-dessus et le copier manuellement."
         },
         apiKeySecurity: {
             title: "Avis de stockage de clé API",
@@ -555,7 +558,8 @@ export const translations = {
             instructionsPaste: "Pega la respuesta exacta de tu chat de IA en el campo de texto de abajo. Es mejor usar el botón de copiar",
             instructionsPasteEnd: "justo debajo de la respuesta de la IA.",
             responsePlaceholder: "Pega aquí la respuesta exacta de la IA...",
-            responseRequired: "Por favor, pega primero la respuesta de la IA."
+            responseRequired: "Por favor, pega primero la respuesta de la IA.",
+            copyFailed: "No se pudo copiar automáticamente. Por favor, selecciona el texto de arriba y cópialo manualmente."
         },
         apiKeySecurity: {
             title: "Aviso de almacenamiento de clave API",
