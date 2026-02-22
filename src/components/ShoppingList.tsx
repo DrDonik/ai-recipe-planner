@@ -102,7 +102,11 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     setLocalStorageChecked(Array.from(next));
                 } else {
                     // Shared list: use fixed localStorage key
-                    localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED, JSON.stringify(Array.from(next)));
+                    try {
+                        localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED, JSON.stringify(Array.from(next)));
+                    } catch (error) {
+                        console.error('Error saving shared shopping list checked state:', error);
+                    }
                 }
 
                 return next;
