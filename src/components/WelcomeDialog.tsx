@@ -16,10 +16,14 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
     const dialogRef = useFocusTrap(onClose);
 
     const handleClose = () => {
-        if (dontShowAgain) {
-            localStorage.setItem(STORAGE_KEYS.WELCOME_DISMISSED, 'true');
-        } else {
-            localStorage.removeItem(STORAGE_KEYS.WELCOME_DISMISSED);
+        try {
+            if (dontShowAgain) {
+                localStorage.setItem(STORAGE_KEYS.WELCOME_DISMISSED, 'true');
+            } else {
+                localStorage.removeItem(STORAGE_KEYS.WELCOME_DISMISSED);
+            }
+        } catch (error) {
+            console.error('Error saving localStorage key "welcome_dismissed":', error);
         }
         onClose();
     };
