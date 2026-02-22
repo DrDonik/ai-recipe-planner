@@ -33,7 +33,29 @@ describe('WelcomeDialog localStorage error handling', () => {
         await user.click(screen.getByText('Get Started'));
 
         expect(consoleSpy).toHaveBeenCalledWith(
-            'Error saving localStorage key "welcome_dismissed":',
+            `Error updating localStorage key "${STORAGE_KEYS.WELCOME_DISMISSED}":`,
+            expect.any(DOMException)
+        );
+        // onClose still called despite the error
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onClose and logs error when removeItem throws with dontShowAgain unchecked', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const onClose = vi.fn();
+        const user = userEvent.setup();
+        // No WELCOME_DISMISSED in storage — checkbox starts unchecked
+
+        renderWelcomeDialog(onClose);
+
+        vi.spyOn(localStorage, 'removeItem').mockImplementation(() => {
+            throw new DOMException('SecurityError');
+        });
+
+        await user.click(screen.getByText('Get Started'));
+
+        expect(consoleSpy).toHaveBeenCalledWith(
+            `Error updating localStorage key "${STORAGE_KEYS.WELCOME_DISMISSED}":`,
             expect.any(DOMException)
         );
         // onClose still called despite the error

@@ -23,7 +23,7 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                 localStorage.removeItem(STORAGE_KEYS.WELCOME_DISMISSED);
             }
         } catch (error) {
-            console.error('Error saving localStorage key "welcome_dismissed":', error);
+            console.error(`Error updating localStorage key "${STORAGE_KEYS.WELCOME_DISMISSED}":`, error);
         }
         onClose();
     };
