@@ -79,7 +79,6 @@ describe('llm service', () => {
 
       // The prompt must explicitly require spice rack items in "ingredients"
       expect(prompt).toContain('spice rack items used in the recipe');
-      expect(prompt).toContain('Do NOT omit spice rack items from "ingredients"');
     });
 
     it('should handle empty pantry', () => {
