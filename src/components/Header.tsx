@@ -69,8 +69,16 @@ export const Header: React.FC<HeaderProps> = ({
         }
     };
 
+    const markApiKeyWarningSeen = () => {
+        try {
+            localStorage.setItem(STORAGE_KEYS.API_KEY_WARNING_SEEN, 'true');
+        } catch (error) {
+            console.error(`Error saving localStorage key "${STORAGE_KEYS.API_KEY_WARNING_SEEN}":`, error);
+        }
+    };
+
     const handleSecurityAccept = () => {
-        localStorage.setItem(STORAGE_KEYS.API_KEY_WARNING_SEEN, 'true');
+        markApiKeyWarningSeen();
         setShowSecurityDialog(false);
         if (pendingModeSwitch === 'toApiKey') {
             setUseCopyPaste(false);
@@ -79,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     const handleSecurityUseCopyPaste = () => {
-        localStorage.setItem(STORAGE_KEYS.API_KEY_WARNING_SEEN, 'true');
+        markApiKeyWarningSeen();
         setShowSecurityDialog(false);
 
         // Ask if user wants to clear or keep the API key

@@ -32,7 +32,11 @@ export function useStringLocalStorage(key: string, initialValue: string) {
     });
 
     useEffect(() => {
-        localStorage.setItem(key, state);
+        try {
+            localStorage.setItem(key, state);
+        } catch (error) {
+            console.error(`Error saving localStorage key "${key}":`, error);
+        }
     }, [key, state]);
 
     return [state, setState] as const;

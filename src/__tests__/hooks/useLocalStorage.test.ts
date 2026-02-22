@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLocalStorage, useStringLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -200,5 +200,24 @@ describe('useStringLocalStorage', () => {
 
     const { result: result2 } = renderHook(() => useStringLocalStorage('test-special', 'initial'));
     expect(result2.current[0]).toBe(specialString);
+  });
+
+  it('logs error and does not crash when localStorage.setItem throws', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useStringLocalStorage('test-key', 'initial'));
+
+    vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError');
+    });
+
+    act(() => {
+      result.current[1]('new value');
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error saving localStorage key "test-key":',
+      expect.any(DOMException)
+    );
+    consoleSpy.mockRestore();
   });
 });
