@@ -84,17 +84,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
     }, [recipe.id]);
 
 
-    // Memoize the set of missing ingredient names (lowercase) for O(1) lookup
-    const missingIngredientNames = useMemo(() => {
-        if (!recipe.missingIngredients) return new Set<string>();
-        return new Set(recipe.missingIngredients.map(m => m.item.toLowerCase()));
-    }, [recipe.id]);
-
-    // Helper to check if an ingredient is missing (O(1) Set lookup)
-    const isIngredientMissing = useCallback((ingredientName: string) => {
-        return missingIngredientNames.has(ingredientName.toLowerCase());
-    }, [missingIngredientNames]);
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -171,7 +160,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     </div>
                     <ul className={isStandalone ? 'text-base' : 'text-sm'} role="list">
                         {recipe.ingredients.map((ing, idx) => {
-                            const isMissing = isIngredientMissing(ing.item);
                             const ingredientKey = `${ing.item}-${ing.amount}-${idx}`;
                             const isStruck = struckIngredients.has(idx);
 
@@ -184,13 +172,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                     onClick={() => toggleIngredient(idx)}
                                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleIngredient(idx); }}}
                                     aria-pressed={isStruck}
-                                    aria-label={`${ing.item}, ${ing.amount}${isMissing ? ' (need to buy)' : ''}${isStruck ? ' (crossed off)' : ''}`}
+                                    aria-label={`${ing.item}, ${ing.amount}${isStruck ? ' (crossed off)' : ''}`}
                                 >
                                     <span className={`${isStandalone ? 'text-base' : 'text-sm'} transition-all ${isStruck
                                         ? "line-through opacity-50 text-text-muted"
-                                        : isMissing
-                                            ? "text-amber-600 dark:text-amber-400 font-medium"
-                                            : "text-text-main"
+                                        : "text-text-main"
                                         } flex-1`}>
                                         {ing.item}
                                     </span>

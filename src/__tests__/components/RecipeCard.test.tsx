@@ -407,8 +407,8 @@ describe('RecipeCard', () => {
         });
     });
 
-    describe('Ingredient Missing Detection (Exact Matching)', () => {
-        it('highlights ingredient that exactly matches missing ingredient', () => {
+    describe('Ingredient Highlighting', () => {
+        it('does not highlight ingredients in the ingredients list even when they appear in missingIngredients', () => {
             const recipeWithMissingSalt: Recipe = {
                 ...mockRecipe,
                 ingredients: [
@@ -422,88 +422,10 @@ describe('RecipeCard', () => {
                 <RecipeCard recipe={recipeWithMissingSalt} index={0} />
             );
 
-            // Salt should be highlighted as missing (amber color)
-            const saltElement = screen.getByText('Salt');
-            expect(saltElement).toHaveClass('text-amber-600');
-        });
-
-        it('does not highlight "rice" when "licorice" is missing (no substring matching)', () => {
-            const recipeWithMissingLicorice: Recipe = {
-                ...mockRecipe,
-                ingredients: [
-                    { item: 'Rice', amount: '200g' },
-                    { item: 'Onion', amount: '1' },
-                ],
-                missingIngredients: [{ item: 'Licorice', amount: '50g' }],
-            };
-
-            renderWithSettings(
-                <RecipeCard recipe={recipeWithMissingLicorice} index={0} />
-            );
-
-            // Rice should NOT be highlighted (should not have amber color class)
-            const riceElement = screen.getByText('Rice');
-            expect(riceElement).not.toHaveClass('text-amber-600');
-            expect(riceElement).toHaveClass('text-text-main');
-        });
-
-        it('does not highlight "salt" when "basalt" is missing (no substring matching)', () => {
-            const recipeWithMissingBasalt: Recipe = {
-                ...mockRecipe,
-                ingredients: [
-                    { item: 'Salt', amount: '1 tsp' },
-                    { item: 'Pepper', amount: '1 tsp' },
-                ],
-                missingIngredients: [{ item: 'Basalt', amount: '1kg' }],
-            };
-
-            renderWithSettings(
-                <RecipeCard recipe={recipeWithMissingBasalt} index={0} />
-            );
-
-            // Salt should NOT be highlighted
+            // Ingredients should never be highlighted in amber — missing items are shown in the separate box
             const saltElement = screen.getByText('Salt');
             expect(saltElement).not.toHaveClass('text-amber-600');
             expect(saltElement).toHaveClass('text-text-main');
-        });
-
-        it('does not highlight "oil" when "foil" is missing (no substring matching)', () => {
-            const recipeWithMissingFoil: Recipe = {
-                ...mockRecipe,
-                ingredients: [
-                    { item: 'Oil', amount: '2 tbsp' },
-                    { item: 'Garlic', amount: '3 cloves' },
-                ],
-                missingIngredients: [{ item: 'Foil', amount: '1 sheet' }],
-            };
-
-            renderWithSettings(
-                <RecipeCard recipe={recipeWithMissingFoil} index={0} />
-            );
-
-            // Oil should NOT be highlighted
-            const oilElement = screen.getByText('Oil');
-            expect(oilElement).not.toHaveClass('text-amber-600');
-            expect(oilElement).toHaveClass('text-text-main');
-        });
-
-        it('performs case-insensitive exact matching', () => {
-            const recipeWithMixedCase: Recipe = {
-                ...mockRecipe,
-                ingredients: [
-                    { item: 'SALT', amount: '1 tsp' },
-                    { item: 'Pepper', amount: '1 tsp' },
-                ],
-                missingIngredients: [{ item: 'salt', amount: '1 tsp' }],
-            };
-
-            renderWithSettings(
-                <RecipeCard recipe={recipeWithMixedCase} index={0} />
-            );
-
-            // SALT should be highlighted despite case difference
-            const saltElement = screen.getByText('SALT');
-            expect(saltElement).toHaveClass('text-amber-600');
         });
 
         it('does not highlight any ingredient when missingIngredients is empty', () => {
@@ -520,7 +442,6 @@ describe('RecipeCard', () => {
                 <RecipeCard recipe={recipeWithNoMissing} index={0} />
             );
 
-            // No ingredients should be highlighted
             const riceElement = screen.getByText('Rice');
             const saltElement = screen.getByText('Salt');
             expect(riceElement).toHaveClass('text-text-main');
