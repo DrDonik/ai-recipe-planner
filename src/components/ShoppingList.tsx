@@ -5,7 +5,7 @@ import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
-import { getItemKey, getListHash, listsMatch } from '../utils/shoppingListHelpers';
+import { getItemKey, listsMatch } from '../utils/shoppingListHelpers';
 
 interface ShoppingListProps {
     items: Ingredient[];
@@ -49,9 +49,6 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
         }
     }, [isStandaloneView, items]);
 
-    // Get the localStorage key for shared lists (based on content hash)
-    const sharedListStorageKey = useMemo(() => getListHash(items), [items]);
-
     // For standalone view: track checked state locally, initialized from localStorage
     const [standaloneChecked, setStandaloneChecked] = useState<Set<string>>(() => {
         if (!isStandaloneView) return new Set();
@@ -61,8 +58,8 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
             return new Set(ownListCheckedState ?? []);
         }
 
-        // Shared list: use hashed localStorage key
-        const storedSharedChecked = localStorage.getItem(sharedListStorageKey);
+        // Shared list: use fixed localStorage key
+        const storedSharedChecked = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED);
         if (storedSharedChecked) {
             try {
                 return new Set(JSON.parse(storedSharedChecked) as string[]);
@@ -104,8 +101,12 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                     // Own list: use main localStorage key (via hook)
                     setLocalStorageChecked(Array.from(next));
                 } else {
-                    // Shared list: use hashed localStorage key
-                    localStorage.setItem(sharedListStorageKey, JSON.stringify(Array.from(next)));
+                    // Shared list: use fixed localStorage key
+                    try {
+                        localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED, JSON.stringify(Array.from(next)));
+                    } catch (error) {
+                        console.error('Error saving shared shopping list checked state:', error);
+                    }
                 }
 
                 return next;
@@ -122,7 +123,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                 return Array.from(nextSet);
             });
         }
-    }, [isStandaloneView, isOwnList, setLocalStorageChecked, sharedListStorageKey]);
+    }, [isStandaloneView, isOwnList, setLocalStorageChecked]);
 
 
     if (items.length === 0) return null;
