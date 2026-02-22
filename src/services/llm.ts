@@ -152,7 +152,7 @@ export const buildRecipePrompt = ({
     8. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
     9. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
     10. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
-    11. The "ingredients" array must contain EVERY single ingredient needed for the recipe (both what I have and what I need to buy).
+    11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe.
     12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices if they are listed in "Available Spices".
     13. If the same ingredient is missing in different recipes, combine them in the "missingIngredients" array and total the amount needed.
     14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.

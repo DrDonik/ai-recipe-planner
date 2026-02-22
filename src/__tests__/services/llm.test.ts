@@ -67,6 +67,20 @@ describe('llm service', () => {
       expect(prompt).toContain('Do NOT add to shopping list');
     });
 
+    it('should instruct LLM to include spice rack items in the ingredients array', () => {
+      const prompt = buildRecipePrompt({
+        ingredients: [{ id: 'id1', name: 'Chicken', amount: '500g' }],
+        people: 2,
+        meals: 1,
+        diet: 'No restrictions',
+        language: 'English',
+        spices: ['Salt', 'Pepper'],
+      });
+
+      // The prompt must explicitly require spice rack items in "ingredients"
+      expect(prompt).toContain('spice rack items used in the recipe');
+    });
+
     it('should handle empty pantry', () => {
       const prompt = buildRecipePrompt({
         ingredients: [],
