@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ShoppingList } from '../../components/ShoppingList';
-import { getListHash } from '../../utils/shoppingListHelpers';
 import type { Ingredient, MealPlan } from '../../types';
 import { SettingsProvider } from '../../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../../constants';
@@ -421,7 +420,7 @@ describe('ShoppingList', () => {
             expect(decoupledText).not.toBeInTheDocument();
         });
 
-        it('initializes checked state from hash-based localStorage for shared list', () => {
+        it('initializes checked state from fixed localStorage key for shared list', () => {
             // Set up a different meal plan (so items are treated as shared)
             const differentItems: Ingredient[] = [
                 { item: 'Potato', amount: '3' },
@@ -432,10 +431,9 @@ describe('ShoppingList', () => {
             };
             localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
 
-            // Calculate the hash for mockItems and set checked state using exported helper
-            const hashKey = getListHash(mockItems);
+            // Set checked state using the fixed shared key
             const checkedKeys = ['Onion|1'];
-            localStorage.setItem(hashKey, JSON.stringify(checkedKeys));
+            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED, JSON.stringify(checkedKeys));
 
             renderWithSettings(
                 <ShoppingList
