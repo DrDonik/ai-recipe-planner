@@ -218,5 +218,6 @@ describe('useStringLocalStorage', () => {
       'Error saving localStorage key "test-key":',
       expect.any(DOMException)
     );
+    consoleSpy.mockRestore();
   });
 });

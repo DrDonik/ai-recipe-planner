@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { WelcomeDialog } from '../../components/WelcomeDialog';
@@ -15,6 +15,10 @@ const renderWelcomeDialog = (onClose = vi.fn()) =>
 describe('WelcomeDialog localStorage error handling', () => {
     beforeEach(() => {
         localStorage.clear();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('calls onClose and logs error when setItem throws with dontShowAgain checked', async () => {
