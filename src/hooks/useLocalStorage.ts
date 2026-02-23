@@ -12,14 +12,19 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     });
     const [persistError, setPersistError] = useState(false);
 
+    // Effect syncs React state to localStorage (external system).
+    // setPersistError reflects whether that sync succeeded — this is
+    // the "update state from external system result" pattern, not a
+    // cascading-render issue, so the lint suppression is intentional.
     useEffect(() => {
         try {
-            setPersistError(false);
             if (state === null || state === undefined) {
                 localStorage.removeItem(key);
             } else {
                 localStorage.setItem(key, JSON.stringify(state));
             }
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setPersistError(false);
         } catch (error) {
             setPersistError(true);
             console.error(`Error saving localStorage key "${key}":`, error);
@@ -35,10 +40,12 @@ export function useStringLocalStorage(key: string, initialValue: string) {
     });
     const [persistError, setPersistError] = useState(false);
 
+    // See comment in useLocalStorage above for lint suppression rationale.
     useEffect(() => {
         try {
-            setPersistError(false);
             localStorage.setItem(key, state);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setPersistError(false);
         } catch (error) {
             setPersistError(true);
             console.error(`Error saving localStorage key "${key}":`, error);
