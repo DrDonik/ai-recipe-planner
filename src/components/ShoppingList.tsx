@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Ingredient, MealPlan } from '../types';
@@ -14,13 +14,18 @@ interface ShoppingListProps {
     isStandaloneView?: boolean;
     onViewSingle?: () => void;
     onClose?: () => void;
+    onPersistErrorChange?: (hasError: boolean) => void;
 }
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onPersistErrorChange }) => {
     const { t } = useSettings();
 
     // Load checked items from localStorage (used for main view and own list in standalone)
-    const [localStorageChecked, setLocalStorageChecked] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
+    const [localStorageChecked, setLocalStorageChecked, checkedPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
+
+    useEffect(() => {
+        onPersistErrorChange?.(checkedPersistError);
+    }, [checkedPersistError, onPersistErrorChange]);
 
     // Determine if this is the user's own list and get initial checked state
     // Consolidates duplicate localStorage parsing and listsMatch calls

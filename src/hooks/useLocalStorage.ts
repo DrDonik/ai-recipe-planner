@@ -10,7 +10,10 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
             return initialValue;
         }
     });
+    const [persistError, setPersistError] = useState(false);
 
+    // Effect syncs state to localStorage; setPersistError reflects whether
+    // that external write succeeded, so the lint suppression is intentional.
     useEffect(() => {
         try {
             if (state === null || state === undefined) {
@@ -18,26 +21,34 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
             } else {
                 localStorage.setItem(key, JSON.stringify(state));
             }
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setPersistError(false);
         } catch (error) {
+            setPersistError(true);
             console.error(`Error saving localStorage key "${key}":`, error);
         }
     }, [key, state]);
 
-    return [state, setState] as const;
+    return [state, setState, persistError] as const;
 }
 
 export function useStringLocalStorage(key: string, initialValue: string) {
     const [state, setState] = useState<string>(() => {
         return localStorage.getItem(key) || initialValue;
     });
+    const [persistError, setPersistError] = useState(false);
 
+    // See comment in useLocalStorage above for lint suppression rationale.
     useEffect(() => {
         try {
             localStorage.setItem(key, state);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setPersistError(false);
         } catch (error) {
+            setPersistError(true);
             console.error(`Error saving localStorage key "${key}":`, error);
         }
     }, [key, state]);
 
-    return [state, setState] as const;
+    return [state, setState, persistError] as const;
 }

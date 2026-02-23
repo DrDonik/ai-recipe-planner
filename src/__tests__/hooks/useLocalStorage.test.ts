@@ -147,6 +147,85 @@ describe('useLocalStorage', () => {
     const { result: result2 } = renderHook(() => useLocalStorage<string>('test-special', 'initial'));
     expect(result2.current[0]).toBe(specialString);
   });
+
+  it('sets persistError to true when localStorage.setItem throws QuotaExceededError', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useLocalStorage<string>('test-persist-error', 'initial'));
+
+    // Initially persistError should be false
+    expect(result.current[2]).toBe(false);
+
+    // Mock setItem to throw QuotaExceededError
+    const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+    });
+
+    act(() => {
+      result.current[1]('large value');
+    });
+
+    // persistError should now be true
+    expect(result.current[2]).toBe(true);
+    // State should still update in React even though persistence failed
+    expect(result.current[0]).toBe('large value');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error saving localStorage key "test-persist-error":',
+      expect.any(DOMException)
+    );
+
+    setItemSpy.mockRestore();
+    consoleSpy.mockRestore();
+  });
+
+  it('resets persistError to false after a successful write following a failure', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useLocalStorage<string>('test-persist-recovery', 'initial'));
+
+    // Force a write failure
+    const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+    });
+
+    act(() => {
+      result.current[1]('will fail');
+    });
+
+    // Confirm error state
+    expect(result.current[2]).toBe(true);
+
+    // Restore normal setItem behavior
+    setItemSpy.mockRestore();
+
+    // Trigger another write that should succeed
+    act(() => {
+      result.current[1]('will succeed');
+    });
+
+    // persistError should be cleared
+    expect(result.current[2]).toBe(false);
+    expect(result.current[0]).toBe('will succeed');
+    // Verify the value was actually persisted
+    expect(localStorage.getItem('test-persist-recovery')).toBe(JSON.stringify('will succeed'));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('returns persistError as the third element of the tuple and stays false after successful write', () => {
+    const { result } = renderHook(() => useLocalStorage('test-tuple', 'initial'));
+
+    // Destructure all three elements
+    const [state, setState, persistError] = result.current;
+    expect(state).toBe('initial');
+    expect(typeof setState).toBe('function');
+    expect(persistError).toBe(false);
+
+    // Verify persistError stays false after a successful write
+    act(() => {
+      setState('updated');
+    });
+    expect(result.current[0]).toBe('updated');
+    expect(result.current[2]).toBe(false);
+  });
 });
 
 describe('useStringLocalStorage', () => {
@@ -219,5 +298,77 @@ describe('useStringLocalStorage', () => {
       expect.any(DOMException)
     );
     consoleSpy.mockRestore();
+  });
+
+  it('sets persistError to true when localStorage.setItem throws QuotaExceededError', () => {
+    // Restore any leaked mocks from previous tests
+    vi.restoreAllMocks();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useStringLocalStorage('test-str-persist-error', 'initial'));
+
+    // Initially persistError should be false
+    expect(result.current[2]).toBe(false);
+
+    const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+    });
+
+    act(() => {
+      result.current[1]('large value');
+    });
+
+    // persistError should now be true
+    expect(result.current[2]).toBe(true);
+    expect(result.current[0]).toBe('large value');
+
+    setItemSpy.mockRestore();
+    consoleSpy.mockRestore();
+  });
+
+  it('resets persistError to false after a successful write following a failure', () => {
+    vi.restoreAllMocks();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useStringLocalStorage('test-str-persist-recovery', 'initial'));
+
+    // Force a write failure
+    const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+    });
+
+    act(() => {
+      result.current[1]('will fail');
+    });
+
+    expect(result.current[2]).toBe(true);
+
+    // Restore normal setItem
+    setItemSpy.mockRestore();
+
+    act(() => {
+      result.current[1]('will succeed');
+    });
+
+    // persistError should be cleared
+    expect(result.current[2]).toBe(false);
+    expect(result.current[0]).toBe('will succeed');
+    expect(localStorage.getItem('test-str-persist-recovery')).toBe('will succeed');
+
+    consoleSpy.mockRestore();
+  });
+
+  it('returns persistError as the third element of the tuple and stays false after successful write', () => {
+    const { result } = renderHook(() => useStringLocalStorage('test-str-tuple', 'initial'));
+
+    const [state, setState, persistError] = result.current;
+    expect(state).toBe('initial');
+    expect(typeof setState).toBe('function');
+    expect(persistError).toBe(false);
+
+    // Verify persistError stays false after a successful write
+    act(() => {
+      setState('updated');
+    });
+    expect(result.current[0]).toBe('updated');
+    expect(result.current[2]).toBe(false);
   });
 });

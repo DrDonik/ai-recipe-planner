@@ -72,6 +72,7 @@ interface SettingsContextType {
     language: string;
     setLanguage: (lang: string) => void;
     t: TranslationType;
+    storagePersistError: boolean;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -121,13 +122,15 @@ const getInitialStyleWishes = (): string[] => {
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-    const [useCopyPaste, setUseCopyPaste] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, getInitialUseCopyPaste());
-    const [apiKey, setApiKey] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
-    const [people, setPeople] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
-    const [meals, setMeals] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
-    const [diet, setDiet] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
-    const [styleWishes, setStyleWishes] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
-    const [language, setLanguage] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
+    const [useCopyPaste, setUseCopyPaste, useCopyPasteError] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, getInitialUseCopyPaste());
+    const [apiKey, setApiKey, apiKeyError] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
+    const [people, setPeople, peopleError] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
+    const [meals, setMeals, mealsError] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
+    const [diet, setDiet, dietError] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
+    const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
+    const [language, setLanguage, languageError] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
+
+    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError;
 
     const t = getTranslations(language);
 
@@ -139,7 +142,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         diet, setDiet,
         styleWishes, setStyleWishes,
         language, setLanguage,
-        t
+        t,
+        storagePersistError
     };
 
     return (

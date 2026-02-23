@@ -17,6 +17,85 @@ Object.defineProperty(window, 'location', {
 const mockPushState = vi.fn();
 window.history.pushState = mockPushState;
 
+describe('App Storage Error Notification', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockLocation.search = '';
+        localStorage.setItem('welcome_dismissed', 'true');
+    });
+
+    it('shows storage error notification when localStorage.setItem throws QuotaExceededError', async () => {
+        // Make setItem throw for pantry_items key BEFORE rendering
+        const originalSetItem = localStorage.setItem.bind(localStorage);
+        vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+            if (key === 'pantry_items') {
+                throw new DOMException('Quota exceeded', 'QuotaExceededError');
+            }
+            return originalSetItem(key, value);
+        });
+
+        renderWithSettings(<App />);
+
+        // The hook will attempt to persist pantry_items (initial []) on mount,
+        // which triggers the error and shows the notification
+        await waitFor(() => {
+            expect(screen.getByText(/could not save data/i)).toBeInTheDocument();
+        });
+
+        vi.restoreAllMocks();
+    });
+
+    it('renders without errors when localStorage works normally', async () => {
+        renderWithSettings(<App />);
+
+        // No storage error notification should appear
+        await waitFor(() => {
+            expect(screen.queryByText(/could not save data/i)).not.toBeInTheDocument();
+        });
+    });
+
+    it('shows only one notification when multiple localStorage keys fail simultaneously', async () => {
+        // Fail both pantry_items and spice_rack_items to trigger multiple persistError flags
+        const originalSetItem = localStorage.setItem.bind(localStorage);
+        vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+            if (key === 'pantry_items' || key === 'spice_rack_items') {
+                throw new DOMException('Quota exceeded', 'QuotaExceededError');
+            }
+            return originalSetItem(key, value);
+        });
+
+        renderWithSettings(<App />);
+
+        // Wait for the error notification to appear
+        await waitFor(() => {
+            expect(screen.getByText(/could not save data/i)).toBeInTheDocument();
+        });
+
+        // Verify there is exactly one notification element, not two
+        const notifications = screen.getAllByText(/could not save data/i);
+        expect(notifications).toHaveLength(1);
+
+        vi.restoreAllMocks();
+    });
+
+    it('does not show storage error when localStorage works and user interacts', async () => {
+        // Render app with working localStorage
+        renderWithSettings(<App />);
+
+        // Trigger a user interaction that causes a successful localStorage write
+        // (toggling a panel writes a boolean to localStorage)
+        const settingsHeader = screen.queryByText(/settings/i);
+        if (settingsHeader) {
+            fireEvent.click(settingsHeader);
+        }
+
+        // After successful writes, no error notification should appear
+        await waitFor(() => {
+            expect(screen.queryByText(/could not save data/i)).not.toBeInTheDocument();
+        });
+    });
+});
+
 describe('App URL Parameter Decoding', () => {
     beforeEach(() => {
         vi.clearAllMocks();
