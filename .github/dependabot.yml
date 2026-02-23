@@ -4,7 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "friday"
     open-pull-requests-limit: 10
     ignore:
       # Wait for eslint-plugin-react-hooks to support ESLint 10
@@ -29,6 +29,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "friday"
     commit-message:
       prefix: "ci"
