@@ -1,0 +1,29 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "d56b3b935b22",
+  "strategy": "manual-commit",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/App.tsx",
+    "src/__tests__/components/ShoppingList.test.tsx",
+    "src/components/ShoppingList.tsx",
+    "src/hooks/useLocalStorage.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/d5/6b3b935b22/0/metadata.json",
+      "transcript": "/d5/6b3b935b22/0/full.jsonl",
+      "context": "/d5/6b3b935b22/0/context.md",
+      "content_hash": "/d5/6b3b935b22/0/content_hash.txt",
+      "prompt": "/d5/6b3b935b22/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 57,
+    "cache_creation_tokens": 63846,
+    "cache_read_tokens": 3456408,
+    "output_tokens": 574,
+    "api_call_count": 48
+  }
+}

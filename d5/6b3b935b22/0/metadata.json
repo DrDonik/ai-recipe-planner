@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "d56b3b935b22",
+  "session_id": "a4bd6af4-28d0-4000-aa6b-4a0a1763a66b",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-23T10:35:33.82085Z",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/App.tsx",
+    "src/__tests__/components/ShoppingList.test.tsx",
+    "src/components/ShoppingList.tsx",
+    "src/hooks/useLocalStorage.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "5181b791-69c3-4ec7-b7f3-8c49daa63884",
+  "token_usage": {
+    "input_tokens": 57,
+    "cache_creation_tokens": 63846,
+    "cache_read_tokens": 3456408,
+    "output_tokens": 574,
+    "api_call_count": 48
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-23T10:35:33.721413Z",
+    "agent_lines": 54,
+    "human_added": 48,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 102,
+    "agent_percentage": 52.94117647058824
+  }
+}
