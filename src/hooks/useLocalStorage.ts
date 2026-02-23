@@ -12,10 +12,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     });
     const [persistError, setPersistError] = useState(false);
 
-    // Effect syncs React state to localStorage (external system).
-    // setPersistError reflects whether that sync succeeded — this is
-    // the "update state from external system result" pattern, not a
-    // cascading-render issue, so the lint suppression is intentional.
+    // Effect syncs state to localStorage; setPersistError reflects whether
+    // that external write succeeded, so the lint suppression is intentional.
     useEffect(() => {
         try {
             if (state === null || state === undefined) {

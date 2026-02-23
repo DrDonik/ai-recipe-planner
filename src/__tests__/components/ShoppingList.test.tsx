@@ -293,8 +293,8 @@ describe('ShoppingList', () => {
     });
 
     describe('Persist Error Callback', () => {
-        it('calls onPersistError when localStorage write fails', async () => {
-            const onPersistError = vi.fn();
+        it('calls onPersistErrorChange with true when localStorage write fails', async () => {
+            const onPersistErrorChange = vi.fn();
             const user = userEvent.setup();
 
             // Spy on the actual localStorage instance (not Storage.prototype,
@@ -310,7 +310,7 @@ describe('ShoppingList', () => {
             renderWithSettings(
                 <ShoppingList
                     items={mockItems}
-                    onPersistError={onPersistError}
+                    onPersistErrorChange={onPersistErrorChange}
                 />
             );
 
@@ -318,20 +318,20 @@ describe('ShoppingList', () => {
             const checkboxes = screen.getAllByRole('checkbox');
             await user.click(checkboxes[0]);
 
-            // onPersistError should have been called
-            expect(onPersistError).toHaveBeenCalled();
+            // onPersistErrorChange should have been called with true
+            expect(onPersistErrorChange).toHaveBeenCalledWith(true);
 
             vi.restoreAllMocks();
         });
 
-        it('does not call onPersistError when localStorage write succeeds', async () => {
-            const onPersistError = vi.fn();
+        it('calls onPersistErrorChange with false when localStorage write succeeds', async () => {
+            const onPersistErrorChange = vi.fn();
             const user = userEvent.setup();
 
             renderWithSettings(
                 <ShoppingList
                     items={mockItems}
-                    onPersistError={onPersistError}
+                    onPersistErrorChange={onPersistErrorChange}
                 />
             );
 
@@ -339,11 +339,11 @@ describe('ShoppingList', () => {
             const checkboxes = screen.getAllByRole('checkbox');
             await user.click(checkboxes[0]);
 
-            // onPersistError should NOT have been called
-            expect(onPersistError).not.toHaveBeenCalled();
+            // onPersistErrorChange should have been called with false (no error)
+            expect(onPersistErrorChange).toHaveBeenCalledWith(false);
         });
 
-        it('does not crash when onPersistError is not provided and localStorage fails', async () => {
+        it('does not crash when onPersistErrorChange is not provided and localStorage fails', async () => {
             const user = userEvent.setup();
 
             const originalSetItem = localStorage.setItem.bind(localStorage);
@@ -354,7 +354,7 @@ describe('ShoppingList', () => {
                 return originalSetItem(key, value);
             });
 
-            // Render WITHOUT onPersistError prop
+            // Render WITHOUT onPersistErrorChange prop
             renderWithSettings(
                 <ShoppingList items={mockItems} />
             );
@@ -367,6 +367,39 @@ describe('ShoppingList', () => {
             expect(screen.getByText('Tomato')).toBeInTheDocument();
 
             vi.restoreAllMocks();
+        });
+
+        it('calls onPersistErrorChange with false after error clears on recovery', async () => {
+            const onPersistErrorChange = vi.fn();
+            const user = userEvent.setup();
+
+            const originalSetItem = localStorage.setItem.bind(localStorage);
+            const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+                if (key === STORAGE_KEYS.SHOPPING_LIST_CHECKED) {
+                    throw new DOMException('Quota exceeded', 'QuotaExceededError');
+                }
+                return originalSetItem(key, value);
+            });
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    onPersistErrorChange={onPersistErrorChange}
+                />
+            );
+
+            // Trigger a failing write
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[0]);
+            expect(onPersistErrorChange).toHaveBeenCalledWith(true);
+
+            // Restore normal localStorage behavior
+            setItemSpy.mockRestore();
+            onPersistErrorChange.mockClear();
+
+            // Trigger a successful write — error should clear
+            await user.click(checkboxes[0]);
+            expect(onPersistErrorChange).toHaveBeenCalledWith(false);
         });
     });
 

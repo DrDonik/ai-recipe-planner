@@ -94,10 +94,11 @@ function App() {
 
   // Storage error notification — deduplicated via ref guard
   const storageErrorShownRef = useRef(false);
+  const [shoppingListCheckedPersistError, setShoppingListCheckedPersistError] = useState(false);
   const anyPersistError = storagePersistError || pantryPersistError || spicesPersistError ||
     headerMinPersistError || optionsMinPersistError || pantryMinPersistError ||
     spiceRackMinPersistError || shoppingListMinPersistError || recipeMissingMinPersistError ||
-    mealPlanPersistError;
+    mealPlanPersistError || shoppingListCheckedPersistError;
 
   useEffect(() => {
     if (anyPersistError && !storageErrorShownRef.current) {
@@ -108,13 +109,6 @@ function App() {
       storageErrorShownRef.current = false;
     }
   }, [anyPersistError, showNotification, t.storageError]);
-
-  const handleShoppingListPersistError = useCallback(() => {
-    if (!storageErrorShownRef.current) {
-      showNotification({ message: t.storageError, type: 'error' });
-      storageErrorShownRef.current = true;
-    }
-  }, [showNotification, t.storageError]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -475,7 +469,7 @@ function App() {
                   isMinimized={shoppingListMinimized}
                   onToggleMinimize={handleToggleShoppingListMinimize}
                   onViewSingle={() => openShoppingListView(mealPlan.shoppingList)}
-                  onPersistError={handleShoppingListPersistError}
+                  onPersistErrorChange={setShoppingListCheckedPersistError}
                 />
 
                 <div>

@@ -14,20 +14,18 @@ interface ShoppingListProps {
     isStandaloneView?: boolean;
     onViewSingle?: () => void;
     onClose?: () => void;
-    onPersistError?: () => void;
+    onPersistErrorChange?: (hasError: boolean) => void;
 }
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onPersistError }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onPersistErrorChange }) => {
     const { t } = useSettings();
 
     // Load checked items from localStorage (used for main view and own list in standalone)
     const [localStorageChecked, setLocalStorageChecked, checkedPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SHOPPING_LIST_CHECKED, []);
 
     useEffect(() => {
-        if (checkedPersistError && onPersistError) {
-            onPersistError();
-        }
-    }, [checkedPersistError, onPersistError]);
+        onPersistErrorChange?.(checkedPersistError);
+    }, [checkedPersistError, onPersistErrorChange]);
 
     // Determine if this is the user's own list and get initial checked state
     // Consolidates duplicate localStorage parsing and listsMatch calls
