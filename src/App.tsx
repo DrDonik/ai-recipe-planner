@@ -24,18 +24,18 @@ function App() {
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
   const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
-  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t } = useSettings();
+  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t, storagePersistError } = useSettings();
 
-  const [pantryItems, setPantryItems] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
-  const [spices, setSpices] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
+  const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
+  const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
 
-  const [headerMinimized, setHeaderMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
-  const [optionsMinimized, setOptionsMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.OPTIONS_MINIMIZED, false);
-  const [pantryMinimized, setPantryMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.PANTRY_MINIMIZED, false);
-  const [spiceRackMinimized, setSpiceRackMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.SPICE_RACK_MINIMIZED, false);
-  const [shoppingListMinimized, setShoppingListMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.SHOPPING_LIST_MINIMIZED, false);
-  const [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized] = useLocalStorage<boolean>(STORAGE_KEYS.RECIPE_MISSING_INGREDIENTS_MINIMIZED, false);
-  const [mealPlan, setMealPlan] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
+  const [headerMinimized, setHeaderMinimized, headerMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
+  const [optionsMinimized, setOptionsMinimized, optionsMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.OPTIONS_MINIMIZED, false);
+  const [pantryMinimized, setPantryMinimized, pantryMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.PANTRY_MINIMIZED, false);
+  const [spiceRackMinimized, setSpiceRackMinimized, spiceRackMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.SPICE_RACK_MINIMIZED, false);
+  const [shoppingListMinimized, setShoppingListMinimized, shoppingListMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.SHOPPING_LIST_MINIMIZED, false);
+  const [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized, recipeMissingMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.RECIPE_MISSING_INGREDIENTS_MINIMIZED, false);
+  const [mealPlan, setMealPlan, mealPlanPersistError] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
 
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<Notification | null>(null);
@@ -91,6 +91,30 @@ function App() {
     }
     setNotification(null);
   }, []);
+
+  // Storage error notification — deduplicated via ref guard
+  const storageErrorShownRef = useRef(false);
+  const anyPersistError = storagePersistError || pantryPersistError || spicesPersistError ||
+    headerMinPersistError || optionsMinPersistError || pantryMinPersistError ||
+    spiceRackMinPersistError || shoppingListMinPersistError || recipeMissingMinPersistError ||
+    mealPlanPersistError;
+
+  useEffect(() => {
+    if (anyPersistError && !storageErrorShownRef.current) {
+      showNotification({ message: t.storageError, type: 'error' });
+      storageErrorShownRef.current = true;
+    }
+    if (!anyPersistError) {
+      storageErrorShownRef.current = false;
+    }
+  }, [anyPersistError, showNotification, t.storageError]);
+
+  const handleShoppingListPersistError = useCallback(() => {
+    if (!storageErrorShownRef.current) {
+      showNotification({ message: t.storageError, type: 'error' });
+      storageErrorShownRef.current = true;
+    }
+  }, [showNotification, t.storageError]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -451,6 +475,7 @@ function App() {
                   isMinimized={shoppingListMinimized}
                   onToggleMinimize={handleToggleShoppingListMinimize}
                   onViewSingle={() => openShoppingListView(mealPlan.shoppingList)}
+                  onPersistError={handleShoppingListPersistError}
                 />
 
                 <div>

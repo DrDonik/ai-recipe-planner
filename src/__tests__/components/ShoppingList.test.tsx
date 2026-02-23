@@ -292,6 +292,84 @@ describe('ShoppingList', () => {
         });
     });
 
+    describe('Persist Error Callback', () => {
+        it('calls onPersistError when localStorage write fails', async () => {
+            const onPersistError = vi.fn();
+            const user = userEvent.setup();
+
+            // Spy on the actual localStorage instance (not Storage.prototype,
+            // because the test environment uses a custom LocalStorageMock)
+            const originalSetItem = localStorage.setItem.bind(localStorage);
+            vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+                if (key === STORAGE_KEYS.SHOPPING_LIST_CHECKED) {
+                    throw new DOMException('Quota exceeded', 'QuotaExceededError');
+                }
+                return originalSetItem(key, value);
+            });
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    onPersistError={onPersistError}
+                />
+            );
+
+            // Toggle a checkbox to trigger a localStorage write
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[0]);
+
+            // onPersistError should have been called
+            expect(onPersistError).toHaveBeenCalled();
+
+            vi.restoreAllMocks();
+        });
+
+        it('does not call onPersistError when localStorage write succeeds', async () => {
+            const onPersistError = vi.fn();
+            const user = userEvent.setup();
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    onPersistError={onPersistError}
+                />
+            );
+
+            // Toggle a checkbox — should succeed normally
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[0]);
+
+            // onPersistError should NOT have been called
+            expect(onPersistError).not.toHaveBeenCalled();
+        });
+
+        it('does not crash when onPersistError is not provided and localStorage fails', async () => {
+            const user = userEvent.setup();
+
+            const originalSetItem = localStorage.setItem.bind(localStorage);
+            vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+                if (key === STORAGE_KEYS.SHOPPING_LIST_CHECKED) {
+                    throw new DOMException('Quota exceeded', 'QuotaExceededError');
+                }
+                return originalSetItem(key, value);
+            });
+
+            // Render WITHOUT onPersistError prop
+            renderWithSettings(
+                <ShoppingList items={mockItems} />
+            );
+
+            // Toggle a checkbox — should not crash
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[0]);
+
+            // Component should still be rendered
+            expect(screen.getByText('Tomato')).toBeInTheDocument();
+
+            vi.restoreAllMocks();
+        });
+    });
+
     describe('Own List vs Shared List Detection', () => {
         it('correctly identifies own list when shopping list matches stored meal plan', () => {
             // Set up a meal plan in localStorage with matching shopping list
