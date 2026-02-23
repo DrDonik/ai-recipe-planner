@@ -210,7 +210,7 @@ describe('useLocalStorage', () => {
     consoleSpy.mockRestore();
   });
 
-  it('returns persistError as the third element of the tuple', () => {
+  it('returns persistError as the third element of the tuple and stays false after successful write', () => {
     const { result } = renderHook(() => useLocalStorage('test-tuple', 'initial'));
 
     // Destructure all three elements
@@ -218,6 +218,13 @@ describe('useLocalStorage', () => {
     expect(state).toBe('initial');
     expect(typeof setState).toBe('function');
     expect(persistError).toBe(false);
+
+    // Verify persistError stays false after a successful write
+    act(() => {
+      setState('updated');
+    });
+    expect(result.current[0]).toBe('updated');
+    expect(result.current[2]).toBe(false);
   });
 });
 
@@ -349,12 +356,19 @@ describe('useStringLocalStorage', () => {
     consoleSpy.mockRestore();
   });
 
-  it('returns persistError as the third element of the tuple', () => {
+  it('returns persistError as the third element of the tuple and stays false after successful write', () => {
     const { result } = renderHook(() => useStringLocalStorage('test-str-tuple', 'initial'));
 
     const [state, setState, persistError] = result.current;
     expect(state).toBe('initial');
     expect(typeof setState).toBe('function');
     expect(persistError).toBe(false);
+
+    // Verify persistError stays false after a successful write
+    act(() => {
+      setState('updated');
+    });
+    expect(result.current[0]).toBe('updated');
+    expect(result.current[2]).toBe(false);
   });
 });

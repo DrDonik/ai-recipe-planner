@@ -53,6 +53,47 @@ describe('App Storage Error Notification', () => {
             expect(screen.queryByText(/could not save data/i)).not.toBeInTheDocument();
         });
     });
+
+    it('shows only one notification when multiple localStorage keys fail simultaneously', async () => {
+        // Fail both pantry_items and spice_rack_items to trigger multiple persistError flags
+        const originalSetItem = localStorage.setItem.bind(localStorage);
+        vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+            if (key === 'pantry_items' || key === 'spice_rack_items') {
+                throw new DOMException('Quota exceeded', 'QuotaExceededError');
+            }
+            return originalSetItem(key, value);
+        });
+
+        renderWithSettings(<App />);
+
+        // Wait for the error notification to appear
+        await waitFor(() => {
+            expect(screen.getByText(/could not save data/i)).toBeInTheDocument();
+        });
+
+        // Verify there is exactly one notification element, not two
+        const notifications = screen.getAllByText(/could not save data/i);
+        expect(notifications).toHaveLength(1);
+
+        vi.restoreAllMocks();
+    });
+
+    it('does not show storage error when localStorage works and user interacts', async () => {
+        // Render app with working localStorage
+        renderWithSettings(<App />);
+
+        // Trigger a user interaction that causes a successful localStorage write
+        // (toggling a panel writes a boolean to localStorage)
+        const settingsHeader = screen.queryByText(/settings/i);
+        if (settingsHeader) {
+            fireEvent.click(settingsHeader);
+        }
+
+        // After successful writes, no error notification should appear
+        await waitFor(() => {
+            expect(screen.queryByText(/could not save data/i)).not.toBeInTheDocument();
+        });
+    });
 });
 
 describe('App URL Parameter Decoding', () => {
