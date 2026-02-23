@@ -1,0 +1,1285 @@
+# Prime Context
+
+This command loads essential context for a new agent session by reading the project context documentation and understanding the codebase structure.
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### 1. Context Availability Check
+- Run: `ls -la .claude/context/ 2>/dev/null`
+- If directory doesn't exist or is empty:
+  - Tell user: "❌ No context found. Please run /context:create first to establish project context."
+  - Exit gracefully
+- Count available context files: `ls -1 .claude/context/*.md 2>/dev/null | wc -l`
+- Report: "📁 Found {count} context files to load"
+
+### 2. File Integrity Check
+- For each context file found:
+  - Verify file is readable: `test -r ".claude/context/{file}" && echo "readable"`
+  - Check file has content: `test -s ".claude/context/{file}" && echo "has content"`
+  - Check for valid frontmatter (should start with `---`)
+- Report any issues:
+  - Empty files: "⚠️ {filename} is empty (skipping)"
+  - Unreadable files: "⚠️ Cannot read {filename} (permission issue)"
+  - Missing frontmatter: "⚠️ {filename} missing frontmatter (may be corrupted)"
+
+### 3. Project State Check
+- Run: `git status --short 2>/dev/null` to see current state
+- Run: `git branch --show-current 2>/dev/null` to get current branch
+- Note if not in git repository (context may be less complete)
+
+## Instructions
+
+### 1. Context Loading Sequence
+
+Load context files in priority order for optimal understanding:
+
+**Priority 1 - Essential Context (load first):**
+1. `project-overview.md` - High-level understanding of the project
+2. `project-brief.md` - Core purpose and goals
+3. `tech-context.md` - Technical stack and dependencies
+
+**Priority 2 - Current State (load second):**
+4. `progress.md` - Current status and recent work
+5. `project-structure.md` - Directory and file organization
+
+**Priority 3 - Deep Context (load third):**
+6. `system-patterns.md` - Architecture and design patterns
+7. `product-context.md` - User needs and requirements
+8. `project-style-guide.md` - Coding conventions
+9. `project-vision.md` - Long-term direction
+
+### 2. Validation During Loading
+
+For each file loaded:
+- Check frontmatter exists and parse:
+  - `created` date should be valid
+  - `last_updated` should be ≥ created date
+  - `version` should be present
+- If frontmatter is invalid, note but continue loading content
+- Track which files loaded successfully vs failed
+
+### 3. Supplementary Information
+
+After loading context files:
+- Run: `git ls-files --others --exclude-standard | head -20` to see untracked files
+- Read `README.md` if it exists for additional project information
+- Check for `.env.example` or similar for environment setup needs
+
+### 4. Error Recovery
+
+**If critical files are missing:**
+- `project-overview.md` missing: Try to understand from README.md
+- `tech-context.md` missing: Analyze project configuration files directly (package.json, requirements.txt, pyproject.toml, composer.json, Gemfile, Cargo.toml, go.mod, pom.xml, build.gradle, build.gradle.kts, *.sln, *.csproj, Package.swift, pubspec.yaml, CMakeLists.txt, etc.)
+- `progress.md` missing: Check recent git commits for status
+
+**If context is incomplete:**
+- Inform user which files are missing
+- Suggest running `/context:update` to refresh context
+- Continue with partial context but note limitations
+
+### 5. Loading Summary
+
+Provide comprehensive summary after priming:
+
+```
+🧠 Context Primed Successfully
+
+📖 Loaded Context Files:
+  ✅ Essential: {count}/3 files
+  ✅ Current State: {count}/2 files
+  ✅ Deep Context: {count}/4 files
+
+🔍 Project Understanding:
+  - Name: {project_name}
+  - Type: {project_type}
+  - Language: {primary_language}
+  - Status: {current_status from progress.md}
+  - Branch: {git_branch}
+
+📊 Key Metrics:
+  - Last Updated: {most_recent_update}
+  - Context Version: {version}
+  - Files Loaded: {success_count}/{total_count}
+
+⚠️ Warnings:
+  {list any missing files or issues}
+
+🎯 Ready State:
+  ✅ Project context loaded
+  ✅ Current status understood
+  ✅ Ready for development work
+
+💡 Project Summary:
+  {2-3 sentence summary of what the project is and current state}
+```
+
+### 6. Partial Context Handling
+
+If some files fail to load:
+- Continue with available context
+- Clearly note what's missing
+- Suggest remediation:
+  - "Missing technical context - run /context:create to rebuild"
+  - "Progress file corrupted - run /context:update to refresh"
+
+### 7. Performance Optimization
+
+For large contexts:
+- Load files in parallel when possible
+- Show progress indicator: "Loading context files... {current}/{total}"
+- Skip extremely large files (>10000 lines) with warning
+- Cache parsed frontmatter for faster subsequent loads
+
+## Important Notes
+
+- **Always validate** files before attempting to read
+- **Load in priority order** to get essential context first
+- **Handle missing files gracefully** - don't fail completely
+- **Provide clear summary** of what was loaded and project state
+- **Note any issues** that might affect development work
+
+---
+
+# PRD Parse
+
+Convert PRD to technical implementation epic.
+
+## Usage
+```
+/pm:prd-parse <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### Validation Steps
+1. **Verify <feature_name> was provided as a parameter:**
+   - If not, tell user: "❌ <feature_name> was not provided as parameter. Please run: /pm:prd-parse <feature_name>"
+   - Stop execution if <feature_name> was not provided
+
+2. **Verify PRD exists:**
+   - Check if `.claude/prds/.md` exists
+   - If not found, tell user: "❌ PRD not found: . First create it with: /pm:prd-new "
+   - Stop execution if PRD doesn't exist
+
+3. **Validate PRD frontmatter:**
+   - Verify PRD has valid frontmatter with: name, description, status, created
+   - If frontmatter is invalid or missing, tell user: "❌ Invalid PRD frontmatter. Please check: .claude/prds/.md"
+   - Show what's missing or invalid
+
+4. **Check for existing epic:**
+   - Check if `.claude/epics//epic.md` already exists
+   - If it exists, ask user: "⚠️ Epic '' already exists. Overwrite? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "View existing epic with: /pm:epic-show "
+
+5. **Verify directory permissions:**
+   - Ensure `.claude/epics/` directory exists or can be created
+   - If cannot create, tell user: "❌ Cannot create epic directory. Please check permissions."
+
+## Instructions
+
+You are a technical lead converting a Product Requirements Document into a detailed implementation epic for: ****
+
+### 1. Read the PRD
+- Load the PRD from `.claude/prds/.md`
+- Analyze all requirements and constraints
+- Understand the user stories and success criteria
+- Extract the PRD description from frontmatter
+
+### 2. Technical Analysis
+- Identify architectural decisions needed
+- Determine technology stack and approaches
+- Map functional requirements to technical components
+- Identify integration points and dependencies
+
+### 3. File Format with Frontmatter
+Create the epic file at: `.claude/epics//epic.md` with this exact structure:
+
+```markdown
+---
+name: 
+status: backlog
+created: [Current ISO date/time]
+progress: 0%
+prd: .claude/prds/.md
+github: [Will be updated when synced to GitHub]
+---
+
+# Epic: 
+
+## Overview
+Brief technical summary of the implementation approach
+
+## Architecture Decisions
+- Key technical decisions and rationale
+- Technology choices
+- Design patterns to use
+
+## Technical Approach
+### Frontend Components
+- UI components needed
+- State management approach
+- User interaction patterns
+
+### Backend Services
+- API endpoints required
+- Data models and schema
+- Business logic components
+
+### Infrastructure
+- Deployment considerations
+- Scaling requirements
+- Monitoring and observability
+
+## Implementation Strategy
+- Development phases
+- Risk mitigation
+- Testing approach
+
+## Task Breakdown Preview
+High-level task categories that will be created:
+- [ ] Category 1: Description
+- [ ] Category 2: Description
+- [ ] etc.
+
+## Dependencies
+- External service dependencies
+- Internal team dependencies
+- Prerequisite work
+
+## Success Criteria (Technical)
+- Performance benchmarks
+- Quality gates
+- Acceptance criteria
+
+## Estimated Effort
+- Overall timeline estimate
+- Resource requirements
+- Critical path items
+```
+
+### 4. Frontmatter Guidelines
+- **name**: Use the exact feature name (same as )
+- **status**: Always start with "backlog" for new epics
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+- **progress**: Always start with "0%" for new epics
+- **prd**: Reference the source PRD file path
+- **github**: Leave placeholder text - will be updated during sync
+
+### 5. Output Location
+Create the directory structure if it doesn't exist:
+- `.claude/epics//` (directory)
+- `.claude/epics//epic.md` (epic file)
+
+### 6. Quality Validation
+
+Before saving the epic, verify:
+- [ ] All PRD requirements are addressed in the technical approach
+- [ ] Task breakdown categories cover all implementation areas
+- [ ] Dependencies are technically accurate
+- [ ] Effort estimates are realistic
+- [ ] Architecture decisions are justified
+
+### 7. Post-Creation
+
+After successfully creating the epic:
+1. Confirm: "✅ Epic created: .claude/epics//epic.md"
+2. Show summary of:
+   - Number of task categories identified
+   - Key architecture decisions
+   - Estimated effort
+3. Suggest next step: "Ready to break down into tasks? Run: /pm:epic-decompose "
+
+## Error Recovery
+
+If any step fails:
+- Clearly explain what went wrong
+- If PRD is incomplete, list specific missing sections
+- If technical approach is unclear, identify what needs clarification
+- Never create an epic with incomplete information
+
+Focus on creating a technically sound implementation plan that addresses all PRD requirements while being practical and achievable for "".
+
+## IMPORTANT:
+- Aim for as few tasks as possible and limit the total number of tasks to 10 or less.
+- When creating the epic, identify ways to simplify and improve it. Look for ways to leverage existing functionality instead of creating more code when possible.
+
+---
+
+Can you create a prd from issue 104?
+
+---
+
+# PRD Parse
+
+Convert PRD to technical implementation epic.
+
+## Usage
+```
+/pm:prd-parse <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### Validation Steps
+1. **Verify <feature_name> was provided as a parameter:**
+   - If not, tell user: "❌ <feature_name> was not provided as parameter. Please run: /pm:prd-parse <feature_name>"
+   - Stop execution if <feature_name> was not provided
+
+2. **Verify PRD exists:**
+   - Check if `.claude/prds/localstorage-error-handling.md` exists
+   - If not found, tell user: "❌ PRD not found: localstorage-error-handling. First create it with: /pm:prd-new localstorage-error-handling"
+   - Stop execution if PRD doesn't exist
+
+3. **Validate PRD frontmatter:**
+   - Verify PRD has valid frontmatter with: name, description, status, created
+   - If frontmatter is invalid or missing, tell user: "❌ Invalid PRD frontmatter. Please check: .claude/prds/localstorage-error-handling.md"
+   - Show what's missing or invalid
+
+4. **Check for existing epic:**
+   - Check if `.claude/epics/localstorage-error-handling/epic.md` already exists
+   - If it exists, ask user: "⚠️ Epic 'localstorage-error-handling' already exists. Overwrite? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "View existing epic with: /pm:epic-show localstorage-error-handling"
+
+5. **Verify directory permissions:**
+   - Ensure `.claude/epics/` directory exists or can be created
+   - If cannot create, tell user: "❌ Cannot create epic directory. Please check permissions."
+
+## Instructions
+
+You are a technical lead converting a Product Requirements Document into a detailed implementation epic for: **localstorage-error-handling**
+
+### 1. Read the PRD
+- Load the PRD from `.claude/prds/localstorage-error-handling.md`
+- Analyze all requirements and constraints
+- Understand the user stories and success criteria
+- Extract the PRD description from frontmatter
+
+### 2. Technical Analysis
+- Identify architectural decisions needed
+- Determine technology stack and approaches
+- Map functional requirements to technical components
+- Identify integration points and dependencies
+
+### 3. File Format with Frontmatter
+Create the epic file at: `.claude/epics/localstorage-error-handling/epic.md` with this exact structure:
+
+```markdown
+---
+name: localstorage-error-handling
+status: backlog
+created: [Current ISO date/time]
+progress: 0%
+prd: .claude/prds/localstorage-error-handling.md
+github: [Will be updated when synced to GitHub]
+---
+
+# Epic: localstorage-error-handling
+
+## Overview
+Brief technical summary of the implementation approach
+
+## Architecture Decisions
+- Key technical decisions and rationale
+- Technology choices
+- Design patterns to use
+
+## Technical Approach
+### Frontend Components
+- UI components needed
+- State management approach
+- User interaction patterns
+
+### Backend Services
+- API endpoints required
+- Data models and schema
+- Business logic components
+
+### Infrastructure
+- Deployment considerations
+- Scaling requirements
+- Monitoring and observability
+
+## Implementation Strategy
+- Development phases
+- Risk mitigation
+- Testing approach
+
+## Task Breakdown Preview
+High-level task categories that will be created:
+- [ ] Category 1: Description
+- [ ] Category 2: Description
+- [ ] etc.
+
+## Dependencies
+- External service dependencies
+- Internal team dependencies
+- Prerequisite work
+
+## Success Criteria (Technical)
+- Performance benchmarks
+- Quality gates
+- Acceptance criteria
+
+## Estimated Effort
+- Overall timeline estimate
+- Resource requirements
+- Critical path items
+```
+
+### 4. Frontmatter Guidelines
+- **name**: Use the exact feature name (same as localstorage-error-handling)
+- **status**: Always start with "backlog" for new epics
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+- **progress**: Always start with "0%" for new epics
+- **prd**: Reference the source PRD file path
+- **github**: Leave placeholder text - will be updated during sync
+
+### 5. Output Location
+Create the directory structure if it doesn't exist:
+- `.claude/epics/localstorage-error-handling/` (directory)
+- `.claude/epics/localstorage-error-handling/epic.md` (epic file)
+
+### 6. Quality Validation
+
+Before saving the epic, verify:
+- [ ] All PRD requirements are addressed in the technical approach
+- [ ] Task breakdown categories cover all implementation areas
+- [ ] Dependencies are technically accurate
+- [ ] Effort estimates are realistic
+- [ ] Architecture decisions are justified
+
+### 7. Post-Creation
+
+After successfully creating the epic:
+1. Confirm: "✅ Epic created: .claude/epics/localstorage-error-handling/epic.md"
+2. Show summary of:
+   - Number of task categories identified
+   - Key architecture decisions
+   - Estimated effort
+3. Suggest next step: "Ready to break down into tasks? Run: /pm:epic-decompose localstorage-error-handling"
+
+## Error Recovery
+
+If any step fails:
+- Clearly explain what went wrong
+- If PRD is incomplete, list specific missing sections
+- If technical approach is unclear, identify what needs clarification
+- Never create an epic with incomplete information
+
+Focus on creating a technically sound implementation plan that addresses all PRD requirements while being practical and achievable for "localstorage-error-handling".
+
+## IMPORTANT:
+- Aim for as few tasks as possible and limit the total number of tasks to 10 or less.
+- When creating the epic, identify ways to simplify and improve it. Look for ways to leverage existing functionality instead of creating more code when possible.
+
+---
+
+# Epic Decompose
+
+Break epic into concrete, actionable tasks.
+
+## Usage
+```
+/pm:epic-decompose <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+1. **Verify epic exists:**
+   - Check if `.claude/epics//epic.md` exists
+   - If not found, tell user: "❌ Epic not found: . First create it with: /pm:prd-parse "
+   - Stop execution if epic doesn't exist
+
+2. **Check for existing tasks:**
+   - Check if any numbered task files (001.md, 002.md, etc.) already exist in `.claude/epics//`
+   - If tasks exist, list them and ask: "⚠️ Found {count} existing tasks. Delete and recreate all tasks? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "View existing tasks with: /pm:epic-show "
+
+3. **Validate epic frontmatter:**
+   - Verify epic has valid frontmatter with: name, status, created, prd
+   - If invalid, tell user: "❌ Invalid epic frontmatter. Please check: .claude/epics//epic.md"
+
+4. **Check epic status:**
+   - If epic status is already "completed", warn user: "⚠️ Epic is marked as completed. Are you sure you want to decompose it again?"
+
+## Instructions
+
+You are decomposing an epic into specific, actionable tasks for: ****
+
+### 1. Read the Epic
+- Load the epic from `.claude/epics//epic.md`
+- Understand the technical approach and requirements
+- Review the task breakdown preview
+
+### 2. Analyze for Parallel Creation
+
+Determine if tasks can be created in parallel:
+- If tasks are mostly independent: Create in parallel using Task agents
+- If tasks have complex dependencies: Create sequentially
+- For best results: Group independent tasks for parallel creation
+
+### 3. Parallel Task Creation (When Possible)
+
+If tasks can be created in parallel, spawn sub-agents:
+
+```yaml
+Task:
+  description: "Create task files batch {X}"
+  subagent_type: "general-purpose"
+  prompt: |
+    Create task files for epic: 
+
+    Tasks to create:
+    - {list of 3-4 tasks for this batch}
+
+    For each task:
+    1. Create file: .claude/epics//{number}.md
+    2. Use exact format with frontmatter and all sections
+    3. Follow task breakdown from epic
+    4. Set parallel/depends_on fields appropriately
+    5. Number sequentially (001.md, 002.md, etc.)
+
+    Return: List of files created
+```
+
+### 4. Task File Format with Frontmatter
+For each task, create a file with this exact structure:
+
+```markdown
+---
+name: [Task Title]
+status: open
+created: [Current ISO date/time]
+updated: [Current ISO date/time]
+github: [Will be updated when synced to GitHub]
+depends_on: []  # List of task numbers this depends on, e.g., [001, 002]
+parallel: true  # Can this run in parallel with other tasks?
+conflicts_with: []  # Tasks that modify same files, e.g., [003, 004]
+---
+
+# Task: [Task Title]
+
+## Description
+Clear, concise description of what needs to be done
+
+## Acceptance Criteria
+- [ ] Specific criterion 1
+- [ ] Specific criterion 2
+- [ ] Specific criterion 3
+
+## Technical Details
+- Implementation approach
+- Key considerations
+- Code locations/files affected
+
+## Dependencies
+- [ ] Task/Issue dependencies
+- [ ] External dependencies
+
+## Effort Estimate
+- Size: XS/S/M/L/XL
+- Hours: estimated hours
+- Parallel: true/false (can run in parallel with other tasks)
+
+## Definition of Done
+- [ ] Code implemented
+- [ ] Tests written and passing
+- [ ] Documentation updated
+- [ ] Code reviewed
+- [ ] Deployed to staging
+```
+
+### 3. Task Naming Convention
+Save tasks as: `.claude/epics//{task_number}.md`
+- Use sequential numbering: 001.md, 002.md, etc.
+- Keep task titles short but descriptive
+
+### 4. Frontmatter Guidelines
+- **name**: Use a descriptive task title (without "Task:" prefix)
+- **status**: Always start with "open" for new tasks
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+- **updated**: Use the same real datetime as created for new tasks
+- **github**: Leave placeholder text - will be updated during sync
+- **depends_on**: List task numbers that must complete before this can start (e.g., [001, 002])
+- **parallel**: Set to true if this can run alongside other tasks without conflicts
+- **conflicts_with**: List task numbers that modify the same files (helps coordination)
+
+### 5. Task Types to Consider
+- **Setup tasks**: Environment, dependencies, scaffolding
+- **Data tasks**: Models, schemas, migrations
+- **API tasks**: Endpoints, services, integration
+- **UI tasks**: Components, pages, styling
+- **Testing tasks**: Unit tests, integration tests
+- **Documentation tasks**: README, API docs
+- **Deployment tasks**: CI/CD, infrastructure
+
+### 6. Parallelization
+Mark tasks with `parallel: true` if they can be worked on simultaneously without conflicts.
+
+### 7. Execution Strategy
+
+Choose based on task count and complexity:
+
+**Small Epic (< 5 tasks)**: Create sequentially for simplicity
+
+**Medium Epic (5-10 tasks)**:
+- Batch into 2-3 groups
+- Spawn agents for each batch
+- Consolidate results
+
+**Large Epic (> 10 tasks)**:
+- Analyze dependencies first
+- Group independent tasks
+- Launch parallel agents (max 5 concurrent)
+- Create dependent tasks after prerequisites
+
+Example for parallel execution:
+```markdown
+Spawning 3 agents for parallel task creation:
+- Agent 1: Creating tasks 001-003 (Database layer)
+- Agent 2: Creating tasks 004-006 (API layer)
+- Agent 3: Creating tasks 007-009 (UI layer)
+```
+
+### 8. Task Dependency Validation
+
+When creating tasks with dependencies:
+- Ensure referenced dependencies exist (e.g., if Task 003 depends on Task 002, verify 002 was created)
+- Check for circular dependencies (Task A → Task B → Task A)
+- If dependency issues found, warn but continue: "⚠️ Task dependency warning: {details}"
+
+### 9. Update Epic with Task Summary
+After creating all tasks, update the epic file by adding this section:
+```markdown
+## Tasks Created
+- [ ] 001.md - {Task Title} (parallel: true/false)
+- [ ] 002.md - {Task Title} (parallel: true/false)
+- etc.
+
+Total tasks: {count}
+Parallel tasks: {parallel_count}
+Sequential tasks: {sequential_count}
+Estimated total effort: {sum of hours}
+```
+
+Also update the epic's frontmatter progress if needed (still 0% until tasks actually start).
+
+### 9. Quality Validation
+
+Before finalizing tasks, verify:
+- [ ] All tasks have clear acceptance criteria
+- [ ] Task sizes are reasonable (1-3 days each)
+- [ ] Dependencies are logical and achievable
+- [ ] Parallel tasks don't conflict with each other
+- [ ] Combined tasks cover all epic requirements
+
+### 10. Post-Decomposition
+
+After successfully creating tasks:
+1. Confirm: "✅ Created {count} tasks for epic: "
+2. Show summary:
+   - Total tasks created
+   - Parallel vs sequential breakdown
+   - Total estimated effort
+3. Suggest next step: "Ready to sync to GitHub? Run: /pm:epic-sync "
+
+## Error Recovery
+
+If any step fails:
+- If task creation partially completes, list which tasks were created
+- Provide option to clean up partial tasks
+- Never leave the epic in an inconsistent state
+
+Aim for tasks that can be completed in 1-3 days each. Break down larger tasks into smaller, manageable pieces for the "" epic.
+
+---
+
+Output:
+!bash ccpm/scripts/pm/help.sh
+
+---
+
+# Epic Start
+
+Launch parallel agents to work on epic tasks in a shared branch.
+
+## Usage
+```
+/pm:epic-start <epic_name>
+```
+
+## Quick Check
+
+1. **Verify epic exists:**
+   ```bash
+   test -f .claude/epics//epic.md || echo "❌ Epic not found. Run: /pm:prd-parse "
+   ```
+
+2. **Check GitHub sync:**
+   Look for `github:` field in epic frontmatter.
+   If missing: "❌ Epic not synced. Run: /pm:epic-sync  first"
+
+3. **Check for branch:**
+   ```bash
+   git branch -a | grep "epic/"
+   ```
+
+4. **Check for uncommitted changes:**
+   ```bash
+   git status --porcelain
+   ```
+   If output is not empty: "❌ You have uncommitted changes. Please commit or stash them before starting an epic"
+
+## Instructions
+
+### 1. Create or Enter Branch
+
+Follow `/rules/branch-operations.md`:
+
+```bash
+# Check for uncommitted changes
+if [ -n "$(git status --porcelain)" ]; then
+  echo "❌ You have uncommitted changes. Please commit or stash them before starting an epic."
+  exit 1
+fi
+
+# If branch doesn't exist, create it
+if ! git branch -a | grep -q "epic/"; then
+  git checkout main
+  git pull origin main
+  git checkout -b epic/
+  git push -u origin epic/
+  echo "✅ Created branch: epic/"
+else
+  git checkout epic/
+  git pull origin epic/
+  echo "✅ Using existing branch: epic/"
+fi
+```
+
+### 2. Identify Ready Issues
+
+Read all task files in `.claude/epics//`:
+- Parse frontmatter for `status`, `depends_on`, `parallel` fields
+- Check GitHub issue status if needed
+- Build dependency graph
+
+Categorize issues:
+- **Ready**: No unmet dependencies, not started
+- **Blocked**: Has unmet dependencies
+- **In Progress**: Already being worked on
+- **Complete**: Finished
+
+### 3. Analyze Ready Issues
+
+For each ready issue without analysis:
+```bash
+# Check for analysis
+if ! test -f .claude/epics//{issue}-analysis.md; then
+  echo "Analyzing issue #{issue}..."
+  # Run analysis (inline or via Task tool)
+fi
+```
+
+### 4. Launch Parallel Agents
+
+For each ready issue with analysis:
+
+```markdown
+## Starting Issue #{issue}: {title}
+
+Reading analysis...
+Found {count} parallel streams:
+  - Stream A: {description} (Agent-{id})
+  - Stream B: {description} (Agent-{id})
+
+Launching agents in branch: epic/
+```
+
+Use Task tool to launch each stream:
+```yaml
+Task:
+  description: "Issue #{issue} Stream {X}"
+  subagent_type: "{agent_type}"
+  prompt: |
+    Working in branch: epic/
+    Issue: #{issue} - {title}
+    Stream: {stream_name}
+
+    Your scope:
+    - Files: {file_patterns}
+    - Work: {stream_description}
+
+    Read full requirements from:
+    - .claude/epics//{task_file}
+    - .claude/epics//{issue}-analysis.md
+
+    Follow coordination rules in /rules/agent-coordination.md
+
+    Commit frequently with message format:
+    "Issue #{issue}: {specific change}"
+
+    Update progress in:
+    .claude/epics//updates/{issue}/stream-{X}.md
+```
+
+### 5. Track Active Agents
+
+Create/update `.claude/epics//execution-status.md`:
+
+```markdown
+---
+started: {datetime}
+branch: epic/
+---
+
+# Execution Status
+
+## Active Agents
+- Agent-1: Issue #1234 Stream A (Database) - Started {time}
+- Agent-2: Issue #1234 Stream B (API) - Started {time}
+- Agent-3: Issue #1235 Stream A (UI) - Started {time}
+
+## Queued Issues
+- Issue #1236 - Waiting for #1234
+- Issue #1237 - Waiting for #1235
+
+## Completed
+- {None yet}
+```
+
+### 6. Monitor and Coordinate
+
+Set up monitoring:
+```bash
+echo "
+Agents launched successfully!
+
+Monitor progress:
+  /pm:epic-status 
+
+View branch changes:
+  git status
+
+Stop all agents:
+  /pm:epic-stop 
+
+Merge when complete:
+  /pm:epic-merge 
+"
+```
+
+### 7. Handle Dependencies
+
+As agents complete streams:
+- Check if any blocked issues are now ready
+- Launch new agents for newly-ready work
+- Update execution-status.md
+
+## Output Format
+
+```
+🚀 Epic Execution Started: 
+
+Branch: epic/
+
+Launching {total} agents across {issue_count} issues:
+
+Issue #1234: Database Schema
+  ├─ Stream A: Schema creation (Agent-1) ✓ Started
+  └─ Stream B: Migrations (Agent-2) ✓ Started
+
+Issue #1235: API Endpoints
+  ├─ Stream A: User endpoints (Agent-3) ✓ Started
+  ├─ Stream B: Post endpoints (Agent-4) ✓ Started
+  └─ Stream C: Tests (Agent-5) ⏸ Waiting for A & B
+
+Blocked Issues (2):
+  - #1236: UI Components (depends on #1234)
+  - #1237: Integration (depends on #1235, #1236)
+
+Monitor with: /pm:epic-status 
+```
+
+## Error Handling
+
+If agent launch fails:
+```
+❌ Failed to start Agent-{id}
+  Issue: #{issue}
+  Stream: {stream}
+  Error: {reason}
+
+Continue with other agents? (yes/no)
+```
+
+If uncommitted changes are found:
+```
+❌ You have uncommitted changes. Please commit or stash them before starting an epic.
+
+To commit changes:
+  git add .
+  git commit -m "Your commit message"
+
+To stash changes:
+  git stash push -m "Work in progress"
+  # (Later restore with: git stash pop)
+```
+
+If branch creation fails:
+```
+❌ Cannot create branch
+  {git error message}
+
+Try: git branch -d epic/
+Or: Check existing branches with: git branch -a
+```
+
+## Important Notes
+
+- Follow `/rules/branch-operations.md` for git operations
+- Follow `/rules/agent-coordination.md` for parallel work
+- Agents work in the SAME branch (not separate branches)
+- Maximum parallel agents should be reasonable (e.g., 5-10)
+- Monitor system resources if launching many agents
+
+---
+
+Base directory for this skill: /Users/dominik/Code/ai-recipe-planner/.claude/skills/brainstorming
+
+# Brainstorming Ideas Into Designs
+
+## Overview
+
+Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
+
+## The Process
+
+**Understanding the idea:**
+- Check out the current project state first (files, docs, recent commits)
+- Ask questions one at a time to refine the idea
+- Prefer multiple choice questions when possible, but open-ended is fine too
+- Only one question per message - if a topic needs more exploration, break it into multiple questions
+- Focus on understanding: purpose, constraints, success criteria
+
+**Exploring approaches:**
+- Propose 2-3 different approaches with trade-offs
+- Present options conversationally with your recommendation and reasoning
+- Lead with your recommended option and explain why
+
+**Presenting the design:**
+- Once you believe you understand what you're building, present the design
+- Break it into sections of 200-300 words
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+- Be ready to go back and clarify if something doesn't make sense
+
+## After the Design
+
+**Documentation:**
+- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
+- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Commit the design document to git
+
+**Implementation (if continuing):**
+- Ask: "Ready to set up for implementation?"
+- Use superpowers:using-git-worktrees to create isolated workspace
+- Use superpowers:writing-plans to create detailed implementation plan
+
+## Key Principles
+
+- **One question at a time** - Don't overwhelm with multiple questions
+- **Multiple choice preferred** - Easier to answer than open-ended when possible
+- **YAGNI ruthlessly** - Remove unnecessary features from all designs
+- **Explore alternatives** - Always propose 2-3 approaches before settling
+- **Incremental validation** - Present design in sections, validate each
+- **Be flexible** - Go back and clarify when something doesn't make sense
+
+
+ARGUMENTS: Implementing localStorage error handling epic - tasks 001 (add persistError to hooks) and 002 (add translation keys) running in parallel, followed by task 003 (wiring notifications) and task 004 (verification)
+
+---
+
+<task-notification>
+<task-id>a3019c6</task-id>
+<tool-use-id>toolu_01NB8pG8TBZ97AysJX9QtJTT</tool-use-id>
+<status>completed</status>
+<summary>Agent "Task 002: Add translation keys" completed</summary>
+<result>Done. Added the `storageError` translation key to all four languages in `/Users/dominik/Code/ai-recipe-planner/src/constants/translations.ts`. The key was placed after `parseError` and before the `errors` object in each language block, consistent with the existing error key grouping.
+
+- **English** (line 26): `"Could not save data — your browser storage may be full. Some changes may be lost on refresh."`
+- **German** (line 174): `"Daten konnten nicht gespeichert werden — Ihr Browserspeicher ist möglicherweise voll. Einige Änderungen könnten beim Neuladen verloren gehen."`
+- **French** (line 321): `"Impossible de sauvegarder les données — le stockage de votre navigateur est peut-être plein. Certaines modifications pourraient être perdues lors de l'actualisation."`
+- **Spanish** (line 468): `"No se pudieron guardar los datos — el almacenamiento de su navegador puede estar lleno. Algunos cambios podrían perderse al actualizar."`
+
+Build verified successfully. Committed as `Issue #104: add storageError translation keys`.</result>
+<usage><total_tokens>52050</total_tokens><tool_uses>7</tool_uses><duration_ms>52847</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dominik-Code-ai-recipe-planner/tasks/a3019c6.output
+
+---
+
+<task-notification>
+<task-id>a24f604</task-id>
+<tool-use-id>toolu_018EQhkfDkp8di6MtzyTfotQ</tool-use-id>
+<status>completed</status>
+<summary>Agent "Task 001: Add persistError to hooks" completed</summary>
+<result>Done. Here is a summary of the changes:
+
+### `/Users/dominik/Code/ai-recipe-planner/src/hooks/useLocalStorage.ts`
+
+Added `persistError` flag to both hooks:
+
+- **`useLocalStorage<T>`**: Added `const [persistError, setPersistError] = useState(false)`. In the `useEffect` write path, `setPersistError(false)` is called before the `setItem`, and `setPersistError(true)` is called in the `catch` block. Return changed to `[state, setState, persistError] as const`.
+
+- **`useStringLocalStorage`**: Same pattern applied. Return changed to `[state, setState, persistError] as const`.
+
+Existing `[state, setState]` destructuring continues to work since the third element is simply ignored if not destructured.
+
+### `/Users/dominik/Code/ai-recipe-planner/src/__tests__/hooks/useLocalStorage.test.ts`
+
+Added 8 new test cases (4 per hook):
+
+**`useLocalStorage` tests:**
+1. `persistError` becomes `true` when `setItem` throws `QuotaExceededError`
+2. `persistError` resets to `false` after a successful write following a failure
+3. Tuple shape verification (third element is `persistError`)
+
+**`useStringLocalStorage` tests:**
+1. `persistError` becomes `true` when `setItem` throws `QuotaExceededError`
+2. `persistError` resets to `false` after a successful write following a failure
+3. Tuple shape verification (third element is `persistError`)
+
+All 195 tests pass, build succeeds.</result>
+<usage><total_tokens>54620</total_tokens><tool_uses>13</tool_uses><duration_ms>195249</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dominik-Code-ai-recipe-planner/tasks/a24f604.output
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me trace through the entire conversation chronologically:
+
+1. User ran `/context:prime` - I loaded all 10 context files for the AI Recipe Planner project
+2. User ran `/pm:prd-parse` without arguments - I checked for PRDs, found none, told user to create one first
+3. User asked "Can you create a prd from issue 104?" - I fetched GitHub issue #104 about useLocalStorage silently failing on QuotaExceededError, read the hook code and notification system, created PRD at `.claude/prds/localstorage-error-handling.md`
+4. User ran `/pm:prd-parse localstorage-error-handling` - I read the PRD, analyzed codebase (hook consumers, notification system), created epic at `.claude/epics/localstorage-error-handling/epic.md` with architecture decisions and 7-task preview
+5. User ran `/pm:epic-decompose` - I consolidated 7 tasks into 4 tasks (001-004), created task files
+6. User ran `/pm:help` - showed PM help
+7. User ran `/pm:epic-start` - I committed planning files to main, created `epic/localstorage-error-handling` branch, launched Task 001 and Task 002 as parallel background agents
+8. Both agents completed - Task 001 added persistError to hooks + tests, Task 002 added translation keys
+9. I implemented Task 003 manually - wired SettingsContext, App.tsx, ShoppingList.tsx with error notifications and tests
+10. Ran tests - 200 passed
+11. Ran lint - found `react-hooks/set-state-in-effect` errors for setPersistError calls inside useEffect
+12. Tried multiple approaches to fix lint (useCallback wrapper, useRef+conditional), eventually used eslint-disable comments with rationale
+13. Final state: 0 lint errors, 200 tests pass, build succeeds, 4 commits on epic branch
+14. User ran `/finishing-a-development-branch` skill
+
+Key errors encountered:
+- Test agent analysis revealed `vi.spyOn(Storage.prototype, 'setItem')` won't work with custom LocalStorageMock - fixed by spying on `localStorage` directly
+- `react-hooks/set-state-in-effect` lint errors for setPersistError in useEffect - fixed with targeted eslint-disable comments
+- Ordering issue with storageErrorShownRef used before declaration in App.tsx - fixed by reordering
+- Unused eslint-disable directives - removed unnecessary ones, kept only those needed
+
+The current state: All 4 tasks complete, branch has 4 commits, user invoked finishing-a-development-branch skill.
+
+Summary:
+1. Primary Request and Intent:
+   The user wanted to implement a fix for GitHub issue #104: `useLocalStorage` silently fails on `QuotaExceededError`. The workflow was:
+   - Create a PRD from issue #104
+   - Parse the PRD into a technical epic
+   - Decompose the epic into tasks
+   - Execute the tasks (parallel where possible)
+   - Finish the development branch
+   
+   The core goal: when localStorage persistence fails, notify the user immediately via the existing notification system instead of silently losing data.
+
+2. Key Technical Concepts:
+   - TypeScript tuple extension for backwards-compatible API changes (`[state, setState, persistError] as const`)
+   - React hooks: `useState`, `useEffect`, `useCallback`, `useRef` for deduplication guards
+   - `react-hooks/set-state-in-effect` ESLint rule and intentional suppression with rationale
+   - Centralized error notification via ref-based dedup guard in App.tsx
+   - SettingsContext error propagation (OR of 7 internal hook errors)
+   - Test environment: custom `LocalStorageMock` that doesn't extend `Storage` — requires `vi.spyOn(localStorage, 'setItem')` not `vi.spyOn(Storage.prototype, 'setItem')`
+   - PM workflow: PRD → Epic → Decompose → Execute → Finish
+
+3. Files and Code Sections:
+
+   - `src/hooks/useLocalStorage.ts` (MODIFIED - core change)
+     - Added `persistError` boolean flag to both `useLocalStorage<T>` and `useStringLocalStorage`
+     - Returns `[state, setState, persistError] as const` — backwards compatible
+     - Uses eslint-disable for `react-hooks/set-state-in-effect` with rationale comment
+     ```typescript
+     const [persistError, setPersistError] = useState(false);
+     useEffect(() => {
+         try {
+             if (state === null || state === undefined) {
+                 localStorage.removeItem(key);
+             } else {
+                 localStorage.setItem(key, JSON.stringify(state));
+             }
+             // eslint-disable-next-line react-hooks/set-state-in-effect
+             setPersistError(false);
+         } catch (error) {
+             setPersistError(true);
+             console.error(`Error saving localStorage key "${key}":`, error);
+         }
+     }, [key, state]);
+     return [state, setState, persistError] as const;
+     ```
+
+   - `src/contexts/SettingsContext.tsx` (MODIFIED)
+     - Destructures `persistError` from all 7 hook calls
+     - Derives `storagePersistError` (logical OR of all 7)
+     - Added `storagePersistError: boolean` to `SettingsContextType` interface
+     ```typescript
+     const [useCopyPaste, setUseCopyPaste, useCopyPasteError] = useLocalStorage<boolean>(...);
+     const [apiKey, setApiKey, apiKeyError] = useStringLocalStorage(...);
+     // ... 5 more hooks with error destructuring
+     const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError;
+     ```
+
+   - `src/App.tsx` (MODIFIED)
+     - Destructures `persistError` from all 9 direct hook calls
+     - Reads `storagePersistError` from SettingsContext
+     - Single `useEffect` with ref guard fires deduplicated notification
+     - `handleShoppingListPersistError` callback for ShoppingList
+     ```typescript
+     const storageErrorShownRef = useRef(false);
+     const anyPersistError = storagePersistError || pantryPersistError || spicesPersistError ||
+       headerMinPersistError || optionsMinPersistError || pantryMinPersistError ||
+       spiceRackMinPersistError || shoppingListMinPersistError || recipeMissingMinPersistError ||
+       mealPlanPersistError;
+     useEffect(() => {
+       if (anyPersistError && !storageErrorShownRef.current) {
+         showNotification({ message: t.storageError, type: 'error' });
+         storageErrorShownRef.current = true;
+       }
+       if (!anyPersistError) {
+         storageErrorShownRef.current = false;
+       }
+     }, [anyPersistError, showNotification, t.storageError]);
+     ```
+
+   - `src/components/ShoppingList.tsx` (MODIFIED)
+     - Added `onPersistError?: () => void` to props interface
+     - Destructures `checkedPersistError` from its hook call
+     - useEffect fires `onPersistError` when error detected
+     ```typescript
+     const [localStorageChecked, setLocalStorageChecked, checkedPersistError] = useLocalStorage<string[]>(...);
+     useEffect(() => {
+         if (checkedPersistError && onPersistError) { onPersistError(); }
+     }, [checkedPersistError, onPersistError]);
+     ```
+
+   - `src/constants/translations.ts` (MODIFIED)
+     - Added `storageError` key to all 4 languages (EN, DE, ES, FR)
+     - Placed after `parseError` in each language block
+
+   - `src/__tests__/hooks/useLocalStorage.test.ts` (MODIFIED by agent)
+     - 6 new test cases for persistError flag behavior on both hooks
+
+   - `src/__tests__/App.test.tsx` (MODIFIED)
+     - Added `App Storage Error Notification` describe block
+     - Tests: notification appears on QuotaExceededError, no notification normally
+     ```typescript
+     it('shows storage error notification when localStorage.setItem throws QuotaExceededError', async () => {
+         const originalSetItem = localStorage.setItem.bind(localStorage);
+         vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+             if (key === 'pantry_items') {
+                 throw new DOMException('Quota exceeded', 'QuotaExceededError');
+             }
+             return originalSetItem(key, value);
+         });
+         renderWithSettings(<App />);
+         await waitFor(() => {
+             expect(screen.getByText(/could not save data/i)).toBeInTheDocument();
+         });
+         vi.restoreAllMocks();
+     });
+     ```
+
+   - `src/__tests__/components/ShoppingList.test.tsx` (MODIFIED)
+     - Added `Persist Error Callback` describe block with 3 tests
+     - Uses `vi.spyOn(localStorage, 'setItem')` (not `Storage.prototype`)
+
+   - `.claude/prds/localstorage-error-handling.md` (CREATED)
+   - `.claude/epics/localstorage-error-handling/epic.md` (CREATED)
+   - `.claude/epics/localstorage-error-handling/001.md` through `004.md` (CREATED)
+
+4. Errors and fixes:
+   - **Test spy target mismatch**: Test agent identified that `vi.spyOn(Storage.prototype, 'setItem')` doesn't intercept calls on the custom `LocalStorageMock` instance because it doesn't extend `Storage`. Fixed by using `vi.spyOn(localStorage, 'setItem')` with `localStorage.setItem.bind(localStorage)` for the original.
+   - **`react-hooks/set-state-in-effect` lint errors**: `setPersistError()` calls inside `useEffect` triggered this rule. Tried: (1) useCallback wrapper — rule traced through it, (2) useRef + conditional — still flagged, (3) eslint-disable comments — worked. Applied with rationale comment explaining this is the "update state from external system result" pattern.
+   - **Ref ordering in App.tsx**: `handleShoppingListPersistError` callback referenced `storageErrorShownRef` before it was declared. Fixed by moving ref declaration before the callback.
+   - **Unused eslint-disable directives**: Some `setPersistError` calls (in catch blocks) weren't actually flagged by the rule. Removed unnecessary suppression comments, keeping only those on lines that trigger the error (the `setPersistError(false)` success-path calls).
+
+5. Problem Solving:
+   - Designed centralized notification approach to avoid notification spam — single ref guard in App.tsx deduplicates across all 17+ hook instances
+   - SettingsContext exposes single OR'd error to avoid leaking internals
+   - ShoppingList uses callback prop pattern since it manages its own hook internally
+   - All 200 tests pass, 0 lint errors, build succeeds
+
+6. All user messages:
+   - `/context:prime` (load project context)
+   - `/pm:prd-parse` (no args — showed available PRDs)
+   - "Can you create a prd from issue 104?"
+   - `/pm:prd-parse localstorage-error-handling`
+   - `/pm:epic-decompose` (with args: localstorage-error-handling)
+   - `/pm:help`
+   - `/pm:epic-start` (with args: localstorage-error-handling)
+   - (approved committing planning files to main)
+   - `/finishing-a-development-branch`
+
+7. Pending Tasks:
+   - Complete the finishing-a-development-branch skill workflow (verify tests → present options → execute choice)
+
+8. Current Work:
+   The user invoked `/finishing-a-development-branch`. The skill requires: verify tests pass → present 4 options (merge locally, create PR, keep as-is, discard) → execute chosen option. Tests already verified (200 pass, 0 lint errors, build succeeds). Currently on branch `epic/localstorage-error-handling` with 4 commits ahead of main:
+   - `1939c07` Issue #104: add storageError translation keys
+   - `6073faf` Issue #104: add persistError flag to localStorage hooks
+   - `6c75852` Issue #104: wire storage error notifications across components
+   - `bfeb645` Issue #104: fix lint errors in localStorage hooks
+
+9. Optional Next Step:
+   Execute the finishing-a-development-branch skill: announce usage, verify tests pass (already confirmed), present the 4 structured options to the user, and execute their choice. The skill states: "Announce at start: 'I'm using the finishing-a-development-branch skill to complete this work.'" Then present options: merge locally, create PR, keep as-is, or discard.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/dominik/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+Push and create PR

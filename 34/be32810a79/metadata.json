@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "34be32810a79",
+  "strategy": "manual-commit",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 0,
+  "files_touched": [
+    ".claude/epics/localstorage-error-handling/001.md",
+    ".claude/epics/localstorage-error-handling/002.md",
+    ".claude/epics/localstorage-error-handling/003.md",
+    ".claude/epics/localstorage-error-handling/004.md",
+    ".claude/epics/localstorage-error-handling/epic.md",
+    ".claude/prds/localstorage-error-handling.md",
+    ".claude/settings.local.json",
+    "src/App.tsx",
+    "src/__tests__/App.test.tsx",
+    "src/__tests__/components/ShoppingList.test.tsx",
+    "src/components/ShoppingList.tsx",
+    "src/contexts/SettingsContext.tsx",
+    "src/hooks/useLocalStorage.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/34/be32810a79/0/metadata.json",
+      "transcript": "/34/be32810a79/0/full.jsonl",
+      "context": "/34/be32810a79/0/context.md",
+      "content_hash": "/34/be32810a79/0/content_hash.txt",
+      "prompt": "/34/be32810a79/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 13,
+    "cache_creation_tokens": 40623,
+    "cache_read_tokens": 447774,
+    "output_tokens": 65,
+    "api_call_count": 7
+  }
+}

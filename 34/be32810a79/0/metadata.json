@@ -1,0 +1,44 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "34be32810a79",
+  "session_id": "8d7fa1c0-c5b5-4de2-a9ac-8e5b81889557",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-23T10:09:27.471796Z",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 0,
+  "files_touched": [
+    ".claude/epics/localstorage-error-handling/001.md",
+    ".claude/epics/localstorage-error-handling/002.md",
+    ".claude/epics/localstorage-error-handling/003.md",
+    ".claude/epics/localstorage-error-handling/004.md",
+    ".claude/epics/localstorage-error-handling/epic.md",
+    ".claude/prds/localstorage-error-handling.md",
+    ".claude/settings.local.json",
+    "src/App.tsx",
+    "src/__tests__/App.test.tsx",
+    "src/__tests__/components/ShoppingList.test.tsx",
+    "src/components/ShoppingList.tsx",
+    "src/contexts/SettingsContext.tsx",
+    "src/hooks/useLocalStorage.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "640b5b53-56d1-4338-b23e-f507dcb5672c",
+  "checkpoint_transcript_start": 446,
+  "transcript_lines_at_start": 446,
+  "token_usage": {
+    "input_tokens": 13,
+    "cache_creation_tokens": 40623,
+    "cache_read_tokens": 447774,
+    "output_tokens": 65,
+    "api_call_count": 7
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-23T10:09:27.325091Z",
+    "agent_lines": 41,
+    "human_added": 0,
+    "human_modified": 16,
+    "human_removed": 30,
+    "total_committed": 57,
+    "agent_percentage": 71.9298245614035
+  }
+}
