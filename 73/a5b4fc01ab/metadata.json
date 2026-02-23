@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "73a5b4fc01ab",
+  "strategy": "manual-commit",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 3,
+  "files_touched": [
+    ".claude/epics/localstorage-error-handling/001.md",
+    ".claude/epics/localstorage-error-handling/002.md",
+    ".claude/epics/localstorage-error-handling/003.md",
+    ".claude/epics/localstorage-error-handling/004.md",
+    ".claude/epics/localstorage-error-handling/epic.md",
+    ".claude/prds/localstorage-error-handling.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/73/a5b4fc01ab/0/metadata.json",
+      "transcript": "/73/a5b4fc01ab/0/full.jsonl",
+      "context": "/73/a5b4fc01ab/0/context.md",
+      "content_hash": "/73/a5b4fc01ab/0/content_hash.txt",
+      "prompt": "/73/a5b4fc01ab/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 44,
+    "cache_creation_tokens": 65879,
+    "cache_read_tokens": 2362096,
+    "output_tokens": 321,
+    "api_call_count": 32
+  }
+}

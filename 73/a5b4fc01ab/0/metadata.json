@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "73a5b4fc01ab",
+  "session_id": "8d7fa1c0-c5b5-4de2-a9ac-8e5b81889557",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-23T09:17:05.123672Z",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 3,
+  "files_touched": [
+    ".claude/epics/localstorage-error-handling/001.md",
+    ".claude/epics/localstorage-error-handling/002.md",
+    ".claude/epics/localstorage-error-handling/003.md",
+    ".claude/epics/localstorage-error-handling/004.md",
+    ".claude/epics/localstorage-error-handling/epic.md",
+    ".claude/prds/localstorage-error-handling.md"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "1e85a4e2-3c92-406e-82ca-57a307a8c51d",
+  "token_usage": {
+    "input_tokens": 44,
+    "cache_creation_tokens": 65879,
+    "cache_read_tokens": 2362096,
+    "output_tokens": 321,
+    "api_call_count": 32
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-23T09:17:05.077469Z",
+    "agent_lines": 384,
+    "human_added": 138,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 522,
+    "agent_percentage": 73.5632183908046
+  }
+}
