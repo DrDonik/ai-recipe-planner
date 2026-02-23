@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { RecipeCard } from '../../components/RecipeCard';
 import type { Recipe } from '../../types';
@@ -446,6 +446,110 @@ describe('RecipeCard', () => {
             const saltElement = screen.getByText('Salt');
             expect(riceElement).toHaveClass('text-text-main');
             expect(saltElement).toHaveClass('text-text-main');
+        });
+    });
+
+    describe('Ingredient keyboard accessibility', () => {
+        it('toggles strikethrough on Enter key press', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const ingredient = screen.getByLabelText(/Tomato, 2/);
+            expect(ingredient).toHaveAttribute('aria-pressed', 'false');
+
+            fireEvent.keyDown(ingredient, { key: 'Enter' });
+
+            expect(ingredient).toHaveAttribute('aria-pressed', 'true');
+        });
+
+        it('toggles strikethrough on Space key press', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const ingredient = screen.getByLabelText(/Tomato, 2/);
+            expect(ingredient).toHaveAttribute('aria-pressed', 'false');
+
+            fireEvent.keyDown(ingredient, { key: ' ' });
+
+            expect(ingredient).toHaveAttribute('aria-pressed', 'true');
+        });
+
+        it('toggles back to not-struck on second Enter press', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const ingredient = screen.getByLabelText(/Tomato, 2/);
+
+            fireEvent.keyDown(ingredient, { key: 'Enter' });
+            expect(ingredient).toHaveAttribute('aria-pressed', 'true');
+
+            fireEvent.keyDown(ingredient, { key: 'Enter' });
+            expect(ingredient).toHaveAttribute('aria-pressed', 'false');
+        });
+
+        it('does not toggle on other keys like Tab', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const ingredient = screen.getByLabelText(/Tomato, 2/);
+            fireEvent.keyDown(ingredient, { key: 'Tab' });
+
+            expect(ingredient).toHaveAttribute('aria-pressed', 'false');
+        });
+    });
+
+    describe('Instruction step keyboard accessibility', () => {
+        it('highlights step on Enter key press', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const step = screen.getByText('Step 1');
+            expect(step).not.toHaveAttribute('aria-current');
+
+            fireEvent.keyDown(step, { key: 'Enter' });
+
+            expect(step).toHaveAttribute('aria-current', 'step');
+        });
+
+        it('highlights step on Space key press', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const step = screen.getByText('Step 1');
+            fireEvent.keyDown(step, { key: ' ' });
+
+            expect(step).toHaveAttribute('aria-current', 'step');
+        });
+
+        it('removes highlight when pressing Enter on already-active step', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const step = screen.getByText('Step 1');
+
+            fireEvent.keyDown(step, { key: 'Enter' });
+            expect(step).toHaveAttribute('aria-current', 'step');
+
+            fireEvent.keyDown(step, { key: 'Enter' });
+            expect(step).not.toHaveAttribute('aria-current');
+        });
+
+        it('does not highlight on other keys', () => {
+            renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} isStandalone />
+            );
+
+            const step = screen.getByText('Step 1');
+            fireEvent.keyDown(step, { key: 'Tab' });
+
+            expect(step).not.toHaveAttribute('aria-current');
         });
     });
 });
