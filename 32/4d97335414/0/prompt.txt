@@ -1,0 +1,286 @@
+Issue 124 flags missing test coverage. Can you check this? I also use codecov to check coverage, see https://app.codecov.io/gh/DrDonik/ai-recipe-planner/
+
+---
+
+No need to update the issue. Start working on the gaps.
+
+---
+
+Base directory for this skill: /Users/dominik/Code/ai-recipe-planner/.claude/skills/brainstorming
+
+# Brainstorming Ideas Into Designs
+
+## Overview
+
+Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
+
+## The Process
+
+**Understanding the idea:**
+- Check out the current project state first (files, docs, recent commits)
+- Ask questions one at a time to refine the idea
+- Prefer multiple choice questions when possible, but open-ended is fine too
+- Only one question per message - if a topic needs more exploration, break it into multiple questions
+- Focus on understanding: purpose, constraints, success criteria
+
+**Exploring approaches:**
+- Propose 2-3 different approaches with trade-offs
+- Present options conversationally with your recommendation and reasoning
+- Lead with your recommended option and explain why
+
+**Presenting the design:**
+- Once you believe you understand what you're building, present the design
+- Break it into sections of 200-300 words
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+- Be ready to go back and clarify if something doesn't make sense
+
+## After the Design
+
+**Documentation:**
+- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
+- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Commit the design document to git
+
+**Implementation (if continuing):**
+- Ask: "Ready to set up for implementation?"
+- Use superpowers:using-git-worktrees to create isolated workspace
+- Use superpowers:writing-plans to create detailed implementation plan
+
+## Key Principles
+
+- **One question at a time** - Don't overwhelm with multiple questions
+- **Multiple choice preferred** - Easier to answer than open-ended when possible
+- **YAGNI ruthlessly** - Remove unnecessary features from all designs
+- **Explore alternatives** - Always propose 2-3 approaches before settling
+- **Incremental validation** - Present design in sections, validate each
+- **Be flexible** - Go back and clarify when something doesn't make sense
+
+
+ARGUMENTS: Fill test coverage gaps for useWakeLock (27%), Header (49%), RecipeCard (57%), App.tsx (60%), SettingsPanel (75%), and ShoppingList (79%)
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me go through the conversation chronologically:
+
+1. User asked to check issue #124 about missing test coverage, and mentioned codecov.
+2. I fetched issue #124 from GitHub and tried to fetch codecov (which failed as SPA).
+3. I ran `npm run test:coverage` to get actual coverage numbers.
+4. I compared issue #124's claims vs actual coverage - found many claims were outdated.
+5. User said "No need to update the issue. Start working on the gaps."
+6. I invoked brainstorming skill, but decided this was straightforward testing work.
+7. I entered plan mode, explored the codebase with two Explore agents.
+8. I wrote a plan covering 6 test files to create/extend.
+9. User approved the plan.
+10. I started implementing tests in order:
+
+**Task 1: useWakeLock.test.ts (CREATE)** - COMPLETED
+- Created mock WakeLockSentinel helper
+- Tests for: isSupported, request(), release(), toggle(), visibility change, unmount cleanup
+- Error: `isSupported` test failed because `Object.defineProperty(navigator, 'wakeLock', { value: undefined })` doesn't remove the property from `in` operator check
+- Fix: Changed to `delete nav['wakeLock']` approach
+- All 22 tests pass
+
+**Task 2: Header.test.tsx (EXTEND)** - COMPLETED
+- Added setup() helper with options for headerMinimized, presetApiKey, presetUseCopyPaste, presetWarningDismissed
+- Tests for: expanded rendering, minimize toggle, help button, mode toggle flows, ClearApiKeyDialog, security dialog paths, language selector, API key input, warning indicator
+- Error: Help button aria-label had exclamation mark "Welcome to AI Recipe Planner!" but actual text was without it
+- Fix: Removed exclamation mark
+- All 23 tests pass
+
+**Task 3: RecipeCard.test.tsx (EXTEND)** - COMPLETED
+- Added keyboard accessibility tests for ingredients and instruction steps
+- Error: Used `user.type()` on non-input elements (li with role="button"), which doesn't fire keyDown events properly
+- Fix: Changed to `fireEvent.keyDown()` approach
+- Also added `fireEvent` to imports
+- All 35 tests pass
+
+**Task 4: App.test.tsx (EXTEND)** - COMPLETED
+- Added vi.mock for '../services/llm'
+- Tests for: recipe deletion with undo, empty pantry with undo, generate recipes (API mode), copy & paste mode
+- Error 1: `screen.getByLabelText('Empty Pantry')` - button has no aria-label, just text content
+- Fix: Changed to `screen.getByRole('button', { name: /empty pantry/i })`
+- Error 2: `SHOPPING_LIST_CHECKED` assertion expected null but got "[]" (hook re-initializes after removeItem)
+- Fix: Changed assertion to verify `mockGenerateRecipes` was called
+- Error 3: `/copy & paste/i` matched multiple elements (mode toggle label + dialog title)
+- Fix: Changed to `screen.getByRole('dialog')` instead
+- All 24 tests pass
+
+**Task 5: SettingsPanel.test.tsx (EXTEND)** - IN PROGRESS
+- I had just finished reading both the test file and source file
+- Need to add: remove style wish, minimize/expand toggle, people counter, meals counter tests
+- The source file shows aria-labels for buttons: t.decreasePeople, t.increasePeople, t.decreaseMeals, t.increaseMeals, t.remove
+
+**Task 6: ShoppingList.test.tsx (EXTEND)** - PENDING
+- Need: standalone shared list toggle, li onClick handler, shared list localStorage error
+
+**Task 7: Final coverage report** - PENDING
+
+Current todo list state:
+1. ✅ useWakeLock.test.ts
+2. ✅ Header.test.tsx
+3. ✅ RecipeCard.test.tsx
+4. ✅ App.test.tsx
+5. 🔄 SettingsPanel.test.tsx (in_progress)
+6. ⏳ ShoppingList.test.tsx
+7. ⏳ Final coverage report
+
+Summary:
+1. Primary Request and Intent:
+   The user asked to check GitHub issue #124 (test coverage gaps) and cross-reference with their Codecov dashboard. After I analyzed the actual coverage vs issue claims, the user said "No need to update the issue. Start working on the gaps." The task is to fill test coverage gaps across 6 files: `useWakeLock` (27%), `Header` (49%), `RecipeCard` (57%), `App.tsx` (60%), `SettingsPanel` (75%), and `ShoppingList` (79%).
+
+2. Key Technical Concepts:
+   - Vitest 4 with `happy-dom` environment, `@testing-library/react`, `@testing-library/user-event`
+   - `renderWithSettings()` helper wraps components in `<SettingsProvider>` (from `src/__tests__/testUtils.tsx`)
+   - `renderHook` + `act` pattern for hook tests
+   - `vi.fn()` for callback stubs, `vi.spyOn(localStorage, 'setItem')` for error paths
+   - `vi.mock('framer-motion')` to avoid animation issues in RecipeCard tests
+   - `fireEvent.keyDown()` for keyboard accessibility on non-input elements (not `user.type()`)
+   - `vi.mock('../services/llm')` with `importOriginal` to mock `generateRecipes` while keeping other exports
+   - localStorage mock (`Map`-based) auto-resets between tests via global setup
+   - Project uses React 19, TypeScript, Tailwind CSS 4, Zod validation, i18n via `translations.ts`
+
+3. Files and Code Sections:
+
+   - **`src/__tests__/hooks/useWakeLock.test.ts`** (CREATED)
+     - New test file covering the Wake Lock API hook (previously 27% coverage, 0 tests)
+     - 22 tests covering: isSupported, request/release/toggle lifecycle, visibility change re-acquisition, unmount cleanup
+     - Key pattern: mock `navigator.wakeLock` with fake sentinel object that tracks `released` state and event listeners
+     ```typescript
+     function createMockSentinel() {
+         let released = false;
+         const listeners: Record<string, Array<{ fn: () => void; once: boolean }>> = {};
+         const sentinel = {
+             get released() { return released; },
+             release: vi.fn(async () => { released = true; }),
+             addEventListener: vi.fn((event: string, fn: () => void, options?: { once?: boolean }) => {
+                 if (!listeners[event]) listeners[event] = [];
+                 listeners[event].push({ fn, once: options?.once ?? false });
+             }),
+             removeEventListener: vi.fn((event: string, fn: () => void) => {
+                 if (listeners[event]) {
+                     listeners[event] = listeners[event].filter(l => l.fn !== fn);
+                 }
+             }),
+             _simulateRelease: () => {
+                 released = true;
+                 const releaseListeners = listeners['release'] || [];
+                 releaseListeners.forEach(l => l.fn());
+                 if (releaseListeners.length) {
+                     listeners['release'] = releaseListeners.filter(l => !l.once);
+                 }
+             },
+             type: 'screen' as WakeLockType,
+             onrelease: null,
+         };
+         return sentinel;
+     }
+     ```
+
+   - **`src/__tests__/components/Header.test.tsx`** (REWRITTEN)
+     - Was 2 tests (localStorage error handling only), now 23 tests
+     - Added `setup()` helper with options: `headerMinimized`, `presetApiKey`, `presetUseCopyPaste`, `presetWarningDismissed`
+     - Covers: expanded rendering, minimize toggle, help button, mode toggle flows (Copy&Paste→API Key via security dialog, API Key→Copy&Paste direct and via ClearApiKeyDialog), Keep/Clear dialog interactions, language selector, API key input visibility, warning indicator in both minimized and expanded modes
+     - Key setup pattern:
+     ```typescript
+     interface SetupOptions {
+         headerMinimized?: boolean;
+         presetApiKey?: string;
+         presetUseCopyPaste?: boolean;
+         presetWarningDismissed?: boolean;
+     }
+     function setup(options: SetupOptions = {}) {
+         // Pre-populate localStorage, render Header in SettingsProvider, return { user, props }
+     }
+     ```
+
+   - **`src/__tests__/components/RecipeCard.test.tsx`** (EXTENDED)
+     - Added `fireEvent` to imports
+     - Added 8 new tests: ingredient keyboard accessibility (Enter, Space, toggle back, non-triggering keys) and instruction step keyboard accessibility (Enter, Space, toggle off, non-triggering keys)
+     - Uses `fireEvent.keyDown()` not `user.type()` for non-input elements
+
+   - **`src/__tests__/App.test.tsx`** (EXTENDED)
+     - Added imports: `userEvent`, `STORAGE_KEYS`, and `vi.mock('../services/llm')` for `generateRecipes`
+     - Added 8 new tests across 4 describe blocks:
+       - `App Recipe Deletion`: delete with undo, restore on undo, delete last recipe shows empty state
+       - `App Empty Pantry with Undo`: empties and restores on undo
+       - `App Generate Recipes (API mode)`: no API key error, successful generation, failed generation preserves old plan
+       - `App Copy & Paste Mode`: opens CopyPasteDialog, closes on cancel
+     - LLM mock pattern:
+     ```typescript
+     vi.mock('../services/llm', async (importOriginal) => {
+         const actual = await importOriginal<typeof import('../services/llm')>();
+         return { ...actual, generateRecipes: vi.fn() };
+     });
+     ```
+
+   - **`src/hooks/useWakeLock.ts`** (READ) - Source file for wake lock hook, 137 lines
+   - **`src/components/Header.tsx`** (READ) - 261 lines, mode toggle logic, security/clear dialogs
+   - **`src/components/RecipeCard.tsx`** (READ lines 155-254) - Keyboard handlers on ingredients (line 173) and steps (line 234)
+   - **`src/App.tsx`** (READ lines 240-519) - deleteRecipe, emptyPantry, handleGenerate, handleCopyPasteSubmit/Cancel, render branches
+   - **`src/components/SettingsPanel.tsx`** (READ) - 280 lines, handleRemoveStyleWish (line 50-52), minimize toggle (line 89-96), people counter (lines 180-194), meals counter (lines 206-220)
+   - **`src/__tests__/components/SettingsPanel.test.tsx`** (READ) - Current 6 tests, needs extension
+   - **`src/components/ApiKeySecurityDialog.tsx`** (READ) - Buttons: "I understand, continue" and "Use Copy & Paste instead"
+   - **`src/components/ClearApiKeyDialog.tsx`** (READ) - Buttons: "No, keep it" and "Yes, clear it"
+   - **`src/constants/translations.ts`** (GREPPED) - English translations for all UI text used in assertions
+
+4. Errors and fixes:
+   - **useWakeLock `isSupported` test**: `Object.defineProperty(navigator, 'wakeLock', { value: undefined })` still has key present for `in` operator → Fixed by using `delete nav['wakeLock']` and restoring after test
+   - **Header help button**: Test used `'Welcome to AI Recipe Planner!'` (with `!`) but actual `t.welcome.title` is `'Welcome to AI Recipe Planner'` (no `!`) → Removed exclamation mark
+   - **RecipeCard keyboard tests**: `user.type(element, '{Enter}')` doesn't work on non-input `<li>` elements → Changed to `fireEvent.keyDown(element, { key: 'Enter' })`
+   - **App empty pantry**: `screen.getByLabelText('Empty Pantry')` failed because button has no aria-label → Changed to `screen.getByRole('button', { name: /empty pantry/i })`
+   - **App generate success**: `localStorage.getItem(SHOPPING_LIST_CHECKED)` expected null but got `"[]"` because useLocalStorage hook re-initializes → Changed assertion to verify `mockGenerateRecipes` call count instead
+   - **App Copy&Paste dialog**: `/copy & paste/i` matched multiple elements (mode toggle label + dialog title) → Changed to `screen.getByRole('dialog')`
+
+5. Problem Solving:
+   - Issue #124's claims were significantly outdated - many files claimed as "zero coverage" actually had 90-100% coverage. I identified the real gaps by running `npm run test:coverage` and provided a corrected priority list.
+   - For each test file, I read both the source component and existing tests to understand patterns before writing new tests.
+   - Used two parallel Explore agents to efficiently gather test patterns and source file coverage gaps.
+
+6. All user messages:
+   - "Issue 124 flags missing test coverage. Can you check this? I also use codecov to check coverage, see https://app.codecov.io/gh/DrDonik/ai-recipe-planner/"
+   - "No need to update the issue. Start working on the gaps."
+   - (User approved plan via ExitPlanMode)
+
+7. Pending Tasks:
+   - **Extend `src/__tests__/components/SettingsPanel.test.tsx`** (75% → target ~90%): Add tests for remove style wish, minimize/expand toggle, people counter (increment, decrement, clamp at 1 and 20), meals counter (increment, decrement, clamp at 1 and 10)
+   - **Extend `src/__tests__/components/ShoppingList.test.tsx`** (79% → target ~90%): Add tests for standalone shared list toggle, li onClick handler (clicking text vs checkbox), shared list localStorage error on `SHOPPING_LIST_CHECKED_SHARED`
+   - **Run final coverage report**: `npm run test:coverage` and compare before/after numbers
+
+8. Current Work:
+   I was about to write the SettingsPanel.test.tsx extensions. I had just finished reading both `src/__tests__/components/SettingsPanel.test.tsx` (current 6 tests with setup helper) and `src/components/SettingsPanel.tsx` (full source, 280 lines). The specific gaps to cover are:
+   - `handleRemoveStyleWish` (line 50-52): add a wish, click its Trash2 button (aria-label `t.remove`), verify removed
+   - Minimize/expand toggle (line 89-96): buttons with aria-label "Expand"/"Collapse", verify content hidden/shown
+   - People counter (lines 180-194): buttons with aria-labels `t.decreasePeople`/`t.increasePeople`, clamp at 1 and 20
+   - Meals counter (lines 206-220): buttons with aria-labels `t.decreaseMeals`/`t.increaseMeals`, clamp at 1 and 10
+
+   The existing test setup pattern to follow:
+   ```typescript
+   const setup = (props = {}) => {
+       const defaultProps = {
+           optionsMinimized: false,
+           setOptionsMinimized: vi.fn(),
+           loading: false,
+           handleGenerate: vi.fn(),
+           notification: null,
+           ...props,
+       };
+       renderWithSettings(<SettingsPanel {...defaultProps} />);
+       return { user: userEvent.setup(), props: defaultProps };
+   };
+   ```
+
+9. Optional Next Step:
+   Write and add SettingsPanel tests to `src/__tests__/components/SettingsPanel.test.tsx` for the 4 uncovered areas (remove style wish, minimize toggle, people counter, meals counter), then run `npx vitest run src/__tests__/components/SettingsPanel.test.tsx --reporter=verbose` to verify. This is directly continuing the approved plan: "Extend `src/__tests__/components/SettingsPanel.test.tsx` - Remove style wish, Minimize/expand toggle, People counter, Meals counter."
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/dominik/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+Commit the new test files. I don't think we need to keep the coverage reports, do we?
