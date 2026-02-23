@@ -199,14 +199,18 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
   // Step 1: Clean up markdown code blocks first (sometimes models add ```json ... ```)
   cleanedText = cleanedText.replace(/```json/g, "").replace(/```/g, "").trim();
 
-  // Step 2: Strip everything after the last closing brace
+  // Step 2: Replace typographic quotes with standard double quotes to handle copy-paste from devices/apps that auto-format
+  // Covers English (“”), German („“), and Swiss/French («») double quotes
+  cleanedText = cleanedText.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
+
+  // Step 3: Strip everything after the last closing brace
   // This removes trailing content like source references that some LLMs append
   const lastBraceIndex = cleanedText.lastIndexOf('}');
   if (lastBraceIndex !== -1) {
     cleanedText = cleanedText.substring(0, lastBraceIndex + 1);
   }
 
-  // Step 3: Strip inline markdown links entirely (some LLMs like Perplexity add these)
+  // Step 4: Strip inline markdown links entirely (some LLMs like Perplexity add these)
   // Pattern: " [text](url)" -> "" (removes the entire markdown link including whitespace)
   // The [^\]\n]+ ensures we don't match across newlines (which would accidentally match JSON array brackets)
   cleanedText = cleanedText.replace(/\s*\[([^\]\n]+)\]\([^)\n]+\)/g, '');
