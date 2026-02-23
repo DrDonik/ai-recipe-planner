@@ -23,6 +23,7 @@ export const translations = {
         invalidSharedData: "Invalid shared data. The link may be corrupted.",
         generateError: "Something went wrong generating recipes.",
         parseError: "Something went wrong parsing the response.",
+        storageError: "Could not save data — your browser storage may be full. Some changes may be lost on refresh.",
         errors: {
             invalidStructure: "Invalid recipe data structure",
             tryAgain: "Please try generating recipes again.",
@@ -170,6 +171,7 @@ export const translations = {
         invalidSharedData: "Ungültige geteilte Daten. Der Link könnte beschädigt sein.",
         generateError: "Beim Generieren der Rezepte ist ein Fehler aufgetreten.",
         parseError: "Beim Verarbeiten der Antwort ist ein Fehler aufgetreten.",
+        storageError: "Daten konnten nicht gespeichert werden — Ihr Browserspeicher ist möglicherweise voll. Einige Änderungen könnten beim Neuladen verloren gehen.",
         errors: {
             invalidStructure: "Ungültige Rezeptdatenstruktur",
             tryAgain: "Bitte versuche erneut, Rezepte zu generieren.",
@@ -317,6 +319,7 @@ export const translations = {
         invalidSharedData: "Données partagées invalides. Le lien peut être corrompu.",
         generateError: "Une erreur s'est produite lors de la génération des recettes.",
         parseError: "Une erreur s'est produite lors de l'analyse de la réponse.",
+        storageError: "Impossible de sauvegarder les données — le stockage de votre navigateur est peut-être plein. Certaines modifications pourraient être perdues lors de l'actualisation.",
         errors: {
             invalidStructure: "Structure de données de recette invalide",
             tryAgain: "Veuillez réessayer de générer des recettes.",
@@ -464,6 +467,7 @@ export const translations = {
         invalidSharedData: "Datos compartidos inválidos. El enlace puede estar corrupto.",
         generateError: "Algo salió mal al generar las recetas.",
         parseError: "Algo salió mal al procesar la respuesta.",
+        storageError: "No se pudieron guardar los datos — el almacenamiento de su navegador puede estar lleno. Algunos cambios podrían perderse al actualizar.",
         errors: {
             invalidStructure: "Estructura de datos de receta inválida",
             tryAgain: "Por favor, intenta generar recetas de nuevo.",
