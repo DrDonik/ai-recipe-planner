@@ -10,34 +10,40 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
             return initialValue;
         }
     });
+    const [persistError, setPersistError] = useState(false);
 
     useEffect(() => {
         try {
+            setPersistError(false);
             if (state === null || state === undefined) {
                 localStorage.removeItem(key);
             } else {
                 localStorage.setItem(key, JSON.stringify(state));
             }
         } catch (error) {
+            setPersistError(true);
             console.error(`Error saving localStorage key "${key}":`, error);
         }
     }, [key, state]);
 
-    return [state, setState] as const;
+    return [state, setState, persistError] as const;
 }
 
 export function useStringLocalStorage(key: string, initialValue: string) {
     const [state, setState] = useState<string>(() => {
         return localStorage.getItem(key) || initialValue;
     });
+    const [persistError, setPersistError] = useState(false);
 
     useEffect(() => {
         try {
+            setPersistError(false);
             localStorage.setItem(key, state);
         } catch (error) {
+            setPersistError(true);
             console.error(`Error saving localStorage key "${key}":`, error);
         }
     }, [key, state]);
 
-    return [state, setState] as const;
+    return [state, setState, persistError] as const;
 }
