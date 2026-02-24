@@ -117,13 +117,14 @@ else
   epic_type="feature"
 fi
 
-# Create epic issue with labels
-epic_number=$(gh issue create \
+# Create epic issue with label and get the issue number
+epic_url=$(gh issue create \
   --repo "$REPO" \
   --title "Epic: $ARGUMENTS" \
   --body-file /tmp/epic-body.md \
-  --label "epic,epic:$ARGUMENTS,$epic_type" \
-  --json number -q .number)
+  --label "epic" 2>/dev/null)
+
+epic_number="${epic_url##*/}"
 ```
 
 Store the returned issue number for epic frontmatter update.
@@ -161,22 +162,21 @@ if [ "$task_count" -lt 5 ]; then
 
     # Create sub-issue with labels
     if [ "$use_subissues" = true ]; then
-      task_number=$(gh sub-issue create \
+      task_url=$(gh sub-issue create \
         --parent "$epic_number" \
         --title "$task_name" \
-        --body-file /tmp/task-body.md \
-        --label "task,epic:$ARGUMENTS" \
-        --json number -q .number)
+        --body "$(cat /tmp/task-body.md)" \
+        --label "task,epic" 2>/dev/null)
     else
-      task_number=$(gh issue create \
+      task_url=$(gh issue create \
         --repo "$REPO" \
         --title "$task_name" \
         --body-file /tmp/task-body.md \
-        --label "task,epic:$ARGUMENTS" \
-        --json number -q .number)
+        --label "task,epic" 2>/dev/null)
     fi
 
     # Record mapping for renaming
+    task_number="${task_url##*/}"
     echo "$task_file:$task_number" >> /tmp/task-mapping.txt
   done
 
@@ -447,7 +447,7 @@ echo "✅ Created worktree: ../epic-$ARGUMENTS"
 
 Next steps:
   - Start parallel execution: /pm:epic-start $ARGUMENTS
-  - Or work on single issue: /pm:issue-start {issue_number}
+  - Or work on single issue: /pm:issue-analyze {issue_number}
   - View epic: https://github.com/{owner}/{repo}/issues/{epic_number}
 ```
 
