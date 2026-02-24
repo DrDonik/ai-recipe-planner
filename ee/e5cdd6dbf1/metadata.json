@@ -1,0 +1,29 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "eee5cdd6dbf1",
+  "strategy": "manual-commit",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "src/__tests__/App.test.tsx",
+    "src/__tests__/components/Header.test.tsx",
+    "src/__tests__/hooks/useWakeLock.test.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ee/e5cdd6dbf1/0/metadata.json",
+      "transcript": "/ee/e5cdd6dbf1/0/full.jsonl",
+      "context": "/ee/e5cdd6dbf1/0/context.md",
+      "content_hash": "/ee/e5cdd6dbf1/0/content_hash.txt",
+      "prompt": "/ee/e5cdd6dbf1/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 50,
+    "cache_creation_tokens": 220825,
+    "cache_read_tokens": 4006948,
+    "output_tokens": 493,
+    "api_call_count": 40
+  }
+}

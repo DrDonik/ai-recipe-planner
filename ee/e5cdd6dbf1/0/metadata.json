@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "eee5cdd6dbf1",
+  "session_id": "ca0585b1-88ca-4639-a4be-d58b138baa4b",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-24T09:45:10.972778Z",
+  "branch": "epic/localstorage-error-handling",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "src/__tests__/App.test.tsx",
+    "src/__tests__/components/Header.test.tsx",
+    "src/__tests__/hooks/useWakeLock.test.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "a5dd86d5-de90-427f-b976-f0cbfbdd040d",
+  "token_usage": {
+    "input_tokens": 50,
+    "cache_creation_tokens": 220825,
+    "cache_read_tokens": 4006948,
+    "output_tokens": 493,
+    "api_call_count": 40
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-24T09:45:10.830064Z",
+    "agent_lines": 988,
+    "human_added": 356,
+    "human_modified": 49,
+    "human_removed": 0,
+    "total_committed": 1344,
+    "agent_percentage": 73.51190476190477
+  }
+}
