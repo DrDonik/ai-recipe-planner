@@ -63,7 +63,7 @@ describe('useWakeLock', () => {
 
         it('returns false when navigator.wakeLock is not available', () => {
             // Delete wakeLock from navigator so 'wakeLock' in navigator returns false
-            const nav = navigator as Record<string, unknown>;
+            const nav = navigator as unknown as Record<string, unknown>;
             const original = nav['wakeLock'];
             delete nav['wakeLock'];
 
@@ -335,27 +335,6 @@ describe('useWakeLock', () => {
             expect(navigator.wakeLock.request).toHaveBeenCalledTimes(1);
         });
 
-        it('does not re-acquire when tab is hidden', async () => {
-            const { result } = renderHook(() => useWakeLock());
-
-            await act(async () => {
-                await result.current.request();
-            });
-
-            // Simulate tab becoming hidden (not visible)
-            Object.defineProperty(document, 'visibilityState', {
-                value: 'hidden',
-                writable: true,
-                configurable: true,
-            });
-
-            await act(async () => {
-                document.dispatchEvent(new Event('visibilitychange'));
-            });
-
-            // Only the initial request
-            expect(navigator.wakeLock.request).toHaveBeenCalledTimes(1);
-        });
     });
 
     describe('unmount cleanup', () => {

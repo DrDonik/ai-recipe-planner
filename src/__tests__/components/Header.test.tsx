@@ -285,20 +285,8 @@ describe('Header localStorage error handling', () => {
 
     it('does not crash and logs error when setItem throws on security dialog accept', async () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const user = userEvent.setup();
-        localStorage.setItem(STORAGE_KEYS.API_KEY, 'my-test-key');
 
-        render(
-            <SettingsProvider>
-                <Header
-                    headerMinimized={false}
-                    setHeaderMinimized={vi.fn()}
-                    onShowHelp={vi.fn()}
-                    onShowNotification={vi.fn()}
-                    onClearNotification={vi.fn()}
-                />
-            </SettingsProvider>
-        );
+        const { user } = setup({ presetApiKey: 'my-test-key', presetWarningDismissed: false });
 
         expect(screen.getByRole('dialog')).toBeInTheDocument();
 
@@ -317,20 +305,8 @@ describe('Header localStorage error handling', () => {
 
     it('does not crash and logs error when setItem throws on "Use Copy & Paste" click', async () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const user = userEvent.setup();
-        localStorage.setItem(STORAGE_KEYS.API_KEY, 'my-test-key');
 
-        render(
-            <SettingsProvider>
-                <Header
-                    headerMinimized={false}
-                    setHeaderMinimized={vi.fn()}
-                    onShowHelp={vi.fn()}
-                    onShowNotification={vi.fn()}
-                    onClearNotification={vi.fn()}
-                />
-            </SettingsProvider>
-        );
+        const { user } = setup({ presetApiKey: 'my-test-key', presetWarningDismissed: false });
 
         expect(screen.getByRole('dialog')).toBeInTheDocument();
 

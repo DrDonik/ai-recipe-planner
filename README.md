@@ -71,6 +71,10 @@ Run tests with:
 npm test
 ```
 
+### Current Coverage
+
+[![codecov](https://codecov.io/gh/DrDonik/ai-recipe-planner/graph/badge.svg?token=16WTD4P5MU)](https://codecov.io/gh/DrDonik/ai-recipe-planner)
+
 ## License
 
 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE (WTFPL)

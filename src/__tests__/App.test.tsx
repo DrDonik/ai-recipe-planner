@@ -1,20 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterEach, afterAll } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
 import App from '../App';
 import { renderWithSettings } from './testUtils';
 import { encodeForUrl } from '../utils/sharing';
 import type { Recipe, Ingredient, MealPlan } from '../types';
-import { STORAGE_KEYS } from '../constants';
+import { STORAGE_KEYS, API_CONFIG } from '../constants';
+import { handlers } from './mocks/handlers';
 
-// Mock the llm service for generate tests
-vi.mock('../services/llm', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../services/llm')>();
-    return {
-        ...actual,
-        generateRecipes: vi.fn(),
-    };
-});
+const API_URL = `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`;
+
+// MSW server for intercepting Gemini API calls
+const server = setupServer(...handlers);
+beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 // Mock window.location
 const mockLocation = new URL('http://localhost:3000');
@@ -531,22 +533,31 @@ describe('App Generate Recipes (API mode)', () => {
     });
 
     it('generates recipes successfully with API key', async () => {
-        const { generateRecipes } = await import('../services/llm');
-        const mockGenerateRecipes = vi.mocked(generateRecipes);
-
-        const generatedPlan: MealPlan = {
-            recipes: [{
-                id: 'gen-recipe-1',
-                title: 'Generated Recipe',
-                time: '15 min',
-                ingredients: [{ item: 'Rice', amount: '200g' }],
-                instructions: ['Cook rice'],
-                usedIngredients: [],
-            }],
-            shoppingList: [{ item: 'Soy Sauce', amount: '2 tbsp' }],
-        };
-
-        mockGenerateRecipes.mockResolvedValueOnce(generatedPlan);
+        // MSW handler returning a valid Gemini API response with our test recipe
+        server.use(
+            http.post(API_URL, () => {
+                return HttpResponse.json({
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify({
+                                    recipes: [{
+                                        id: 'gen-recipe-1',
+                                        title: 'Generated Recipe',
+                                        time: '15 min',
+                                        ingredients: [{ item: 'Rice', amount: '200g' }],
+                                        instructions: ['Cook rice'],
+                                        usedIngredients: ['1'],
+                                        missingIngredients: [{ item: 'Soy Sauce', amount: '2 tbsp' }],
+                                    }],
+                                    shoppingList: [{ item: 'Soy Sauce', amount: '2 tbsp' }],
+                                }),
+                            }],
+                        },
+                    }],
+                });
+            })
+        );
 
         localStorage.setItem(STORAGE_KEYS.API_KEY, 'test-api-key');
         localStorage.setItem(STORAGE_KEYS.PANTRY_ITEMS, JSON.stringify([{ id: '1', name: 'Rice', amount: '200g' }]));
@@ -556,20 +567,22 @@ describe('App Generate Recipes (API mode)', () => {
         const generateButton = screen.getByRole('button', { name: /generate/i });
         fireEvent.click(generateButton);
 
-        // Should show generated recipe
+        // Should show generated recipe (end-to-end: fetch → parse → Zod validate → render)
         await waitFor(() => {
             expect(screen.getByText('Generated Recipe')).toBeInTheDocument();
         });
-
-        // generateRecipes was called with the API key
-        expect(mockGenerateRecipes).toHaveBeenCalledTimes(1);
     });
 
     it('shows error notification when generation fails and preserves old plan', async () => {
-        const { generateRecipes } = await import('../services/llm');
-        const mockGenerateRecipes = vi.mocked(generateRecipes);
-
-        mockGenerateRecipes.mockRejectedValueOnce(new Error('API rate limit exceeded'));
+        // MSW handler returning a Gemini API error response
+        server.use(
+            http.post(API_URL, () => {
+                return HttpResponse.json(
+                    { error: { message: 'API rate limit exceeded', code: 429 } },
+                    { status: 429 }
+                );
+            })
+        );
 
         // Seed an existing meal plan
         const existingPlan: MealPlan = {
