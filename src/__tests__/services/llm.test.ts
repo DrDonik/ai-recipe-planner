@@ -218,6 +218,37 @@ describe('llm service', () => {
       expect(prompt).toContain('fun');
     });
 
+    it('should scope missingIngredients to per-recipe amounts (rule 13)', () => {
+      const prompt = buildRecipePrompt({
+        ingredients: [{ id: 'id1', name: 'Chicken', amount: '500g' }],
+        people: 2,
+        meals: 2,
+        diet: 'No restrictions',
+        language: 'English',
+      });
+
+      // New rule 13: missingIngredients is per-recipe only
+      expect(prompt).toContain('Each recipe\'s "missingIngredients" must list only the ingredients that specific recipe requires');
+      expect(prompt).toContain('Do not combine amounts across recipes in "missingIngredients"');
+
+      // Old ambiguous rule 13 must be gone
+      expect(prompt).not.toContain('combine them in the "missingIngredients" array and total the amount needed');
+    });
+
+    it('should define shoppingList as cross-recipe aggregate (rule 19)', () => {
+      const prompt = buildRecipePrompt({
+        ingredients: [{ id: 'id1', name: 'Chicken', amount: '500g' }],
+        people: 2,
+        meals: 2,
+        diet: 'No restrictions',
+        language: 'English',
+      });
+
+      // New rule 19: top-level shoppingList aggregates across recipes
+      expect(prompt).toContain('The top-level "shoppingList" is the aggregated shopping list across all recipes');
+      expect(prompt).toContain('combine the totals here');
+    });
+
     it('should respect language parameter in instructions', () => {
       const ingredients: PantryItem[] = [
         { id: 'id1', name: 'Chicken', amount: '500g' },
