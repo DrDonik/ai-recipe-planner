@@ -227,6 +227,24 @@ describe('ShoppingList', () => {
             await user.click(firstCheckbox);
             expect(firstCheckbox).not.toBeChecked();
         });
+
+        it('toggles item once when clicking the list item text (not checkbox)', async () => {
+            const user = userEvent.setup();
+            renderWithSettings(
+                <ShoppingList items={mockItems} />
+            );
+
+            const checkboxes = screen.getAllByRole('checkbox');
+            const firstCheckbox = checkboxes[0];
+            expect(firstCheckbox).not.toBeChecked();
+
+            // Click the item text (the li onClick handler), not the checkbox
+            const itemText = screen.getByText('Tomato');
+            await user.click(itemText);
+
+            // Should toggle exactly once (not double-toggle)
+            expect(firstCheckbox).toBeChecked();
+        });
     });
 
     describe('Minimized State', () => {
@@ -558,6 +576,82 @@ describe('ShoppingList', () => {
             expect(checkboxes[0]).not.toBeChecked();
             expect(checkboxes[1]).toBeChecked();
             expect(checkboxes[2]).not.toBeChecked();
+        });
+
+        it('persists shared list checked state to SHOPPING_LIST_CHECKED_SHARED on toggle', async () => {
+            const user = userEvent.setup();
+
+            // Set up a different meal plan so items are treated as shared
+            const differentItems: Ingredient[] = [
+                { item: 'Potato', amount: '3' },
+            ];
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: differentItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            // Toggle first checkbox
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[0]);
+
+            // Verify it wrote to the shared localStorage key
+            const stored = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED);
+            expect(stored).not.toBeNull();
+            const parsed = JSON.parse(stored!) as string[];
+            expect(parsed).toContain('Tomato|2');
+        });
+
+        it('catches localStorage error when persisting shared list checked state', async () => {
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const user = userEvent.setup();
+
+            // Set up a different meal plan so items are treated as shared
+            const differentItems: Ingredient[] = [
+                { item: 'Potato', amount: '3' },
+            ];
+            const mealPlan: MealPlan = {
+                recipes: [],
+                shoppingList: differentItems,
+            };
+            localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
+
+            renderWithSettings(
+                <ShoppingList
+                    items={mockItems}
+                    isStandaloneView={true}
+                />
+            );
+
+            // Make setItem throw for the shared key
+            const originalSetItem = localStorage.setItem.bind(localStorage);
+            vi.spyOn(localStorage, 'setItem').mockImplementation((key: string, value: string) => {
+                if (key === STORAGE_KEYS.SHOPPING_LIST_CHECKED_SHARED) {
+                    throw new DOMException('Quota exceeded', 'QuotaExceededError');
+                }
+                return originalSetItem(key, value);
+            });
+
+            // Toggle a checkbox — should not crash
+            const checkboxes = screen.getAllByRole('checkbox');
+            await user.click(checkboxes[0]);
+
+            expect(consoleSpy).toHaveBeenCalledWith(
+                'Error saving shared shopping list checked state:',
+                expect.any(DOMException)
+            );
+
+            // Component should still be rendered
+            expect(screen.getByText('Tomato')).toBeInTheDocument();
+
+            vi.restoreAllMocks();
         });
 
         it('does not parse localStorage multiple times on mount', () => {
