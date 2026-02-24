@@ -129,7 +129,7 @@ export const buildRecipePrompt = ({
   const sanitizedDiet = sanitizeUserInput(diet, 200);
 
   return `
-    You are a smart recipe planner. 
+    You are a smart recipe planner.
 
     I need a meal plan for ${meals} distinct meals for ${people} people.
 
@@ -160,8 +160,8 @@ export const buildRecipePrompt = ({
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
     18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON ...
-    19. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK!
-    
+    19. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK! Do NOT use any quotation marks (straight or typographic) within the comments text.
+
     NUTRITION ESTIMATES:
     - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
     - "calories" is in kcal. "carbs", "fat", and "protein" are in grams.
@@ -190,44 +190,77 @@ export const buildRecipePrompt = ({
 };
 
 /**
- * Parses the LLM response text into a MealPlan.
- * Exported so it can be used by the copy-paste flow.
- * Now includes runtime validation using Zod to ensure data structure is correct.
+ * Applies common cleanup steps to the raw LLM response text.
+ * The typographic quote replacement is optional because blindly replacing
+ * typographic quotes inside JSON string values produces unescaped `"` characters
+ * that break JSON parsing. It is only applied as a fallback.
  */
-export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTranslations): MealPlan => {
-  let cleanedText = text;
+const prepareResponseText = (raw: string, replaceTypographicQuotes: boolean): string => {
+  let cleaned = raw;
 
   // Step 1: Clean up markdown code blocks first (sometimes models add ```json ... ```)
-  cleanedText = cleanedText.replace(/```json/g, "").replace(/```/g, "").trim();
+  cleaned = cleaned.replace(/```json/g, '').replace(/```/g, '').trim();
 
-  // Step 2: Replace typographic quotes with standard double quotes to handle copy-paste from devices/apps that auto-format
-  // Covers English (“”), German („“), and Swiss/French («») double quotes
-  cleanedText = cleanedText.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
+  // Step 2 (optional): Replace typographic quotes with standard double quotes to handle
+  // copy-paste from devices/apps that auto-format structural JSON quotes.
+  // Covers English smart quotes, German low-9 quotes, and guillemets.
+  // Not applied in the first parse attempt because typographic quotes inside string values
+  // (e.g. the German style of quoting a term) are valid JSON content -- replacing them would
+  // produce unescaped inner double quotes that invalidate the JSON.
+  if (replaceTypographicQuotes) {
+    cleaned = cleaned.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
+  }
 
   // Step 3: Strip everything after the last closing brace
   // This removes trailing content like source references that some LLMs append
-  const lastBraceIndex = cleanedText.lastIndexOf('}');
+  const lastBraceIndex = cleaned.lastIndexOf('}');
   if (lastBraceIndex !== -1) {
-    cleanedText = cleanedText.substring(0, lastBraceIndex + 1);
+    cleaned = cleaned.substring(0, lastBraceIndex + 1);
   }
 
   // Step 4: Strip inline markdown links entirely (some LLMs like Perplexity add these)
   // Pattern: " [text](url)" -> "" (removes the entire markdown link including whitespace)
   // The [^\]\n]+ ensures we don't match across newlines (which would accidentally match JSON array brackets)
-  cleanedText = cleanedText.replace(/\s*\[([^\]\n]+)\]\([^)\n]+\)/g, '');
+  cleaned = cleaned.replace(/\s*\[([^\]\n]+)\]\([^)\n]+\)/g, '');
 
+  return cleaned;
+};
+
+/**
+ * Parses the LLM response text into a MealPlan.
+ * Exported so it can be used by the copy-paste flow.
+ * Now includes runtime validation using Zod to ensure data structure is correct.
+ *
+ * Two parse strategies are tried in order:
+ * 1. Without typographic quote replacement -- preserves typographic quotes inside string
+ *    values (they are valid JSON content) and avoids turning them into breaking double quotes.
+ * 2. With typographic quote replacement -- fallback for devices/apps that auto-correct
+ *    all structural JSON quotes to typographic quotes.
+ */
+export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTranslations): MealPlan => {
   const errors = errorTranslations ?? translations.English.errors;
 
+  // Strategy 1: Try without typographic quote replacement.
+  // Typographic quotes inside string values are valid JSON and must not be converted to
+  // plain double quotes, as that would produce unescaped inner quotes that break parsing.
+  const firstAttempt = prepareResponseText(text, false);
   try {
-    const parsed = JSON.parse(cleanedText);
+    const parsed = JSON.parse(firstAttempt);
+    return MealPlanSchema.parse(parsed);
+  } catch {
+    // Fall through to strategy 2
+  }
 
-    // Validate the parsed data against our schema
+  // Strategy 2: Replace typographic quotes (handles devices that auto-format all JSON quotes).
+  const secondAttempt = prepareResponseText(text, true);
+  try {
+    const parsed = JSON.parse(secondAttempt);
     const validated = MealPlanSchema.parse(parsed);
     return validated;
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Zod validation failed - the JSON structure doesn't match expectations
-      console.error("Validation Error:", error.issues);
+      console.error('Validation Error:', error.issues);
       const firstError = error.issues[0];
       const path = firstError.path.join('.');
       throw new Error(
@@ -237,7 +270,7 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
     }
 
     // JSON parsing failed
-    console.error("JSON Parse Error. Raw response:", cleanedText);
+    console.error('JSON Parse Error. Raw response:', secondAttempt);
     throw new Error(errors.invalidJson);
   }
 };
@@ -274,9 +307,9 @@ export const generateRecipes = async (
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           contents: [
@@ -303,7 +336,7 @@ export const generateRecipes = async (
 
     return parseRecipeResponse(text, errors);
   } catch (error) {
-    console.error("LLM Error:", error);
+    console.error('LLM Error:', error);
 
     // Handle specific error types with user-friendly messages
     if (error instanceof Error) {

@@ -218,6 +218,20 @@ describe('llm service', () => {
       expect(prompt).toContain('fun');
     });
 
+    it('should instruct the LLM not to use quotation marks inside comments', () => {
+      // Prevents the LLM from generating typographic or straight quotes in the comments
+      // field, which can break JSON parsing (see issue #168).
+      const prompt = buildRecipePrompt({
+        ingredients: [],
+        people: 2,
+        meals: 1,
+        diet: 'No restrictions',
+        language: 'English',
+      });
+
+      expect(prompt).toContain('Do NOT use any quotation marks');
+    });
+
     it('should respect language parameter in instructions', () => {
       const ingredients: PantryItem[] = [
         { id: 'id1', name: 'Chicken', amount: '500g' },
@@ -475,6 +489,59 @@ describe('llm service', () => {
 
       const result = parseRecipeResponse(withComments);
       expect(result.recipes[0].comments).toBe('Salt was once used as currency in ancient Rome.');
+    });
+
+    it('should parse valid JSON that contains typographic quotes inside string values', () => {
+      // Typographic quotes (e.g. German „...") inside a JSON string value are valid UTF-8 content.
+      // The parser must NOT replace them before the first parse attempt, because doing so creates
+      // unescaped inner `"` characters that invalidate the JSON.
+      // This is the exact scenario from issue #168: comments contained „glänzend gebraten".
+      const jsonWithTypographicContentQuotes = `{
+  "recipes": [{
+    "id": "recipe-teriyaki",
+    "title": "Teriyaki Chicken",
+    "time": "45 Minuten",
+    "ingredients": [{"item": "Hähnchen", "amount": "500 g"}],
+    "instructions": ["Im Ofen garen."],
+    "usedIngredients": [],
+    "missingIngredients": [{"item": "Hähnchen", "amount": "500 g"}],
+    "comments": "Teriyaki bedeutet wörtlich \u201Egl\u00e4nzend gebraten\u201C \u2013 die gl\u00e4nzende Sauce entsteht durch Zucker oder Honig."
+  }],
+  "shoppingList": [{"item": "Hähnchen", "amount": "500 g"}]
+}`;
+
+      const result = parseRecipeResponse(jsonWithTypographicContentQuotes);
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].id).toBe('recipe-teriyaki');
+      // The typographic quotes must be preserved in the parsed output
+      expect(result.recipes[0].comments).toContain('\u201Egl\u00e4nzend gebraten\u201C');
+    });
+
+    it('should fall back to typographic quote replacement for device-autocorrected JSON', () => {
+      // Some devices replace all structural " in JSON with typographic " (left) and " (right).
+      // Strategy 1 (no replacement) will fail on this malformed JSON.
+      // Strategy 2 (with replacement) must succeed as fallback.
+      const baseObj = {
+        recipes: [{
+          id: '1',
+          title: 'Test Recipe',
+          time: '20 mins',
+          ingredients: [{ item: 'Salt', amount: '1g' }],
+          instructions: ['Cook it'],
+          usedIngredients: [],
+          missingIngredients: [],
+        }],
+        shoppingList: [],
+      };
+      // Simulate device auto-correction: replace " with " (U+201C left) and " with " (U+201D right)
+      // JSON.stringify uses standard straight quotes; alternate left/right to mimic pairing
+      const jsonString = JSON.stringify(baseObj);
+      // Replace opening quotes (preceded by { , [ : or start) with " and closing quotes with "
+      const deviceCorrected = jsonString.replace(/"([^"]*?)"/g, '\u201C$1\u201D');
+
+      const result = parseRecipeResponse(deviceCorrected);
+      expect(result.recipes).toHaveLength(1);
+      expect(result.recipes[0].title).toBe('Test Recipe');
     });
 
     it('should handle optional missingIngredients field', () => {
