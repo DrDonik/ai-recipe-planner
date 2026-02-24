@@ -1,0 +1,895 @@
+# Issue Analyze
+
+Analyze an issue to identify parallel work streams for maximum efficiency.
+
+## Usage
+```
+/pm:issue-analyze <issue_number>
+```
+
+## Quick Check
+
+1. **Find local task file:**
+   - First check if `.claude/epics/*/165.md` exists (new naming convention)
+   - If not found, search for file containing `github:.*issues/165` in frontmatter (old naming)
+   - If not found: "❌ No local task for issue #165. Run: /pm:import first"
+
+2. **Check for existing analysis:**
+   ```bash
+   test -f .claude/epics/*/165-analysis.md && echo "⚠️ Analysis already exists. Overwrite? (yes/no)"
+   ```
+
+## Instructions
+
+### 1. Read Issue Context
+
+Get issue details from GitHub:
+```bash
+gh issue view 165 --json title,body,labels
+```
+
+Read local task file to understand:
+- Technical requirements
+- Acceptance criteria
+- Dependencies
+- Effort estimate
+
+### 2. Identify Parallel Work Streams
+
+Analyze the issue to identify independent work that can run in parallel:
+
+**Common Patterns:**
+- **Database Layer**: Schema, migrations, models
+- **Service Layer**: Business logic, data access
+- **API Layer**: Endpoints, validation, middleware
+- **UI Layer**: Components, pages, styles
+- **Test Layer**: Unit tests, integration tests
+- **Documentation**: API docs, README updates
+
+**Key Questions:**
+- What files will be created/modified?
+- Which changes can happen independently?
+- What are the dependencies between changes?
+- Where might conflicts occur?
+
+### 3. Create Analysis File
+
+Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+Create `.claude/epics/{epic_name}/165-analysis.md`:
+
+```markdown
+---
+issue: 165
+title: {issue_title}
+analyzed: {current_datetime}
+estimated_hours: {total_hours}
+parallelization_factor: {1.0-5.0}
+---
+
+# Parallel Work Analysis: Issue #165
+
+## Overview
+{Brief description of what needs to be done}
+
+## Parallel Streams
+
+### Stream A: {Stream Name}
+**Scope**: {What this stream handles}
+**Files**:
+- {file_pattern_1}
+- {file_pattern_2}
+**Agent Type**: {backend|frontend|fullstack|database}-specialist
+**Can Start**: immediately
+**Estimated Hours**: {hours}
+**Dependencies**: none
+
+### Stream B: {Stream Name}
+**Scope**: {What this stream handles}
+**Files**:
+- {file_pattern_1}
+- {file_pattern_2}
+**Agent Type**: {agent_type}
+**Can Start**: immediately
+**Estimated Hours**: {hours}
+**Dependencies**: none
+
+### Stream C: {Stream Name}
+**Scope**: {What this stream handles}
+**Files**:
+- {file_pattern_1}
+**Agent Type**: {agent_type}
+**Can Start**: after Stream A completes
+**Estimated Hours**: {hours}
+**Dependencies**: Stream A
+
+## Coordination Points
+
+### Shared Files
+{List any files multiple streams need to modify}:
+- `src/types/index.ts` - Streams A & B (coordinate type updates)
+- Project configuration files (package.json, pom.xml, Cargo.toml, etc.) - Stream B (add dependencies)
+- Build configuration files (build.gradle, CMakeLists.txt, etc.) - Stream C (build system changes)
+
+### Sequential Requirements
+{List what must happen in order}:
+1. Database schema before API endpoints
+2. API types before UI components
+3. Core logic before tests
+
+## Conflict Risk Assessment
+- **Low Risk**: Streams work on different directories
+- **Medium Risk**: Some shared type files, manageable with coordination
+- **High Risk**: Multiple streams modifying same core files
+
+## Parallelization Strategy
+
+**Recommended Approach**: {sequential|parallel|hybrid}
+
+{If parallel}: Launch Streams A, B simultaneously. Start C when A completes.
+{If sequential}: Complete Stream A, then B, then C.
+{If hybrid}: Start A & B together, C depends on A, D depends on B & C.
+
+## Expected Timeline
+
+With parallel execution:
+- Wall time: {max_stream_hours} hours
+- Total work: {sum_all_hours} hours
+- Efficiency gain: {percentage}%
+
+Without parallel execution:
+- Wall time: {sum_all_hours} hours
+
+## Notes
+{Any special considerations, warnings, or recommendations}
+```
+
+### 4. Validate Analysis
+
+Ensure:
+- All major work is covered by streams
+- File patterns don't unnecessarily overlap
+- Dependencies are logical
+- Agent types match the work type
+- Time estimates are reasonable
+
+### 5. Output
+
+```
+✅ Analysis complete for issue #165
+
+Identified {count} parallel work streams:
+  Stream A: {name} ({hours}h)
+  Stream B: {name} ({hours}h)
+  Stream C: {name} ({hours}h)
+  
+Parallelization potential: {factor}x speedup
+  Sequential time: {total}h
+  Parallel time: {reduced}h
+
+Files at risk of conflict:
+  {list shared files if any}
+
+Next: Start work with /pm:issue-start 165
+```
+
+## Important Notes
+
+- Analysis is local only - not synced to GitHub
+- Focus on practical parallelization, not theoretical maximum
+- Consider agent expertise when assigning streams
+- Account for coordination overhead in estimates
+- Prefer clear separation over maximum parallelization
+
+---
+
+# Issue Start
+
+Begin work on a GitHub issue with parallel agents based on work stream analysis.
+
+## Usage
+```
+/pm:issue-start <issue_number>
+```
+
+## Quick Check
+
+1. **Get issue details:**
+   ```bash
+   gh issue view 165 --json state,title,labels,body
+   ```
+   If it fails: "❌ Cannot access issue #165. Check number or run: gh auth login"
+
+2. **Find local task file:**
+   - First check if `.claude/epics/*/165.md` exists (new naming)
+   - If not found, search for file containing `github:.*issues/165` in frontmatter (old naming)
+   - If not found: "❌ No local task for issue #165. This issue may have been created outside the PM system."
+
+3. **Check for analysis:**
+   ```bash
+   test -f .claude/epics/*/165-analysis.md || echo "❌ No analysis found for issue #165
+   
+   Run: /pm:issue-analyze 165 first
+   Or: /pm:issue-start 165 --analyze to do both"
+   ```
+   If no analysis exists and no --analyze flag, stop execution.
+
+## Instructions
+
+### 1. Ensure Worktree Exists
+
+Check if epic worktree exists:
+```bash
+# Find epic name from task file
+epic_name={extracted_from_path}
+
+# Check worktree
+if ! git worktree list | grep -q "epic-$epic_name"; then
+  echo "❌ No worktree for epic. Run: /pm:epic-start $epic_name"
+  exit 1
+fi
+```
+
+### 2. Read Analysis
+
+Read `.claude/epics/{epic_name}/165-analysis.md`:
+- Parse parallel streams
+- Identify which can start immediately
+- Note dependencies between streams
+
+### 3. Setup Progress Tracking
+
+Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+Create workspace structure:
+```bash
+mkdir -p .claude/epics/{epic_name}/updates/165
+```
+
+Update task file frontmatter `updated` field with current datetime.
+
+### 4. Launch Parallel Agents
+
+For each stream that can start immediately:
+
+Create `.claude/epics/{epic_name}/updates/165/stream-{X}.md`:
+```markdown
+---
+issue: 165
+stream: {stream_name}
+agent: {agent_type}
+started: {current_datetime}
+status: in_progress
+---
+
+# Stream {X}: {stream_name}
+
+## Scope
+{stream_description}
+
+## Files
+{file_patterns}
+
+## Progress
+- Starting implementation
+```
+
+Launch agent using Task tool:
+```yaml
+Task:
+  description: "Issue #165 Stream {X}"
+  subagent_type: "{agent_type}"
+  prompt: |
+    You are working on Issue #165 in the epic worktree.
+    
+    Worktree location: ../epic-{epic_name}/
+    Your stream: {stream_name}
+    
+    Your scope:
+    - Files to modify: {file_patterns}
+    - Work to complete: {stream_description}
+    
+    Requirements:
+    1. Read full task from: .claude/epics/{epic_name}/{task_file}
+    2. Work ONLY in your assigned files
+    3. Commit frequently with format: "Issue #165: {specific change}"
+    4. Update progress in: .claude/epics/{epic_name}/updates/165/stream-{X}.md
+    5. Follow coordination rules in /rules/agent-coordination.md
+    
+    If you need to modify files outside your scope:
+    - Check if another stream owns them
+    - Wait if necessary
+    - Update your progress file with coordination notes
+    
+    Complete your stream's work and mark as completed when done.
+```
+
+### 5. GitHub Assignment
+
+```bash
+# Assign to self and mark in-progress
+gh issue edit 165 --add-assignee @me --add-label "in-progress"
+```
+
+### 6. Output
+
+```
+✅ Started parallel work on issue #165
+
+Epic: {epic_name}
+Worktree: ../epic-{epic_name}/
+
+Launching {count} parallel agents:
+  Stream A: {name} (Agent-1) ✓ Started
+  Stream B: {name} (Agent-2) ✓ Started
+  Stream C: {name} - Waiting (depends on A)
+
+Progress tracking:
+  .claude/epics/{epic_name}/updates/165/
+
+Monitor with: /pm:epic-status {epic_name}
+Sync updates: /pm:issue-sync 165
+```
+
+## Error Handling
+
+If any step fails, report clearly:
+- "❌ {What failed}: {How to fix}"
+- Continue with what's possible
+- Never leave partial state
+
+## Important Notes
+
+Follow `/rules/datetime.md` for timestamps.
+Keep it simple - trust that GitHub and file system work.
+
+---
+
+# Issue Sync
+
+Push local updates as GitHub issue comments for transparent audit trail.
+
+## Usage
+```
+/pm:issue-sync <issue_number>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+0. **Repository Protection Check:**
+   Follow `/rules/github-operations.md` - check remote origin:
+   ```bash
+   remote_url=$(git remote get-url origin 2>/dev/null || echo "")
+   if [[ "$remote_url" == *"automazeio/ccpm"* ]]; then
+     echo "❌ ERROR: Cannot sync to CCPM template repository!"
+     echo "Update your remote: git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+     exit 1
+   fi
+   ```
+
+1. **GitHub Authentication:**
+   - Run: `gh auth status`
+   - If not authenticated, tell user: "❌ GitHub CLI not authenticated. Run: gh auth login"
+
+2. **Issue Validation:**
+   - Run: `gh issue view 165 --json state`
+   - If issue doesn't exist, tell user: "❌ Issue #165 not found"
+   - If issue is closed and completion < 100%, warn: "⚠️ Issue is closed but work incomplete"
+
+3. **Local Updates Check:**
+   - Check if `.claude/epics/*/updates/165/` directory exists
+   - If not found, tell user: "❌ No local updates found for issue #165. Run: /pm:issue-start 165"
+   - Check if progress.md exists
+   - If not, tell user: "❌ No progress tracking found. Initialize with: /pm:issue-start 165"
+
+4. **Check Last Sync:**
+   - Read `last_sync` from progress.md frontmatter
+   - If synced recently (< 5 minutes), ask: "⚠️ Recently synced. Force sync anyway? (yes/no)"
+   - Calculate what's new since last sync
+
+5. **Verify Changes:**
+   - Check if there are actual updates to sync
+   - If no changes, tell user: "ℹ️ No new updates to sync since {last_sync}"
+   - Exit gracefully if nothing to sync
+
+## Instructions
+
+You are synchronizing local development progress to GitHub as issue comments for: **Issue #165**
+
+### 1. Gather Local Updates
+Collect all local updates for the issue:
+- Read from `.claude/epics/{epic_name}/updates/165/`
+- Check for new content in:
+  - `progress.md` - Development progress
+  - `notes.md` - Technical notes and decisions
+  - `commits.md` - Recent commits and changes
+  - Any other update files
+
+### 2. Update Progress Tracking Frontmatter
+Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+Update the progress.md file frontmatter:
+```yaml
+---
+issue: 165
+started: [preserve existing date]
+last_sync: [Use REAL datetime from command above]
+completion: [calculated percentage 0-100%]
+---
+```
+
+### 3. Determine What's New
+Compare against previous sync to identify new content:
+- Look for sync timestamp markers
+- Identify new sections or updates
+- Gather only incremental changes since last sync
+
+### 4. Format Update Comment
+Create comprehensive update comment:
+
+```markdown
+## 🔄 Progress Update - {current_date}
+
+### ✅ Completed Work
+{list_completed_items}
+
+### 🔄 In Progress
+{current_work_items}
+
+### 📝 Technical Notes
+{key_technical_decisions}
+
+### 📊 Acceptance Criteria Status
+- ✅ {completed_criterion}
+- 🔄 {in_progress_criterion}
+- ⏸️ {blocked_criterion}
+- □ {pending_criterion}
+
+### 🚀 Next Steps
+{planned_next_actions}
+
+### ⚠️ Blockers
+{any_current_blockers}
+
+### 💻 Recent Commits
+{commit_summaries}
+
+---
+*Progress: {completion}% | Synced from local updates at {timestamp}*
+```
+
+### 5. Post to GitHub
+Use GitHub CLI to add comment:
+```bash
+gh issue comment #165 --body-file {temp_comment_file}
+```
+
+### 6. Update Local Task File
+Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+Update the task file frontmatter with sync information:
+```yaml
+---
+name: [Task Title]
+status: open
+created: [preserve existing date]
+updated: [Use REAL datetime from command above]
+github: https://github.com/{org}/{repo}/issues/165
+---
+```
+
+### 7. Handle Completion
+If task is complete, update all relevant frontmatter:
+
+**Task file frontmatter**:
+```yaml
+---
+name: [Task Title]
+status: closed
+created: [existing date]
+updated: [current date/time]
+github: https://github.com/{org}/{repo}/issues/165
+---
+```
+
+**Progress file frontmatter**:
+```yaml
+---
+issue: 165
+started: [existing date]
+last_sync: [current date/time]
+completion: 100%
+---
+```
+
+**Epic progress update**: Recalculate epic progress based on completed tasks and update epic frontmatter:
+```yaml
+---
+name: [Epic Name]
+status: in-progress
+created: [existing date]
+progress: [calculated percentage based on completed tasks]%
+prd: [existing path]
+github: [existing URL]
+---
+```
+
+### 8. Completion Comment
+If task is complete:
+```markdown
+## ✅ Task Completed - {current_date}
+
+### 🎯 All Acceptance Criteria Met
+- ✅ {criterion_1}
+- ✅ {criterion_2}
+- ✅ {criterion_3}
+
+### 📦 Deliverables
+- {deliverable_1}
+- {deliverable_2}
+
+### 🧪 Testing
+- Unit tests: ✅ Passing
+- Integration tests: ✅ Passing
+- Manual testing: ✅ Complete
+
+### 📚 Documentation
+- Code documentation: ✅ Updated
+- README updates: ✅ Complete
+
+This task is ready for review and can be closed.
+
+---
+*Task completed: 100% | Synced at {timestamp}*
+```
+
+### 9. Output Summary
+```
+☁️ Synced updates to GitHub Issue #165
+
+📝 Update summary:
+   Progress items: {progress_count}
+   Technical notes: {notes_count}
+   Commits referenced: {commit_count}
+
+📊 Current status:
+   Task completion: {task_completion}%
+   Epic progress: {epic_progress}%
+   Completed criteria: {completed}/{total}
+
+🔗 View update: gh issue view #165 --comments
+```
+
+### 10. Frontmatter Maintenance
+- Always update task file frontmatter with current timestamp
+- Track completion percentages in progress files
+- Update epic progress when tasks complete
+- Maintain sync timestamps for audit trail
+
+### 11. Incremental Sync Detection
+
+**Prevent Duplicate Comments:**
+1. Add sync markers to local files after each sync:
+   ```markdown
+   <!-- SYNCED: 2024-01-15T10:30:00Z -->
+   ```
+2. Only sync content added after the last marker
+3. If no new content, skip sync with message: "No updates since last sync"
+
+### 12. Comment Size Management
+
+**Handle GitHub's Comment Limits:**
+- Max comment size: 65,536 characters
+- If update exceeds limit:
+  1. Split into multiple comments
+  2. Or summarize with link to full details
+  3. Warn user: "⚠️ Update truncated due to size. Full details in local files."
+
+### 13. Error Handling
+
+**Common Issues and Recovery:**
+
+1. **Network Error:**
+   - Message: "❌ Failed to post comment: network error"
+   - Solution: "Check internet connection and retry"
+   - Keep local updates intact for retry
+
+2. **Rate Limit:**
+   - Message: "❌ GitHub rate limit exceeded"
+   - Solution: "Wait {minutes} minutes or use different token"
+   - Save comment locally for later sync
+
+3. **Permission Denied:**
+   - Message: "❌ Cannot comment on issue (permission denied)"
+   - Solution: "Check repository access permissions"
+
+4. **Issue Locked:**
+   - Message: "⚠️ Issue is locked for comments"
+   - Solution: "Contact repository admin to unlock"
+
+### 14. Epic Progress Calculation
+
+When updating epic progress:
+1. Count total tasks in epic directory
+2. Count tasks with `status: closed` in frontmatter
+3. Calculate: `progress = (closed_tasks / total_tasks) * 100`
+4. Round to nearest integer
+5. Update epic frontmatter only if percentage changed
+
+### 15. Post-Sync Validation
+
+After successful sync:
+- [ ] Verify comment posted on GitHub
+- [ ] Confirm frontmatter updated with sync timestamp
+- [ ] Check epic progress updated if task completed
+- [ ] Validate no data corruption in local files
+
+This creates a transparent audit trail of development progress that stakeholders can follow in real-time for Issue #165, while maintaining accurate frontmatter across all project files.
+
+---
+
+# Epic Merge
+
+Merge completed epic from worktree back to main branch.
+
+## Usage
+```
+/pm:epic-merge <epic_name>
+```
+
+## Quick Check
+
+1. **Verify worktree exists:**
+   ```bash
+   git worktree list | grep "epic-missing-ingredients-per-recipe-fix" || echo "❌ No worktree for epic: missing-ingredients-per-recipe-fix"
+   ```
+
+2. **Check for active agents:**
+   Read `.claude/epics/missing-ingredients-per-recipe-fix/execution-status.md`
+   If active agents exist: "⚠️ Active agents detected. Stop them first with: /pm:epic-stop missing-ingredients-per-recipe-fix"
+
+## Instructions
+
+### 1. Pre-Merge Validation
+
+Navigate to worktree and check status:
+```bash
+cd ../epic-missing-ingredients-per-recipe-fix
+
+# Check for uncommitted changes
+if [[ $(git status --porcelain) ]]; then
+  echo "⚠️ Uncommitted changes in worktree:"
+  git status --short
+  echo "Commit or stash changes before merging"
+  exit 1
+fi
+
+# Check branch status
+git fetch origin
+git status -sb
+```
+
+### 2. Run Tests (Optional but Recommended)
+
+```bash
+# Look for test commands based on project type
+if [ -f package.json ]; then
+  npm test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f pom.xml ]; then
+  mvn test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+  ./gradlew test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f composer.json ]; then
+  ./vendor/bin/phpunit || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f *.sln ] || [ -f *.csproj ]; then
+  dotnet test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f Cargo.toml ]; then
+  cargo test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f go.mod ]; then
+  go test ./... || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f Gemfile ]; then
+  bundle exec rspec || bundle exec rake test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f pubspec.yaml ]; then
+  flutter test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f Package.swift ]; then
+  swift test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f CMakeLists.txt ]; then
+  cd build && ctest || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+elif [ -f Makefile ]; then
+  make test || echo "⚠️ Tests failed. Continue anyway? (yes/no)"
+fi
+```
+
+### 3. Update Epic Documentation
+
+Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+Update `.claude/epics/missing-ingredients-per-recipe-fix/epic.md`:
+- Set status to "completed"
+- Update completion date
+- Add final summary
+
+### 4. Attempt Merge
+
+```bash
+# Return to main repository
+cd {main-repo-path}
+
+# Ensure main is up to date
+git checkout main
+git pull origin main
+
+# Attempt merge
+echo "Merging epic/missing-ingredients-per-recipe-fix to main..."
+git merge epic/missing-ingredients-per-recipe-fix --no-ff -m "Merge epic: missing-ingredients-per-recipe-fix
+
+Completed features:
+# Generate feature list
+feature_list=""
+if [ -d ".claude/epics/missing-ingredients-per-recipe-fix" ]; then
+  cd .claude/epics/missing-ingredients-per-recipe-fix
+  for task_file in [0-9]*.md; do
+    [ -f "$task_file" ] || continue
+    task_name=$(grep '^name:' "$task_file" | cut -d: -f2 | sed 's/^ *//')
+    feature_list="$feature_list\n- $task_name"
+  done
+  cd - > /dev/null
+fi
+
+echo "$feature_list"
+
+# Extract epic issue number
+epic_github_line=$(grep 'github:' .claude/epics/missing-ingredients-per-recipe-fix/epic.md 2>/dev/null || true)
+if [ -n "$epic_github_line" ]; then
+  epic_issue=$(echo "$epic_github_line" | grep -oE '[0-9]+' || true)
+  if [ -n "$epic_issue" ]; then
+    echo "\nCloses epic #$epic_issue"
+  fi
+fi"
+```
+
+### 5. Handle Merge Conflicts
+
+If merge fails with conflicts:
+```bash
+# Check conflict status
+git status
+
+echo "
+❌ Merge conflicts detected!
+
+Conflicts in:
+$(git diff --name-only --diff-filter=U)
+
+Options:
+1. Resolve manually:
+   - Edit conflicted files
+   - git add {files}
+   - git commit
+   
+2. Abort merge:
+   git merge --abort
+   
+3. Get help:
+   /pm:epic-resolve missing-ingredients-per-recipe-fix
+
+Worktree preserved at: ../epic-missing-ingredients-per-recipe-fix
+"
+exit 1
+```
+
+### 6. Post-Merge Cleanup
+
+If merge succeeds:
+```bash
+# Push to remote
+git push origin main
+
+# Clean up worktree
+git worktree remove ../epic-missing-ingredients-per-recipe-fix
+echo "✅ Worktree removed: ../epic-missing-ingredients-per-recipe-fix"
+
+# Delete branch
+git branch -d epic/missing-ingredients-per-recipe-fix
+git push origin --delete epic/missing-ingredients-per-recipe-fix 2>/dev/null || true
+
+# Archive epic locally
+mkdir -p .claude/epics/archived/
+mv .claude/epics/missing-ingredients-per-recipe-fix .claude/epics/archived/
+echo "✅ Epic archived: .claude/epics/archived/missing-ingredients-per-recipe-fix"
+```
+
+### 7. Update GitHub Issues
+
+Close related issues:
+```bash
+# Get issue numbers from epic
+# Extract epic issue number
+epic_github_line=$(grep 'github:' .claude/epics/archived/missing-ingredients-per-recipe-fix/epic.md 2>/dev/null || true)
+if [ -n "$epic_github_line" ]; then
+  epic_issue=$(echo "$epic_github_line" | grep -oE '[0-9]+$' || true)
+else
+  epic_issue=""
+fi
+
+# Close epic issue
+gh issue close $epic_issue -c "Epic completed and merged to main"
+
+# Close task issues
+for task_file in .claude/epics/archived/missing-ingredients-per-recipe-fix/[0-9]*.md; do
+  [ -f "$task_file" ] || continue
+  # Extract task issue number
+  task_github_line=$(grep 'github:' "$task_file" 2>/dev/null || true)
+  if [ -n "$task_github_line" ]; then
+    issue_num=$(echo "$task_github_line" | grep -oE '[0-9]+$' || true)
+  else
+    issue_num=""
+  fi
+  if [ ! -z "$issue_num" ]; then
+    gh issue close $issue_num -c "Completed in epic merge"
+  fi
+done
+```
+
+### 8. Final Output
+
+```
+✅ Epic Merged Successfully: missing-ingredients-per-recipe-fix
+
+Summary:
+  Branch: epic/missing-ingredients-per-recipe-fix → main
+  Commits merged: {count}
+  Files changed: {count}
+  Issues closed: {count}
+  
+Cleanup completed:
+  ✓ Worktree removed
+  ✓ Branch deleted
+  ✓ Epic archived
+  ✓ GitHub issues closed
+  
+Next steps:
+  - Deploy changes if needed
+  - Start new epic: /pm:prd-new {feature}
+  - View completed work: git log --oneline -20
+```
+
+## Conflict Resolution Help
+
+If conflicts need resolution:
+```
+The epic branch has conflicts with main.
+
+This typically happens when:
+- Main has changed since epic started
+- Multiple epics modified same files
+- Dependencies were updated
+
+To resolve:
+1. Open conflicted files
+2. Look for <<<<<<< markers
+3. Choose correct version or combine
+4. Remove conflict markers
+5. git add {resolved files}
+6. git commit
+7. git push
+
+Or abort and try later:
+  git merge --abort
+```
+
+## Important Notes
+
+- Always check for uncommitted changes first
+- Run tests before merging when possible
+- Use --no-ff to preserve epic history
+- Archive epic data instead of deleting
+- Close GitHub issues to maintain sync
