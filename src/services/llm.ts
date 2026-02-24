@@ -154,12 +154,13 @@ export const buildRecipePrompt = ({
     10. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
     11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe.
     12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices if they are listed in "Available Spices".
-    13. If the same ingredient is missing in different recipes, combine them in the "missingIngredients" array and total the amount needed.
+    13. Each recipe's "missingIngredients" must list only the ingredients that specific recipe requires to be purchased, at the amount needed for that recipe alone. Do not combine amounts across recipes in "missingIngredients".
     14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     16. If you need to buy spices or staples, use the "missingIngredients" array.
-    17. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON ...
-    18. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK!
+    17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
+    18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON ...
+    19. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK!
     
     NUTRITION ESTIMATES:
     - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.

@@ -235,6 +235,23 @@ describe('llm service', () => {
       expect(prompt).toContain('Output ALL text');
       expect(prompt).toContain('in Spanish');
     });
+
+    it('should enforce per-recipe missingIngredients and aggregated shoppingList rules', () => {
+      const prompt = buildRecipePrompt({
+        ingredients: [{ id: 'id1', name: 'Chicken', amount: '500g' }],
+        people: 2,
+        meals: 2,
+        diet: 'No restrictions',
+        language: 'English',
+      });
+
+      // Old combined-amounts rule must be gone
+      expect(prompt).not.toContain('combine them in the');
+      // New per-recipe rule must be present
+      expect(prompt).toContain('for that recipe alone');
+      // Aggregated shoppingList rule must be present
+      expect(prompt).toContain('"shoppingList" is the aggregated shopping list');
+    });
   });
 
   describe('parseRecipeResponse', () => {
