@@ -116,7 +116,7 @@ export const buildRecipePrompt = ({
 
   const spiceList = spices.length > 0
     ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.map(s => sanitizeUserInput(s)).join(", ")}`
-    : "No extra spices available.";
+    : "No extra spices or staples available.";
 
   const sanitizedStyleWishes = styleWishes
     .map(wish => sanitizeUserInput(wish, 200))
@@ -148,12 +148,12 @@ export const buildRecipePrompt = ({
     4. Ensure variety: The ${meals} meals should be distinct in style and flavor profile.
     5. For every meal, use the five basic flavors - sweetness, sourness, bitterness, saltiness, and umami - and the five basic textures - soft, crispy, chewy, crunchy, and tender - as a guidance. Try to balance them, but never dogmatically.
     6. For every meal, check if a sauce, gravy or dip could enhance the meal.
-    7. ${ingredients.length > 0 ? `If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.` : `Choose ingredients that work well together and create balanced, delicious meals.`}
-    8. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
+    7. ${ingredients.length > 0 ? `If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.` : `For every meal, choose ingredients that work well together and create balanced, delicious meals.`}
+    8. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients ${spices.length > 0 ? '(except available spices/staples)' : ''} will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
     9. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
     10. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
     11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe.
-    12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices if they are listed in "Available Spices".
+    12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices and staples if they are listed in "Available Spices/Staples".
     13. Each recipe's "missingIngredients" must list only the ingredients that specific recipe requires to be purchased, at the amount needed for that recipe alone. Do not combine amounts across recipes in "missingIngredients".
     14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
