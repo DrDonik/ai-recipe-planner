@@ -3,17 +3,20 @@
   "checkpoint_id": "f63716ae8f10",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 4,
+  "checkpoints_count": 8,
   "files_touched": [
     ".claude/epics/archived/missing-ingredients-per-recipe-fix/165-analysis.md",
     ".claude/epics/archived/missing-ingredients-per-recipe-fix/165.md",
     ".claude/epics/archived/missing-ingredients-per-recipe-fix/epic.md",
     ".claude/epics/archived/missing-ingredients-per-recipe-fix/github-mapping.md",
     ".claude/epics/archived/missing-ingredients-per-recipe-fix/updates/165/stream-A.md",
+    ".claude/epics/missing-ingredients-per-recipe-fix/001.md",
     ".claude/epics/missing-ingredients-per-recipe-fix/165-analysis.md",
     ".claude/epics/missing-ingredients-per-recipe-fix/165.md",
     ".claude/epics/missing-ingredients-per-recipe-fix/epic.md",
-    ".claude/epics/missing-ingredients-per-recipe-fix/updates/165/stream-A.md"
+    ".claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md",
+    ".claude/epics/missing-ingredients-per-recipe-fix/updates/165/stream-A.md",
+    ".claude/prds/missing-ingredients-per-recipe-fix.md"
   ],
   "sessions": [
     {
@@ -22,13 +25,20 @@
       "context": "/f6/3716ae8f10/0/context.md",
       "content_hash": "/f6/3716ae8f10/0/content_hash.txt",
       "prompt": "/f6/3716ae8f10/0/prompt.txt"
+    },
+    {
+      "metadata": "/f6/3716ae8f10/1/metadata.json",
+      "transcript": "/f6/3716ae8f10/1/full.jsonl",
+      "context": "/f6/3716ae8f10/1/context.md",
+      "content_hash": "/f6/3716ae8f10/1/content_hash.txt",
+      "prompt": "/f6/3716ae8f10/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 41,
-    "cache_creation_tokens": 50279,
-    "cache_read_tokens": 2123186,
-    "output_tokens": 363,
-    "api_call_count": 32
+    "input_tokens": 98,
+    "cache_creation_tokens": 140567,
+    "cache_read_tokens": 4904626,
+    "output_tokens": 788,
+    "api_call_count": 71
   }
 }

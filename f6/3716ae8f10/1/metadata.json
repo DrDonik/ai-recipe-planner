@@ -1,0 +1,34 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "f63716ae8f10",
+  "session_id": "d2689a20-3ade-48b7-b16d-f91bea319793",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-24T15:30:38.126757Z",
+  "branch": "main",
+  "checkpoints_count": 4,
+  "files_touched": [
+    ".claude/epics/missing-ingredients-per-recipe-fix/001.md",
+    ".claude/epics/missing-ingredients-per-recipe-fix/165.md",
+    ".claude/epics/missing-ingredients-per-recipe-fix/epic.md",
+    ".claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md",
+    ".claude/prds/missing-ingredients-per-recipe-fix.md"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "7d75d346-76cb-4476-a2d2-5f28e2aafb07",
+  "token_usage": {
+    "input_tokens": 57,
+    "cache_creation_tokens": 90288,
+    "cache_read_tokens": 2781440,
+    "output_tokens": 425,
+    "api_call_count": 39
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-24T15:30:38.078304Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 196,
+    "human_removed": 33,
+    "total_committed": 196,
+    "agent_percentage": 0
+  }
+}

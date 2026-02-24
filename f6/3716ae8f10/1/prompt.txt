@@ -1,0 +1,1579 @@
+# PRD New
+
+Launch brainstorming for new product requirement document.
+
+## Usage
+```
+/pm:prd-new <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### Input Validation
+1. **Validate feature name format:**
+   - Must contain only lowercase letters, numbers, and hyphens
+   - Must start with a letter
+   - No spaces or special characters allowed
+   - If invalid, tell user: "❌ Feature name must be kebab-case (lowercase letters, numbers, hyphens only). Examples: user-auth, payment-v2, notification-system"
+
+2. **Check for existing PRD:**
+   - Check if `.claude/prds/.md` already exists
+   - If it exists, ask user: "⚠️ PRD '' already exists. Do you want to overwrite it? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "Use a different name or run: /pm:prd-parse  to create an epic from the existing PRD"
+
+3. **Verify directory structure:**
+   - Check if `.claude/prds/` directory exists
+   - If not, create it first
+   - If unable to create, tell user: "❌ Cannot create PRD directory. Please manually create: .claude/prds/"
+
+## Instructions
+
+You are a product manager creating a comprehensive Product Requirements Document (PRD) for: ****
+
+Follow this structured approach:
+
+### 1. Discovery & Context
+- Ask clarifying questions about the feature/product ""
+- Understand the problem being solved
+- Identify target users and use cases
+- Gather constraints and requirements
+
+### 2. PRD Structure
+Create a comprehensive PRD with these sections:
+
+#### Executive Summary
+- Brief overview and value proposition
+
+#### Problem Statement
+- What problem are we solving?
+- Why is this important now?
+
+#### User Stories
+- Primary user personas
+- Detailed user journeys
+- Pain points being addressed
+
+#### Requirements
+**Functional Requirements**
+- Core features and capabilities
+- User interactions and flows
+
+**Non-Functional Requirements**
+- Performance expectations
+- Security considerations
+- Scalability needs
+
+#### Success Criteria
+- Measurable outcomes
+- Key metrics and KPIs
+
+#### Constraints & Assumptions
+- Technical limitations
+- Timeline constraints
+- Resource limitations
+
+#### Out of Scope
+- What we're explicitly NOT building
+
+#### Dependencies
+- External dependencies
+- Internal team dependencies
+
+### 3. File Format with Frontmatter
+Save the completed PRD to: `.claude/prds/.md` with this exact structure:
+
+```markdown
+---
+name: 
+description: [Brief one-line description of the PRD]
+status: backlog
+created: [Current ISO date/time]
+---
+
+# PRD: 
+
+## Executive Summary
+[Content...]
+
+## Problem Statement
+[Content...]
+
+[Continue with all sections...]
+```
+
+### 4. Frontmatter Guidelines
+- **name**: Use the exact feature name (same as )
+- **description**: Write a concise one-line summary of what this PRD covers
+- **status**: Always start with "backlog" for new PRDs
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+  - Never use placeholder text
+  - Must be actual system time in ISO 8601 format
+
+### 5. Quality Checks
+
+Before saving the PRD, verify:
+- [ ] All sections are complete (no placeholder text)
+- [ ] User stories include acceptance criteria
+- [ ] Success criteria are measurable
+- [ ] Dependencies are clearly identified
+- [ ] Out of scope items are explicitly listed
+
+### 6. Post-Creation
+
+After successfully creating the PRD:
+1. Confirm: "✅ PRD created: .claude/prds/.md"
+2. Show brief summary of what was captured
+3. Suggest next step: "Ready to create implementation epic? Run: /pm:prd-parse "
+
+## Error Recovery
+
+If any step fails:
+- Clearly explain what went wrong
+- Provide specific steps to fix the issue
+- Never leave partial or corrupted files
+
+Conduct a thorough brainstorming session before writing the PRD. Ask questions, explore edge cases, and ensure comprehensive coverage of the feature requirements for "".
+
+---
+
+# PRD New
+
+Launch brainstorming for new product requirement document.
+
+## Usage
+```
+/pm:prd-new <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### Input Validation
+1. **Validate feature name format:**
+   - Must contain only lowercase letters, numbers, and hyphens
+   - Must start with a letter
+   - No spaces or special characters allowed
+   - If invalid, tell user: "❌ Feature name must be kebab-case (lowercase letters, numbers, hyphens only). Examples: user-auth, payment-v2, notification-system"
+
+2. **Check for existing PRD:**
+   - Check if `.claude/prds/missing-ingredients-per-recipe-fix.md` already exists
+   - If it exists, ask user: "⚠️ PRD 'missing-ingredients-per-recipe-fix' already exists. Do you want to overwrite it? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "Use a different name or run: /pm:prd-parse missing-ingredients-per-recipe-fix to create an epic from the existing PRD"
+
+3. **Verify directory structure:**
+   - Check if `.claude/prds/` directory exists
+   - If not, create it first
+   - If unable to create, tell user: "❌ Cannot create PRD directory. Please manually create: .claude/prds/"
+
+## Instructions
+
+You are a product manager creating a comprehensive Product Requirements Document (PRD) for: **missing-ingredients-per-recipe-fix**
+
+Follow this structured approach:
+
+### 1. Discovery & Context
+- Ask clarifying questions about the feature/product "missing-ingredients-per-recipe-fix"
+- Understand the problem being solved
+- Identify target users and use cases
+- Gather constraints and requirements
+
+### 2. PRD Structure
+Create a comprehensive PRD with these sections:
+
+#### Executive Summary
+- Brief overview and value proposition
+
+#### Problem Statement
+- What problem are we solving?
+- Why is this important now?
+
+#### User Stories
+- Primary user personas
+- Detailed user journeys
+- Pain points being addressed
+
+#### Requirements
+**Functional Requirements**
+- Core features and capabilities
+- User interactions and flows
+
+**Non-Functional Requirements**
+- Performance expectations
+- Security considerations
+- Scalability needs
+
+#### Success Criteria
+- Measurable outcomes
+- Key metrics and KPIs
+
+#### Constraints & Assumptions
+- Technical limitations
+- Timeline constraints
+- Resource limitations
+
+#### Out of Scope
+- What we're explicitly NOT building
+
+#### Dependencies
+- External dependencies
+- Internal team dependencies
+
+### 3. File Format with Frontmatter
+Save the completed PRD to: `.claude/prds/missing-ingredients-per-recipe-fix.md` with this exact structure:
+
+```markdown
+---
+name: missing-ingredients-per-recipe-fix
+description: [Brief one-line description of the PRD]
+status: backlog
+created: [Current ISO date/time]
+---
+
+# PRD: missing-ingredients-per-recipe-fix
+
+## Executive Summary
+[Content...]
+
+## Problem Statement
+[Content...]
+
+[Continue with all sections...]
+```
+
+### 4. Frontmatter Guidelines
+- **name**: Use the exact feature name (same as missing-ingredients-per-recipe-fix)
+- **description**: Write a concise one-line summary of what this PRD covers
+- **status**: Always start with "backlog" for new PRDs
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+  - Never use placeholder text
+  - Must be actual system time in ISO 8601 format
+
+### 5. Quality Checks
+
+Before saving the PRD, verify:
+- [ ] All sections are complete (no placeholder text)
+- [ ] User stories include acceptance criteria
+- [ ] Success criteria are measurable
+- [ ] Dependencies are clearly identified
+- [ ] Out of scope items are explicitly listed
+
+### 6. Post-Creation
+
+After successfully creating the PRD:
+1. Confirm: "✅ PRD created: .claude/prds/missing-ingredients-per-recipe-fix.md"
+2. Show brief summary of what was captured
+3. Suggest next step: "Ready to create implementation epic? Run: /pm:prd-parse missing-ingredients-per-recipe-fix"
+
+## Error Recovery
+
+If any step fails:
+- Clearly explain what went wrong
+- Provide specific steps to fix the issue
+- Never leave partial or corrupted files
+
+Conduct a thorough brainstorming session before writing the PRD. Ask questions, explore edge cases, and ensure comprehensive coverage of the feature requirements for "missing-ingredients-per-recipe-fix".
+
+---
+
+Base directory for this skill: /Users/dominik/Code/ai-recipe-planner/.claude/skills/brainstorming
+
+# Brainstorming Ideas Into Designs
+
+## Overview
+
+Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
+
+## The Process
+
+**Understanding the idea:**
+- Check out the current project state first (files, docs, recent commits)
+- Ask questions one at a time to refine the idea
+- Prefer multiple choice questions when possible, but open-ended is fine too
+- Only one question per message - if a topic needs more exploration, break it into multiple questions
+- Focus on understanding: purpose, constraints, success criteria
+
+**Exploring approaches:**
+- Propose 2-3 different approaches with trade-offs
+- Present options conversationally with your recommendation and reasoning
+- Lead with your recommended option and explain why
+
+**Presenting the design:**
+- Once you believe you understand what you're building, present the design
+- Break it into sections of 200-300 words
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+- Be ready to go back and clarify if something doesn't make sense
+
+## After the Design
+
+**Documentation:**
+- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
+- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Commit the design document to git
+
+**Implementation (if continuing):**
+- Ask: "Ready to set up for implementation?"
+- Use superpowers:using-git-worktrees to create isolated workspace
+- Use superpowers:writing-plans to create detailed implementation plan
+
+## Key Principles
+
+- **One question at a time** - Don't overwhelm with multiple questions
+- **Multiple choice preferred** - Easier to answer than open-ended when possible
+- **YAGNI ruthlessly** - Remove unnecessary features from all designs
+- **Explore alternatives** - Always propose 2-3 approaches before settling
+- **Incremental validation** - Present design in sections, validate each
+- **Be flexible** - Go back and clarify when something doesn't make sense
+
+---
+
+d) Sometimes, the LLM groups the entire shoppingList into the missingIngredients of one recipe. Maybe the LLM prompt can be misunderstood?
+
+---
+
+a) is the desired begaviour
+
+---
+
+Yes, this seems right. What other rules or parts of the prompt mention shoppingList or missingIngredients?
+
+---
+
+That looks right
+
+---
+
+# PRD Parse
+
+Convert PRD to technical implementation epic.
+
+## Usage
+```
+/pm:prd-parse <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### Validation Steps
+1. **Verify <feature_name> was provided as a parameter:**
+   - If not, tell user: "❌ <feature_name> was not provided as parameter. Please run: /pm:prd-parse <feature_name>"
+   - Stop execution if <feature_name> was not provided
+
+2. **Verify PRD exists:**
+   - Check if `.claude/prds/.md` exists
+   - If not found, tell user: "❌ PRD not found: . First create it with: /pm:prd-new "
+   - Stop execution if PRD doesn't exist
+
+3. **Validate PRD frontmatter:**
+   - Verify PRD has valid frontmatter with: name, description, status, created
+   - If frontmatter is invalid or missing, tell user: "❌ Invalid PRD frontmatter. Please check: .claude/prds/.md"
+   - Show what's missing or invalid
+
+4. **Check for existing epic:**
+   - Check if `.claude/epics//epic.md` already exists
+   - If it exists, ask user: "⚠️ Epic '' already exists. Overwrite? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "View existing epic with: /pm:epic-show "
+
+5. **Verify directory permissions:**
+   - Ensure `.claude/epics/` directory exists or can be created
+   - If cannot create, tell user: "❌ Cannot create epic directory. Please check permissions."
+
+## Instructions
+
+You are a technical lead converting a Product Requirements Document into a detailed implementation epic for: ****
+
+### 1. Read the PRD
+- Load the PRD from `.claude/prds/.md`
+- Analyze all requirements and constraints
+- Understand the user stories and success criteria
+- Extract the PRD description from frontmatter
+
+### 2. Technical Analysis
+- Identify architectural decisions needed
+- Determine technology stack and approaches
+- Map functional requirements to technical components
+- Identify integration points and dependencies
+
+### 3. File Format with Frontmatter
+Create the epic file at: `.claude/epics//epic.md` with this exact structure:
+
+```markdown
+---
+name: 
+status: backlog
+created: [Current ISO date/time]
+progress: 0%
+prd: .claude/prds/.md
+github: [Will be updated when synced to GitHub]
+---
+
+# Epic: 
+
+## Overview
+Brief technical summary of the implementation approach
+
+## Architecture Decisions
+- Key technical decisions and rationale
+- Technology choices
+- Design patterns to use
+
+## Technical Approach
+### Frontend Components
+- UI components needed
+- State management approach
+- User interaction patterns
+
+### Backend Services
+- API endpoints required
+- Data models and schema
+- Business logic components
+
+### Infrastructure
+- Deployment considerations
+- Scaling requirements
+- Monitoring and observability
+
+## Implementation Strategy
+- Development phases
+- Risk mitigation
+- Testing approach
+
+## Task Breakdown Preview
+High-level task categories that will be created:
+- [ ] Category 1: Description
+- [ ] Category 2: Description
+- [ ] etc.
+
+## Dependencies
+- External service dependencies
+- Internal team dependencies
+- Prerequisite work
+
+## Success Criteria (Technical)
+- Performance benchmarks
+- Quality gates
+- Acceptance criteria
+
+## Estimated Effort
+- Overall timeline estimate
+- Resource requirements
+- Critical path items
+```
+
+### 4. Frontmatter Guidelines
+- **name**: Use the exact feature name (same as )
+- **status**: Always start with "backlog" for new epics
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+- **progress**: Always start with "0%" for new epics
+- **prd**: Reference the source PRD file path
+- **github**: Leave placeholder text - will be updated during sync
+
+### 5. Output Location
+Create the directory structure if it doesn't exist:
+- `.claude/epics//` (directory)
+- `.claude/epics//epic.md` (epic file)
+
+### 6. Quality Validation
+
+Before saving the epic, verify:
+- [ ] All PRD requirements are addressed in the technical approach
+- [ ] Task breakdown categories cover all implementation areas
+- [ ] Dependencies are technically accurate
+- [ ] Effort estimates are realistic
+- [ ] Architecture decisions are justified
+
+### 7. Post-Creation
+
+After successfully creating the epic:
+1. Confirm: "✅ Epic created: .claude/epics//epic.md"
+2. Show summary of:
+   - Number of task categories identified
+   - Key architecture decisions
+   - Estimated effort
+3. Suggest next step: "Ready to break down into tasks? Run: /pm:epic-decompose "
+
+## Error Recovery
+
+If any step fails:
+- Clearly explain what went wrong
+- If PRD is incomplete, list specific missing sections
+- If technical approach is unclear, identify what needs clarification
+- Never create an epic with incomplete information
+
+Focus on creating a technically sound implementation plan that addresses all PRD requirements while being practical and achievable for "".
+
+## IMPORTANT:
+- Aim for as few tasks as possible and limit the total number of tasks to 10 or less.
+- When creating the epic, identify ways to simplify and improve it. Look for ways to leverage existing functionality instead of creating more code when possible.
+
+---
+
+# PRD Parse
+
+Convert PRD to technical implementation epic.
+
+## Usage
+```
+/pm:prd-parse <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+### Validation Steps
+1. **Verify <feature_name> was provided as a parameter:**
+   - If not, tell user: "❌ <feature_name> was not provided as parameter. Please run: /pm:prd-parse <feature_name>"
+   - Stop execution if <feature_name> was not provided
+
+2. **Verify PRD exists:**
+   - Check if `.claude/prds/missing-ingredients-per-recipe-fix.md` exists
+   - If not found, tell user: "❌ PRD not found: missing-ingredients-per-recipe-fix. First create it with: /pm:prd-new missing-ingredients-per-recipe-fix"
+   - Stop execution if PRD doesn't exist
+
+3. **Validate PRD frontmatter:**
+   - Verify PRD has valid frontmatter with: name, description, status, created
+   - If frontmatter is invalid or missing, tell user: "❌ Invalid PRD frontmatter. Please check: .claude/prds/missing-ingredients-per-recipe-fix.md"
+   - Show what's missing or invalid
+
+4. **Check for existing epic:**
+   - Check if `.claude/epics/missing-ingredients-per-recipe-fix/epic.md` already exists
+   - If it exists, ask user: "⚠️ Epic 'missing-ingredients-per-recipe-fix' already exists. Overwrite? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "View existing epic with: /pm:epic-show missing-ingredients-per-recipe-fix"
+
+5. **Verify directory permissions:**
+   - Ensure `.claude/epics/` directory exists or can be created
+   - If cannot create, tell user: "❌ Cannot create epic directory. Please check permissions."
+
+## Instructions
+
+You are a technical lead converting a Product Requirements Document into a detailed implementation epic for: **missing-ingredients-per-recipe-fix**
+
+### 1. Read the PRD
+- Load the PRD from `.claude/prds/missing-ingredients-per-recipe-fix.md`
+- Analyze all requirements and constraints
+- Understand the user stories and success criteria
+- Extract the PRD description from frontmatter
+
+### 2. Technical Analysis
+- Identify architectural decisions needed
+- Determine technology stack and approaches
+- Map functional requirements to technical components
+- Identify integration points and dependencies
+
+### 3. File Format with Frontmatter
+Create the epic file at: `.claude/epics/missing-ingredients-per-recipe-fix/epic.md` with this exact structure:
+
+```markdown
+---
+name: missing-ingredients-per-recipe-fix
+status: backlog
+created: [Current ISO date/time]
+progress: 0%
+prd: .claude/prds/missing-ingredients-per-recipe-fix.md
+github: [Will be updated when synced to GitHub]
+---
+
+# Epic: missing-ingredients-per-recipe-fix
+
+## Overview
+Brief technical summary of the implementation approach
+
+## Architecture Decisions
+- Key technical decisions and rationale
+- Technology choices
+- Design patterns to use
+
+## Technical Approach
+### Frontend Components
+- UI components needed
+- State management approach
+- User interaction patterns
+
+### Backend Services
+- API endpoints required
+- Data models and schema
+- Business logic components
+
+### Infrastructure
+- Deployment considerations
+- Scaling requirements
+- Monitoring and observability
+
+## Implementation Strategy
+- Development phases
+- Risk mitigation
+- Testing approach
+
+## Task Breakdown Preview
+High-level task categories that will be created:
+- [ ] Category 1: Description
+- [ ] Category 2: Description
+- [ ] etc.
+
+## Dependencies
+- External service dependencies
+- Internal team dependencies
+- Prerequisite work
+
+## Success Criteria (Technical)
+- Performance benchmarks
+- Quality gates
+- Acceptance criteria
+
+## Estimated Effort
+- Overall timeline estimate
+- Resource requirements
+- Critical path items
+```
+
+### 4. Frontmatter Guidelines
+- **name**: Use the exact feature name (same as missing-ingredients-per-recipe-fix)
+- **status**: Always start with "backlog" for new epics
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+- **progress**: Always start with "0%" for new epics
+- **prd**: Reference the source PRD file path
+- **github**: Leave placeholder text - will be updated during sync
+
+### 5. Output Location
+Create the directory structure if it doesn't exist:
+- `.claude/epics/missing-ingredients-per-recipe-fix/` (directory)
+- `.claude/epics/missing-ingredients-per-recipe-fix/epic.md` (epic file)
+
+### 6. Quality Validation
+
+Before saving the epic, verify:
+- [ ] All PRD requirements are addressed in the technical approach
+- [ ] Task breakdown categories cover all implementation areas
+- [ ] Dependencies are technically accurate
+- [ ] Effort estimates are realistic
+- [ ] Architecture decisions are justified
+
+### 7. Post-Creation
+
+After successfully creating the epic:
+1. Confirm: "✅ Epic created: .claude/epics/missing-ingredients-per-recipe-fix/epic.md"
+2. Show summary of:
+   - Number of task categories identified
+   - Key architecture decisions
+   - Estimated effort
+3. Suggest next step: "Ready to break down into tasks? Run: /pm:epic-decompose missing-ingredients-per-recipe-fix"
+
+## Error Recovery
+
+If any step fails:
+- Clearly explain what went wrong
+- If PRD is incomplete, list specific missing sections
+- If technical approach is unclear, identify what needs clarification
+- Never create an epic with incomplete information
+
+Focus on creating a technically sound implementation plan that addresses all PRD requirements while being practical and achievable for "missing-ingredients-per-recipe-fix".
+
+## IMPORTANT:
+- Aim for as few tasks as possible and limit the total number of tasks to 10 or less.
+- When creating the epic, identify ways to simplify and improve it. Look for ways to leverage existing functionality instead of creating more code when possible.
+
+---
+
+# Epic Decompose
+
+Break epic into concrete, actionable tasks.
+
+## Usage
+```
+/pm:epic-decompose <feature_name>
+```
+
+## Required Rules
+
+**IMPORTANT:** Before executing this command, read and follow:
+- `.claude/rules/datetime.md` - For getting real current date/time
+
+## Preflight Checklist
+
+Before proceeding, complete these validation steps.
+Do not bother the user with preflight checks progress ("I'm not going to ..."). Just do them and move on.
+
+1. **Verify epic exists:**
+   - Check if `.claude/epics/missing-ingredients-per-recipe-fix/epic.md` exists
+   - If not found, tell user: "❌ Epic not found: missing-ingredients-per-recipe-fix. First create it with: /pm:prd-parse missing-ingredients-per-recipe-fix"
+   - Stop execution if epic doesn't exist
+
+2. **Check for existing tasks:**
+   - Check if any numbered task files (001.md, 002.md, etc.) already exist in `.claude/epics/missing-ingredients-per-recipe-fix/`
+   - If tasks exist, list them and ask: "⚠️ Found {count} existing tasks. Delete and recreate all tasks? (yes/no)"
+   - Only proceed with explicit 'yes' confirmation
+   - If user says no, suggest: "View existing tasks with: /pm:epic-show missing-ingredients-per-recipe-fix"
+
+3. **Validate epic frontmatter:**
+   - Verify epic has valid frontmatter with: name, status, created, prd
+   - If invalid, tell user: "❌ Invalid epic frontmatter. Please check: .claude/epics/missing-ingredients-per-recipe-fix/epic.md"
+
+4. **Check epic status:**
+   - If epic status is already "completed", warn user: "⚠️ Epic is marked as completed. Are you sure you want to decompose it again?"
+
+## Instructions
+
+You are decomposing an epic into specific, actionable tasks for: **missing-ingredients-per-recipe-fix**
+
+### 1. Read the Epic
+- Load the epic from `.claude/epics/missing-ingredients-per-recipe-fix/epic.md`
+- Understand the technical approach and requirements
+- Review the task breakdown preview
+
+### 2. Analyze for Parallel Creation
+
+Determine if tasks can be created in parallel:
+- If tasks are mostly independent: Create in parallel using Task agents
+- If tasks have complex dependencies: Create sequentially
+- For best results: Group independent tasks for parallel creation
+
+### 3. Parallel Task Creation (When Possible)
+
+If tasks can be created in parallel, spawn sub-agents:
+
+```yaml
+Task:
+  description: "Create task files batch {X}"
+  subagent_type: "general-purpose"
+  prompt: |
+    Create task files for epic: missing-ingredients-per-recipe-fix
+
+    Tasks to create:
+    - {list of 3-4 tasks for this batch}
+
+    For each task:
+    1. Create file: .claude/epics/missing-ingredients-per-recipe-fix/{number}.md
+    2. Use exact format with frontmatter and all sections
+    3. Follow task breakdown from epic
+    4. Set parallel/depends_on fields appropriately
+    5. Number sequentially (001.md, 002.md, etc.)
+
+    Return: List of files created
+```
+
+### 4. Task File Format with Frontmatter
+For each task, create a file with this exact structure:
+
+```markdown
+---
+name: [Task Title]
+status: open
+created: [Current ISO date/time]
+updated: [Current ISO date/time]
+github: [Will be updated when synced to GitHub]
+depends_on: []  # List of task numbers this depends on, e.g., [001, 002]
+parallel: true  # Can this run in parallel with other tasks?
+conflicts_with: []  # Tasks that modify same files, e.g., [003, 004]
+---
+
+# Task: [Task Title]
+
+## Description
+Clear, concise description of what needs to be done
+
+## Acceptance Criteria
+- [ ] Specific criterion 1
+- [ ] Specific criterion 2
+- [ ] Specific criterion 3
+
+## Technical Details
+- Implementation approach
+- Key considerations
+- Code locations/files affected
+
+## Dependencies
+- [ ] Task/Issue dependencies
+- [ ] External dependencies
+
+## Effort Estimate
+- Size: XS/S/M/L/XL
+- Hours: estimated hours
+- Parallel: true/false (can run in parallel with other tasks)
+
+## Definition of Done
+- [ ] Code implemented
+- [ ] Tests written and passing
+- [ ] Documentation updated
+- [ ] Code reviewed
+- [ ] Deployed to staging
+```
+
+### 3. Task Naming Convention
+Save tasks as: `.claude/epics/missing-ingredients-per-recipe-fix/{task_number}.md`
+- Use sequential numbering: 001.md, 002.md, etc.
+- Keep task titles short but descriptive
+
+### 4. Frontmatter Guidelines
+- **name**: Use a descriptive task title (without "Task:" prefix)
+- **status**: Always start with "open" for new tasks
+- **created**: Get REAL current datetime by running: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+- **updated**: Use the same real datetime as created for new tasks
+- **github**: Leave placeholder text - will be updated during sync
+- **depends_on**: List task numbers that must complete before this can start (e.g., [001, 002])
+- **parallel**: Set to true if this can run alongside other tasks without conflicts
+- **conflicts_with**: List task numbers that modify the same files (helps coordination)
+
+### 5. Task Types to Consider
+- **Setup tasks**: Environment, dependencies, scaffolding
+- **Data tasks**: Models, schemas, migrations
+- **API tasks**: Endpoints, services, integration
+- **UI tasks**: Components, pages, styling
+- **Testing tasks**: Unit tests, integration tests
+- **Documentation tasks**: README, API docs
+- **Deployment tasks**: CI/CD, infrastructure
+
+### 6. Parallelization
+Mark tasks with `parallel: true` if they can be worked on simultaneously without conflicts.
+
+### 7. Execution Strategy
+
+Choose based on task count and complexity:
+
+**Small Epic (< 5 tasks)**: Create sequentially for simplicity
+
+**Medium Epic (5-10 tasks)**:
+- Batch into 2-3 groups
+- Spawn agents for each batch
+- Consolidate results
+
+**Large Epic (> 10 tasks)**:
+- Analyze dependencies first
+- Group independent tasks
+- Launch parallel agents (max 5 concurrent)
+- Create dependent tasks after prerequisites
+
+Example for parallel execution:
+```markdown
+Spawning 3 agents for parallel task creation:
+- Agent 1: Creating tasks 001-003 (Database layer)
+- Agent 2: Creating tasks 004-006 (API layer)
+- Agent 3: Creating tasks 007-009 (UI layer)
+```
+
+### 8. Task Dependency Validation
+
+When creating tasks with dependencies:
+- Ensure referenced dependencies exist (e.g., if Task 003 depends on Task 002, verify 002 was created)
+- Check for circular dependencies (Task A → Task B → Task A)
+- If dependency issues found, warn but continue: "⚠️ Task dependency warning: {details}"
+
+### 9. Update Epic with Task Summary
+After creating all tasks, update the epic file by adding this section:
+```markdown
+## Tasks Created
+- [ ] 001.md - {Task Title} (parallel: true/false)
+- [ ] 002.md - {Task Title} (parallel: true/false)
+- etc.
+
+Total tasks: {count}
+Parallel tasks: {parallel_count}
+Sequential tasks: {sequential_count}
+Estimated total effort: {sum of hours}
+```
+
+Also update the epic's frontmatter progress if needed (still 0% until tasks actually start).
+
+### 9. Quality Validation
+
+Before finalizing tasks, verify:
+- [ ] All tasks have clear acceptance criteria
+- [ ] Task sizes are reasonable (1-3 days each)
+- [ ] Dependencies are logical and achievable
+- [ ] Parallel tasks don't conflict with each other
+- [ ] Combined tasks cover all epic requirements
+
+### 10. Post-Decomposition
+
+After successfully creating tasks:
+1. Confirm: "✅ Created {count} tasks for epic: missing-ingredients-per-recipe-fix"
+2. Show summary:
+   - Total tasks created
+   - Parallel vs sequential breakdown
+   - Total estimated effort
+3. Suggest next step: "Ready to sync to GitHub? Run: /pm:epic-sync missing-ingredients-per-recipe-fix"
+
+## Error Recovery
+
+If any step fails:
+- If task creation partially completes, list which tasks were created
+- Provide option to clean up partial tasks
+- Never leave the epic in an inconsistent state
+
+Aim for tasks that can be completed in 1-3 days each. Break down larger tasks into smaller, manageable pieces for the "missing-ingredients-per-recipe-fix" epic.
+
+---
+
+# Epic Sync
+
+Push epic and tasks to GitHub as issues.
+
+## Usage
+```
+/pm:epic-sync <feature_name>
+```
+
+## Quick Check
+
+```bash
+# Verify epic exists
+test -f .claude/epics/missing-ingredients-per-recipe-fix/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse missing-ingredients-per-recipe-fix"
+
+# Count task files
+ls .claude/epics/missing-ingredients-per-recipe-fix/*.md 2>/dev/null | grep -v epic.md | wc -l
+```
+
+If no tasks found: "❌ No tasks to sync. Run: /pm:epic-decompose missing-ingredients-per-recipe-fix"
+
+## Instructions
+
+### 0. Check Remote Repository
+
+Follow `/rules/github-operations.md` to ensure we're not syncing to the CCPM template:
+
+```bash
+# Check if remote origin is the CCPM template repository
+remote_url=$(git remote get-url origin 2>/dev/null || echo "")
+if [[ "$remote_url" == *"automazeio/ccpm"* ]] || [[ "$remote_url" == *"automazeio/ccpm.git"* ]]; then
+  echo "❌ ERROR: You're trying to sync with the CCPM template repository!"
+  echo ""
+  echo "This repository (automazeio/ccpm) is a template for others to use."
+  echo "You should NOT create issues or PRs here."
+  echo ""
+  echo "To fix this:"
+  echo "1. Fork this repository to your own GitHub account"
+  echo "2. Update your remote origin:"
+  echo "   git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+  echo ""
+  echo "Or if this is a new project:"
+  echo "1. Create a new repository on GitHub"
+  echo "2. Update your remote origin:"
+  echo "   git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+  echo ""
+  echo "Current remote: $remote_url"
+  exit 1
+fi
+```
+
+### 1. Create Epic Issue
+
+#### First, detect the GitHub repository:
+```bash
+# Get the current repository from git remote
+remote_url=$(git remote get-url origin 2>/dev/null || echo "")
+REPO=$(echo "$remote_url" | sed 's|.*github.com[:/]||' | sed 's|\.git$||')
+[ -z "$REPO" ] && REPO="user/repo"
+echo "Creating issues in repository: $REPO"
+```
+
+Strip frontmatter and prepare GitHub issue body:
+```bash
+# Extract content without frontmatter
+sed '1,/^---$/d; 1,/^---$/d' .claude/epics/missing-ingredients-per-recipe-fix/epic.md > /tmp/epic-body-raw.md
+
+# Remove "## Tasks Created" section and replace with Stats
+awk '
+  /^## Tasks Created/ {
+    in_tasks=1
+    next
+  }
+  /^## / && in_tasks {
+    in_tasks=0
+    # When we hit the next section after Tasks Created, add Stats
+    if (total_tasks) {
+      print "## Stats"
+      print ""
+      print "Total tasks: " total_tasks
+      print "Parallel tasks: " parallel_tasks " (can be worked on simultaneously)"
+      print "Sequential tasks: " sequential_tasks " (have dependencies)"
+      if (total_effort) print "Estimated total effort: " total_effort " hours"
+      print ""
+    }
+  }
+  /^Total tasks:/ && in_tasks { total_tasks = ; next }
+  /^Parallel tasks:/ && in_tasks { parallel_tasks = ; next }
+  /^Sequential tasks:/ && in_tasks { sequential_tasks = ; next }
+  /^Estimated total effort:/ && in_tasks {
+    gsub(/^Estimated total effort: /, "")
+    total_effort = missing-ingredients-per-recipe-fix
+    next
+  }
+  !in_tasks { print }
+  END {
+    # If we were still in tasks section at EOF, add stats
+    if (in_tasks && total_tasks) {
+      print "## Stats"
+      print ""
+      print "Total tasks: " total_tasks
+      print "Parallel tasks: " parallel_tasks " (can be worked on simultaneously)"
+      print "Sequential tasks: " sequential_tasks " (have dependencies)"
+      if (total_effort) print "Estimated total effort: " total_effort
+    }
+  }
+' /tmp/epic-body-raw.md > /tmp/epic-body.md
+
+# Determine epic type (feature vs bug) from content
+if grep -qi "bug\|fix\|issue\|problem\|error" /tmp/epic-body.md; then
+  epic_type="bug"
+else
+  epic_type="feature"
+fi
+
+# Create epic issue with labels
+epic_number=$(gh issue create \
+  --repo "$REPO" \
+  --title "Epic: missing-ingredients-per-recipe-fix" \
+  --body-file /tmp/epic-body.md \
+  --label "epic,epic:missing-ingredients-per-recipe-fix,$epic_type" \
+  --json number -q .number)
+```
+
+Store the returned issue number for epic frontmatter update.
+
+### 2. Create Task Sub-Issues
+
+Check if gh-sub-issue is available:
+```bash
+if gh extension list | grep -q "yahsan2/gh-sub-issue"; then
+  use_subissues=true
+else
+  use_subissues=false
+  echo "⚠️ gh-sub-issue not installed. Using fallback mode."
+fi
+```
+
+Count task files to determine strategy:
+```bash
+task_count=$(ls .claude/epics/missing-ingredients-per-recipe-fix/[0-9][0-9][0-9].md 2>/dev/null | wc -l)
+```
+
+### For Small Batches (< 5 tasks): Sequential Creation
+
+```bash
+if [ "$task_count" -lt 5 ]; then
+  # Create sequentially for small batches
+  for task_file in .claude/epics/missing-ingredients-per-recipe-fix/[0-9][0-9][0-9].md; do
+    [ -f "$task_file" ] || continue
+
+    # Extract task name from frontmatter
+    task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+
+    # Strip frontmatter from task content
+    sed '1,/^---$/d; 1,/^---$/d' "$task_file" > /tmp/task-body.md
+
+    # Create sub-issue with labels
+    if [ "$use_subissues" = true ]; then
+      task_number=$(gh sub-issue create \
+        --parent "$epic_number" \
+        --title "$task_name" \
+        --body-file /tmp/task-body.md \
+        --label "task,epic:missing-ingredients-per-recipe-fix" \
+        --json number -q .number)
+    else
+      task_number=$(gh issue create \
+        --repo "$REPO" \
+        --title "$task_name" \
+        --body-file /tmp/task-body.md \
+        --label "task,epic:missing-ingredients-per-recipe-fix" \
+        --json number -q .number)
+    fi
+
+    # Record mapping for renaming
+    echo "$task_file:$task_number" >> /tmp/task-mapping.txt
+  done
+
+  # After creating all issues, update references and rename files
+  # This follows the same process as step 3 below
+fi
+```
+
+### For Larger Batches: Parallel Creation
+
+```bash
+if [ "$task_count" -ge 5 ]; then
+  echo "Creating $task_count sub-issues in parallel..."
+
+  # Check if gh-sub-issue is available for parallel agents
+  if gh extension list | grep -q "yahsan2/gh-sub-issue"; then
+    subissue_cmd="gh sub-issue create --parent $epic_number"
+  else
+    subissue_cmd="gh issue create --repo \"$REPO\""
+  fi
+
+  # Batch tasks for parallel processing
+  # Spawn agents to create sub-issues in parallel with proper labels
+  # Each agent must use: --label "task,epic:missing-ingredients-per-recipe-fix"
+fi
+```
+
+Use Task tool for parallel creation:
+```yaml
+Task:
+  description: "Create GitHub sub-issues batch {X}"
+  subagent_type: "general-purpose"
+  prompt: |
+    Create GitHub sub-issues for tasks in epic missing-ingredients-per-recipe-fix
+    Parent epic issue: #$epic_number
+
+    Tasks to process:
+    - {list of 3-4 task files}
+
+    For each task file:
+    1. Extract task name from frontmatter
+    2. Strip frontmatter using: sed '1,/^---$/d; 1,/^---$/d'
+    3. Create sub-issue using:
+       - If gh-sub-issue available:
+         gh sub-issue create --parent $epic_number --title "$task_name" \
+           --body-file /tmp/task-body.md --label "task,epic:missing-ingredients-per-recipe-fix"
+       - Otherwise: 
+         gh issue create --repo "$REPO" --title "$task_name" --body-file /tmp/task-body.md \
+           --label "task,epic:missing-ingredients-per-recipe-fix"
+    4. Record: task_file:issue_number
+
+    IMPORTANT: Always include --label parameter with "task,epic:missing-ingredients-per-recipe-fix"
+
+    Return mapping of files to issue numbers.
+```
+
+Consolidate results from parallel agents:
+```bash
+# Collect all mappings from agents
+cat /tmp/batch-*/mapping.txt >> /tmp/task-mapping.txt
+
+# IMPORTANT: After consolidation, follow step 3 to:
+# 1. Build old->new ID mapping
+# 2. Update all task references (depends_on, conflicts_with)
+# 3. Rename files with proper frontmatter updates
+```
+
+### 3. Rename Task Files and Update References
+
+First, build a mapping of old numbers to new issue IDs:
+```bash
+# Create mapping from old task numbers (001, 002, etc.) to new issue IDs
+> /tmp/id-mapping.txt
+while IFS=: read -r task_file task_number; do
+  # Extract old number from filename (e.g., 001 from 001.md)
+  old_num=$(basename "$task_file" .md)
+  echo "$old_num:$task_number" >> /tmp/id-mapping.txt
+done < /tmp/task-mapping.txt
+```
+
+Then rename files and update all references:
+```bash
+# Process each task file
+while IFS=: read -r task_file task_number; do
+  new_name="$(dirname "$task_file")/${task_number}.md"
+
+  # Read the file content
+  content=$(cat "$task_file")
+
+  # Update depends_on and conflicts_with references
+  while IFS=: read -r old_num new_num; do
+    # Update arrays like [001, 002] to use new issue numbers
+    content=$(echo "$content" | sed "s/\b$old_num\b/$new_num/g")
+  done < /tmp/id-mapping.txt
+
+  # Write updated content to new file
+  echo "$content" > "$new_name"
+
+  # Remove old file if different from new
+  [ "$task_file" != "$new_name" ] && rm "$task_file"
+
+  # Update github field in frontmatter
+  # Add the GitHub URL to the frontmatter
+  repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+  github_url="https://github.com/$repo/issues/$task_number"
+
+  # Update frontmatter with GitHub URL and current timestamp
+  current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  # Use sed to update the github and updated fields
+  sed -i.bak "/^github:/c\github: $github_url" "$new_name"
+  sed -i.bak "/^updated:/c\updated: $current_date" "$new_name"
+  rm "${new_name}.bak"
+done < /tmp/task-mapping.txt
+```
+
+### 4. Update Epic with Task List (Fallback Only)
+
+If NOT using gh-sub-issue, add task list to epic:
+
+```bash
+if [ "$use_subissues" = false ]; then
+  # Get current epic body
+  gh issue view ${epic_number} --json body -q .body > /tmp/epic-body.md
+
+  # Append task list
+  cat >> /tmp/epic-body.md << 'EOF'
+
+  ## Tasks
+  - [ ] #${task1_number} ${task1_name}
+  - [ ] #${task2_number} ${task2_name}
+  - [ ] #${task3_number} ${task3_name}
+  EOF
+
+  # Update epic issue
+  gh issue edit ${epic_number} --body-file /tmp/epic-body.md
+fi
+```
+
+With gh-sub-issue, this is automatic!
+
+### 5. Update Epic File
+
+Update the epic file with GitHub URL, timestamp, and real task IDs:
+
+#### 5a. Update Frontmatter
+```bash
+# Get repo info
+repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+epic_url="https://github.com/$repo/issues/$epic_number"
+current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Update epic frontmatter
+sed -i.bak "/^github:/c\github: $epic_url" .claude/epics/missing-ingredients-per-recipe-fix/epic.md
+sed -i.bak "/^updated:/c\updated: $current_date" .claude/epics/missing-ingredients-per-recipe-fix/epic.md
+rm .claude/epics/missing-ingredients-per-recipe-fix/epic.md.bak
+```
+
+#### 5b. Update Tasks Created Section
+```bash
+# Create a temporary file with the updated Tasks Created section
+cat > /tmp/tasks-section.md << 'EOF'
+## Tasks Created
+EOF
+
+# Add each task with its real issue number
+for task_file in .claude/epics/missing-ingredients-per-recipe-fix/[0-9]*.md; do
+  [ -f "$task_file" ] || continue
+
+  # Get issue number (filename without .md)
+  issue_num=$(basename "$task_file" .md)
+
+  # Get task name from frontmatter
+  task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+
+  # Get parallel status
+  parallel=$(grep '^parallel:' "$task_file" | sed 's/^parallel: *//')
+
+  # Add to tasks section
+  echo "- [ ] #${issue_num} - ${task_name} (parallel: ${parallel})" >> /tmp/tasks-section.md
+done
+
+# Add summary statistics
+total_count=$(ls .claude/epics/missing-ingredients-per-recipe-fix/[0-9]*.md 2>/dev/null | wc -l)
+parallel_count=$(grep -l '^parallel: true' .claude/epics/missing-ingredients-per-recipe-fix/[0-9]*.md 2>/dev/null | wc -l)
+sequential_count=$((total_count - parallel_count))
+
+cat >> /tmp/tasks-section.md << EOF
+
+Total tasks: ${total_count}
+Parallel tasks: ${parallel_count}
+Sequential tasks: ${sequential_count}
+EOF
+
+# Replace the Tasks Created section in epic.md
+# First, create a backup
+cp .claude/epics/missing-ingredients-per-recipe-fix/epic.md .claude/epics/missing-ingredients-per-recipe-fix/epic.md.backup
+
+# Use awk to replace the section
+awk '
+  /^## Tasks Created/ {
+    skip=1
+    while ((getline line < "/tmp/tasks-section.md") > 0) print line
+    close("/tmp/tasks-section.md")
+  }
+  /^## / && !/^## Tasks Created/ { skip=0 }
+  !skip && !/^## Tasks Created/ { print }
+' .claude/epics/missing-ingredients-per-recipe-fix/epic.md.backup > .claude/epics/missing-ingredients-per-recipe-fix/epic.md
+
+# Clean up
+rm .claude/epics/missing-ingredients-per-recipe-fix/epic.md.backup
+rm /tmp/tasks-section.md
+```
+
+### 6. Create Mapping File
+
+Create `.claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md`:
+```bash
+# Create mapping file
+cat > .claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md << EOF
+# GitHub Issue Mapping
+
+Epic: #${epic_number} - https://github.com/${repo}/issues/${epic_number}
+
+Tasks:
+EOF
+
+# Add each task mapping
+for task_file in .claude/epics/missing-ingredients-per-recipe-fix/[0-9]*.md; do
+  [ -f "$task_file" ] || continue
+
+  issue_num=$(basename "$task_file" .md)
+  task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+
+  echo "- #${issue_num}: ${task_name} - https://github.com/${repo}/issues/${issue_num}" >> .claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md
+done
+
+# Add sync timestamp
+echo "" >> .claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md
+echo "Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .claude/epics/missing-ingredients-per-recipe-fix/github-mapping.md
+```
+
+### 7. Create Worktree
+
+Follow `/rules/worktree-operations.md` to create development worktree:
+
+```bash
+# Ensure main is current
+git checkout main
+git pull origin main
+
+# Create worktree for epic
+git worktree add ../epic-missing-ingredients-per-recipe-fix -b epic/missing-ingredients-per-recipe-fix
+
+echo "✅ Created worktree: ../epic-missing-ingredients-per-recipe-fix"
+```
+
+### 8. Output
+
+```
+✅ Synced to GitHub
+  - Epic: #{epic_number} - {epic_title}
+  - Tasks: {count} sub-issues created
+  - Labels applied: epic, task, epic:{name}
+  - Files renamed: 001.md → {issue_id}.md
+  - References updated: depends_on/conflicts_with now use issue IDs
+  - Worktree: ../epic-missing-ingredients-per-recipe-fix
+
+Next steps:
+  - Start parallel execution: /pm:epic-start missing-ingredients-per-recipe-fix
+  - Or work on single issue: /pm:issue-start {issue_number}
+  - View epic: https://github.com/{owner}/{repo}/issues/{epic_number}
+```
+
+## Error Handling
+
+Follow `/rules/github-operations.md` for GitHub CLI errors.
+
+If any issue creation fails:
+- Report what succeeded
+- Note what failed
+- Don't attempt rollback (partial sync is fine)
+
+## Important Notes
+
+- Trust GitHub CLI authentication
+- Don't pre-check for duplicates
+- Update frontmatter only after successful creation
+- Keep operations simple and atomic
+
+---
+
+# Issue Start
+
+Begin work on a GitHub issue with parallel agents based on work stream analysis.
+
+## Usage
+```
+/pm:issue-start <issue_number>
+```
+
+## Quick Check
+
+1. **Get issue details:**
+   ```bash
+   gh issue view 165 --json state,title,labels,body
+   ```
+   If it fails: "❌ Cannot access issue #165. Check number or run: gh auth login"
+
+2. **Find local task file:**
+   - First check if `.claude/epics/*/165.md` exists (new naming)
+   - If not found, search for file containing `github:.*issues/165` in frontmatter (old naming)
+   - If not found: "❌ No local task for issue #165. This issue may have been created outside the PM system."
+
+3. **Check for analysis:**
+   ```bash
+   test -f .claude/epics/*/165-analysis.md || echo "❌ No analysis found for issue #165
+   
+   Run: /pm:issue-analyze 165 first
+   Or: /pm:issue-start 165 --analyze to do both"
+   ```
+   If no analysis exists and no --analyze flag, stop execution.
+
+## Instructions
+
+### 1. Ensure Worktree Exists
+
+Check if epic worktree exists:
+```bash
+# Find epic name from task file
+epic_name={extracted_from_path}
+
+# Check worktree
+if ! git worktree list | grep -q "epic-$epic_name"; then
+  echo "❌ No worktree for epic. Run: /pm:epic-start $epic_name"
+  exit 1
+fi
+```
+
+### 2. Read Analysis
+
+Read `.claude/epics/{epic_name}/165-analysis.md`:
+- Parse parallel streams
+- Identify which can start immediately
+- Note dependencies between streams
+
+### 3. Setup Progress Tracking
+
+Get current datetime: `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+Create workspace structure:
+```bash
+mkdir -p .claude/epics/{epic_name}/updates/165
+```
+
+Update task file frontmatter `updated` field with current datetime.
+
+### 4. Launch Parallel Agents
+
+For each stream that can start immediately:
+
+Create `.claude/epics/{epic_name}/updates/165/stream-{X}.md`:
+```markdown
+---
+issue: 165
+stream: {stream_name}
+agent: {agent_type}
+started: {current_datetime}
+status: in_progress
+---
+
+# Stream {X}: {stream_name}
+
+## Scope
+{stream_description}
+
+## Files
+{file_patterns}
+
+## Progress
+- Starting implementation
+```
+
+Launch agent using Task tool:
+```yaml
+Task:
+  description: "Issue #165 Stream {X}"
+  subagent_type: "{agent_type}"
+  prompt: |
+    You are working on Issue #165 in the epic worktree.
+    
+    Worktree location: ../epic-{epic_name}/
+    Your stream: {stream_name}
+    
+    Your scope:
+    - Files to modify: {file_patterns}
+    - Work to complete: {stream_description}
+    
+    Requirements:
+    1. Read full task from: .claude/epics/{epic_name}/{task_file}
+    2. Work ONLY in your assigned files
+    3. Commit frequently with format: "Issue #165: {specific change}"
+    4. Update progress in: .claude/epics/{epic_name}/updates/165/stream-{X}.md
+    5. Follow coordination rules in /rules/agent-coordination.md
+    
+    If you need to modify files outside your scope:
+    - Check if another stream owns them
+    - Wait if necessary
+    - Update your progress file with coordination notes
+    
+    Complete your stream's work and mark as completed when done.
+```
+
+### 5. GitHub Assignment
+
+```bash
+# Assign to self and mark in-progress
+gh issue edit 165 --add-assignee @me --add-label "in-progress"
+```
+
+### 6. Output
+
+```
+✅ Started parallel work on issue #165
+
+Epic: {epic_name}
+Worktree: ../epic-{epic_name}/
+
+Launching {count} parallel agents:
+  Stream A: {name} (Agent-1) ✓ Started
+  Stream B: {name} (Agent-2) ✓ Started
+  Stream C: {name} - Waiting (depends on A)
+
+Progress tracking:
+  .claude/epics/{epic_name}/updates/165/
+
+Monitor with: /pm:epic-status {epic_name}
+Sync updates: /pm:issue-sync 165
+```
+
+## Error Handling
+
+If any step fails, report clearly:
+- "❌ {What failed}: {How to fix}"
+- Continue with what's possible
+- Never leave partial state
+
+## Important Notes
+
+Follow `/rules/datetime.md` for timestamps.
+Keep it simple - trust that GitHub and file system work.
+
+---
+
+I need to ask a meta-question here, this task is done! When you tried createing the issue using the gh command, the label "epic:missing-ingredients-per-recipe-fix" didn't exist. This is not surprising, it would need to be created first. The "epic" label, however, does exist, but it didn't return as an existing label when you listed the labels. This is puzzling.
+
+Two questions:
+1. It doesn't really make sense to create a label for each seperate epic, does it? Does the pm-command specifically state that each label should exist?
+2. Why didn't the "epic" label not return as existing when parisng the available labels?
+
+---
+
+Can you check where in the .claude/commands files you are instructed to create or at least assign these labels? And where would the truncate limit go?
