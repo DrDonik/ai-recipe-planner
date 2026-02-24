@@ -96,11 +96,17 @@ jobs:
           # Fetch the current labels on the issue
           LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name')
 
+          HAS_EPIC_LABEL=$(echo "$LABELS" | grep -c '^epic$' || true)
           HAS_AUTO_IMPLEMENTABLE=$(echo "$LABELS" | grep -c '^auto-implementable$' || true)
           HAS_VALIDATED=$(echo "$LABELS" | grep -c '^validated$' || true)
           HAS_SECURITY_SENSITIVE=$(echo "$LABELS" | grep -c '^security-sensitive$' || true)
 
-          if [ "$HAS_SECURITY_SENSITIVE" -gt 0 ]; then
+          if [ "$HAS_EPIC_LABEL" -gt 0 ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          ℹ️ This issue has been added by the ccpm system. It should be addressed locally using the appropriate ccpm-command.
+          EOF
+            )"
+          elif [ "$HAS_SECURITY_SENSITIVE" -gt 0 ]; then
             gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
           🔒 This issue has been flagged as security-sensitive and requires manual review by a maintainer.
           Auto-implementation is disabled for security-sensitive issues.
