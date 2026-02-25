@@ -252,7 +252,7 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
   cleanedText = cleanedText.replace(/```json/g, "").replace(/```/g, "").trim();
 
   // Step 2: Replace typographic quotes with standard double quotes to handle copy-paste from devices/apps that auto-format
-  // Covers English (""), German („"), and Swiss/French («») double quotes
+// Covers English (“”), German („“), and Swiss/French («») double quotes
   cleanedText = cleanedText.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
 
   // Step 3: Strip everything after the last closing brace
