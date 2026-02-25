@@ -218,6 +218,20 @@ describe('llm service', () => {
       expect(prompt).toContain('fun');
     });
 
+    it('should instruct LLM to use single quotes instead of double quotes inside string values', () => {
+      const prompt = buildRecipePrompt({
+        ingredients: [],
+        people: 2,
+        meals: 1,
+        diet: 'No restrictions',
+        language: 'English',
+      });
+
+      // Rule 18 must forbid double quotes in string values and suggest single quotes
+      expect(prompt).toContain("Never use double quote characters");
+      expect(prompt).toContain("single quotes");
+    });
+
     it('should respect language parameter in instructions', () => {
       const ingredients: PantryItem[] = [
         { id: 'id1', name: 'Chicken', amount: '500g' },
@@ -602,6 +616,124 @@ Sources
       expect(result.recipes).toHaveLength(1);
       expect(result.recipes[0].instructions[0]).toBe('Mix ingredients in bowl.');
       expect(result.recipes[0].instructions[1]).toBe('Cook it.');
+    });
+
+    it('should repair unescaped double quotes in the comments field', () => {
+      // LLM omits escaping: "comments": "Known as "paella" in Spain."
+      const response = `{
+  "recipes": [{
+    "id": "1",
+    "title": "Paella",
+    "time": "45 mins",
+    "ingredients": [{"item": "Rice", "amount": "300g"}],
+    "instructions": ["Cook the rice."],
+    "usedIngredients": [],
+    "missingIngredients": [],
+    "comments": "Known as "paella" in Spain."
+  }],
+  "shoppingList": []
+}`;
+
+      const result = parseRecipeResponse(response);
+
+      expect(result.recipes[0].comments).toBe('Known as "paella" in Spain.');
+    });
+
+    it('should repair multiple unescaped quotes in comments', () => {
+      // Multiple unescaped quotes in one string: "guanciale" vs "pancetta"
+      const response = `{
+  "recipes": [{
+    "id": "1",
+    "title": "Carbonara",
+    "time": "20 mins",
+    "ingredients": [{"item": "Pasta", "amount": "200g"}],
+    "instructions": ["Boil pasta."],
+    "usedIngredients": [],
+    "missingIngredients": [],
+    "comments": "Italians debate "guanciale" vs "pancetta" for authentic carbonara."
+  }],
+  "shoppingList": []
+}`;
+
+      const result = parseRecipeResponse(response);
+
+      expect(result.recipes[0].comments).toBe('Italians debate "guanciale" vs "pancetta" for authentic carbonara.');
+    });
+
+    it('should repair unescaped double quotes in an instructions string', () => {
+      // Unescaped quotes can appear in instructions too
+      const response = `{
+  "recipes": [{
+    "id": "1",
+    "title": "Test",
+    "time": "30 mins",
+    "ingredients": [{"item": "Salt", "amount": "1g"}],
+    "instructions": ["Season with salt until it tastes "just right"."],
+    "usedIngredients": [],
+    "missingIngredients": []
+  }],
+  "shoppingList": []
+}`;
+
+      const result = parseRecipeResponse(response);
+
+      expect(result.recipes[0].instructions[0]).toBe('Season with salt until it tastes "just right".');
+    });
+
+    it('should not corrupt already-properly-escaped quotes in string values', () => {
+      // If the LLM correctly escapes quotes, they must survive the repair pass unchanged
+      const response = JSON.stringify({
+        recipes: [{
+          id: '1',
+          title: 'Test',
+          time: '20 mins',
+          ingredients: [{ item: 'Salt', amount: '1g' }],
+          instructions: ['Cook.'],
+          usedIngredients: [],
+          missingIngredients: [],
+          comments: 'Romans called it \\"sal\\" — the origin of the word salary.',
+        }],
+        shoppingList: [],
+      });
+
+      const result = parseRecipeResponse(response);
+
+      expect(result.recipes[0].comments).toBe('Romans called it \\"sal\\" — the origin of the word salary.');
+    });
+
+    it('should repair quotes across multiple recipes', () => {
+      const response = `{
+  "recipes": [
+    {
+      "id": "1",
+      "title": "Dish "Alpha"",
+      "time": "15 mins",
+      "ingredients": [{"item": "Egg", "amount": "1"}],
+      "instructions": ["Fry."],
+      "usedIngredients": [],
+      "missingIngredients": [],
+      "comments": "Named "Alpha" by its inventor."
+    },
+    {
+      "id": "2",
+      "title": "Dish Beta",
+      "time": "20 mins",
+      "ingredients": [{"item": "Milk", "amount": "100ml"}],
+      "instructions": ["Heat."],
+      "usedIngredients": [],
+      "missingIngredients": [],
+      "comments": "A classic."
+    }
+  ],
+  "shoppingList": []
+}`;
+
+      const result = parseRecipeResponse(response);
+
+      expect(result.recipes).toHaveLength(2);
+      expect(result.recipes[0].title).toBe('Dish "Alpha"');
+      expect(result.recipes[0].comments).toBe('Named "Alpha" by its inventor.');
+      expect(result.recipes[1].comments).toBe('A classic.');
     });
   });
 

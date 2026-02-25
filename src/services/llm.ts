@@ -159,8 +159,8 @@ export const buildRecipePrompt = ({
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
-    18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON ...
-    19. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK!
+    18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.
+    19. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK! Use single quotes (') for any quotations within the text.
     
     NUTRITION ESTIMATES:
     - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
@@ -190,6 +190,57 @@ export const buildRecipePrompt = ({
 };
 
 /**
+ * Attempts to repair unescaped double quotes inside JSON string values.
+ *
+ * Uses a character-by-character state machine: when inside a string value,
+ * a `"` is treated as a closing quote only if it is immediately followed by
+ * a JSON-structural character (`:`, `,`, `}`, `]`) or end-of-input. All other
+ * `"` characters inside a string are escaped to `\"`.
+ *
+ * This handles the common LLM mistake of embedding raw double quotes in free-text
+ * fields such as `"comments"` or `"instructions"`, e.g.:
+ *   `"comments": "Known as "paella" in Spain."`
+ * becomes:
+ *   `"comments": "Known as \"paella\" in Spain."`
+ */
+const repairUnescapedQuotes = (text: string): string => {
+  const result: string[] = [];
+  let inString = false;
+  let i = 0;
+
+  while (i < text.length) {
+    const ch = text[i];
+
+    if (!inString) {
+      result.push(ch);
+      if (ch === '"') inString = true;
+    } else if (ch === '\\' && i + 1 < text.length) {
+      // Escape sequence: copy both chars and stay inside the string
+      result.push(ch, text[++i]);
+    } else if (ch === '"') {
+      // Look past any whitespace to find the next meaningful character
+      let j = i + 1;
+      while (j < text.length && ' \t\r\n'.includes(text[j])) j++;
+      const next = j < text.length ? text[j] : '';
+      if (':,}]'.includes(next) || next === '') {
+        // Structural context: this is the closing quote
+        inString = false;
+        result.push(ch);
+      } else {
+        // Content context: escape the interior quote
+        result.push('\\', '"');
+      }
+    } else {
+      result.push(ch);
+    }
+
+    i++;
+  }
+
+  return result.join('');
+};
+
+/**
  * Parses the LLM response text into a MealPlan.
  * Exported so it can be used by the copy-paste flow.
  * Now includes runtime validation using Zod to ensure data structure is correct.
@@ -201,7 +252,7 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
   cleanedText = cleanedText.replace(/```json/g, "").replace(/```/g, "").trim();
 
   // Step 2: Replace typographic quotes with standard double quotes to handle copy-paste from devices/apps that auto-format
-  // Covers English (“”), German („“), and Swiss/French («») double quotes
+// Covers English (“”), German („“), and Swiss/French («») double quotes
   cleanedText = cleanedText.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
 
   // Step 3: Strip everything after the last closing brace
@@ -218,9 +269,21 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
 
   const errors = errorTranslations ?? translations.English.errors;
 
+  // Step 5: Parse JSON, with a fallback repair pass for unescaped interior quotes
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(cleanedText);
+    parsed = JSON.parse(cleanedText);
+  } catch {
+    // JSON.parse failed — attempt to repair unescaped double quotes in string values and retry
+    try {
+      parsed = JSON.parse(repairUnescapedQuotes(cleanedText));
+    } catch {
+      console.error("JSON Parse Error. Raw response:", cleanedText);
+      throw new Error(errors.invalidJson);
+    }
+  }
 
+  try {
     // Validate the parsed data against our schema
     const validated = MealPlanSchema.parse(parsed);
     return validated;
@@ -235,9 +298,6 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
         errors.tryAgain
       );
     }
-
-    // JSON parsing failed
-    console.error("JSON Parse Error. Raw response:", cleanedText);
     throw new Error(errors.invalidJson);
   }
 };
