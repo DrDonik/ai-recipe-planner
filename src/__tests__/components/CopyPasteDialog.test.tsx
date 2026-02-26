@@ -176,7 +176,7 @@ describe('CopyPasteDialog', () => {
             await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
 
             expect(screen.getByRole('alert')).toBeInTheDocument();
-            expect(screen.getByText(/Looks like you copied the prompt/i)).toBeInTheDocument();
+            expect(screen.getByText(/You didn't copy the AI's response yet/i)).toBeInTheDocument();
             expect(props.onSubmit).not.toHaveBeenCalled();
         });
     });

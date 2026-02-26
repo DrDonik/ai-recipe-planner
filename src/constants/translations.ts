@@ -122,7 +122,7 @@ export const translations = {
             instructionsPasteStep3: "Come back here and click 'Import Recipes'",
             responsePlaceholder: "Paste the exact AI response here...",
             responseRequired: "No AI response found in your clipboard. Please paste it manually into the field above.",
-            clipboardIsPrompt: "Looks like you copied the prompt, not the AI's response. Paste the prompt into your AI chat, copy the response, and try again.",
+            clipboardIsPrompt: "You didn't copy the AI's response yet. Paste the prompt into your AI chat, copy the response, and try again.",
             copyFailed: "Couldn't copy automatically. Please select the text above and copy it manually."
         },
         apiKeySecurity: {
@@ -274,7 +274,7 @@ export const translations = {
             instructionsPasteStep3: "Komme hierher zurück und klicke auf 'Rezepte importieren'",
             responsePlaceholder: "Füge hier die exakte Antwort der KI ein...",
             responseRequired: "Keine KI-Antwort in der Zwischenablage gefunden. Bitte füge sie manuell in das Feld oben ein.",
-            clipboardIsPrompt: "Du hast anscheinend den Prompt kopiert, nicht die Antwort der KI. Füge den Prompt in deinen KI-Chat ein, kopiere die Antwort und versuche es erneut.",
+            clipboardIsPrompt: "Du hast die Antwort der KI noch nicht kopiert. Füge den Prompt in deinen KI-Chat ein, kopiere die Antwort und versuche es erneut.",
             copyFailed: "Automatisches Kopieren fehlgeschlagen. Bitte markiere den Text oben und kopiere ihn manuell."
         },
         apiKeySecurity: {
@@ -426,7 +426,7 @@ export const translations = {
             instructionsPasteStep3: "Revenez ici et cliquez sur 'Importer les recettes'",
             responsePlaceholder: "Collez ici la réponse exacte de l'IA...",
             responseRequired: "Aucune réponse IA trouvée dans votre presse-papiers. Veuillez la coller manuellement dans le champ ci-dessus.",
-            clipboardIsPrompt: "Il semble que vous ayez copié le prompt, pas la réponse de l'IA. Collez le prompt dans votre chat IA, copiez la réponse et réessayez.",
+            clipboardIsPrompt: "Vous n'avez pas encore copié la réponse de l'IA. Collez le prompt dans votre chat IA, copiez la réponse et réessayez.",
             copyFailed: "La copie automatique a échoué. Veuillez sélectionner le texte ci-dessus et le copier manuellement."
         },
         apiKeySecurity: {
@@ -578,7 +578,7 @@ export const translations = {
             instructionsPasteStep3: "Vuelve aquí y haz clic en 'Importar recetas'",
             responsePlaceholder: "Pega aquí la respuesta exacta de la IA...",
             responseRequired: "No se encontró ninguna respuesta de IA en tu portapapeles. Por favor, pégala manualmente en el campo de arriba.",
-            clipboardIsPrompt: "Parece que copiaste el prompt, no la respuesta de la IA. Pega el prompt en tu chat de IA, copia la respuesta e inténtalo de nuevo.",
+            clipboardIsPrompt: "Aún no has copiado la respuesta de la IA. Pega el prompt en tu chat de IA, copia la respuesta e inténtalo de nuevo.",
             copyFailed: "No se pudo copiar automáticamente. Por favor, selecciona el texto de arriba y cópialo manualmente."
         },
         apiKeySecurity: {
