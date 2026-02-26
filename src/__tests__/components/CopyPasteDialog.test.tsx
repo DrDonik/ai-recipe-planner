@@ -112,13 +112,13 @@ describe('CopyPasteDialog', () => {
             expect(screen.getByRole('button', { name: /Copy Prompt/i })).toBeInTheDocument();
         });
 
-        it('shows error when submitting empty response', async () => {
+        it('shows error when submitting empty response and clipboard is inaccessible', async () => {
             const { user, props } = await advanceToPasteStep();
 
             await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
 
             expect(screen.getByRole('alert')).toBeInTheDocument();
-            expect(screen.getByText(/Please paste the AI's response first/i)).toBeInTheDocument();
+            expect(screen.getByText(/No AI response found in your clipboard/i)).toBeInTheDocument();
             expect(props.onSubmit).not.toHaveBeenCalled();
         });
 
@@ -146,19 +146,15 @@ describe('CopyPasteDialog', () => {
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();
         });
 
-        it('auto-pastes clipboard content into textarea when textarea is empty', async () => {
+        it('auto-pastes from clipboard and submits immediately when textarea is empty', async () => {
             vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('{"recipes": [{"title": "Pasta"}]}');
             const { user, props } = await advanceToPasteStep();
 
             await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
 
-            // Textarea should now contain the clipboard content
-            const textarea = screen.getByPlaceholderText(/Paste the exact AI response/i);
-            expect(textarea).toHaveValue('{"recipes": [{"title": "Pasta"}]}');
-            // No error shown — user just needs to click Import Recipes once more to confirm
+            // onSubmit called immediately with the clipboard content — no second click needed
+            expect(props.onSubmit).toHaveBeenCalledWith('{"recipes": [{"title": "Pasta"}]}');
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-            // onSubmit not yet called; user reviews the pasted content first
-            expect(props.onSubmit).not.toHaveBeenCalled();
         });
 
         it('shows error when textarea is empty and clipboard content is also empty', async () => {
@@ -168,7 +164,19 @@ describe('CopyPasteDialog', () => {
             await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
 
             expect(screen.getByRole('alert')).toBeInTheDocument();
-            expect(screen.getByText(/Please paste the AI's response first/i)).toBeInTheDocument();
+            expect(screen.getByText(/No AI response found in your clipboard/i)).toBeInTheDocument();
+            expect(props.onSubmit).not.toHaveBeenCalled();
+        });
+
+        it('shows error when clipboard contains the original prompt instead of the AI response', async () => {
+            // defaultProps.prompt is 'Test prompt content', clipboard returns the same
+            vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('Test prompt content');
+            const { user, props } = await advanceToPasteStep();
+
+            await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
+
+            expect(screen.getByRole('alert')).toBeInTheDocument();
+            expect(screen.getByText(/Looks like you copied the prompt/i)).toBeInTheDocument();
             expect(props.onSubmit).not.toHaveBeenCalled();
         });
     });

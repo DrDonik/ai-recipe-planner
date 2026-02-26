@@ -46,8 +46,12 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
             try {
                 const text = await navigator.clipboard.readText();
                 if (text.trim()) {
-                    setResponse(text);
+                    if (text.trim() === prompt.trim()) {
+                        setError(t.copyPaste.clipboardIsPrompt);
+                        return;
+                    }
                     setError(null);
+                    onSubmit(text);
                     return;
                 }
             } catch {
@@ -118,11 +122,18 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                         <>
                             <div className="flex items-start gap-2 text-sm text-text-muted bg-blue-500/10 rounded-lg p-3">
                                 <AlertCircle size={16} className="text-blue-500 shrink-0 mt-0.5" />
-                                <span>
-                                    {t.copyPaste.instructionsPaste}{' '}
-                                    <Copy size={14} className="inline-block align-text-bottom mx-0.5" />
-                                    {' '}{t.copyPaste.instructionsPasteEnd}
-                                </span>
+                                <div className="flex flex-col gap-1.5">
+                                    <span>{t.copyPaste.instructionsPasteIntro}</span>
+                                    <ol className="flex flex-col gap-0.5 list-decimal list-inside">
+                                        <li>{t.copyPaste.instructionsPasteStep1}</li>
+                                        <li>
+                                            {t.copyPaste.instructionsPasteStep2}{' '}
+                                            <Copy size={14} className="inline-block align-text-bottom mx-0.5" />
+                                            {' '}{t.copyPaste.instructionsPasteStep2End}
+                                        </li>
+                                        <li>{t.copyPaste.instructionsPasteStep3}</li>
+                                    </ol>
+                                </div>
                             </div>
                             <textarea
                                 ref={textareaRef}
