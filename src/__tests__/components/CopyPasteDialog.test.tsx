@@ -92,6 +92,11 @@ describe('CopyPasteDialog', () => {
             return result;
         };
 
+        beforeEach(() => {
+            // Default: clipboard read fails so existing empty-submission tests still hit the error path
+            vi.spyOn(navigator.clipboard, 'readText').mockRejectedValue(new DOMException('Permission denied'));
+        });
+
         it('shows back and submit buttons', async () => {
             await advanceToPasteStep();
 
@@ -107,13 +112,13 @@ describe('CopyPasteDialog', () => {
             expect(screen.getByRole('button', { name: /Copy Prompt/i })).toBeInTheDocument();
         });
 
-        it('shows error when submitting empty response', async () => {
+        it('shows error when submitting empty response and clipboard is inaccessible', async () => {
             const { user, props } = await advanceToPasteStep();
 
             await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
 
             expect(screen.getByRole('alert')).toBeInTheDocument();
-            expect(screen.getByText(/Please paste the AI's response first/i)).toBeInTheDocument();
+            expect(screen.getByText(/No AI response found in your clipboard/i)).toBeInTheDocument();
             expect(props.onSubmit).not.toHaveBeenCalled();
         });
 
@@ -139,6 +144,40 @@ describe('CopyPasteDialog', () => {
             await user.type(textarea, 'a');
 
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        });
+
+        it('auto-pastes from clipboard and submits immediately when textarea is empty', async () => {
+            vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('{"recipes": [{"title": "Pasta"}]}');
+            const { user, props } = await advanceToPasteStep();
+
+            await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
+
+            // onSubmit called immediately with the clipboard content — no second click needed
+            expect(props.onSubmit).toHaveBeenCalledWith('{"recipes": [{"title": "Pasta"}]}');
+            expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        });
+
+        it('shows error when textarea is empty and clipboard content is also empty', async () => {
+            vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('   ');
+            const { user, props } = await advanceToPasteStep();
+
+            await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
+
+            expect(screen.getByRole('alert')).toBeInTheDocument();
+            expect(screen.getByText(/No AI response found in your clipboard/i)).toBeInTheDocument();
+            expect(props.onSubmit).not.toHaveBeenCalled();
+        });
+
+        it('shows error when clipboard contains the original prompt instead of the AI response', async () => {
+            // defaultProps.prompt is 'Test prompt content', clipboard returns the same
+            vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('Test prompt content');
+            const { user, props } = await advanceToPasteStep();
+
+            await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
+
+            expect(screen.getByRole('alert')).toBeInTheDocument();
+            expect(screen.getByText(/You didn't copy the AI's response yet/i)).toBeInTheDocument();
+            expect(props.onSubmit).not.toHaveBeenCalled();
         });
     });
 
