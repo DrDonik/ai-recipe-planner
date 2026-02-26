@@ -41,8 +41,18 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
         }, 600);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!response.trim()) {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text.trim()) {
+                    setResponse(text);
+                    setError(null);
+                    return;
+                }
+            } catch {
+                // Clipboard read failed or permission denied — fall through to show error
+            }
             setError(t.copyPaste.responseRequired);
             return;
         }

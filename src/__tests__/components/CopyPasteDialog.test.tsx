@@ -92,6 +92,11 @@ describe('CopyPasteDialog', () => {
             return result;
         };
 
+        beforeEach(() => {
+            // Default: clipboard read fails so existing empty-submission tests still hit the error path
+            vi.spyOn(navigator.clipboard, 'readText').mockRejectedValue(new DOMException('Permission denied'));
+        });
+
         it('shows back and submit buttons', async () => {
             await advanceToPasteStep();
 
@@ -139,6 +144,32 @@ describe('CopyPasteDialog', () => {
             await user.type(textarea, 'a');
 
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        });
+
+        it('auto-pastes clipboard content into textarea when textarea is empty', async () => {
+            vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('{"recipes": [{"title": "Pasta"}]}');
+            const { user, props } = await advanceToPasteStep();
+
+            await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
+
+            // Textarea should now contain the clipboard content
+            const textarea = screen.getByPlaceholderText(/Paste the exact AI response/i);
+            expect(textarea).toHaveValue('{"recipes": [{"title": "Pasta"}]}');
+            // No error shown — user just needs to click Import Recipes once more to confirm
+            expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+            // onSubmit not yet called; user reviews the pasted content first
+            expect(props.onSubmit).not.toHaveBeenCalled();
+        });
+
+        it('shows error when textarea is empty and clipboard content is also empty', async () => {
+            vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('   ');
+            const { user, props } = await advanceToPasteStep();
+
+            await user.click(screen.getByRole('button', { name: /Import Recipes/i }));
+
+            expect(screen.getByRole('alert')).toBeInTheDocument();
+            expect(screen.getByText(/Please paste the AI's response first/i)).toBeInTheDocument();
+            expect(props.onSubmit).not.toHaveBeenCalled();
         });
     });
 
