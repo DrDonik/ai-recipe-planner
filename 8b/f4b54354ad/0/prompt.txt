@@ -1,0 +1,57 @@
+I have realised an issue in this code base: When generating several meals in one go, with different ingredients, the AI (gemini, when using the API mode) often returns recipes with the same ingredient used in multiple recipes. E.g., it stretches 240 g potatoes over two meals, using 120 g each. This doesn't make much sense. Let's tackle this problem in three steps: 1. Let's figure out scenarios when it does and when it doesn't make sense to distribute one ingredient over different recipes. 2. Let's figure out the root cause for the LLM to distribute the ingredients. 3. Let's find a solution to the root cause.
+
+---
+
+What purpose does rule 7 serve at all, then?
+
+---
+
+Yes, let's add the new rule.
+
+---
+
+Let's add the new rule, but the way you phrased it above might lead to new problems. You say: "Each recipe must use realistic, standalone portions of each ingredient." The LLM could interpret that as "every meal needs to include some of each pantry ingredient." Let's first figure out the new rule before adding it to the prompt. What would be a better, less ambiguous version?
+
+---
+
+Why do we need the first sentence in the new rule? Wouldnt the second sentence suffice? Or is it too weak?
+
+---
+
+Then I would like to be even more concrete than "has a limited quantity". As the user could request meals for 3 people, (or n people), can we make the sentence more clear than just "limited quantity"? (After all, all quantities are limited.)
+
+---
+
+And what if we frame the first sentence positivly? "When a pantry item's quantity results in a full serving per person, don't split it."? Or is this again to vague?
+
+---
+
+Now, 120g of potatoes is not a full serving: it's a full PART of a serving ...
+
+---
+
+Works better, only the side serving is too small: Use 250g of potatoes as a side for 1 person. Should we also add a second example for the "main" ingredient?
+
+---
+
+Sounds good. What would the full new rule now be?
+
+---
+
+Not yet. How does this new rule now interact with the other rules (mainly 2 and 7, but also the other rules we haven't talked about yet).
+
+---
+
+I think the new rule should go directly after rule 2 or rule 3, as it belongs to that set. What is rule 4?
+
+---
+
+Sounds good, let's put it there. Go ahead and implement the new rule.
+
+---
+
+Would rules 8 and 9 (in the new numbering) not belong after rule 4 (in the new numbering)?
+
+---
+
+Yes, go ahead and reorder.
