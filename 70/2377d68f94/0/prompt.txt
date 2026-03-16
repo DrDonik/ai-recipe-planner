@@ -1,0 +1,29 @@
+On the remote, there is some depandabot vulnerability. What does that mean?
+
+---
+
+What is a "transitive dep of Vite"?
+
+---
+
+But updating vite might solve this in itself? Dependabot also had a related pull request. Can you check this?
+
+---
+
+Check first the depandabot.yml, we blocked some update earlier because there was some breaking changes. Maybe it would also be worthwile unblocking that in the process. What was the block?
+
+---
+
+Yes, try those major bumps locally.
+
+---
+
+Instead of adding rollup explicitely, wasn't there a minor vite update that depends on the correct rollup version?
+
+---
+
+We should also block dependabot from suggesting major updates to both vite and (maybe?) plugin-react, shouldn't we?
+
+---
+
+Dependabot also suggested other changes in it's PR. Why don't we apply those that work and test it again? Both using npm test, and also by starting a dev-server after all the updates.
