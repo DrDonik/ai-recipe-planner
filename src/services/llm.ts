@@ -149,18 +149,17 @@ export const buildRecipePrompt = ({
     5. ${ingredients.length > 0 ? `If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.` : `For every meal, choose ingredients that work well together and create balanced, delicious meals.`}
     6. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients ${spices.length > 0 ? '(except available spices/staples)' : ''} will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
     7. Ensure variety: The ${meals} meals should be distinct in style and flavor profile.
-    8. For every meal, use the five basic flavors - sweetness, sourness, bitterness, saltiness, and umami - and the five basic textures - soft, crispy, chewy, crunchy, and tender - as a guidance. Try to balance them, but never dogmatically.
-    9. For every meal, check if a sauce, gravy or dip could enhance the meal.
-    10. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
-    11. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
-    12. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe.
-    13. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices and staples if they are listed in "Available Spices/Staples".
-    14. Each recipe's "missingIngredients" must list only the ingredients that specific recipe requires to be purchased, at the amount needed for that recipe alone. Do not combine amounts across recipes in "missingIngredients".
-    15. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
-    16. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
-    17. If you need to buy spices or staples, use the "missingIngredients" array.
-    18. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
-    19. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.
+    8. Each meal should be intentionally composed — consider what makes it interesting and satisfying according to its own culinary logic: that might be flavor balance, textural contrast, moisture, temperature, color, spice complexity, or something else entirely.
+    9. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
+    10. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
+    11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe.
+    12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices and staples if they are listed in "Available Spices/Staples".
+    13. Each recipe's "missingIngredients" must list only the ingredients that specific recipe requires to be purchased, at the amount needed for that recipe alone. Do not combine amounts across recipes in "missingIngredients".
+    14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
+    15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
+    16. If you need to buy spices or staples, use the "missingIngredients" array.
+    17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
+    18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.
     20. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK! Use single quotes (') for any quotations within the text.
     
     NUTRITION ESTIMATES:
