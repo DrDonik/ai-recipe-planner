@@ -149,7 +149,7 @@ export const buildRecipePrompt = ({
     5. ${ingredients.length > 0 ? `If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.` : `For every meal, choose ingredients that work well together and create balanced, delicious meals.`}
     6. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients ${spices.length > 0 ? '(except available spices/staples)' : ''} will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
     7. Ensure variety: The ${meals} meals should be distinct in style and flavor profile.
-    8. For every meal, use the five basic flavors - sweetness, sourness, bitterness, saltiness, and umami - and the five basic textures - soft, crispy, chewy, crunchy, and tender - as a guidance. Try to balance them, but never dogmatically.
+    8. Each meal should be intentionally composed — consider what makes it interesting and satisfying according to its own culinary logic: that might be flavor balance, textural contrast, temperature, color, spice complexity, or something else entirely.
     9. For every meal, check if a sauce, gravy or dip could enhance the meal.
     10. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
     11. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
