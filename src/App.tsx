@@ -4,6 +4,7 @@ import { useWakeLock } from './hooks/useWakeLock';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack, type SpiceRackRef } from './components/SpiceRack';
+import { KitchenAppliances, type KitchenAppliancesRef } from './components/KitchenAppliances';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
@@ -21,6 +22,7 @@ function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
   const settingsPanelRef = useRef<SettingsPanelRef>(null);
   const spiceRackRef = useRef<SpiceRackRef>(null);
+  const kitchenAppliancesRef = useRef<KitchenAppliancesRef>(null);
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
   const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
@@ -28,11 +30,13 @@ function App() {
 
   const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
+  const [appliances, setAppliances, appliancesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.KITCHEN_APPLIANCES, []);
 
   const [headerMinimized, setHeaderMinimized, headerMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
   const [optionsMinimized, setOptionsMinimized, optionsMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.OPTIONS_MINIMIZED, false);
   const [pantryMinimized, setPantryMinimized, pantryMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.PANTRY_MINIMIZED, false);
   const [spiceRackMinimized, setSpiceRackMinimized, spiceRackMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.SPICE_RACK_MINIMIZED, false);
+  const [kitchenAppliancesMinimized, setKitchenAppliancesMinimized, kitchenAppliancesMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.KITCHEN_APPLIANCES_MINIMIZED, false);
   const [shoppingListMinimized, setShoppingListMinimized, shoppingListMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.SHOPPING_LIST_MINIMIZED, false);
   const [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized, recipeMissingMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.RECIPE_MISSING_INGREDIENTS_MINIMIZED, false);
   const [mealPlan, setMealPlan, mealPlanPersistError] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
@@ -65,6 +69,7 @@ function App() {
   const handleShowHelp = useCallback(() => setShowWelcome(true), []);
   const handleTogglePantryMinimize = useCallback(() => setPantryMinimized(prev => !prev), []);
   const handleToggleSpiceRackMinimize = useCallback(() => setSpiceRackMinimized(prev => !prev), []);
+  const handleToggleKitchenAppliancesMinimize = useCallback(() => setKitchenAppliancesMinimized(prev => !prev), []);
   const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(prev => !prev), []);
   const handleToggleRecipeMissingIngredientsMinimize = useCallback(() => setRecipeMissingIngredientsMinimized(prev => !prev), []);
 
@@ -96,9 +101,9 @@ function App() {
   const storageErrorShownRef = useRef(false);
   const [shoppingListCheckedPersistError, setShoppingListCheckedPersistError] = useState(false);
   const anyPersistError = storagePersistError || pantryPersistError || spicesPersistError ||
-    headerMinPersistError || optionsMinPersistError || pantryMinPersistError ||
-    spiceRackMinPersistError || shoppingListMinPersistError || recipeMissingMinPersistError ||
-    mealPlanPersistError || shoppingListCheckedPersistError;
+    appliancesPersistError || headerMinPersistError || optionsMinPersistError || pantryMinPersistError ||
+    spiceRackMinPersistError || kitchenAppliancesMinPersistError || shoppingListMinPersistError ||
+    recipeMissingMinPersistError || mealPlanPersistError || shoppingListCheckedPersistError;
 
   useEffect(() => {
     if (anyPersistError && !storageErrorShownRef.current) {
@@ -279,6 +284,17 @@ function App() {
     setSpices(prev => prev.filter(s => s !== spiceToRemove));
   }, [setSpices]);
 
+  const addAppliance = useCallback((appliance: string) => {
+    setAppliances(prev => {
+      if (prev.includes(appliance)) return prev;
+      return [...prev, appliance].sort((a, b) => a.localeCompare(b));
+    });
+  }, [setAppliances]);
+
+  const removeAppliance = useCallback((applianceToRemove: string) => {
+    setAppliances(prev => prev.filter(a => a !== applianceToRemove));
+  }, [setAppliances]);
+
   const deleteRecipe = useCallback((recipeId: string) => {
     if (!mealPlan) return;
     const backup = mealPlan;
@@ -304,15 +320,17 @@ function App() {
   }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
   const handleGenerate = useCallback(async () => {
-    // Flush any pending input from PantryInput, StyleWish or SpiceRack before generating
+    // Flush any pending input from PantryInput, StyleWish, SpiceRack or KitchenAppliances before generating
     const pendingItem = pantryInputRef.current?.flushPendingInput();
     const pendingStyleWish = settingsPanelRef.current?.flushPendingInput();
     const pendingSpice = spiceRackRef.current?.flushPendingInput();
+    const pendingAppliance = kitchenAppliancesRef.current?.flushPendingInput();
 
-    // If there was a pending item, include it in the pantry, style wishes or spicerack for generation
+    // If there was a pending item, include it in the pantry, style wishes, spicerack or appliances for generation
     const itemsToUse = pendingItem ? [...pantryItems, pendingItem] : pantryItems;
     const styleWishesToUse = pendingStyleWish ? [...styleWishes, pendingStyleWish] : styleWishes;
     const spicesToUse = pendingSpice ? [...spices, pendingSpice] : spices;
+    const appliancesToUse = pendingAppliance ? [...appliances, pendingAppliance] : appliances;
 
     // Handle copy-paste mode differently
     if (useCopyPaste) {
@@ -323,6 +341,7 @@ function App() {
         diet,
         language,
         spices: spicesToUse,
+        appliances: appliancesToUse,
         styleWishes: styleWishesToUse,
       });
       setCopyPastePrompt(prompt);
@@ -341,7 +360,7 @@ function App() {
     // Don't clear mealPlan here - preserve it on failure so user doesn't lose their previous plan
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, styleWishesToUse, t.errors);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, appliancesToUse, styleWishesToUse, t.errors);
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
@@ -352,7 +371,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [pantryItems, spices, styleWishes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan]);
+  }, [pantryItems, spices, appliances, styleWishes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan]);
 
   const handleCopyPasteSubmit = useCallback((response: string) => {
     setShowCopyPasteDialog(false);
@@ -454,6 +473,15 @@ function App() {
               onRemoveSpice={removeSpice}
               isMinimized={spiceRackMinimized}
               onToggleMinimize={handleToggleSpiceRackMinimize}
+            />
+
+            <KitchenAppliances
+              ref={kitchenAppliancesRef}
+              appliances={appliances}
+              onAddAppliance={addAppliance}
+              onRemoveAppliance={removeAppliance}
+              isMinimized={kitchenAppliancesMinimized}
+              onToggleMinimize={handleToggleKitchenAppliancesMinimize}
             />
           </div>
 
