@@ -834,6 +834,7 @@ Sources
         'Vegan',
         'German',
         ['Salt', 'Pepper'],
+        [],
         ['Quick meals', 'Gluten-free']
       );
 
@@ -877,6 +878,7 @@ Sources
           3,
           'No restrictions',
           'English',
+          [],
           [],
           [],
           customErrors
