@@ -32,7 +32,7 @@ export const KitchenAppliances = forwardRef<KitchenAppliancesRef, KitchenApplian
 
         setNewAppliance('');
 
-        if (appliances.includes(trimmed)) return null;
+        if (appliances.some(a => a.toLowerCase() === trimmed.toLowerCase())) return null;
 
         onAddAppliance(trimmed);
         return trimmed;
