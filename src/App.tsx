@@ -286,7 +286,7 @@ function App() {
 
   const addAppliance = useCallback((appliance: string) => {
     setAppliances(prev => {
-      if (prev.includes(appliance)) return prev;
+      if (prev.some(a => a.toLowerCase() === appliance.toLowerCase())) return prev;
       return [...prev, appliance].sort((a, b) => a.localeCompare(b));
     });
   }, [setAppliances]);
