@@ -50,6 +50,10 @@ export const translations = {
         noStyleWishes: "No style preferences added yet.",
         spiceRack: "Spice Rack & Staples",
         spicesPlaceholder: "Add spices, oils, sauces...",
+        kitchenAppliances: "Kitchen Appliances",
+        appliancesPlaceholder: "Add air fryer, Instant Pot...",
+        kitchenAppliancesInfo: "Add special appliances like an air fryer or Vitamix. The AI will use these to tailor cooking methods. Saved on this device for future sessions.",
+        noAppliances: "No appliances added yet.",
         placeholders: {
             ingredient: "Ingredient (e.g. Carrots)",
             amount: "Amount (e.g. 1kg or 3 pcs)",
@@ -202,6 +206,10 @@ export const translations = {
         noStyleWishes: "Noch keine Stil-Präferenzen hinzugefügt.",
         spiceRack: "Gewürzregal & Grundvorräte",
         spicesPlaceholder: "Gewürze, Öl, Soßen hinzufügen...",
+        kitchenAppliances: "Küchengeräte",
+        appliancesPlaceholder: "Heißluftfritteuse, Instant Pot...",
+        kitchenAppliancesInfo: "Füge spezielle Geräte wie eine Heißluftfritteuse oder einen Vitamix hinzu. Die KI nutzt diese, um Kochtechniken anzupassen. Auf diesem Gerät gespeichert.",
+        noAppliances: "Noch keine Geräte hinzugefügt.",
         placeholders: {
             ingredient: "Zutat (z.B. Karotten)",
             amount: "Menge (z.B. 1kg oder 3 Stück)",
@@ -354,6 +362,10 @@ export const translations = {
         noStyleWishes: "Aucune préférence de style ajoutée pour le moment.",
         spiceRack: "Épices & Produits de Base",
         spicesPlaceholder: "Ajouter épices, huiles, sauces...",
+        kitchenAppliances: "Appareils de Cuisine",
+        appliancesPlaceholder: "Ajouter friteuse à air, Instant Pot...",
+        kitchenAppliancesInfo: "Ajoutez des appareils spéciaux comme une friteuse à air ou un Vitamix. L'IA les utilisera pour adapter les méthodes de cuisson. Sauvegardé sur cet appareil.",
+        noAppliances: "Aucun appareil ajouté pour le moment.",
         placeholders: {
             ingredient: "Ingrédient (ex: Carottes)",
             amount: "Quantité (ex: 1kg ou 3 pcs)",
@@ -506,6 +518,10 @@ export const translations = {
         noStyleWishes: "No se han agregado preferencias de estilo todavía.",
         spiceRack: "Especiero y Productos Básicos",
         spicesPlaceholder: "Agregar especias, aceites, salsas...",
+        kitchenAppliances: "Electrodomésticos de Cocina",
+        appliancesPlaceholder: "Agregar freidora de aire, Instant Pot...",
+        kitchenAppliancesInfo: "Agrega electrodomésticos especiales como una freidora de aire o Vitamix. La IA los usará para adaptar los métodos de cocción. Guardado en este dispositivo.",
+        noAppliances: "No se han agregado electrodomésticos todavía.",
         placeholders: {
             ingredient: "Ingrediente (ej. Zanahorias)",
             amount: "Cantidad (ej. 1kg o 3 pcs)",

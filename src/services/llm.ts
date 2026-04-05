@@ -94,6 +94,7 @@ export interface RecipePromptParams {
   diet: string;
   language: string;
   spices?: string[];
+  appliances?: string[];
   styleWishes?: string[];
 }
 
@@ -108,6 +109,7 @@ export const buildRecipePrompt = ({
   diet,
   language,
   spices = [],
+  appliances = [],
   styleWishes = [],
 }: RecipePromptParams): string => {
   const pantryList = ingredients
@@ -117,6 +119,10 @@ export const buildRecipePrompt = ({
   const spiceList = spices.length > 0
     ? `Available Spices/Staples (Do NOT add to shopping list): ${spices.map(s => sanitizeUserInput(s)).join(", ")}`
     : "No extra spices or staples available.";
+
+  const applianceList = appliances.length > 0
+    ? `Available Kitchen Appliances: ${appliances.map(a => sanitizeUserInput(a)).join(", ")}`
+    : "";
 
   const sanitizedStyleWishes = styleWishes
     .map(wish => sanitizeUserInput(wish, 200))
@@ -136,6 +142,7 @@ export const buildRecipePrompt = ({
     ${ingredients.length > 0 ? `I have these ingredients in my pantry:\n${pantryList}` : `My pantry is empty. Choose suitable ingredients for the recipes.`}
 
     ${spiceList}
+    ${applianceList}
 
     DIETARY PREFERENCE: ${sanitizedDiet}
     LANGUAGE: ${language}
@@ -151,6 +158,7 @@ export const buildRecipePrompt = ({
     7. Ensure variety: The ${meals} meals should be distinct in style and flavor profile.
     8. Each meal should be intentionally composed — consider what makes it interesting and satisfying according to its own culinary logic: that might be flavor balance, textural contrast, moisture, temperature, color, spice complexity, or something else entirely.
     9. Let the available spices and staples guide the recipes. Not all spices or staples need to be used.
+    ${appliances.length > 0 ? `9b. Use the available kitchen appliances where they improve a recipe (e.g. air fryer for crispy results, blender for smooth soups). Not every recipe must use an appliance.` : ''}
     10. Output ALL text (recipe titles, ingredients, instructions, shopping list items) in ${language}.
     11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe.
     12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices and staples if they are listed in "Available Spices/Staples".
@@ -310,6 +318,7 @@ export const generateRecipes = async (
   diet: string,
   language: string,
   spices: string[] = [],
+  appliances: string[] = [],
   styleWishes: string[] = [],
   errorTranslations?: ErrorTranslations
 ): Promise<MealPlan> => {
@@ -324,6 +333,7 @@ export const generateRecipes = async (
     diet,
     language,
     spices,
+    appliances,
     styleWishes,
   });
 
