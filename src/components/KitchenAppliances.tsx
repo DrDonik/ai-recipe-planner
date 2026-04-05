@@ -89,7 +89,7 @@ export const KitchenAppliances = forwardRef<KitchenAppliancesRef, KitchenApplian
                                     type="button"
                                     onClick={() => onRemoveAppliance(appliance)}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
-                                    aria-label={t.remove}
+                                    aria-label={t.remove + " " + appliance}
                                 >
                                     <Trash2 size={10} />
                                 </button>
