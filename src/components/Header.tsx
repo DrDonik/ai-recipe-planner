@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
 import { TooltipButton } from './ui/TooltipButton';
+import { buildExportData, downloadExportFile, readImportFile, applyImportData } from '../utils/dataTransfer';
 import type { Notification } from '../types';
 
 interface HeaderProps {
@@ -31,6 +32,39 @@ export const Header: React.FC<HeaderProps> = ({
     });
     const [showClearDialog, setShowClearDialog] = useState(false);
     const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
+    const importFileRef = useRef<HTMLInputElement>(null);
+
+    const handleExport = () => {
+        const data = buildExportData();
+        downloadExportFile(data);
+        onShowNotification({ message: t.dataTransfer.exportSuccess, type: 'undo', timeout: 3000 });
+    };
+
+    const handleImportClick = () => {
+        importFileRef.current?.click();
+    };
+
+    const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset the input so the same file can be selected again
+        e.target.value = '';
+
+        if (!window.confirm(t.dataTransfer.importConfirm)) return;
+
+        try {
+            const data = await readImportFile(file);
+            applyImportData(data);
+            onShowNotification({ message: t.dataTransfer.importSuccess, type: 'undo', timeout: 2000 });
+            // Reload to pick up all the new localStorage values
+            setTimeout(() => window.location.reload(), 1500);
+        } catch (err) {
+            const key = (err instanceof Error ? err.message : '') as keyof typeof t.dataTransfer;
+            const message = t.dataTransfer[key] || t.dataTransfer.invalidImportStructure;
+            onShowNotification({ message, type: 'error' });
+        }
+    };
 
     const clearApiKeyWithUndo = () => {
         const backupKey = apiKey;
@@ -235,6 +269,33 @@ export const Header: React.FC<HeaderProps> = ({
                                     <option value="Spanish">Español</option>
                                     <option value="French">Français</option>
                                 </select>
+                            </div>
+
+                            {/* Export / Import */}
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <input
+                                    ref={importFileRef}
+                                    type="file"
+                                    accept=".json"
+                                    onChange={handleImportFile}
+                                    className="hidden"
+                                    aria-hidden="true"
+                                    data-testid="import-file-input"
+                                />
+                                <TooltipButton
+                                    icon={<Download size={16} />}
+                                    tooltip={t.dataTransfer.exportData}
+                                    ariaLabel={t.dataTransfer.exportData}
+                                    className="p-2 bg-white/50 dark:bg-black/20 rounded-full border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40 transition-colors text-text-muted hover:text-primary cursor-pointer"
+                                    onClick={handleExport}
+                                />
+                                <TooltipButton
+                                    icon={<Upload size={16} />}
+                                    tooltip={t.dataTransfer.importData}
+                                    ariaLabel={t.dataTransfer.importData}
+                                    className="p-2 bg-white/50 dark:bg-black/20 rounded-full border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40 transition-colors text-text-muted hover:text-primary cursor-pointer"
+                                    onClick={handleImportClick}
+                                />
                             </div>
                         </>
                     )}
