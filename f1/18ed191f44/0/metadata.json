@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.5.3",
+  "checkpoint_id": "f118ed191f44",
+  "session_id": "599e80c7-dc41-450f-b53a-6f0397dfca7b",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-06T20:47:51.887258Z",
+  "branch": "claude/heuristic-tesla",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "AGENTS.md",
+    "src/__tests__/App.test.tsx",
+    "src/__tests__/components/Header.test.tsx",
+    "src/__tests__/hooks/useLocalStorage.test.ts",
+    "src/__tests__/utils/dataTransfer.test.ts",
+    "src/contexts/SettingsContext.tsx",
+    "src/hooks/useLocalStorage.ts",
+    "src/utils/dataTransfer.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "33076a8c0b95",
+  "token_usage": {
+    "input_tokens": 86,
+    "cache_creation_tokens": 137862,
+    "cache_read_tokens": 3549322,
+    "output_tokens": 13462,
+    "api_call_count": 62
+  },
+  "session_metrics": {
+    "turn_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-06T20:47:50.812338Z",
+    "agent_lines": 659,
+    "agent_removed": 174,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 659,
+    "total_lines_changed": 833,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}
