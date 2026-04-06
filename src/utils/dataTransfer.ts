@@ -45,7 +45,7 @@ const ExportDataSchema = z.object({
         [STORAGE_KEYS.PANTRY_ITEMS]: z.array(PantryItemSchema).optional(),
         [STORAGE_KEYS.SPICE_RACK]: z.array(z.string()).optional(),
         [STORAGE_KEYS.MEAL_PLAN]: MealPlanSchema.nullable().optional(),
-        [STORAGE_KEYS.SHOPPING_LIST_CHECKED]: z.record(z.string(), z.boolean()).optional(),
+        [STORAGE_KEYS.SHOPPING_LIST_CHECKED]: z.array(z.string()).optional(),
         [STORAGE_KEYS.PEOPLE_COUNT]: z.number().optional(),
         [STORAGE_KEYS.MEALS_COUNT]: z.number().optional(),
         [STORAGE_KEYS.DIET_PREFERENCE]: z.string().optional(),

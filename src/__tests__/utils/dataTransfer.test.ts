@@ -72,12 +72,12 @@ describe('dataTransfer utilities', () => {
 
         it('should include use_copy_paste and shopping list checked state', () => {
             localStorage.setItem(STORAGE_KEYS.USE_COPY_PASTE, JSON.stringify(false));
-            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.stringify({ 'item-1': true }));
+            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.stringify(['item-1|100g']));
 
             const result = buildExportData();
 
             expect(result.data[STORAGE_KEYS.USE_COPY_PASTE]).toBe(false);
-            expect(result.data[STORAGE_KEYS.SHOPPING_LIST_CHECKED]).toEqual({ 'item-1': true });
+            expect(result.data[STORAGE_KEYS.SHOPPING_LIST_CHECKED]).toEqual(['item-1|100g']);
         });
 
         it('should NOT include API key', () => {
@@ -373,7 +373,7 @@ describe('dataTransfer utilities', () => {
             localStorage.setItem(STORAGE_KEYS.STYLE_WISHES, JSON.stringify(['Italian']));
             localStorage.setItem(STORAGE_KEYS.LANGUAGE, JSON.stringify('German'));
             localStorage.setItem(STORAGE_KEYS.USE_COPY_PASTE, JSON.stringify(true));
-            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.stringify({ 'Parmesan-50-g': true }));
+            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.stringify(['Parmesan|50g']));
 
             // Export
             const exported = buildExportData();
@@ -394,7 +394,7 @@ describe('dataTransfer utilities', () => {
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.STYLE_WISHES)!)).toEqual(['Italian']);
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.LANGUAGE)!)).toBe('German');
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE)!)).toBe(true);
-            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED)!)).toEqual({ 'Parmesan-50-g': true });
+            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED)!)).toEqual(['Parmesan|50g']);
         });
     });
 });
