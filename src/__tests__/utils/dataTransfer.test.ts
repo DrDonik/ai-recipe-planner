@@ -57,9 +57,9 @@ describe('dataTransfer utilities', () => {
         it('should include settings (people, meals, diet, styleWishes, language)', () => {
             localStorage.setItem(STORAGE_KEYS.PEOPLE_COUNT, JSON.stringify(4));
             localStorage.setItem(STORAGE_KEYS.MEALS_COUNT, JSON.stringify(5));
-            localStorage.setItem(STORAGE_KEYS.DIET_PREFERENCE, 'Vegan');
+            localStorage.setItem(STORAGE_KEYS.DIET_PREFERENCE, JSON.stringify('Vegan'));
             localStorage.setItem(STORAGE_KEYS.STYLE_WISHES, JSON.stringify(['Indian', 'Spicy']));
-            localStorage.setItem(STORAGE_KEYS.LANGUAGE, 'German');
+            localStorage.setItem(STORAGE_KEYS.LANGUAGE, JSON.stringify('German'));
 
             const result = buildExportData();
 
@@ -117,10 +117,9 @@ describe('dataTransfer utilities', () => {
             expect(result.data).toEqual({});
         });
 
-        it('should handle plain string values that are not JSON', () => {
-            // diet_preference and language are stored as plain strings
-            localStorage.setItem(STORAGE_KEYS.DIET_PREFERENCE, 'Flexitarian');
-            localStorage.setItem(STORAGE_KEYS.LANGUAGE, 'English');
+        it('should handle string values stored as JSON', () => {
+            localStorage.setItem(STORAGE_KEYS.DIET_PREFERENCE, JSON.stringify('Flexitarian'));
+            localStorage.setItem(STORAGE_KEYS.LANGUAGE, JSON.stringify('English'));
 
             const result = buildExportData();
 
@@ -250,14 +249,14 @@ describe('dataTransfer utilities', () => {
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.SPICE_RACK)!)).toEqual(['Salt', 'Pepper']);
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.PEOPLE_COUNT)!)).toBe(4);
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.MEALS_COUNT)!)).toBe(2);
-            expect(localStorage.getItem(STORAGE_KEYS.DIET_PREFERENCE)).toBe('Vegan');
-            expect(localStorage.getItem(STORAGE_KEYS.LANGUAGE)).toBe('German');
+            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.DIET_PREFERENCE)!)).toBe('Vegan');
+            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.LANGUAGE)!)).toBe('German');
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE)!)).toBe(true);
         });
 
         it('should overwrite existing localStorage values', () => {
             localStorage.setItem(STORAGE_KEYS.PANTRY_ITEMS, JSON.stringify([{ id: 'old', name: 'Old', amount: '1' }]));
-            localStorage.setItem(STORAGE_KEYS.LANGUAGE, 'English');
+            localStorage.setItem(STORAGE_KEYS.LANGUAGE, JSON.stringify('English'));
 
             const importData: ExportData = {
                 version: 1,
@@ -271,7 +270,7 @@ describe('dataTransfer utilities', () => {
             applyImportData(importData);
 
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.PANTRY_ITEMS)!)).toEqual([{ id: 'new', name: 'New', amount: '2' }]);
-            expect(localStorage.getItem(STORAGE_KEYS.LANGUAGE)).toBe('French');
+            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.LANGUAGE)!)).toBe('French');
         });
 
         it('should remove localStorage keys that are not in the import data', () => {
@@ -370,9 +369,9 @@ describe('dataTransfer utilities', () => {
             localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(mealPlan));
             localStorage.setItem(STORAGE_KEYS.PEOPLE_COUNT, JSON.stringify(4));
             localStorage.setItem(STORAGE_KEYS.MEALS_COUNT, JSON.stringify(2));
-            localStorage.setItem(STORAGE_KEYS.DIET_PREFERENCE, 'Vegetarian');
+            localStorage.setItem(STORAGE_KEYS.DIET_PREFERENCE, JSON.stringify('Vegetarian'));
             localStorage.setItem(STORAGE_KEYS.STYLE_WISHES, JSON.stringify(['Italian']));
-            localStorage.setItem(STORAGE_KEYS.LANGUAGE, 'German');
+            localStorage.setItem(STORAGE_KEYS.LANGUAGE, JSON.stringify('German'));
             localStorage.setItem(STORAGE_KEYS.USE_COPY_PASTE, JSON.stringify(true));
             localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.stringify({ 'Parmesan-50-g': true }));
 
@@ -391,9 +390,9 @@ describe('dataTransfer utilities', () => {
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.MEAL_PLAN)!)).toEqual(mealPlan);
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.PEOPLE_COUNT)!)).toBe(4);
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.MEALS_COUNT)!)).toBe(2);
-            expect(localStorage.getItem(STORAGE_KEYS.DIET_PREFERENCE)).toBe('Vegetarian');
+            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.DIET_PREFERENCE)!)).toBe('Vegetarian');
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.STYLE_WISHES)!)).toEqual(['Italian']);
-            expect(localStorage.getItem(STORAGE_KEYS.LANGUAGE)).toBe('German');
+            expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.LANGUAGE)!)).toBe('German');
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE)!)).toBe(true);
             expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED)!)).toEqual({ 'Parmesan-50-g': true });
         });

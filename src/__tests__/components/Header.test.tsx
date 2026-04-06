@@ -22,7 +22,7 @@ function setup(options: SetupOptions = {}) {
     } = options;
 
     if (presetApiKey !== undefined) {
-        localStorage.setItem(STORAGE_KEYS.API_KEY, presetApiKey);
+        localStorage.setItem(STORAGE_KEYS.API_KEY, JSON.stringify(presetApiKey));
     }
     if (presetUseCopyPaste !== undefined) {
         localStorage.setItem(STORAGE_KEYS.USE_COPY_PASTE, String(presetUseCopyPaste));

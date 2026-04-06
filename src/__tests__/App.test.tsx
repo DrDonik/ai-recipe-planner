@@ -559,7 +559,7 @@ describe('App Generate Recipes (API mode)', () => {
             })
         );
 
-        localStorage.setItem(STORAGE_KEYS.API_KEY, 'test-api-key');
+        localStorage.setItem(STORAGE_KEYS.API_KEY, JSON.stringify('test-api-key'));
         localStorage.setItem(STORAGE_KEYS.PANTRY_ITEMS, JSON.stringify([{ id: '1', name: 'Rice', amount: '200g' }]));
 
         renderWithSettings(<App />);
@@ -597,7 +597,7 @@ describe('App Generate Recipes (API mode)', () => {
             shoppingList: [],
         };
         localStorage.setItem(STORAGE_KEYS.MEAL_PLAN, JSON.stringify(existingPlan));
-        localStorage.setItem(STORAGE_KEYS.API_KEY, 'test-api-key');
+        localStorage.setItem(STORAGE_KEYS.API_KEY, JSON.stringify('test-api-key'));
 
         renderWithSettings(<App />);
 

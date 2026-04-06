@@ -67,12 +67,7 @@ export const buildExportData = (): ExportData => {
         const raw = localStorage.getItem(key);
         if (raw === null) continue;
 
-        try {
-            data[key] = JSON.parse(raw);
-        } catch {
-            // Plain string values (diet, language) aren't JSON-wrapped
-            data[key] = raw;
-        }
+        data[key] = JSON.parse(raw);
     }
 
     return {
@@ -146,10 +141,6 @@ export const applyImportData = (exportData: ExportData): void => {
             continue;
         }
 
-        if (typeof value === 'string') {
-            localStorage.setItem(key, value);
-        } else {
-            localStorage.setItem(key, JSON.stringify(value));
-        }
+        localStorage.setItem(key, JSON.stringify(value));
     }
 };

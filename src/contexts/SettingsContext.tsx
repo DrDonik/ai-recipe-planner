@@ -1,5 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { useLocalStorage, useStringLocalStorage } from '../hooks/useLocalStorage';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
 import { STORAGE_KEYS, DEFAULTS } from '../constants';
 
@@ -123,12 +123,12 @@ const getInitialStyleWishes = (): string[] => {
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [useCopyPaste, setUseCopyPaste, useCopyPasteError] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, getInitialUseCopyPaste());
-    const [apiKey, setApiKey, apiKeyError] = useStringLocalStorage(STORAGE_KEYS.API_KEY, '');
+    const [apiKey, setApiKey, apiKeyError] = useLocalStorage<string>(STORAGE_KEYS.API_KEY, '');
     const [people, setPeople, peopleError] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
     const [meals, setMeals, mealsError] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
-    const [diet, setDiet, dietError] = useStringLocalStorage(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
+    const [diet, setDiet, dietError] = useLocalStorage<string>(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
-    const [language, setLanguage, languageError] = useStringLocalStorage(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
+    const [language, setLanguage, languageError] = useLocalStorage<string>(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
 
     const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError;
 
