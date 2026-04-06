@@ -4,6 +4,7 @@ import { userEvent } from '@testing-library/user-event';
 import { Header } from '../../components/Header';
 import { SettingsProvider } from '../../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../../constants';
+import * as dataTransfer from '../../utils/dataTransfer';
 
 interface SetupOptions {
     headerMinimized?: boolean;
@@ -21,7 +22,7 @@ function setup(options: SetupOptions = {}) {
     } = options;
 
     if (presetApiKey !== undefined) {
-        localStorage.setItem(STORAGE_KEYS.API_KEY, presetApiKey);
+        localStorage.setItem(STORAGE_KEYS.API_KEY, JSON.stringify(presetApiKey));
     }
     if (presetUseCopyPaste !== undefined) {
         localStorage.setItem(STORAGE_KEYS.USE_COPY_PASTE, String(presetUseCopyPaste));
@@ -270,6 +271,109 @@ describe('Header', () => {
             await user.click(warning);
 
             expect(screen.getByText('Clear API Key?')).toBeInTheDocument();
+        });
+    });
+
+    describe('export/import buttons', () => {
+        it('shows export and import buttons when header is expanded', () => {
+            setup();
+
+            expect(screen.getByLabelText('Export data')).toBeInTheDocument();
+            expect(screen.getByLabelText('Import data')).toBeInTheDocument();
+        });
+
+        it('does not show export/import buttons when header is minimized', () => {
+            setup({ headerMinimized: true });
+
+            expect(screen.queryByLabelText('Export data')).not.toBeInTheDocument();
+            expect(screen.queryByLabelText('Import data')).not.toBeInTheDocument();
+        });
+
+        it('export button calls buildExportData and downloadExportFile', async () => {
+            const mockExportData = { version: 1, exportedAt: '2026-04-06T12:00:00Z', data: {} };
+            const buildSpy = vi.spyOn(dataTransfer, 'buildExportData').mockReturnValue(mockExportData);
+            const downloadSpy = vi.spyOn(dataTransfer, 'downloadExportFile').mockImplementation(() => {});
+
+            const { user, props } = setup();
+
+            await user.click(screen.getByLabelText('Export data'));
+
+            expect(buildSpy).toHaveBeenCalledOnce();
+            expect(downloadSpy).toHaveBeenCalledWith(mockExportData);
+            expect(props.onShowNotification).toHaveBeenCalledWith(
+                expect.objectContaining({ message: 'Data exported successfully!' })
+            );
+        });
+
+        it('import button triggers file input click', async () => {
+            const { user } = setup();
+
+            const fileInput = screen.getByTestId('import-file-input');
+            const clickSpy = vi.spyOn(fileInput, 'click');
+
+            await user.click(screen.getByLabelText('Import data'));
+
+            expect(clickSpy).toHaveBeenCalledOnce();
+        });
+
+        it('import shows error notification when file validation fails', async () => {
+            vi.spyOn(dataTransfer, 'readImportFile').mockRejectedValue(new Error('invalidImportJson'));
+            vi.stubGlobal('confirm', vi.fn(() => true));
+
+            const { user, props } = setup();
+
+            const fileInput = screen.getByTestId('import-file-input');
+            const file = new File(['not json'], 'backup.json', { type: 'application/json' });
+            await user.upload(fileInput, file);
+
+            // Wait for async handler
+            await vi.waitFor(() => {
+                expect(props.onShowNotification).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        type: 'error',
+                        message: 'Invalid file. Please select a valid JSON backup file.',
+                    })
+                );
+            });
+        });
+
+        it('import does nothing when user cancels confirmation dialog', async () => {
+            const readSpy = vi.spyOn(dataTransfer, 'readImportFile');
+            vi.stubGlobal('confirm', vi.fn(() => false));
+
+            const { user, props } = setup();
+
+            const fileInput = screen.getByTestId('import-file-input');
+            const file = new File(['{}'], 'backup.json', { type: 'application/json' });
+            await user.upload(fileInput, file);
+
+            expect(readSpy).not.toHaveBeenCalled();
+            expect(props.onShowNotification).not.toHaveBeenCalled();
+        });
+
+        it('import applies data and shows success notification on valid file', async () => {
+            const mockData = { version: 1, exportedAt: '2026-04-06T12:00:00Z', data: {} };
+            vi.spyOn(dataTransfer, 'readImportFile').mockResolvedValue(mockData);
+            const applySpy = vi.spyOn(dataTransfer, 'applyImportData').mockImplementation(() => {});
+            vi.stubGlobal('confirm', vi.fn(() => true));
+            // Prevent actual reload
+            const reloadMock = vi.fn();
+            Object.defineProperty(window, 'location', { value: { ...window.location, reload: reloadMock }, writable: true });
+
+            const { user, props } = setup();
+
+            const fileInput = screen.getByTestId('import-file-input');
+            const file = new File([JSON.stringify(mockData)], 'backup.json', { type: 'application/json' });
+            await user.upload(fileInput, file);
+
+            await vi.waitFor(() => {
+                expect(applySpy).toHaveBeenCalledWith(mockData);
+                expect(props.onShowNotification).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        message: 'Data imported successfully! Reloading...',
+                    })
+                );
+            });
         });
     });
 });

@@ -154,7 +154,17 @@ export const translations = {
             action: "Undo"
         },
         apiKeyStoredWarning: "API key stored in local storage",
-        aiDisclaimer: "The recipes are generated directly by AI. AI can make mistakes. Always cook with common sense."
+        aiDisclaimer: "The recipes are generated directly by AI. AI can make mistakes. Always cook with common sense.",
+        dataTransfer: {
+            exportData: "Export data",
+            importData: "Import data",
+            exportSuccess: "Data exported successfully!",
+            importSuccess: "Data imported successfully! Reloading...",
+            invalidImportStructure: "Invalid backup file. The file structure is not recognized.",
+            invalidImportJson: "Invalid file. Please select a valid JSON backup file.",
+            importReadError: "Could not read the file. Please try again.",
+            importConfirm: "This will overwrite all your current data (pantry, spices, recipes, settings). Continue?",
+        },
     },
     German: {
         ingredients: "Zutaten",
@@ -310,7 +320,17 @@ export const translations = {
             action: "Rückgängig"
         },
         apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert",
-        aiDisclaimer: "Die Rezepte werden direkt von der KI generiert. Die KI kann Fehler machen. Kochen Sie immer auch mit gesundem Menschenverstand."
+        aiDisclaimer: "Die Rezepte werden direkt von der KI generiert. Die KI kann Fehler machen. Kochen Sie immer auch mit gesundem Menschenverstand.",
+        dataTransfer: {
+            exportData: "Daten exportieren",
+            importData: "Daten importieren",
+            exportSuccess: "Daten erfolgreich exportiert!",
+            importSuccess: "Daten erfolgreich importiert! Wird neu geladen...",
+            invalidImportStructure: "Ungültige Sicherungsdatei. Die Dateistruktur wird nicht erkannt.",
+            invalidImportJson: "Ungültige Datei. Bitte wählen Sie eine gültige JSON-Sicherungsdatei.",
+            importReadError: "Die Datei konnte nicht gelesen werden. Bitte versuchen Sie es erneut.",
+            importConfirm: "Dies überschreibt alle aktuellen Daten (Vorrat, Gewürze, Rezepte, Einstellungen). Fortfahren?",
+        },
     },
     French: {
         ingredients: "Ingrédients",
@@ -466,7 +486,17 @@ export const translations = {
             action: "Annuler"
         },
         apiKeyStoredWarning: "Clé API stockée dans le stockage local",
-        aiDisclaimer: "Les recettes sont générées directement par l'IA. L'IA peut faire des erreurs. Cuisinez toujours avec bon sens."
+        aiDisclaimer: "Les recettes sont générées directement par l'IA. L'IA peut faire des erreurs. Cuisinez toujours avec bon sens.",
+        dataTransfer: {
+            exportData: "Exporter les données",
+            importData: "Importer les données",
+            exportSuccess: "Données exportées avec succès !",
+            importSuccess: "Données importées avec succès ! Rechargement...",
+            invalidImportStructure: "Fichier de sauvegarde invalide. La structure du fichier n'est pas reconnue.",
+            invalidImportJson: "Fichier invalide. Veuillez sélectionner un fichier de sauvegarde JSON valide.",
+            importReadError: "Impossible de lire le fichier. Veuillez réessayer.",
+            importConfirm: "Cela écrasera toutes vos données actuelles (garde-manger, épices, recettes, paramètres). Continuer ?",
+        },
     },
     Spanish: {
         ingredients: "Ingredientes",
@@ -622,6 +652,16 @@ export const translations = {
             action: "Deshacer"
         },
         apiKeyStoredWarning: "Clave API almacenada en almacenamiento local",
-        aiDisclaimer: "Las recetas son generadas directamente por IA. La IA puede cometer errores. Cocine siempre con sentido común."
+        aiDisclaimer: "Las recetas son generadas directamente por IA. La IA puede cometer errores. Cocine siempre con sentido común.",
+        dataTransfer: {
+            exportData: "Exportar datos",
+            importData: "Importar datos",
+            exportSuccess: "¡Datos exportados con éxito!",
+            importSuccess: "¡Datos importados con éxito! Recargando...",
+            invalidImportStructure: "Archivo de respaldo inválido. La estructura del archivo no es reconocida.",
+            invalidImportJson: "Archivo inválido. Por favor seleccione un archivo de respaldo JSON válido.",
+            importReadError: "No se pudo leer el archivo. Por favor intente de nuevo.",
+            importConfirm: "Esto sobrescribirá todos sus datos actuales (despensa, especias, recetas, configuración). ¿Continuar?",
+        },
     }
 };

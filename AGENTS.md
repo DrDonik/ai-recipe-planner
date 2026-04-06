@@ -64,7 +64,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Googl
 - Type-safe access via translations object
 
 **Custom Hooks (`src/hooks/`)**
-- `useLocalStorage<T>(key, initialValue)` - Generic JSON persistence hook; also `useStringLocalStorage()` for plain strings
+- `useLocalStorage<T>(key, initialValue)` - Generic JSON persistence hook for all localStorage values
 - `useWakeLock()` - Wake Lock API wrapper (keeps screen on during cooking, auto-reacquires on visibility change)
 - `useFocusTrap(onClose)` - Accessibility focus trap for dialogs (Tab/Shift+Tab cycling, Escape to close, restores previous focus)
 
