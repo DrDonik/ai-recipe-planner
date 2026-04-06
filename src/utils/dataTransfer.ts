@@ -27,6 +27,7 @@ const EXPORTABLE_KEYS = [
     STORAGE_KEYS.STYLE_WISHES,
     STORAGE_KEYS.LANGUAGE,
     STORAGE_KEYS.USE_COPY_PASTE,
+    STORAGE_KEYS.KITCHEN_APPLIANCES,
 ] as const;
 
 /**
@@ -52,6 +53,7 @@ const ExportDataSchema = z.object({
         [STORAGE_KEYS.STYLE_WISHES]: z.array(z.string()).optional(),
         [STORAGE_KEYS.LANGUAGE]: z.string().optional(),
         [STORAGE_KEYS.USE_COPY_PASTE]: z.boolean().optional(),
+        [STORAGE_KEYS.KITCHEN_APPLIANCES]: z.array(z.string()).optional(),
     }),
 });
 
