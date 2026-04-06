@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.5.3",
+  "checkpoint_id": "190fbff844ff",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/__tests__/utils/dataTransfer.test.ts",
+    "src/utils/dataTransfer.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/19/0fbff844ff/0/metadata.json",
+      "transcript": "/19/0fbff844ff/0/full.jsonl",
+      "content_hash": "/19/0fbff844ff/0/content_hash.txt",
+      "prompt": "/19/0fbff844ff/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 18,
+    "cache_creation_tokens": 51073,
+    "cache_read_tokens": 592573,
+    "output_tokens": 3053,
+    "api_call_count": 14
+  }
+}

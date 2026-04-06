@@ -1,0 +1,1 @@
+We just implemented an export/import functionality. However, it doesn't seem to work. Exporting works fine, but importing returns an error in the app. I put the exported json-file into the root folder: recipe-planner-backup-2026-04-06
