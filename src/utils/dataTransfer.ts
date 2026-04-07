@@ -15,6 +15,8 @@ const EXPORT_VERSION = 1;
  * - UI collapse states (device-specific)
  * - Welcome dismissed (should show on new device)
  * - Shared shopping list checked (ephemeral)
+ * - Language (meta-level UI preference, should not transfer between users/devices)
+ * - Use copy-paste mode (meta-level UI preference, should not transfer between users/devices)
  */
 const EXPORTABLE_KEYS = [
     STORAGE_KEYS.PANTRY_ITEMS,
@@ -25,8 +27,6 @@ const EXPORTABLE_KEYS = [
     STORAGE_KEYS.MEALS_COUNT,
     STORAGE_KEYS.DIET_PREFERENCE,
     STORAGE_KEYS.STYLE_WISHES,
-    STORAGE_KEYS.LANGUAGE,
-    STORAGE_KEYS.USE_COPY_PASTE,
     STORAGE_KEYS.KITCHEN_APPLIANCES,
 ] as const;
 
@@ -51,8 +51,6 @@ const ExportDataSchema = z.object({
         [STORAGE_KEYS.MEALS_COUNT]: z.number().optional(),
         [STORAGE_KEYS.DIET_PREFERENCE]: z.string().optional(),
         [STORAGE_KEYS.STYLE_WISHES]: z.array(z.string()).optional(),
-        [STORAGE_KEYS.LANGUAGE]: z.string().optional(),
-        [STORAGE_KEYS.USE_COPY_PASTE]: z.boolean().optional(),
         [STORAGE_KEYS.KITCHEN_APPLIANCES]: z.array(z.string()).optional(),
     }),
 });
