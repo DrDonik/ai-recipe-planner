@@ -1,0 +1,1 @@
+Let's update AGENTS.md. Have a look at the entire codebase, and check whether AGENTS.md needs revisions.
