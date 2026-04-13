@@ -72,6 +72,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Googl
 - `idGenerator.ts` - UUID generation via `crypto.randomUUID()`
 - `sharing.ts` - URL base64 encoding/decoding with Zod schema validation for shared recipes and shopping lists
 - `shoppingListHelpers.ts` - `getItemKey()` for unique item keys, `listsMatch()` for list comparison
+- `dataTransfer.ts` - Export/import user data: `buildExportData()`, `downloadExportFile()`, `readImportFile()`, `applyImportData()` with Zod-validated schema and versioning
 
 **Constants (`src/constants/index.ts`)**
 - `STORAGE_KEYS` - All localStorage key names (avoids magic strings)
@@ -95,6 +96,7 @@ App.tsx                     # Main app, routing (normal/shared recipe/shared sho
 ├─ SettingsPanel.tsx        # Diet, style wishes, people/meals count (collapsible)
 ├─ PantryInput.tsx          # Add/remove ingredients from pantry (collapsible)
 ├─ SpiceRack.tsx            # Manage staples/spices always available (collapsible)
+├─ KitchenAppliances.tsx    # Manage kitchen appliances for recipe suggestions (collapsible)
 ├─ RecipeCard.tsx           # Recipe display with ingredient strikethrough, step highlighting,
 │                           #   wake lock, nutrition info, JSON-LD schema, share button
 ├─ ShoppingList.tsx         # Checkbox-based shopping list with persistence
@@ -177,6 +179,7 @@ interface Notification {
 - **Ingredient strikethrough** - Click ingredients to mark as added
 - **Active step highlighting** - Click instructions to highlight current step
 - **Decoupled shopping lists** - Shared shopping lists maintain separate checkbox state
+- **Data export/import** - Backup and restore pantry, spice rack, appliances, recipes, and settings as JSON
 
 ## Development Commands
 
@@ -240,15 +243,18 @@ src/__tests__/
 │   ├── RecipeCard.test.tsx           # Recipe display and interactivity
 │   ├── SettingsPanel.test.tsx        # Settings controls
 │   ├── ShoppingList.test.tsx         # Shopping list checkbox behavior
+│   ├── KitchenAppliances.test.tsx     # Kitchen appliances management
 │   ├── SpiceRack.test.tsx            # Spice rack management
 │   └── WelcomeDialog.test.tsx        # Welcome dialog dismiss behavior
 ├── hooks/
 │   ├── useFocusTrap.test.ts          # Focus trap logic and keyboard handling
-│   └── useLocalStorage.test.ts       # localStorage persistence hook
+│   ├── useLocalStorage.test.ts       # localStorage persistence hook
+│   └── useWakeLock.test.ts           # Wake lock API wrapper
 ├── services/
 │   ├── llm.test.ts                   # Unit tests for prompt building, response parsing, generation
 │   └── llm.integration.test.ts       # Real API tests (skipped without GEMINI_API_KEY)
 └── utils/
+    ├── dataTransfer.test.ts          # Export/import data validation and round-trip tests
     ├── idGenerator.test.ts           # UUID generation and format tests
     └── sharing.test.ts               # URL encoding/decoding, base64, edge cases
 ```
@@ -417,7 +423,8 @@ These rules apply when Claude operates in CI — during issue validation, implem
   - `meal_plan` - Last generated meal plan
   - `shopping_list_checked` - Checked items state
   - `shopping_list_checked_shared` - Separate checked state for shared shopping lists
-  - `header_minimized`, `options_minimized`, `pantry_minimized`, `spice_rack_minimized`, `shopping_list_minimized`, `recipe_missing_ingredients_minimized` - Panel collapse states
+  - `kitchen_appliances_items` - JSON array of kitchen appliances
+  - `header_minimized`, `options_minimized`, `pantry_minimized`, `spice_rack_minimized`, `kitchen_appliances_minimized`, `shopping_list_minimized`, `recipe_missing_ingredients_minimized` - Panel collapse states
   - `welcome_dismissed` - Welcome dialog dismissed
 - **Type Safety**: All LLM response data uses strict TypeScript interfaces (`Recipe`, `MealPlan`, `Ingredient`, `PantryItem`, `Nutrition`)
 - **Error Handling**: User-facing errors displayed via `error` state in App.tsx
