@@ -1,0 +1,37 @@
+There are a few info pop ups, mostly in the settings panels. Those are not consistently written. Let's find out what should best be the common style, and then rewrite those info pop ups.
+
+---
+
+I agree with dropping the persistent message from the three settings infos. Your proposed kitchen appliances text is not entirely correct: the AI knows about these and might use them, but it isn't specifically guided by them. The spices, in turn, do guide the AI. Can you check the prompt (in services/llm.tsx) as to what the AI exactly does with each input?
+
+---
+
+Much more, yes. Can you propose German translations?
+
+---
+
+I would like to rephrase the Pantry text again: these are not "main" ingredients, are they? They are the "available ingredients", or is there a better term?
+
+---
+
+Yes, that's good. Propose the French translation, please.
+
+---
+
+And the Spanish version.
+
+---
+
+Sounds good. Go ahead and implement this.
+
+---
+
+You also mentioned the shopping list text. Let's look at this again.
+
+---
+
+I don't think that users would understand the difference between "shared" and "main" list, would they?
+
+---
+
+This is much better, yes. Can we still add something that the checkmarks are seperate from "your own list", but keeping the tight style?
