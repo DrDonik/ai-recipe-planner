@@ -556,7 +556,7 @@ export const translations = {
             ingredient: "Ingrediente (ej. Zanahorias)",
             amount: "Cantidad (ej. 1kg o 3 pcs)",
         },
-        pantryInfo: "Agrega tus ingredientes disponibles aquí. La IA intentará usar todos en las recetas generadas.",
+        pantryInfo: "Agrega tus ingredientes disponibles aquí. La IA intentará usarlos todos en las recetas generadas.",
         spiceRackInfo: "Agrega productos básicos como especias, aceites o sal. Estos guían las recetas, pero no se agregarán a tu lista de compras.",
         sharedPantry: "Despensa Compartida",
         loadPantry: "Cargar estos artículos en mi despensa",
