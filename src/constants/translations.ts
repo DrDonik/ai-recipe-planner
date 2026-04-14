@@ -218,7 +218,7 @@ export const translations = {
         spicesPlaceholder: "Gewürze, Öl, Soßen hinzufügen...",
         kitchenAppliances: "Küchengeräte",
         appliancesPlaceholder: "Heißluftfritteuse, Instant Pot...",
-        kitchenAppliancesInfo: "Füge Geräte wie eine Heissluftfritteuse oder einen Vitamix hinzu. Die KI kennt sie und kann Rezepte vorschlagen, die sie nutzen.",
+        kitchenAppliancesInfo: "Füge Geräte wie eine Heißluftfritteuse oder einen Vitamix hinzu. Die KI kennt sie und kann Rezepte vorschlagen, die sie nutzen.",
         noAppliances: "Noch keine Geräte hinzugefügt.",
         placeholders: {
             ingredient: "Zutat (z.B. Karotten)",
