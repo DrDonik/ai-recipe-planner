@@ -1,0 +1,55 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "18118c190d97",
+  "session_id": "2a28a82a-5d72-41fc-a9e6-477593b9494c",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-16T19:38:14.951979Z",
+  "branch": "fix/release-warnings",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "src/App.tsx",
+    "src/components/RecipeCard.tsx",
+    ".github/workflows/release.yml",
+    ".github/workflows/issue-validation.yml",
+    ".github/workflows/claude.yml"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-7",
+  "turn_id": "0907f99bbe3b",
+  "checkpoint_transcript_start": 79,
+  "transcript_lines_at_start": 79,
+  "token_usage": {
+    "input_tokens": 66,
+    "cache_creation_tokens": 108915,
+    "cache_read_tokens": 3898097,
+    "output_tokens": 14833,
+    "api_call_count": 46
+  },
+  "session_metrics": {
+    "turn_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-16T19:38:14.937589Z",
+    "agent_lines": 9,
+    "agent_removed": 9,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 9,
+    "total_lines_changed": 18,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 57,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".claude/settings.local.json": 57
+      }
+    }
+  ]
+}

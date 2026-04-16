@@ -1,0 +1,9 @@
+We no longer need the standardize branch. Let's remove the local branches except main and entire
+
+---
+
+There were some warnings when baking the release on github:
+
+---
+
+Let's do 3
