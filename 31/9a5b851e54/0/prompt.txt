@@ -1,0 +1,5 @@
+Let's set and push the next tag for the current main branch. Are we at 1.0.3, or rather at 1.1.0?
+
+---
+
+1. yes, bump it, and never mind the skipped tag: leapfrog this.
