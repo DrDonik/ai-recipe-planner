@@ -10,7 +10,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Googl
 - **Target Audience**: Primarily for personal use
 - **UX Philosophy**: Usability is key. Minimize clicks and scrolling. All settings persist to localStorage so users can jump straight to recipe generation.
 
-**Current version**: 1.0.2
+**Current version**: 1.1.0
 
 ## Tech Stack
 
