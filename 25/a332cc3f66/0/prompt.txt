@@ -1,0 +1,1 @@
+On the PR 198, claude had a comment about a missing test. Can you check if this is legit and, if so, implement one? (The APP_CLIENT_ID repo variable mentioned in the PR has already been set, nothing to do there anymore.)

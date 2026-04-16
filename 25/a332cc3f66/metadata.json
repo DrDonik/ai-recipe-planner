@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "25a332cc3f66",
+  "strategy": "manual-commit",
+  "branch": "fix/release-warnings",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "src/__tests__/components/RecipeCard.test.tsx"
+  ],
+  "sessions": [
+    {
+      "metadata": "/25/a332cc3f66/0/metadata.json",
+      "transcript": "/25/a332cc3f66/0/full.jsonl",
+      "content_hash": "/25/a332cc3f66/0/content_hash.txt",
+      "prompt": "/25/a332cc3f66/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 59642,
+    "cache_read_tokens": 970693,
+    "output_tokens": 5998,
+    "api_call_count": 15
+  }
+}
