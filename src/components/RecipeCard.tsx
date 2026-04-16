@@ -81,7 +81,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             console.error('Failed to generate JSON-LD schema for recipe:', recipe.title, error);
             return null;
         }
-    }, [recipe.id]);
+    }, [recipe]);
 
 
     return (
