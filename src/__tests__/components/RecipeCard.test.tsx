@@ -405,6 +405,41 @@ describe('RecipeCard', () => {
             // Should not show any error alert
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();
         });
+
+        it('updates JSON-LD schema when recipe content changes while id stays the same', () => {
+            // Regression test: the useMemo dep array must track the full recipe object,
+            // not just recipe.id. Otherwise schema goes stale when title/ingredients/
+            // instructions change on a recipe with an unchanged id.
+            const { container, rerender } = renderWithSettings(
+                <RecipeCard recipe={mockRecipe} index={0} />
+            );
+
+            const initialScript = container.querySelector('script[type="application/ld+json"]');
+            expect(initialScript?.innerHTML).toContain('"name":"Test Recipe"');
+            expect(initialScript?.innerHTML).toContain('2 Tomato');
+
+            const updatedRecipe: Recipe = {
+                ...mockRecipe,
+                title: 'Updated Recipe Title',
+                ingredients: [
+                    { item: 'Potato', amount: '3' },
+                    { item: 'Carrot', amount: '2' },
+                ],
+            };
+
+            rerender(
+                <SettingsProvider>
+                    <RecipeCard recipe={updatedRecipe} index={0} />
+                </SettingsProvider>
+            );
+
+            const updatedScript = container.querySelector('script[type="application/ld+json"]');
+            expect(updatedScript?.innerHTML).toContain('"name":"Updated Recipe Title"');
+            expect(updatedScript?.innerHTML).toContain('3 Potato');
+            expect(updatedScript?.innerHTML).toContain('2 Carrot');
+            expect(updatedScript?.innerHTML).not.toContain('"name":"Test Recipe"');
+            expect(updatedScript?.innerHTML).not.toContain('2 Tomato');
+        });
     });
 
     describe('Ingredient Highlighting', () => {
