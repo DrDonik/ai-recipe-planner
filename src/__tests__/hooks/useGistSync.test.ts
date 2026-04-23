@@ -1,0 +1,245 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import { GIST_API, STORAGE_KEYS } from '@/constants';
+import { useGistSync } from '@/hooks/useGistSync';
+import { SYNC_PAYLOAD_VERSION, type SyncPayload } from '@/services/gistSync';
+
+const TOKEN = 'ghp_abc';
+const GIST_ID = 'gist123';
+const GIST_URL = `${GIST_API.BASE_URL}/${GIST_ID}`;
+
+const configureSync = () => {
+  localStorage.setItem(STORAGE_KEYS.GIST_TOKEN, JSON.stringify(TOKEN));
+  localStorage.setItem(STORAGE_KEYS.GIST_ID, JSON.stringify(GIST_ID));
+};
+
+const makeRemotePayload = (overrides: Partial<SyncPayload> = {}): SyncPayload => ({
+  version: SYNC_PAYLOAD_VERSION,
+  updatedAt: '2026-04-23T12:00:00.000Z',
+  data: {
+    [STORAGE_KEYS.PANTRY_ITEMS]: [{ id: 'r1', name: 'RemoteItem', amount: '1' }],
+    [STORAGE_KEYS.PEOPLE_COUNT]: 5,
+  },
+  ...overrides,
+});
+
+const gistWithPayload = (payload: SyncPayload) => ({
+  id: GIST_ID,
+  files: {
+    [GIST_API.FILENAME]: {
+      filename: GIST_API.FILENAME,
+      content: JSON.stringify(payload),
+    },
+  },
+});
+
+const server = setupServer();
+
+describe('useGistSync', () => {
+  beforeEach(() => {
+    server.listen({ onUnhandledRequest: 'error' });
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    server.resetHandlers();
+    server.close();
+    vi.useRealTimers();
+  });
+
+  it('stays idle when sync is not configured and does not hit the network', async () => {
+    const networkSpy = vi.fn();
+    server.use(
+      http.get(GIST_URL, () => {
+        networkSpy();
+        return HttpResponse.json({});
+      }),
+    );
+
+    const { result } = renderHook(() => useGistSync());
+
+    expect(result.current.isConfigured).toBe(false);
+    expect(result.current.status).toBe('idle');
+    // Give microtasks a chance
+    await new Promise((r) => setTimeout(r, 0));
+    expect(networkSpy).not.toHaveBeenCalled();
+  });
+
+  it('pulls on mount, applies payload, and sets status to synced', async () => {
+    configureSync();
+    const remote = makeRemotePayload();
+    server.use(http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))));
+
+    const { result } = renderHook(() => useGistSync());
+
+    expect(result.current.status).toBe('pulling');
+
+    await waitFor(() => expect(result.current.status).toBe('synced'));
+    expect(result.current.justPulledFromRemote).toBe(true);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.PANTRY_ITEMS)!)).toEqual([
+      { id: 'r1', name: 'RemoteItem', amount: '1' },
+    ]);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.PEOPLE_COUNT)!)).toBe(5);
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.SYNC_UPDATED_AT)!)).toBe(remote.updatedAt);
+  });
+
+  it('does not flag justPulledFromRemote if the gist has no sync file yet', async () => {
+    configureSync();
+    server.use(
+      http.get(GIST_URL, () =>
+        HttpResponse.json({ id: GIST_ID, files: { 'other.txt': { content: '' } } }),
+      ),
+    );
+
+    const { result } = renderHook(() => useGistSync());
+
+    await waitFor(() => expect(result.current.status).toBe('synced'));
+    expect(result.current.justPulledFromRemote).toBe(false);
+  });
+
+  it('enters error state with unauthorized on 401', async () => {
+    configureSync();
+    server.use(http.get(GIST_URL, () => new HttpResponse(null, { status: 401 })));
+
+    const { result } = renderHook(() => useGistSync());
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    expect(result.current.errorKind).toBe('unauthorized');
+  });
+
+  it('enters error state with notFound on 404', async () => {
+    configureSync();
+    server.use(http.get(GIST_URL, () => new HttpResponse(null, { status: 404 })));
+
+    const { result } = renderHook(() => useGistSync());
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    expect(result.current.errorKind).toBe('notFound');
+  });
+
+  it('leaves localStorage untouched on pull error', async () => {
+    configureSync();
+    localStorage.setItem(STORAGE_KEYS.PANTRY_ITEMS, JSON.stringify([{ id: 'keep', name: 'Keep', amount: '1' }]));
+    server.use(http.get(GIST_URL, () => HttpResponse.error()));
+
+    const { result } = renderHook(() => useGistSync());
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEYS.PANTRY_ITEMS)!)).toEqual([
+      { id: 'keep', name: 'Keep', amount: '1' },
+    ]);
+  });
+
+  it('pushes a debounced payload when useLocalStorage writes a synced key', async () => {
+    configureSync();
+    const remote = makeRemotePayload({ data: {} });
+    let patchCount = 0;
+    let lastPatchedContent: string | null = null;
+
+    server.use(
+      http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))),
+      http.patch(GIST_URL, async ({ request }) => {
+        patchCount++;
+        const body = (await request.json()) as {
+          files: Record<string, { content: string }>;
+        };
+        lastPatchedContent = body.files[GIST_API.FILENAME].content;
+        return HttpResponse.json({ id: GIST_ID, files: {} });
+      }),
+    );
+
+    const { result: syncResult } = renderHook(() => useGistSync());
+    await waitFor(() => expect(syncResult.current.status).toBe('synced'));
+
+    // Write to a synced key via the real useLocalStorage hook, which emits
+    // the change event that useGistSync listens for.
+    const { useLocalStorage } = await import('@/hooks/useLocalStorage');
+    const { result: lsResult } = renderHook(() =>
+      useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []),
+    );
+
+    await act(async () => {
+      lsResult.current[1](['salt']);
+    });
+
+    // Wait past the debounce window and the subsequent push.
+    await waitFor(
+      () => expect(patchCount).toBeGreaterThanOrEqual(1),
+      { timeout: GIST_API.PUSH_DEBOUNCE_MS + 3000 },
+    );
+
+    expect(patchCount).toBe(1);
+    const pushed = JSON.parse(lastPatchedContent!);
+    expect(pushed.data[STORAGE_KEYS.SPICE_RACK]).toEqual(['salt']);
+    await waitFor(() => expect(syncResult.current.status).toBe('synced'));
+  });
+
+  it('does not push for writes to device-local keys', async () => {
+    configureSync();
+    const remote = makeRemotePayload({ data: {} });
+    const patchSpy = vi.fn();
+
+    server.use(
+      http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))),
+      http.patch(GIST_URL, () => {
+        patchSpy();
+        return HttpResponse.json({ id: GIST_ID, files: {} });
+      }),
+    );
+
+    const { result: syncResult } = renderHook(() => useGistSync());
+    await waitFor(() => expect(syncResult.current.status).toBe('synced'));
+
+    const { useLocalStorage } = await import('@/hooks/useLocalStorage');
+    const { result: lsResult } = renderHook(() =>
+      useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false),
+    );
+
+    await act(async () => {
+      lsResult.current[1](true);
+    });
+
+    // Wait longer than the debounce to be sure no push is ever scheduled.
+    await new Promise((r) => setTimeout(r, GIST_API.PUSH_DEBOUNCE_MS + 500));
+    expect(patchSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not push as a result of applying the initial pull', async () => {
+    configureSync();
+    const remote = makeRemotePayload();
+    const patchSpy = vi.fn();
+
+    server.use(
+      http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))),
+      http.patch(GIST_URL, () => {
+        patchSpy();
+        return HttpResponse.json({ id: GIST_ID, files: {} });
+      }),
+    );
+
+    const { result } = renderHook(() => useGistSync());
+    await waitFor(() => expect(result.current.status).toBe('synced'));
+
+    // Even after the debounce window, no push should have been fired for
+    // the applySyncPayload writes.
+    await new Promise((r) => setTimeout(r, GIST_API.PUSH_DEBOUNCE_MS + 500));
+    expect(patchSpy).not.toHaveBeenCalled();
+  });
+
+  it('acknowledgePull clears the justPulledFromRemote flag', async () => {
+    configureSync();
+    const remote = makeRemotePayload();
+    server.use(http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))));
+
+    const { result } = renderHook(() => useGistSync());
+    await waitFor(() => expect(result.current.justPulledFromRemote).toBe(true));
+
+    act(() => {
+      result.current.acknowledgePull();
+    });
+
+    expect(result.current.justPulledFromRemote).toBe(false);
+  });
+});

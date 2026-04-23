@@ -37,6 +37,7 @@ function setup(options: SetupOptions = {}) {
         onShowHelp: vi.fn(),
         onShowNotification: vi.fn(),
         onClearNotification: vi.fn(),
+        syncStatus: 'idle' as const,
     };
 
     render(

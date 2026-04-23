@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
+import { GistSyncDialog } from './GistSyncDialog';
 import { TooltipButton } from './ui/TooltipButton';
 import { buildExportData, downloadExportFile, readImportFile, applyImportData } from '../utils/dataTransfer';
 import type { Notification } from '../types';
+import type { SyncStatus } from '../hooks/useGistSync';
 
 interface HeaderProps {
     headerMinimized: boolean;
@@ -14,6 +16,7 @@ interface HeaderProps {
     onShowHelp: () => void;
     onShowNotification: (notification: Notification) => void;
     onClearNotification: () => void;
+    syncStatus: SyncStatus;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
     onShowHelp,
     onShowNotification,
     onClearNotification,
+    syncStatus,
 }) => {
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, t } = useSettings();
 
@@ -31,8 +35,44 @@ export const Header: React.FC<HeaderProps> = ({
         return !hasSeenWarning && !!apiKey && !useCopyPaste;
     });
     const [showClearDialog, setShowClearDialog] = useState(false);
+    const [showSyncDialog, setShowSyncDialog] = useState(false);
     const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
     const importFileRef = useRef<HTMLInputElement>(null);
+
+    const syncIcon = (() => {
+        switch (syncStatus) {
+            case 'pulling':
+            case 'pushing':
+                return <Loader2 size={16} className="text-primary animate-spin" />;
+            case 'pending':
+                return <Cloud size={16} className="text-amber-500" />;
+            case 'synced':
+                return <Cloud size={16} className="text-primary" />;
+            case 'error':
+                return <Cloud size={16} className="text-red-500" />;
+            case 'idle':
+            default:
+                return <CloudOff size={16} className="text-text-muted" />;
+        }
+    })();
+
+    const syncTooltip = (() => {
+        switch (syncStatus) {
+            case 'pulling':
+                return t.sync.pullingTooltip;
+            case 'pushing':
+                return t.sync.pushingTooltip;
+            case 'pending':
+                return t.sync.pendingTooltip;
+            case 'synced':
+                return t.sync.enabledTooltip;
+            case 'error':
+                return t.sync.errorTooltip;
+            case 'idle':
+            default:
+                return t.sync.disabledTooltip;
+        }
+    })();
 
     const handleExport = () => {
         const data = buildExportData();
@@ -173,6 +213,17 @@ export const Header: React.FC<HeaderProps> = ({
                             />
                         )}
 
+                        {/* Sync Indicator (when minimized) */}
+                        {headerMinimized && (syncStatus === 'error' || syncStatus === 'pending' || syncStatus === 'synced') && (
+                            <TooltipButton
+                                icon={syncIcon}
+                                tooltip={syncTooltip}
+                                ariaLabel={t.sync.openSettings}
+                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setShowSyncDialog(true)}
+                            />
+                        )}
+
                         {/* Toggle Button */}
                         <button
                             onClick={() => setHeaderMinimized(!headerMinimized)}
@@ -271,7 +322,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 </select>
                             </div>
 
-                            {/* Export / Import */}
+                            {/* Export / Import / Sync */}
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <input
                                     ref={importFileRef}
@@ -296,6 +347,13 @@ export const Header: React.FC<HeaderProps> = ({
                                     className="p-2 bg-white/50 dark:bg-black/20 rounded-full border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40 transition-colors text-text-muted hover:text-primary cursor-pointer"
                                     onClick={handleImportClick}
                                 />
+                                <TooltipButton
+                                    icon={syncIcon}
+                                    tooltip={syncTooltip}
+                                    ariaLabel={t.sync.openSettings}
+                                    className="p-2 bg-white/50 dark:bg-black/20 rounded-full border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40 transition-colors cursor-pointer"
+                                    onClick={() => setShowSyncDialog(true)}
+                                />
                             </div>
                         </>
                     )}
@@ -314,6 +372,15 @@ export const Header: React.FC<HeaderProps> = ({
             <ClearApiKeyDialog
                 onClear={handleClearApiKey}
                 onKeep={handleKeepApiKey}
+            />
+        )}
+
+        {showSyncDialog && (
+            <GistSyncDialog
+                onClose={() => setShowSyncDialog(false)}
+                syncStatus={syncStatus}
+                onShowError={(message) => onShowNotification({ message, type: 'error' })}
+                onShowInfo={(message) => onShowNotification({ message, type: 'undo', timeout: 3000 })}
             />
         )}
         </>

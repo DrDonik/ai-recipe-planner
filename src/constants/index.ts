@@ -29,7 +29,28 @@ export const STORAGE_KEYS = {
     MEAL_PLAN: 'meal_plan',
     WELCOME_DISMISSED: 'welcome_dismissed',
     PANTRY_ITEMS: 'pantry_items',
+    GIST_TOKEN: 'gist_sync_token',
+    GIST_ID: 'gist_sync_id',
+    SYNC_UPDATED_AT: 'sync_updated_at',
+    GIST_TOKEN_WARNING_SEEN: 'gist_token_warning_seen',
 } as const;
+
+/**
+ * LocalStorage keys that participate in Gist-based multi-device sync.
+ * Device-local state (panel collapse, API key, welcome dismissed, language UI)
+ * is intentionally excluded.
+ */
+export const SYNCED_STORAGE_KEYS: readonly string[] = [
+    STORAGE_KEYS.PANTRY_ITEMS,
+    STORAGE_KEYS.SPICE_RACK,
+    STORAGE_KEYS.KITCHEN_APPLIANCES,
+    STORAGE_KEYS.PEOPLE_COUNT,
+    STORAGE_KEYS.MEALS_COUNT,
+    STORAGE_KEYS.DIET_PREFERENCE,
+    STORAGE_KEYS.STYLE_WISHES,
+    STORAGE_KEYS.MEAL_PLAN,
+    STORAGE_KEYS.SHOPPING_LIST_CHECKED,
+] as const;
 
 /**
  * URL query parameter names for sharing functionality.
@@ -47,6 +68,17 @@ export const API_CONFIG = {
     MODEL: 'gemini-3-flash-preview',
     TIMEOUT_MS: 60000,
     KEY_URL: 'https://aistudio.google.com/app/apikey',
+} as const;
+
+/**
+ * GitHub Gist API configuration for multi-device sync.
+ */
+export const GIST_API = {
+    BASE_URL: 'https://api.github.com/gists',
+    FILENAME: 'ai-recipe-planner.json',
+    TIMEOUT_MS: 15000,
+    PUSH_DEBOUNCE_MS: 3000,
+    TOKEN_URL: 'https://github.com/settings/tokens',
 } as const;
 
 /**

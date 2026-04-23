@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage, subscribeToLocalStorageChanges } from '@/hooks/useLocalStorage';
 
 describe('useLocalStorage', () => {
   beforeEach(() => {
@@ -225,6 +225,97 @@ describe('useLocalStorage', () => {
     });
     expect(result.current[0]).toBe('updated');
     expect(result.current[2]).toBe(false);
+  });
+
+  describe('subscribeToLocalStorageChanges', () => {
+    it('notifies subscribers when a value is written', () => {
+      const listener = vi.fn();
+      const unsubscribe = subscribeToLocalStorageChanges(listener);
+
+      const { result } = renderHook(() => useLocalStorage<string>('test-emit', 'initial'));
+      listener.mockClear();
+
+      act(() => {
+        result.current[1]('new-value');
+      });
+
+      expect(listener).toHaveBeenCalledWith({ key: 'test-emit', value: 'new-value' });
+      unsubscribe();
+    });
+
+    it('emits on mount with the initial state', () => {
+      const listener = vi.fn();
+      const unsubscribe = subscribeToLocalStorageChanges(listener);
+
+      renderHook(() => useLocalStorage<number>('test-emit-mount', 42));
+
+      expect(listener).toHaveBeenCalledWith({ key: 'test-emit-mount', value: 42 });
+      unsubscribe();
+    });
+
+    it('stops notifying after unsubscribe', () => {
+      const listener = vi.fn();
+      const unsubscribe = subscribeToLocalStorageChanges(listener);
+      unsubscribe();
+
+      const { result } = renderHook(() => useLocalStorage<string>('test-emit-unsub', 'initial'));
+      listener.mockClear();
+
+      act(() => {
+        result.current[1]('changed');
+      });
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('does NOT emit if the underlying localStorage write fails', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+        throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+      });
+
+      const listener = vi.fn();
+      const unsubscribe = subscribeToLocalStorageChanges(listener);
+
+      const { result } = renderHook(() => useLocalStorage<string>('test-emit-fail', 'initial'));
+      // The mount effect attempts to write — it fails, so no emit.
+      listener.mockClear();
+
+      act(() => {
+        result.current[1]('also-fails');
+      });
+
+      expect(listener).not.toHaveBeenCalled();
+
+      setItemSpy.mockRestore();
+      consoleSpy.mockRestore();
+      unsubscribe();
+    });
+
+    it('isolates listener errors so one broken listener does not block others', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const broken = vi.fn(() => {
+        throw new Error('boom');
+      });
+      const good = vi.fn();
+      const unsubscribeA = subscribeToLocalStorageChanges(broken);
+      const unsubscribeB = subscribeToLocalStorageChanges(good);
+
+      const { result } = renderHook(() => useLocalStorage<string>('test-isolation', 'initial'));
+      broken.mockClear();
+      good.mockClear();
+
+      act(() => {
+        result.current[1]('v');
+      });
+
+      expect(broken).toHaveBeenCalled();
+      expect(good).toHaveBeenCalledWith({ key: 'test-isolation', value: 'v' });
+
+      unsubscribeA();
+      unsubscribeB();
+      consoleSpy.mockRestore();
+    });
   });
 });
 
