@@ -213,6 +213,61 @@ describe('gistSync service', () => {
       await expect(pullGist(TOKEN, GIST_ID)).rejects.toBeInstanceOf(GistPayloadError);
     });
 
+    it('fetches truncated content via raw_url with the Authorization header', async () => {
+      // Gists are private (public: false on create), so raw_url requires auth.
+      const RAW_URL = 'https://gist.githubusercontent.com/fake-user/abc123/raw/sync.json';
+      let rawAuth: string | null = null;
+
+      server.use(
+        http.get(GIST_URL, () =>
+          HttpResponse.json({
+            id: GIST_ID,
+            files: {
+              [GIST_API.FILENAME]: {
+                filename: GIST_API.FILENAME,
+                // Simulate GitHub truncating the content and exposing raw_url.
+                content: '',
+                truncated: true,
+                raw_url: RAW_URL,
+              },
+            },
+          }),
+        ),
+        http.get(RAW_URL, ({ request }) => {
+          rawAuth = request.headers.get('Authorization');
+          return new HttpResponse(JSON.stringify(validPayload), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }),
+      );
+
+      const result = await pullGist(TOKEN, GIST_ID);
+      expect(result).toEqual(validPayload);
+      expect(rawAuth).toBe(`Bearer ${TOKEN}`);
+    });
+
+    it('wraps raw_url failures as GistNetworkError', async () => {
+      const RAW_URL = 'https://gist.githubusercontent.com/fake-user/abc123/raw/sync.json';
+      server.use(
+        http.get(GIST_URL, () =>
+          HttpResponse.json({
+            id: GIST_ID,
+            files: {
+              [GIST_API.FILENAME]: {
+                filename: GIST_API.FILENAME,
+                content: '',
+                truncated: true,
+                raw_url: RAW_URL,
+              },
+            },
+          }),
+        ),
+        http.get(RAW_URL, () => new HttpResponse(null, { status: 500 })),
+      );
+
+      await expect(pullGist(TOKEN, GIST_ID)).rejects.toBeInstanceOf(GistNetworkError);
+    });
+
     it('honors the timeout by aborting slow requests', async () => {
       vi.useFakeTimers();
       server.use(

@@ -213,8 +213,9 @@ export const Header: React.FC<HeaderProps> = ({
                             />
                         )}
 
-                        {/* Sync Indicator (when minimized) */}
-                        {headerMinimized && (syncStatus === 'error' || syncStatus === 'pending' || syncStatus === 'synced') && (
+                        {/* Sync Indicator (when minimized) — show for any non-idle state
+                            so the button does not disappear during pulling/pushing. */}
+                        {headerMinimized && syncStatus !== 'idle' && (
                             <TooltipButton
                                 icon={syncIcon}
                                 tooltip={syncTooltip}

@@ -224,5 +224,30 @@ describe('GistSyncDialog', () => {
 
             writeText.mockRestore();
         });
+
+        it('shows an inline copy error (not a toast) when clipboard write fails', async () => {
+            // The global notification toast is rendered behind the dialog's
+            // backdrop and would be invisible, so a clipboard failure must be
+            // surfaced inside the dialog itself.
+            const writeText = vi
+                .spyOn(navigator.clipboard, 'writeText')
+                .mockRejectedValue(new Error('clipboard blocked'));
+            const onShowError = vi.fn();
+            const onShowInfo = vi.fn();
+
+            const { user } = renderDialog({ syncStatus: 'synced', onShowError, onShowInfo });
+            await user.click(screen.getByRole('button', { name: /Copy Gist ID/i }));
+
+            // Inline message appears (reuses the copy-paste translation key).
+            expect(
+                await screen.findByText(/couldn't copy automatically/i),
+            ).toBeInTheDocument();
+            // Neither toast channel is invoked — the toast is not visible
+            // while the dialog is open.
+            expect(onShowError).not.toHaveBeenCalled();
+            expect(onShowInfo).not.toHaveBeenCalled();
+
+            writeText.mockRestore();
+        });
     });
 });

@@ -148,23 +148,21 @@ interface GistResponse {
 /**
  * Parses a Gist response and extracts our payload file. Returns null if the
  * Gist exists but does not contain our file (e.g. empty or unrelated Gist).
+ *
+ * The token is required because our gists are private (see `createGist`), and
+ * GitHub requires authentication to fetch `raw_url` for private gist files.
  */
-const extractPayload = async (gist: GistResponse): Promise<SyncPayload | null> => {
+const extractPayload = async (
+    gist: GistResponse,
+    token: string,
+): Promise<SyncPayload | null> => {
     const file = gist.files[GIST_API.FILENAME];
     if (!file) return null;
 
     let content = file.content ?? '';
     if (file.truncated && file.raw_url) {
-        try {
-            const raw = await fetch(file.raw_url);
-            if (!raw.ok) {
-                throw new GistNetworkError(`Failed to fetch truncated gist content: ${raw.status}`);
-            }
-            content = await raw.text();
-        } catch (err) {
-            if (err instanceof GistNetworkError) throw err;
-            throw new GistNetworkError(err instanceof Error ? err.message : String(err));
-        }
+        const raw = await gistFetch(file.raw_url, { method: 'GET' }, token);
+        content = await raw.text();
     }
 
     let parsed: unknown;
@@ -191,7 +189,7 @@ export const pullGist = async (
 ): Promise<SyncPayload | null> => {
     const response = await gistFetch(`${GIST_API.BASE_URL}/${gistId}`, { method: 'GET' }, token);
     const gist = (await response.json()) as GistResponse;
-    return extractPayload(gist);
+    return extractPayload(gist, token);
 };
 
 /**

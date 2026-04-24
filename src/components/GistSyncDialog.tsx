@@ -56,6 +56,10 @@ export const GistSyncDialog = ({
     const [gistIdInput, setGistIdInput] = useState('');
     const [busy, setBusy] = useState(false);
     const [fieldError, setFieldError] = useState<string | null>(null);
+    // Dialog-local error for the active step. The global notification toast is
+    // rendered behind the dialog's backdrop, so errors triggered from within
+    // the dialog (e.g. a clipboard failure) must be shown inline.
+    const [copyError, setCopyError] = useState<string | null>(null);
 
     const mapErrorToMessage = (err: unknown): string => {
         if (err instanceof GistUnauthorizedError) return t.sync.errorUnauthorized;
@@ -142,10 +146,14 @@ export const GistSyncDialog = ({
         if (!initiallyConfigured) return;
         try {
             await navigator.clipboard.writeText(initiallyConfigured.gistId);
+            setCopyError(null);
             onShowInfo(t.sync.gistIdCopied);
         } catch {
-            // Clipboard failed — surface gently as a non-error info.
-            onShowError(t.sync.errorNetwork);
+            // Clipboard failed — surface inline (toasts are hidden by the
+            // dialog backdrop). Reuses the copy-paste translation key since
+            // its wording ("select the text above and copy it manually")
+            // fits the gist-id-above-the-button layout verbatim.
+            setCopyError(t.copyPaste.copyFailed);
         }
     };
 
@@ -285,7 +293,9 @@ export const GistSyncDialog = ({
 
     const renderActive = () => {
         const gistId = initiallyConfigured?.gistId ?? '';
-        const errorMessage = syncStatus === 'error' ? t.sync.errorTooltip : null;
+        // copyError takes precedence — it is a direct response to the user's
+        // last click, while the sync-status error reflects background state.
+        const errorMessage = copyError ?? (syncStatus === 'error' ? t.sync.errorTooltip : null);
         return (
             <>
                 <div className="flex items-center gap-3 mb-4">

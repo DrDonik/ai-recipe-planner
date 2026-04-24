@@ -5,12 +5,14 @@ import { Header } from '../../components/Header';
 import { SettingsProvider } from '../../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../../constants';
 import * as dataTransfer from '../../utils/dataTransfer';
+import type { SyncStatus } from '../../hooks/useGistSync';
 
 interface SetupOptions {
     headerMinimized?: boolean;
     presetApiKey?: string;
     presetUseCopyPaste?: boolean;
     presetWarningDismissed?: boolean;
+    syncStatus?: SyncStatus;
 }
 
 function setup(options: SetupOptions = {}) {
@@ -19,6 +21,7 @@ function setup(options: SetupOptions = {}) {
         presetApiKey,
         presetUseCopyPaste,
         presetWarningDismissed = true,
+        syncStatus = 'idle',
     } = options;
 
     if (presetApiKey !== undefined) {
@@ -37,7 +40,7 @@ function setup(options: SetupOptions = {}) {
         onShowHelp: vi.fn(),
         onShowNotification: vi.fn(),
         onClearNotification: vi.fn(),
-        syncStatus: 'idle' as const,
+        syncStatus,
     };
 
     render(
@@ -272,6 +275,25 @@ describe('Header', () => {
             await user.click(warning);
 
             expect(screen.getByText('Clear API Key?')).toBeInTheDocument();
+        });
+    });
+
+    describe('sync indicator (minimized)', () => {
+        // syncStatus 'idle' is the only state where the indicator must be hidden;
+        // every other state (including the transient pulling/pushing) should show
+        // something so the button does not flicker out during a sync round-trip.
+        const visibleStatuses: SyncStatus[] = ['pulling', 'pushing', 'pending', 'synced', 'error'];
+
+        it.each(visibleStatuses)('renders sync indicator in collapsed header for syncStatus "%s"', (status) => {
+            setup({ headerMinimized: true, syncStatus: status });
+
+            expect(screen.getByLabelText('Sync settings')).toBeInTheDocument();
+        });
+
+        it('does not render sync indicator in collapsed header for syncStatus "idle"', () => {
+            setup({ headerMinimized: true, syncStatus: 'idle' });
+
+            expect(screen.queryByLabelText('Sync settings')).not.toBeInTheDocument();
         });
     });
 
