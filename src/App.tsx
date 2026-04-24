@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
+import { useGistSync } from './hooks/useGistSync';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack, type SpiceRackRef } from './components/SpiceRack';
@@ -64,6 +65,9 @@ function App() {
   // to acquire a wake lock. The button is prominently displayed for users to tap.
   const wakeLock = useWakeLock();
 
+  // Multi-device sync via GitHub Gist (opt-in).
+  const sync = useGistSync();
+
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCloseWelcome = useCallback(() => setShowWelcome(false), []);
   const handleShowHelp = useCallback(() => setShowWelcome(true), []);
@@ -114,6 +118,33 @@ function App() {
       storageErrorShownRef.current = false;
     }
   }, [anyPersistError, showNotification, t.storageError]);
+
+  // Notify on successful pull from remote (one-shot per pull)
+  useEffect(() => {
+    if (sync.justPulledFromRemote) {
+      showNotification({ message: t.sync.pulledNotification, type: 'undo', timeout: 3000 });
+      sync.acknowledgePull();
+    }
+  }, [sync, showNotification, t.sync.pulledNotification]);
+
+  // Surface sync errors to the user (category-specific message, one-shot per error state change)
+  const syncErrorShownRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (sync.status !== 'error' || sync.errorKind === null) {
+      syncErrorShownRef.current = null;
+      return;
+    }
+    if (syncErrorShownRef.current === sync.errorKind) return;
+    syncErrorShownRef.current = sync.errorKind;
+
+    const message = {
+      unauthorized: t.sync.errorUnauthorized,
+      notFound: t.sync.errorNotFound,
+      payload: t.sync.errorPayload,
+      network: t.sync.errorNetwork,
+    }[sync.errorKind];
+    showNotification({ message, type: 'error' });
+  }, [sync.status, sync.errorKind, showNotification, t.sync.errorUnauthorized, t.sync.errorNotFound, t.sync.errorPayload, t.sync.errorNetwork]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -440,6 +471,7 @@ function App() {
         onShowHelp={handleShowHelp}
         onShowNotification={showNotification}
         onClearNotification={clearNotification}
+        syncStatus={sync.status}
       />
 
       <main className="app-container flex flex-col gap-8">
