@@ -344,14 +344,14 @@ describe('App URL Parameter Decoding', () => {
             expect(screen.getByText('Language Test Recipe')).toBeInTheDocument();
         });
 
-        it('uses translation ref for error messages', async () => {
-            // Invalid base64 data that will trigger error
+        it('shows translated error when shared URL data is invalid', async () => {
+            // Invalid base64 data triggers the hasInvalidData branch at mount
             mockLocation.search = '?recipe=invalid-base64';
 
             renderWithSettings(<App />);
 
-            // The error message should use the translation from the ref
-            // The ref captures t.invalidSharedData and updates when it changes
+            // Notification is initialized synchronously from t.invalidSharedData
+            // via a lazy useState initializer (no setState-in-effect).
             await waitFor(() => {
                 const errorText = screen.queryByText(/Invalid shared recipe data/i) ||
                                 screen.queryByText(/The link may be corrupted/i);
