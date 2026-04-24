@@ -1,7 +1,7 @@
 ---
 created: 2026-02-23T09:02:16Z
-last_updated: 2026-02-23T09:02:16Z
-version: 1.0
+last_updated: 2026-04-24T06:19:41Z
+version: 1.1
 author: Claude Code PM System
 ---
 
@@ -24,11 +24,11 @@ author: Claude Code PM System
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| react | ^19.2.4 | UI framework |
-| react-dom | ^19.2.4 | React DOM renderer |
-| framer-motion | ^12.34.3 | Animations and transitions |
-| lucide-react | ^0.575.0 | Icon library |
-| zod | ^4.3.6 | Runtime schema validation (LLM responses) |
+| react | ^19.2.5 | UI framework |
+| react-dom | ^19.2.5 | React DOM renderer |
+| framer-motion | ^12.38.0 | Animations and transitions |
+| lucide-react | ^1.8.0 | Icon library |
+| zod | ^4.3.6 | Runtime schema validation (LLM responses, data transfer) |
 
 ## Dev Dependencies
 
@@ -36,18 +36,18 @@ author: Claude Code PM System
 |---------|---------|---------|
 | typescript | ~5.9.3 | Type checking |
 | vite | ^7.3.1 | Build tool and dev server |
-| @vitejs/plugin-react | ^5.1.4 | React Fast Refresh |
+| @vitejs/plugin-react | ^5.2.0 | React Fast Refresh |
 | tailwindcss | ^4.1.18 | Utility-first CSS |
 | @tailwindcss/vite | ^4.2.0 | Tailwind Vite integration |
-| eslint | ^9.39.3 | Linting (flat config) |
-| typescript-eslint | ^8.56.0 | TypeScript ESLint rules |
+| eslint | ^9.39.4 | Linting (flat config) |
+| typescript-eslint | ^8.58.1 | TypeScript ESLint rules |
 | vitest | ^4.0.18 | Test runner |
-| @vitest/coverage-v8 | ^4.0.18 | Code coverage (v8 provider) |
+| @vitest/coverage-v8 | ^4.1.4 | Code coverage (v8 provider) |
 | @testing-library/react | ^16.3.2 | Component testing |
 | @testing-library/user-event | ^14.6.1 | User interaction simulation |
 | @testing-library/jest-dom | ^6.9.1 | DOM assertion matchers |
-| happy-dom | ^20.7.0 | Test DOM environment |
-| msw | ^2.12.10 | API mocking (Mock Service Worker) |
+| happy-dom | ^20.8.4 | Test DOM environment |
+| msw | ^2.13.2 | API mocking (Mock Service Worker) |
 
 ## External Services
 
@@ -55,6 +55,9 @@ author: Claude Code PM System
   - Model: `gemini-3-flash-preview`
   - Base URL: `https://generativelanguage.googleapis.com/v1beta/models`
   - Timeout: 60 seconds
+- **Multi-device Sync**: GitHub Gist API (personal access token, user-supplied)
+  - Endpoint: `https://api.github.com/gists`
+  - Stores serialized app state as a private Gist for cross-device sync
 - **Hosting**: GitHub Pages (static deployment)
 - **CI/CD**: GitHub Actions
 - **Coverage**: Codecov
@@ -79,3 +82,8 @@ author: Claude Code PM System
 - **Vitest**: `happy-dom` environment, globals enabled, path alias `@` -> `./src`
 - **ESLint**: Flat config (ESLint 9) with react-hooks and react-refresh plugins
 - **Lighthouse CI**: perf 80%, a11y 90%, best practices 90%, SEO 90%
+- **CSP**: `connect-src` now allows Gemini API **and** GitHub API for Gist sync
+
+## Update History
+
+- 2026-04-24: Bumped dependency versions (React 19.2.5, lucide-react 1.8.0, typescript-eslint 8.58.1, etc.); added GitHub Gist API as a new external integration
