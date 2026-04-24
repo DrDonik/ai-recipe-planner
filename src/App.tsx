@@ -71,7 +71,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<Notification | null>(() =>
     initialSharedData.hasInvalidData
-      ? { message: t.invalidSharedData, type: 'error' }
+      ? { message: t.invalidSharedData || "Invalid shared data. The link may be corrupted.", type: 'error' }
       : null
   );
   const notificationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
