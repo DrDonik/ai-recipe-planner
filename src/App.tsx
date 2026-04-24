@@ -19,6 +19,28 @@ import { useSettings } from './contexts/SettingsContext';
 import { STORAGE_KEYS, URL_PARAMS } from './constants';
 import { z } from 'zod';
 
+// Parse shared-link URL params once. Pure (no React deps) so it can feed
+// lazy useState initializers, avoiding a setState-in-effect on mount.
+function parseSharedUrlParams(): {
+  recipe: Recipe | null;
+  shoppingList: Ingredient[] | null;
+  hasInvalidData: boolean;
+} {
+  const searchParams = new URLSearchParams(window.location.search);
+  const recipeParam = searchParams.get(URL_PARAMS.RECIPE);
+  const shoppingListParam = searchParams.get(URL_PARAMS.SHOPPING_LIST);
+
+  if (recipeParam) {
+    const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam), RecipeSchema);
+    return { recipe: decoded, shoppingList: null, hasInvalidData: !decoded };
+  }
+  if (shoppingListParam) {
+    const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam), z.array(IngredientSchema));
+    return { recipe: null, shoppingList: decoded, hasInvalidData: !decoded };
+  }
+  return { recipe: null, shoppingList: null, hasInvalidData: false };
+}
+
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
   const settingsPanelRef = useRef<SettingsPanelRef>(null);
@@ -42,8 +64,16 @@ function App() {
   const [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized, recipeMissingMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.RECIPE_MISSING_INGREDIENTS_MINIMIZED, false);
   const [mealPlan, setMealPlan, mealPlanPersistError] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
 
+  // Parse URL params once at mount. Feeds the view/notification initializers
+  // below so shared-link routing happens on the first render (no double-render).
+  const [initialSharedData] = useState(parseSharedUrlParams);
+
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState<Notification | null>(null);
+  const [notification, setNotification] = useState<Notification | null>(() =>
+    initialSharedData.hasInvalidData
+      ? { message: t.invalidSharedData || "Invalid shared data. The link may be corrupted.", type: 'error' }
+      : null
+  );
   const notificationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Welcome Dialog State
@@ -55,10 +85,10 @@ function App() {
   const [showCopyPasteDialog, setShowCopyPasteDialog] = useState(false);
   const [copyPastePrompt, setCopyPastePrompt] = useState('');
 
-  // Single Recipe View State
-  const [viewRecipe, setViewRecipe] = useState<Recipe | null>(null);
-  // Single Shopping List View State
-  const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(null);
+  // Single Recipe View State (initialized from shared-link URL if present)
+  const [viewRecipe, setViewRecipe] = useState<Recipe | null>(initialSharedData.recipe);
+  // Single Shopping List View State (initialized from shared-link URL if present)
+  const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(initialSharedData.shoppingList);
 
   // Wake Lock for keeping screen on during cooking
   // Note: Auto-activation was removed because Safari/iOS requires explicit user gesture
@@ -119,12 +149,19 @@ function App() {
     }
   }, [anyPersistError, showNotification, t.storageError]);
 
-  // Notify on successful pull from remote (one-shot per pull)
+  // Notify on successful pull from remote (one-shot per pull, ref-guarded like
+  // the sync-error and storage-error effects)
+  const pullNotificationShownRef = useRef(false);
   useEffect(() => {
-    if (sync.justPulledFromRemote) {
-      showNotification({ message: t.sync.pulledNotification, type: 'undo', timeout: 3000 });
-      sync.acknowledgePull();
+    if (!sync.justPulledFromRemote) {
+      pullNotificationShownRef.current = false;
+      return;
     }
+    if (pullNotificationShownRef.current) return;
+    pullNotificationShownRef.current = true;
+
+    showNotification({ message: t.sync.pulledNotification, type: 'undo', timeout: 3000 });
+    sync.acknowledgePull();
   }, [sync, showNotification, t.sync.pulledNotification]);
 
   // Surface sync errors to the user (category-specific message, one-shot per error state change)
@@ -170,38 +207,6 @@ function App() {
     prevViewRecipeRef.current = viewRecipe;
     prevViewShoppingListRef.current = viewShoppingList;
   }, [viewRecipe, viewShoppingList]);
-
-  // Ref to capture translation for URL decode effect
-  const invalidSharedDataRef = useRef(t.invalidSharedData);
-  useEffect(() => {
-    invalidSharedDataRef.current = t.invalidSharedData;
-  }, [t.invalidSharedData]);
-
-  // URL parameter decode effect - runs only once on mount
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const recipeParam = searchParams.get(URL_PARAMS.RECIPE);
-    const shoppingListParam = searchParams.get(URL_PARAMS.SHOPPING_LIST);
-
-    if (recipeParam) {
-      const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam), RecipeSchema);
-      if (decoded) {
-        setViewRecipe(decoded);
-      } else {
-        // Invalid or malformed recipe data - show error
-        showNotification({ message: invalidSharedDataRef.current || "Invalid shared recipe data. The link may be corrupted.", type: 'error' });
-      }
-    } else if (shoppingListParam) {
-      const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam), z.array(IngredientSchema));
-      if (decoded) {
-        setViewShoppingList(decoded);
-      } else {
-        // Invalid or malformed shopping list data - show error
-        showNotification({ message: invalidSharedDataRef.current || "Invalid shared shopping list data. The link may be corrupted.", type: 'error' });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {
