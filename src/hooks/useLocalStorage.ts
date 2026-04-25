@@ -99,6 +99,14 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
             // initialValue after an external removal does not silently
             // re-persist `"null"` and echo it back to the remote on the next
             // sync push.
+            //
+            // The guard is intentionally NOT generalised to all defaults: a
+            // generalised guard would also skip the mount-time eager persist
+            // for fresh hooks, which the App's storage-error-notification flow
+            // relies on for early QuotaExceededError detection. The only
+            // remaining echo is one debounced sync push when a non-null
+            // default is reset by an external removal — network noise, not a
+            // correctness issue.
             if (current === next || (next === 'null' && current === null)) {
                 // eslint-disable-next-line react-hooks/set-state-in-effect
                 setPersistError(false);
