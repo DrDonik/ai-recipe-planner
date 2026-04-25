@@ -9,37 +9,15 @@ import { KitchenAppliances, type KitchenAppliancesRef } from './components/Kitch
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
-import { generateRecipes, buildRecipePrompt, parseRecipeResponse, RecipeSchema, IngredientSchema } from './services/llm';
+import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { decodeFromUrl, generateShareUrl } from './utils/sharing';
+import { generateShareUrl } from './utils/sharing';
+import { parseSharedUrlParams } from './utils/sharedUrlParams';
 import { Header } from './components/Header';
 import { SettingsPanel, type SettingsPanelRef } from './components/SettingsPanel';
 import { useSettings } from './contexts/SettingsContext';
 import { STORAGE_KEYS, URL_PARAMS } from './constants';
-import { z } from 'zod';
-
-// Parse shared-link URL params once. Pure (no React deps) so it can feed
-// lazy useState initializers, avoiding a setState-in-effect on mount.
-function parseSharedUrlParams(): {
-  recipe: Recipe | null;
-  shoppingList: Ingredient[] | null;
-  hasInvalidData: boolean;
-} {
-  const searchParams = new URLSearchParams(window.location.search);
-  const recipeParam = searchParams.get(URL_PARAMS.RECIPE);
-  const shoppingListParam = searchParams.get(URL_PARAMS.SHOPPING_LIST);
-
-  if (recipeParam) {
-    const decoded = decodeFromUrl<Recipe>(decodeURIComponent(recipeParam), RecipeSchema);
-    return { recipe: decoded, shoppingList: null, hasInvalidData: !decoded };
-  }
-  if (shoppingListParam) {
-    const decoded = decodeFromUrl<Ingredient[]>(decodeURIComponent(shoppingListParam), z.array(IngredientSchema));
-    return { recipe: null, shoppingList: decoded, hasInvalidData: !decoded };
-  }
-  return { recipe: null, shoppingList: null, hasInvalidData: false };
-}
 
 function App() {
   const pantryInputRef = useRef<PantryInputRef>(null);
