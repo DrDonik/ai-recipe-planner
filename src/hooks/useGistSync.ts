@@ -166,8 +166,11 @@ export const useGistSync = (): UseGistSyncResult => {
             }
         };
 
-        const unsubscribe = subscribeToLocalStorageChanges(({ key }) => {
+        const unsubscribe = subscribeToLocalStorageChanges(({ key, source }) => {
             if (!pullCompleteRef.current) return;
+            // External writes (e.g. our own applySyncPayload) must not trigger
+            // a push — that would echo the value we just pulled back to the gist.
+            if (source !== 'internal') return;
             if (!SYNCED_STORAGE_KEYS.includes(key)) return;
 
             setStatus('pending');
