@@ -228,6 +228,115 @@ describe('useGistSync', () => {
     expect(patchSpy).not.toHaveBeenCalled();
   });
 
+  it('updates a mounted useLocalStorage hook with the pulled value (no reload required)', async () => {
+    // Regression test for the bug where applySyncPayload wrote directly to
+    // localStorage but mounted useLocalStorage hooks kept showing stale state
+    // (e.g. deleted recipes/ingredients still visible until manual reload).
+    configureSync();
+    const remote = makeRemotePayload();
+    const patchSpy = vi.fn();
+    server.use(
+      http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))),
+      http.patch(GIST_URL, () => {
+        patchSpy();
+        return HttpResponse.json({ id: GIST_ID, files: {} });
+      }),
+    );
+
+    // Pre-populate local state so the hook starts with something different
+    // from the incoming remote payload.
+    localStorage.setItem(
+      STORAGE_KEYS.PANTRY_ITEMS,
+      JSON.stringify([{ id: 'local', name: 'LocalItem', amount: '9' }]),
+    );
+
+    const { useLocalStorage } = await import('@/hooks/useLocalStorage');
+    const { result: pantryResult } = renderHook(() =>
+      useLocalStorage<{ id: string; name: string; amount: string }[]>(
+        STORAGE_KEYS.PANTRY_ITEMS,
+        [],
+      ),
+    );
+    // Sanity check: hook starts on the local value.
+    expect(pantryResult.current[0]).toEqual([{ id: 'local', name: 'LocalItem', amount: '9' }]);
+
+    const { result: syncResult } = renderHook(() => useGistSync());
+    await waitFor(() => expect(syncResult.current.status).toBe('synced'));
+
+    // After the pull, the hook must reflect the remote value WITHOUT a remount.
+    await waitFor(() =>
+      expect(pantryResult.current[0]).toEqual([{ id: 'r1', name: 'RemoteItem', amount: '1' }]),
+    );
+
+    // And we must NOT echo the just-pulled values back as a push: that would
+    // burn a network round-trip on every page load and could clobber a
+    // newer remote update racing with us.
+    await new Promise((r) => setTimeout(r, GIST_API.PUSH_DEBOUNCE_MS + 500));
+    expect(patchSpy).not.toHaveBeenCalled();
+    expect(syncResult.current.status).toBe('synced');
+  });
+
+  it('does not push when an external write happens after the initial pull completes', async () => {
+    // Locks in the `source !== 'internal'` defensive filter in the change-bus
+    // listener: even if some non-sync code path performs an external write
+    // (e.g. a future "pull now" button) after the initial pull is done, it
+    // must not be misread as a user edit and pushed back to the gist.
+    configureSync();
+    const remote = makeRemotePayload({ data: {} });
+    const patchSpy = vi.fn();
+
+    server.use(
+      http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))),
+      http.patch(GIST_URL, () => {
+        patchSpy();
+        return HttpResponse.json({ id: GIST_ID, files: {} });
+      }),
+    );
+
+    const { result } = renderHook(() => useGistSync());
+    await waitFor(() => expect(result.current.status).toBe('synced'));
+
+    // Now fire an external write directly (after pullCompleteRef is true) so
+    // the listener's earlier `pullCompleteRef` guard cannot mask the bug.
+    const { writeLocalStorageExternal } = await import('@/hooks/useLocalStorage');
+    act(() => {
+      writeLocalStorageExternal(STORAGE_KEYS.PANTRY_ITEMS, [
+        { id: 'x', name: 'X', amount: '1' },
+      ]);
+    });
+
+    await new Promise((r) => setTimeout(r, GIST_API.PUSH_DEBOUNCE_MS + 500));
+    expect(patchSpy).not.toHaveBeenCalled();
+    expect(result.current.status).toBe('synced');
+  });
+
+  it('clears mounted state when a synced key is absent from the remote payload', async () => {
+    // Mirrors the user scenario: a recipe is deleted on another device, then
+    // the local page pulls — the local UI must drop the now-removed entry.
+    configureSync();
+    // Remote payload omits MEAL_PLAN to simulate "deleted on another device".
+    const remote = makeRemotePayload({ data: {} });
+    server.use(http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))));
+
+    localStorage.setItem(
+      STORAGE_KEYS.MEAL_PLAN,
+      JSON.stringify({ recipes: [{ id: 'r', title: 'Stale', time: '10', ingredients: [], instructions: [], usedIngredients: [] }], shoppingList: [] }),
+    );
+
+    const { useLocalStorage } = await import('@/hooks/useLocalStorage');
+    const { result: mealPlanResult } = renderHook(() =>
+      useLocalStorage<unknown | null>(STORAGE_KEYS.MEAL_PLAN, null),
+    );
+    expect(mealPlanResult.current[0]).not.toBeNull();
+
+    const { result: syncResult } = renderHook(() => useGistSync());
+    await waitFor(() => expect(syncResult.current.status).toBe('synced'));
+
+    // Hook must reset to its initial value when the key is removed externally.
+    await waitFor(() => expect(mealPlanResult.current[0]).toBeNull());
+    expect(localStorage.getItem(STORAGE_KEYS.MEAL_PLAN)).toBeNull();
+  });
+
   it('acknowledgePull clears the justPulledFromRemote flag', async () => {
     configureSync();
     const remote = makeRemotePayload();

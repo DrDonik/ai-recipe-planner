@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { GIST_API, SYNCED_STORAGE_KEYS } from '../constants';
+import { writeLocalStorageExternal } from '../hooks/useLocalStorage';
 
 /**
  * Shape of the payload stored in the sync Gist.
@@ -77,15 +78,17 @@ export const buildSyncPayload = (): SyncPayload => {
 /**
  * Applies a sync payload to localStorage, overwriting any synced keys.
  * Keys absent from the payload are removed locally (matches import semantics).
+ *
+ * Writes go through `writeLocalStorageExternal` so that mounted
+ * `useLocalStorage` hooks re-read the new values and React re-renders the UI.
+ * Without this, the page would still show the pre-sync state until reload.
  */
 export const applySyncPayload = (payload: SyncPayload): void => {
     for (const key of SYNCED_STORAGE_KEYS) {
-        const value = payload.data[key];
-        if (value === undefined) {
-            localStorage.removeItem(key);
-            continue;
-        }
-        localStorage.setItem(key, JSON.stringify(value));
+        // `undefined` (key absent from payload) removes the local key, which
+        // tells subscribed useLocalStorage hooks to reset to their initial
+        // value. Any present value (including `null`) is written verbatim.
+        writeLocalStorageExternal(key, payload.data[key]);
     }
 };
 
