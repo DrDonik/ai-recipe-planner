@@ -276,6 +276,40 @@ describe('useGistSync', () => {
     expect(syncResult.current.status).toBe('synced');
   });
 
+  it('does not push when an external write happens after the initial pull completes', async () => {
+    // Locks in the `source !== 'internal'` defensive filter in the change-bus
+    // listener: even if some non-sync code path performs an external write
+    // (e.g. a future "pull now" button) after the initial pull is done, it
+    // must not be misread as a user edit and pushed back to the gist.
+    configureSync();
+    const remote = makeRemotePayload({ data: {} });
+    const patchSpy = vi.fn();
+
+    server.use(
+      http.get(GIST_URL, () => HttpResponse.json(gistWithPayload(remote))),
+      http.patch(GIST_URL, () => {
+        patchSpy();
+        return HttpResponse.json({ id: GIST_ID, files: {} });
+      }),
+    );
+
+    const { result } = renderHook(() => useGistSync());
+    await waitFor(() => expect(result.current.status).toBe('synced'));
+
+    // Now fire an external write directly (after pullCompleteRef is true) so
+    // the listener's earlier `pullCompleteRef` guard cannot mask the bug.
+    const { writeLocalStorageExternal } = await import('@/hooks/useLocalStorage');
+    act(() => {
+      writeLocalStorageExternal(STORAGE_KEYS.PANTRY_ITEMS, [
+        { id: 'x', name: 'X', amount: '1' },
+      ]);
+    });
+
+    await new Promise((r) => setTimeout(r, GIST_API.PUSH_DEBOUNCE_MS + 500));
+    expect(patchSpy).not.toHaveBeenCalled();
+    expect(result.current.status).toBe('synced');
+  });
+
   it('clears mounted state when a synced key is absent from the remote payload', async () => {
     // Mirrors the user scenario: a recipe is deleted on another device, then
     // the local page pulls — the local UI must drop the now-removed entry.
