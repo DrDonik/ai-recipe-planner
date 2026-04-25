@@ -4,7 +4,7 @@ import { RecipeSchema, IngredientSchema } from '../services/llm';
 import { URL_PARAMS } from '../constants';
 import type { Recipe, Ingredient } from '../types';
 
-export interface SharedUrlData {
+interface SharedUrlData {
     recipe: Recipe | null;
     shoppingList: Ingredient[] | null;
     hasInvalidData: boolean;
