@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * Module-local event bus: every successful write from useLocalStorage is
@@ -75,17 +75,31 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     });
     const [persistError, setPersistError] = useState(false);
 
+    // Track initialValue in a ref so the external-write subscription effect
+    // can read the latest default without re-subscribing on every render.
+    const initialValueRef = useRef(initialValue);
+    useEffect(() => {
+        initialValueRef.current = initialValue;
+    }, [initialValue]);
+
     // Effect syncs state to localStorage; setPersistError reflects whether
     // that external write succeeded, so the lint suppression is intentional.
     useEffect(() => {
         try {
-            const next = (state === null || state === undefined) ? null : JSON.stringify(state);
+            // Only `undefined` removes the key; `null` is JSON-encoded as
+            // `"null"` so an external `null` write (e.g. from Gist sync)
+            // round-trips through the idempotency guard below instead of
+            // being silently deleted and then echoed back to the remote.
+            const next = state === undefined ? null : JSON.stringify(state);
             const current = localStorage.getItem(key);
-            // Idempotent guard: if localStorage already holds this exact value
-            // (e.g. we just absorbed an external write from Gist sync), skip
-            // the write AND the emit so we don't echo it back as an `internal`
-            // event that would trigger a redundant sync push.
-            if (current === next) {
+            // Idempotent guard: skip when storage already matches what we'd
+            // write (e.g. we just absorbed an external write from Gist sync).
+            // Also treat absence (`current === null`) and the literal `"null"`
+            // (`next === 'null'`) as equivalent so that resetting to a null
+            // initialValue after an external removal does not silently
+            // re-persist `"null"` and echo it back to the remote on the next
+            // sync push.
+            if (current === next || (next === 'null' && current === null)) {
                 // eslint-disable-next-line react-hooks/set-state-in-effect
                 setPersistError(false);
                 return;
@@ -105,17 +119,14 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
     // Pick up writes that bypass this hook (sync apply, future imports, etc.)
     // so the component re-renders without requiring a page reload. `undefined`
-    // signals "key removed" → reset to initialValue.
+    // signals "key removed" → reset to initialValue (read from the ref to
+    // avoid capturing a stale default if the parent re-renders).
     useEffect(() => {
         return subscribeToLocalStorageChanges((event) => {
             if (event.source !== 'external') return;
             if (event.key !== key) return;
-            setState((event.value === undefined ? initialValue : event.value) as T);
+            setState((event.value === undefined ? initialValueRef.current : event.value) as T);
         });
-        // initialValue intentionally excluded: it is only consulted when an
-        // external write removes the key, and re-subscribing on every render
-        // would defeat the purpose. Treat it as a stable mount-time default.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key]);
 
     return [state, setState, persistError] as const;

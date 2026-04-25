@@ -84,7 +84,11 @@ describe('useLocalStorage', () => {
     expect(result2.current[0]).toEqual(newArray);
   });
 
-  it('removes item from localStorage when set to null', () => {
+  it('persists null as the JSON literal "null" (only undefined removes the key)', () => {
+    // Explicit null is JSON-encoded so that an external `null` write
+    // (e.g. from Gist sync) is preserved instead of being silently deleted
+    // and echoed back to the remote as a removal. See the external-write
+    // round-trip test below.
     const { result } = renderHook(() => useLocalStorage<string | null>('test-null', 'initial'));
 
     act(() => {
@@ -95,7 +99,11 @@ describe('useLocalStorage', () => {
     act(() => {
       result.current[1](null);
     });
-    expect(localStorage.getItem('test-null')).toBeNull();
+    expect(localStorage.getItem('test-null')).toBe('null');
+
+    // And the persisted "null" parses back to null on remount.
+    const { result: result2 } = renderHook(() => useLocalStorage<string | null>('test-null', 'initial'));
+    expect(result2.current[0]).toBeNull();
   });
 
   it('removes item from localStorage when set to undefined', () => {
@@ -452,6 +460,59 @@ describe('useLocalStorage', () => {
 
       expect(a.current[0]).toBe('from-external');
       expect(b.current[0]).toBe('from-external');
+    });
+
+    it('round-trips an explicit null value from an external write without re-emitting', () => {
+      // Regression for the gemini-code-assist review on PR #207: if Gist sync
+      // pushes `null` for a key, the hook must (a) reflect null in state,
+      // (b) keep the persisted "null" intact, and (c) NOT emit an `internal`
+      // change event — otherwise useGistSync would schedule an echo push that
+      // strips the field from the remote.
+      const internalEvents: Array<{ key: string; value: unknown }> = [];
+      const unsubscribe = subscribeToLocalStorageChanges((event) => {
+        if (event.source === 'internal' && event.key === 'ext-null-roundtrip') {
+          internalEvents.push({ key: event.key, value: event.value });
+        }
+      });
+
+      const { result } = renderHook(() =>
+        useLocalStorage<{ x: number } | null>('ext-null-roundtrip', { x: 0 }),
+      );
+      // Drain the mount-time internal write that persists the initial value.
+      internalEvents.length = 0;
+
+      act(() => {
+        writeLocalStorageExternal('ext-null-roundtrip', null);
+      });
+
+      expect(result.current[0]).toBeNull();
+      expect(localStorage.getItem('ext-null-roundtrip')).toBe('null');
+      expect(internalEvents).toEqual([]);
+
+      unsubscribe();
+    });
+
+    it('uses the latest initialValue when the key is removed externally after a re-render', () => {
+      // The subscription effect captures initialValue via a ref so that a
+      // parent re-render with a new default does not leave us with a stale
+      // value when an external removal asks us to reset.
+      let currentDefault = 'first-default';
+      const { result, rerender } = renderHook(() =>
+        useLocalStorage<string>('ext-stale-default', currentDefault),
+      );
+
+      act(() => {
+        result.current[1]('user-set');
+      });
+
+      currentDefault = 'second-default';
+      rerender();
+
+      act(() => {
+        writeLocalStorageExternal('ext-stale-default', undefined);
+      });
+
+      expect(result.current[0]).toBe('second-default');
     });
 
     it('unsubscribes on unmount so external writes do not leak into stale state', () => {
