@@ -8,6 +8,7 @@ import { renderWithSettings } from './testUtils';
 import { encodeForUrl } from '../utils/sharing';
 import type { Recipe, Ingredient, MealPlan } from '../types';
 import { STORAGE_KEYS, API_CONFIG } from '../constants';
+import { translations } from '../constants/translations';
 import { handlers } from './mocks/handlers';
 
 const API_URL = `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`;
@@ -113,6 +114,8 @@ describe('App URL Parameter Decoding', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockLocation.search = '';
+        // Pin language so assertions can compare against the exact English translation.
+        localStorage.setItem(STORAGE_KEYS.LANGUAGE, 'English');
     });
 
     describe('Recipe URL parameter', () => {
@@ -147,11 +150,8 @@ describe('App URL Parameter Decoding', () => {
 
             renderWithSettings(<App />);
 
-            // Error notification should be shown (it's rendered in SettingsPanel)
             await waitFor(() => {
-                const errorText = screen.queryByText(/Invalid shared recipe data/i) ||
-                                screen.queryByText(/The link may be corrupted/i);
-                expect(errorText).toBeInTheDocument();
+                expect(screen.getByText(translations.English.invalidSharedData)).toBeInTheDocument();
             }, { timeout: 3000 });
         });
 
@@ -163,11 +163,8 @@ describe('App URL Parameter Decoding', () => {
 
             renderWithSettings(<App />);
 
-            // Error notification should be shown (it's rendered in SettingsPanel)
             await waitFor(() => {
-                const errorText = screen.queryByText(/Invalid shared recipe data/i) ||
-                                screen.queryByText(/The link may be corrupted/i);
-                expect(errorText).toBeInTheDocument();
+                expect(screen.getByText(translations.English.invalidSharedData)).toBeInTheDocument();
             }, { timeout: 3000 });
         });
     });
@@ -197,11 +194,8 @@ describe('App URL Parameter Decoding', () => {
 
             renderWithSettings(<App />);
 
-            // Error notification should be shown (it's rendered in SettingsPanel)
             await waitFor(() => {
-                const errorText = screen.queryByText(/Invalid shared shopping list data/i) ||
-                                screen.queryByText(/The link may be corrupted/i);
-                expect(errorText).toBeInTheDocument();
+                expect(screen.getByText(translations.English.invalidSharedData)).toBeInTheDocument();
             }, { timeout: 3000 });
         });
     });
@@ -353,9 +347,7 @@ describe('App URL Parameter Decoding', () => {
             // Notification is initialized synchronously from t.invalidSharedData
             // via a lazy useState initializer (no setState-in-effect).
             await waitFor(() => {
-                const errorText = screen.queryByText(/Invalid shared recipe data/i) ||
-                                screen.queryByText(/The link may be corrupted/i);
-                expect(errorText).toBeInTheDocument();
+                expect(screen.getByText(translations.English.invalidSharedData)).toBeInTheDocument();
             }, { timeout: 3000 });
         });
     });
