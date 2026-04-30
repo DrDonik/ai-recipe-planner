@@ -105,6 +105,13 @@ export const translations = {
             apiKey: "API Key",
             copyPaste: "Copy & Paste"
         },
+        storageTips: {
+            label: "Storage tips",
+            hint: "Tap the ⓘ next to an ingredient",
+            iconAriaLabel: "Storage tip",
+            popoverTitle: "Storage tip",
+            loading: "Fetching storage tip…",
+        },
         copyPaste: {
             title: "Copy & Paste",
             description: "Use any AI chat instead of an API key",
@@ -315,6 +322,13 @@ export const translations = {
         modeSwitch: {
             apiKey: "API-Schlüssel",
             copyPaste: "Kopieren & Einfügen"
+        },
+        storageTips: {
+            label: "Lagerungstipps",
+            hint: "Tippe auf das ⓘ neben einer Zutat",
+            iconAriaLabel: "Lagerungstipp",
+            popoverTitle: "Lagerungstipp",
+            loading: "Lade Lagerungstipp…",
         },
         copyPaste: {
             title: "Kopieren & Einfügen",
@@ -527,6 +541,13 @@ export const translations = {
             apiKey: "Clé API",
             copyPaste: "Copier-Coller"
         },
+        storageTips: {
+            label: "Conseils de conservation",
+            hint: "Touchez l'icône ⓘ à côté d'un ingrédient",
+            iconAriaLabel: "Conseil de conservation",
+            popoverTitle: "Conseil de conservation",
+            loading: "Chargement du conseil…",
+        },
         copyPaste: {
             title: "Copier-Coller",
             description: "Utilisez n'importe quel chat IA au lieu d'une clé API",
@@ -737,6 +758,13 @@ export const translations = {
         modeSwitch: {
             apiKey: "Clave API",
             copyPaste: "Copiar y Pegar"
+        },
+        storageTips: {
+            label: "Consejos de conservación",
+            hint: "Toca el ⓘ junto a un ingrediente",
+            iconAriaLabel: "Consejo de conservación",
+            popoverTitle: "Consejo de conservación",
+            loading: "Obteniendo consejo…",
         },
         copyPaste: {
             title: "Copiar y Pegar",
