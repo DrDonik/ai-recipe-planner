@@ -66,8 +66,9 @@ export function useStorageTips() {
     }, [cache, setCache]);
 
     const restoreAll = useCallback((backup: Record<string, string>) => {
+        setCache(backup);
         writeLocalStorageExternal(STORAGE_KEYS.STORAGE_TIPS_CACHE, backup);
-    }, []);
+    }, [setCache]);
 
     return { getTip, fetchTip, isLoading, getError, clearAll, restoreAll, hasAnyTips };
 }
