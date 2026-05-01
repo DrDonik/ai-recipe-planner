@@ -309,6 +309,70 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
   }
 };
 
+export const fetchStorageTip = async (
+  apiKey: string,
+  ingredientName: string,
+  language: string,
+  errorTranslations?: ErrorTranslations
+): Promise<string> => {
+  const errors = errorTranslations ?? translations.English.errors;
+
+  if (!apiKey) throw new Error(errors.apiKeyRequired);
+
+  const sanitized = sanitizeUserInput(ingredientName, 100);
+  if (!sanitized) throw new Error(errors.unexpectedError);
+
+  const prompt = `Provide concise, practical storage advice for the ingredient: "${sanitized}".
+
+  RULES:
+  - 1-3 short sentences in plain prose. No lists, headings, markdown, JSON, or quotes around the response.
+  - Cover where to store it (room temperature, fridge, freezer, etc.), expected shelf life when stored well, and a brief tip if relevant (e.g. "keep dry", "wrap in paper", "don't store next to apples").
+  - Output the response in ${language}.
+  - When addressing the reader in a language with a T-V distinction, ALWAYS use the informal second person singular: "du" in German, "tu" in French, "tú" in Spanish. Never use the formal form ("Sie", "vous", "usted").
+  - Output ONLY the storage advice text — no preamble, no labels, no quotation marks.`;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || errors.fetchFailed);
+    }
+
+    const data = await response.json();
+    const text: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) throw new Error(errors.emptyResponse);
+
+    return text.trim().replace(/^["']+|["']+$/g, '').trim();
+  } catch (error) {
+    console.error("Storage tip error:", error);
+
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') throw new Error(errors.timeout);
+      if (error.message.includes('Failed to fetch')) throw new Error(errors.networkError);
+      throw error;
+    }
+
+    throw new Error(errors.unexpectedError);
+  }
+};
+
 export const generateRecipes = async (
   apiKey: string,
   ingredients: PantryItem[],

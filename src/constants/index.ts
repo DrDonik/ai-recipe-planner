@@ -33,6 +33,8 @@ export const STORAGE_KEYS = {
     GIST_ID: 'gist_sync_id',
     SYNC_UPDATED_AT: 'sync_updated_at',
     GIST_TOKEN_WARNING_SEEN: 'gist_token_warning_seen',
+    STORAGE_TIPS_ENABLED: 'storage_tips_enabled',
+    STORAGE_TIPS_CACHE: 'storage_tips_cache',
 } as const;
 
 /**

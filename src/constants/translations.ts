@@ -105,6 +105,15 @@ export const translations = {
             apiKey: "API Key",
             copyPaste: "Copy & Paste"
         },
+        storageTips: {
+            label: "Storage tips",
+            hint: "Tap the ⓘ next to an ingredient",
+            iconAriaLabel: "Storage tip",
+            popoverTitle: "Storage tip",
+            loading: "Fetching storage tip…",
+            close: "Close",
+            clearAll: "Clear all storage tips",
+        },
         copyPaste: {
             title: "Copy & Paste",
             description: "Use any AI chat instead of an API key",
@@ -151,6 +160,7 @@ export const translations = {
             pantryEmptied: "Pantry emptied",
             recipeDeleted: "Recipe deleted",
             apiKeyCleared: "API key cleared",
+            storageTipsCleared: "Storage tips cleared",
             action: "Undo"
         },
         apiKeyStoredWarning: "API key stored in local storage",
@@ -316,6 +326,15 @@ export const translations = {
             apiKey: "API-Schlüssel",
             copyPaste: "Kopieren & Einfügen"
         },
+        storageTips: {
+            label: "Lagerungstipps",
+            hint: "Tippe auf das ⓘ neben einer Zutat",
+            iconAriaLabel: "Lagerungstipp",
+            popoverTitle: "Lagerungstipp",
+            loading: "Lade Lagerungstipp…",
+            close: "Schließen",
+            clearAll: "Alle Lagerungstipps löschen",
+        },
         copyPaste: {
             title: "Kopieren & Einfügen",
             description: "Verwende einen beliebigen KI-Chat anstelle eines API-Schlüssels",
@@ -362,6 +381,7 @@ export const translations = {
             pantryEmptied: "Vorrat geleert",
             recipeDeleted: "Rezept gelöscht",
             apiKeyCleared: "API-Schlüssel gelöscht",
+            storageTipsCleared: "Lagerungstipps gelöscht",
             action: "Rückgängig"
         },
         apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert",
@@ -527,6 +547,15 @@ export const translations = {
             apiKey: "Clé API",
             copyPaste: "Copier-Coller"
         },
+        storageTips: {
+            label: "Conseils de conservation",
+            hint: "Touchez l'icône ⓘ à côté d'un ingrédient",
+            iconAriaLabel: "Conseil de conservation",
+            popoverTitle: "Conseil de conservation",
+            loading: "Chargement du conseil…",
+            close: "Fermer",
+            clearAll: "Effacer tous les conseils de conservation",
+        },
         copyPaste: {
             title: "Copier-Coller",
             description: "Utilisez n'importe quel chat IA au lieu d'une clé API",
@@ -573,6 +602,7 @@ export const translations = {
             pantryEmptied: "Garde-manger vidé",
             recipeDeleted: "Recette supprimée",
             apiKeyCleared: "Clé API effacée",
+            storageTipsCleared: "Conseils de conservation effacés",
             action: "Annuler"
         },
         apiKeyStoredWarning: "Clé API stockée dans le stockage local",
@@ -738,6 +768,15 @@ export const translations = {
             apiKey: "Clave API",
             copyPaste: "Copiar y Pegar"
         },
+        storageTips: {
+            label: "Consejos de conservación",
+            hint: "Toca el ⓘ junto a un ingrediente",
+            iconAriaLabel: "Consejo de conservación",
+            popoverTitle: "Consejo de conservación",
+            loading: "Obteniendo consejo…",
+            close: "Cerrar",
+            clearAll: "Eliminar todos los consejos de conservación",
+        },
         copyPaste: {
             title: "Copiar y Pegar",
             description: "Usa cualquier chat de IA en lugar de una clave API",
@@ -784,6 +823,7 @@ export const translations = {
             pantryEmptied: "Despensa vaciada",
             recipeDeleted: "Receta eliminada",
             apiKeyCleared: "Clave API eliminada",
+            storageTipsCleared: "Consejos de conservación eliminados",
             action: "Deshacer"
         },
         apiKeyStoredWarning: "Clave API almacenada en almacenamiento local",
