@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Info } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Info, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useStorageTips } from '../hooks/useStorageTips';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
     syncStatus,
 }) => {
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, storageTipsEnabled, setStorageTipsEnabled, t } = useSettings();
+    const { clearAll: clearAllStorageTips, restoreAll: restoreAllStorageTips, hasAnyTips: hasAnyStorageTips } = useStorageTips();
 
     // Check on mount if existing user needs to see the security warning
     const [showSecurityDialog, setShowSecurityDialog] = useState(() => {
@@ -186,6 +188,23 @@ export const Header: React.FC<HeaderProps> = ({
         setPendingModeSwitch(null);
     };
 
+    const handleClearStorageTips = () => {
+        const backup = clearAllStorageTips();
+        onShowNotification({
+            message: t.undo.storageTipsCleared,
+            type: 'undo',
+            action: {
+                label: t.undo.action,
+                ariaLabel: `${t.undo.action} ${t.undo.storageTipsCleared.toLowerCase()}`,
+                onClick: () => {
+                    restoreAllStorageTips(backup);
+                    onClearNotification();
+                }
+            },
+            timeout: 5000
+        });
+    };
+
     return (
         <>
         <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
@@ -324,6 +343,15 @@ export const Header: React.FC<HeaderProps> = ({
                                                 className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${storageTipsEnabled ? 'left-6' : 'left-0.5'}`}
                                             />
                                         </button>
+                                        {hasAnyStorageTips && (
+                                            <TooltipButton
+                                                icon={<Trash2 size={14} />}
+                                                tooltip={t.storageTips.clearAll}
+                                                ariaLabel={t.storageTips.clearAll}
+                                                className="!p-1.5 cursor-pointer hover:!text-red-500 hover:!bg-red-500/10"
+                                                onClick={handleClearStorageTips}
+                                            />
+                                        )}
                                     </div>
                                     {storageTipsEnabled && (
                                         <span className="text-xs text-text-muted flex items-center gap-1 pl-6">

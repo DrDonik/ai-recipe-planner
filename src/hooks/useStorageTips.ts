@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useLocalStorage } from './useLocalStorage';
+import { useLocalStorage, writeLocalStorageExternal } from './useLocalStorage';
 import { useSettings } from '../contexts/SettingsContext';
 import { fetchStorageTip } from '../services/llm';
 import { STORAGE_KEYS } from '../constants';
@@ -11,6 +11,7 @@ export function useStorageTips() {
     const [cache, setCache] = useLocalStorage<Record<string, string>>(STORAGE_KEYS.STORAGE_TIPS_CACHE, {});
     const [loadingKeys, setLoadingKeys] = useState<Set<string>>(new Set());
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const hasAnyTips = Object.keys(cache).length > 0;
 
     const getTip = useCallback((name: string): string | undefined => {
         return cache[buildKey(language, name)];
@@ -55,5 +56,17 @@ export function useStorageTips() {
         }
     }, [apiKey, language, cache, loadingKeys, setCache, t.errors]);
 
-    return { getTip, fetchTip, isLoading, getError };
+    const clearAll = useCallback((): Record<string, string> => {
+        const backup = cache;
+        writeLocalStorageExternal(STORAGE_KEYS.STORAGE_TIPS_CACHE, undefined);
+        setErrors({});
+        setLoadingKeys(new Set());
+        return backup;
+    }, [cache]);
+
+    const restoreAll = useCallback((backup: Record<string, string>) => {
+        writeLocalStorageExternal(STORAGE_KEYS.STORAGE_TIPS_CACHE, backup);
+    }, []);
+
+    return { getTip, fetchTip, isLoading, getError, clearAll, restoreAll, hasAnyTips };
 }

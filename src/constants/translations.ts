@@ -111,6 +111,8 @@ export const translations = {
             iconAriaLabel: "Storage tip",
             popoverTitle: "Storage tip",
             loading: "Fetching storage tip…",
+            close: "Close",
+            clearAll: "Clear all storage tips",
         },
         copyPaste: {
             title: "Copy & Paste",
@@ -158,6 +160,7 @@ export const translations = {
             pantryEmptied: "Pantry emptied",
             recipeDeleted: "Recipe deleted",
             apiKeyCleared: "API key cleared",
+            storageTipsCleared: "Storage tips cleared",
             action: "Undo"
         },
         apiKeyStoredWarning: "API key stored in local storage",
@@ -329,6 +332,8 @@ export const translations = {
             iconAriaLabel: "Lagerungstipp",
             popoverTitle: "Lagerungstipp",
             loading: "Lade Lagerungstipp…",
+            close: "Schließen",
+            clearAll: "Alle Lagerungstipps löschen",
         },
         copyPaste: {
             title: "Kopieren & Einfügen",
@@ -376,6 +381,7 @@ export const translations = {
             pantryEmptied: "Vorrat geleert",
             recipeDeleted: "Rezept gelöscht",
             apiKeyCleared: "API-Schlüssel gelöscht",
+            storageTipsCleared: "Lagerungstipps gelöscht",
             action: "Rückgängig"
         },
         apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert",
@@ -547,6 +553,8 @@ export const translations = {
             iconAriaLabel: "Conseil de conservation",
             popoverTitle: "Conseil de conservation",
             loading: "Chargement du conseil…",
+            close: "Fermer",
+            clearAll: "Effacer tous les conseils de conservation",
         },
         copyPaste: {
             title: "Copier-Coller",
@@ -594,6 +602,7 @@ export const translations = {
             pantryEmptied: "Garde-manger vidé",
             recipeDeleted: "Recette supprimée",
             apiKeyCleared: "Clé API effacée",
+            storageTipsCleared: "Conseils de conservation effacés",
             action: "Annuler"
         },
         apiKeyStoredWarning: "Clé API stockée dans le stockage local",
@@ -765,6 +774,8 @@ export const translations = {
             iconAriaLabel: "Consejo de conservación",
             popoverTitle: "Consejo de conservación",
             loading: "Obteniendo consejo…",
+            close: "Cerrar",
+            clearAll: "Eliminar todos los consejos de conservación",
         },
         copyPaste: {
             title: "Copiar y Pegar",
@@ -812,6 +823,7 @@ export const translations = {
             pantryEmptied: "Despensa vaciada",
             recipeDeleted: "Receta eliminada",
             apiKeyCleared: "Clave API eliminada",
+            storageTipsCleared: "Consejos de conservación eliminados",
             action: "Deshacer"
         },
         apiKeyStoredWarning: "Clave API almacenada en almacenamiento local",
