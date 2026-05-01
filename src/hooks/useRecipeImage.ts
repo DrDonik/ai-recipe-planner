@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { generateRecipeImage } from '../services/llm';
 import type { Recipe } from '../types';
@@ -14,6 +14,13 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
     const { apiKey, t } = useSettings();
     const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
     const [errors, setErrors] = useState<Record<string, string>>({});
+    // Synchronous in-flight tracking. Using a ref (rather than reading
+    // `loadingIds` in `generate`'s deps) avoids two issues: (1) `generate` no
+    // longer needs `loadingIds` in its dep array, so it stays stable across
+    // loading-state flips and doesn't churn `RecipeCard` props; (2) the check
+    // is synchronous, so a rapid double-click can't slip past a not-yet-applied
+    // state update and fire two redundant requests.
+    const inFlightRef = useRef<Set<string>>(new Set());
 
     const isLoading = useCallback((recipeId: string): boolean => {
         return loadingIds.has(recipeId);
@@ -24,7 +31,8 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
     }, [errors]);
 
     const generate = useCallback(async (recipe: Recipe): Promise<void> => {
-        if (loadingIds.has(recipe.id)) return;
+        if (inFlightRef.current.has(recipe.id)) return;
+        inFlightRef.current.add(recipe.id);
 
         setLoadingIds(prev => {
             const next = new Set(prev);
@@ -45,13 +53,14 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
             const message = err instanceof Error ? err.message : t.errors.unexpectedError;
             setErrors(prev => ({ ...prev, [recipe.id]: message }));
         } finally {
+            inFlightRef.current.delete(recipe.id);
             setLoadingIds(prev => {
                 const next = new Set(prev);
                 next.delete(recipe.id);
                 return next;
             });
         }
-    }, [apiKey, loadingIds, onImageGenerated, t.errors]);
+    }, [apiKey, onImageGenerated, t.errors]);
 
     const clearError = useCallback((recipeId: string) => {
         setErrors(prev => {
