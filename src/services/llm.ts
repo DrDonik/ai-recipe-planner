@@ -427,15 +427,26 @@ export const generateRecipeImage = async (
     }
 
     const data = await response.json();
-    const candidate = data.candidates?.[0];
 
-    // Safety filters: the API returns a finishReason of SAFETY/PROHIBITED_CONTENT/etc. without inline data
-    if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+    // Prompt-level block: the API returns no candidates and surfaces a
+    // promptFeedback.blockReason at the top level. Distinguish this from a
+    // generic empty response so the user sees the right message.
+    if (!data.candidates || data.candidates.length === 0) {
+      if (data.promptFeedback?.blockReason) {
+        throw new Error(errors.imageBlocked);
+      }
+      throw new Error(errors.imageNoData);
+    }
+
+    const candidate = data.candidates[0];
+
+    // Response-level block: finishReason is SAFETY / PROHIBITED_CONTENT / etc.
+    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
       throw new Error(errors.imageBlocked);
     }
 
     const parts: Array<{ inlineData?: { data?: string; mimeType?: string } }> | undefined =
-      candidate?.content?.parts;
+      candidate.content?.parts;
     const imagePart = parts?.find((p) => p.inlineData?.data);
     const base64 = imagePart?.inlineData?.data;
     const mimeType = imagePart?.inlineData?.mimeType ?? 'image/png';

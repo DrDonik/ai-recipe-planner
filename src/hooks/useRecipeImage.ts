@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { generateRecipeImage } from '../services/llm';
 import type { Recipe } from '../types';
@@ -71,5 +71,8 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
         });
     }, []);
 
-    return { generate, isLoading, getError, clearError };
+    return useMemo(
+        () => ({ generate, isLoading, getError, clearError }),
+        [generate, isLoading, getError, clearError],
+    );
 }
