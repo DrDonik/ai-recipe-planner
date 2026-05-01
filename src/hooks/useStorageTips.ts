@@ -11,7 +11,7 @@ export function useStorageTips() {
     const [cache, setCache] = useLocalStorage<Record<string, string>>(STORAGE_KEYS.STORAGE_TIPS_CACHE, {});
     const [loadingKeys, setLoadingKeys] = useState<Set<string>>(new Set());
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const hasAnyTips = Object.keys(cache).length > 0;
+    const hasAnyTips = Object.keys(cache || {}).length > 0;
 
     const getTip = useCallback((name: string): string | undefined => {
         return cache[buildKey(language, name)];
