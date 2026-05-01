@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { API_CONFIG } from '../constants';
 import { translations } from '../constants/translations';
-import type { PantryItem, MealPlan } from '../types';
+import type { PantryItem, MealPlan, Ingredient } from '../types';
 
 /**
  * Sanitizes user input to prevent prompt injection attacks.
@@ -58,6 +58,7 @@ export const RecipeSchema = z.object({
   missingIngredients: z.array(IngredientSchema).optional(),
   nutrition: NutritionSchema.optional(),
   comments: z.string().optional(),
+  imageDataUrl: z.string().optional(),
 });
 
 export const MealPlanSchema = z.object({
@@ -81,6 +82,8 @@ export interface ErrorTranslations {
   timeout: string;
   networkError: string;
   unexpectedError: string;
+  imageBlocked: string;
+  imageNoData: string;
 }
 
 
@@ -362,6 +365,86 @@ export const fetchStorageTip = async (
     return text.trim().replace(/^["']+|["']+$/g, '').trim();
   } catch (error) {
     console.error("Storage tip error:", error);
+
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') throw new Error(errors.timeout);
+      if (error.message.includes('Failed to fetch')) throw new Error(errors.networkError);
+      throw error;
+    }
+
+    throw new Error(errors.unexpectedError);
+  }
+};
+
+/**
+ * Generates a single appetizing food photo for a recipe via Gemini's image model.
+ * Returns a base64 data URL ready to drop into an `<img src=…>`.
+ */
+export const generateRecipeImage = async (
+  apiKey: string,
+  recipeTitle: string,
+  ingredients: Ingredient[],
+  errorTranslations?: ErrorTranslations
+): Promise<string> => {
+  const errors = errorTranslations ?? translations.English.errors;
+
+  if (!apiKey) throw new Error(errors.apiKeyRequired);
+
+  const sanitizedTitle = sanitizeUserInput(recipeTitle, 200);
+  if (!sanitizedTitle) throw new Error(errors.unexpectedError);
+
+  const topIngredients = ingredients
+    .slice(0, 5)
+    .map((i) => sanitizeUserInput(i.item, 60))
+    .filter((s) => s.length > 0)
+    .join(', ');
+
+  const prompt = `An appetizing overhead food photograph of '${sanitizedTitle}'${
+    topIngredients ? `, featuring ${topIngredients}` : ''
+  }. Natural daylight, shallow depth of field, plated on a simple ceramic dish on a wooden table. Photorealistic, magazine-quality food photography. No text, no watermarks, no logos.`;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.IMAGE_MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || errors.fetchFailed);
+    }
+
+    const data = await response.json();
+    const candidate = data.candidates?.[0];
+
+    // Safety filters: the API returns a finishReason of SAFETY/PROHIBITED_CONTENT/etc. without inline data
+    if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+      throw new Error(errors.imageBlocked);
+    }
+
+    const parts: Array<{ inlineData?: { data?: string; mimeType?: string } }> | undefined =
+      candidate?.content?.parts;
+    const imagePart = parts?.find((p) => p.inlineData?.data);
+    const base64 = imagePart?.inlineData?.data;
+    const mimeType = imagePart?.inlineData?.mimeType ?? 'image/png';
+
+    if (!base64) throw new Error(errors.imageNoData);
+
+    return `data:${mimeType};base64,${base64}`;
+  } catch (error) {
+    console.error('Image generation error:', error);
 
     if (error instanceof Error) {
       if (error.name === 'AbortError') throw new Error(errors.timeout);
