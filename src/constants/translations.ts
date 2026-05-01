@@ -36,6 +36,7 @@ export const translations = {
             unexpectedError: "An unexpected error occurred. Please try again.",
             imageBlocked: "The image couldn't be generated — the model declined this prompt.",
             imageNoData: "The image service returned no image data. Please try again.",
+            imageQuotaExceeded: "Image generation isn't available on the free Gemini API tier. Enable billing in Google AI Studio to use this feature.",
         },
         meals: "Meals to plan",
         dietOptions: {
@@ -265,6 +266,7 @@ export const translations = {
             unexpectedError: "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
             imageBlocked: "Das Bild konnte nicht generiert werden — das Modell hat diesen Prompt abgelehnt.",
             imageNoData: "Der Bilddienst hat keine Bilddaten zurückgegeben. Bitte versuche es erneut.",
+            imageQuotaExceeded: "Bildgenerierung ist im kostenlosen Gemini-API-Kontingent nicht verfügbar. Aktiviere die Abrechnung in Google AI Studio, um diese Funktion zu nutzen.",
         },
         meals: "Anzahl Mahlzeiten",
         dietOptions: {
@@ -494,6 +496,7 @@ export const translations = {
             unexpectedError: "Une erreur inattendue s'est produite. Veuillez réessayer.",
             imageBlocked: "L'image n'a pas pu être générée — le modèle a refusé cette invite.",
             imageNoData: "Le service d'image n'a renvoyé aucune donnée d'image. Veuillez réessayer.",
+            imageQuotaExceeded: "La génération d'images n'est pas disponible avec le quota gratuit de l'API Gemini. Activez la facturation dans Google AI Studio pour utiliser cette fonctionnalité.",
         },
         meals: "Repas à planifier",
         dietOptions: {
@@ -723,6 +726,7 @@ export const translations = {
             unexpectedError: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
             imageBlocked: "No se pudo generar la imagen — el modelo rechazó esta solicitud.",
             imageNoData: "El servicio de imágenes no devolvió ningún dato de imagen. Por favor, inténtalo de nuevo.",
+            imageQuotaExceeded: "La generación de imágenes no está disponible en la cuota gratuita de la API de Gemini. Activa la facturación en Google AI Studio para usar esta función.",
         },
         meals: "Comidas a planificar",
         dietOptions: {
