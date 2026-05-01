@@ -58,11 +58,12 @@ export function useStorageTips() {
 
     const clearAll = useCallback((): Record<string, string> => {
         const backup = cache;
+        setCache({});
         writeLocalStorageExternal(STORAGE_KEYS.STORAGE_TIPS_CACHE, undefined);
         setErrors({});
         setLoadingKeys(new Set());
         return backup;
-    }, [cache]);
+    }, [cache, setCache]);
 
     const restoreAll = useCallback((backup: Record<string, string>) => {
         writeLocalStorageExternal(STORAGE_KEYS.STORAGE_TIPS_CACHE, backup);
