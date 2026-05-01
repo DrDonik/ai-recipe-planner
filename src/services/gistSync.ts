@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { GIST_API, SYNCED_STORAGE_KEYS } from '../constants';
+import { GIST_API, STORAGE_KEYS, SYNCED_STORAGE_KEYS } from '../constants';
 import { writeLocalStorageExternal } from '../hooks/useLocalStorage';
 
 /**
@@ -51,6 +51,29 @@ export class GistPayloadError extends Error {
 }
 
 /**
+ * Strips fields that should not be synced across devices. Currently drops
+ * `imageDataUrl` from each recipe inside a meal plan: AI-generated images can
+ * be hundreds of KB of base64, would balloon the Gist payload, and are cheap
+ * to regenerate on demand.
+ */
+const stripUnsyncedFields = (key: string, value: unknown): unknown => {
+    if (key !== STORAGE_KEYS.MEAL_PLAN || !value || typeof value !== 'object') {
+        return value;
+    }
+    const plan = value as { recipes?: unknown };
+    if (!Array.isArray(plan.recipes)) return value;
+    return {
+        ...plan,
+        recipes: plan.recipes.map((r) => {
+            if (!r || typeof r !== 'object') return r;
+            const { imageDataUrl: _omit, ...rest } = r as Record<string, unknown>;
+            void _omit;
+            return rest;
+        }),
+    };
+};
+
+/**
  * Builds a sync payload from the currently persisted localStorage values.
  * Keys with no localStorage entry are omitted.
  */
@@ -61,7 +84,7 @@ export const buildSyncPayload = (): SyncPayload => {
         const raw = localStorage.getItem(key);
         if (raw === null) continue;
         try {
-            data[key] = JSON.parse(raw);
+            data[key] = stripUnsyncedFields(key, JSON.parse(raw));
         } catch {
             // Skip corrupt entries rather than failing the whole push.
             continue;

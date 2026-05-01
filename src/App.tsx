@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useGistSync } from './hooks/useGistSync';
+import { useRecipeImage } from './hooks/useRecipeImage';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack, type SpiceRackRef } from './components/SpiceRack';
@@ -75,6 +76,62 @@ function App() {
 
   // Multi-device sync via GitHub Gist (opt-in).
   const sync = useGistSync();
+
+  // On-demand recipe image generation. Writes to the persisted meal plan and
+  // also updates the in-view recipe so the standalone view reflects the change.
+  const handleImageGenerated = useCallback((recipeId: string, imageDataUrl: string) => {
+    setMealPlan(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        recipes: prev.recipes.map(r => r.id === recipeId ? { ...r, imageDataUrl } : r),
+      };
+    });
+    setViewRecipe(prev => prev && prev.id === recipeId ? { ...prev, imageDataUrl } : prev);
+  }, [setMealPlan]);
+  const recipeImage = useRecipeImage(handleImageGenerated);
+
+  const removeRecipeImage = useCallback((recipeId: string) => {
+    setMealPlan(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        recipes: prev.recipes.map(r => {
+          if (r.id !== recipeId) return r;
+          // Drop imageDataUrl entirely so the persisted JSON shrinks
+          const { imageDataUrl: _omit, ...rest } = r;
+          void _omit;
+          return rest;
+        }),
+      };
+    });
+    setViewRecipe(prev => {
+      if (!prev || prev.id !== recipeId) return prev;
+      const { imageDataUrl: _omit, ...rest } = prev;
+      void _omit;
+      return rest;
+    });
+    recipeImage.clearError(recipeId);
+  }, [setMealPlan, recipeImage]);
+
+  // Image generation requires a configured API key and direct-API mode (the
+  // copy-paste flow has no API call to make). Standalone shared-link views
+  // (no meal plan loaded) also can't generate, since there's nowhere to persist.
+  const canGenerateImages = !useCopyPaste && !!apiKey;
+
+  // Share URLs intentionally omit `imageDataUrl` (it would balloon them), so
+  // when the standalone view is initialized from URL params on mount, the
+  // image is missing even if the user owns this recipe and has generated one.
+  // Derive the effective in-view recipe by merging in the persisted image when
+  // one exists in the meal plan for the same id.
+  const effectiveViewRecipe = useMemo<Recipe | null>(() => {
+    if (!viewRecipe) return null;
+    if (viewRecipe.imageDataUrl) return viewRecipe;
+    const stored = mealPlan?.recipes.find(r => r.id === viewRecipe.id);
+    return stored?.imageDataUrl
+      ? { ...viewRecipe, imageDataUrl: stored.imageDataUrl }
+      : viewRecipe;
+  }, [viewRecipe, mealPlan]);
 
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCloseWelcome = useCallback(() => setShowWelcome(false), []);
@@ -230,8 +287,12 @@ function App() {
   const openRecipeView = useCallback((recipe: Recipe) => {
     savedScrollPositionRef.current = window.scrollY;
     setViewRecipe(recipe);
-    // Update URL without reload
-    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipe);
+    // Strip the (potentially huge) base64 image before encoding into the URL.
+    // The standalone view still shows the image because it reads from `viewRecipe`,
+    // not from the URL.
+    const { imageDataUrl: _omit, ...shareableRecipe } = recipe;
+    void _omit;
+    const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, shareableRecipe);
     window.history.pushState({}, '', shareUrl);
   }, []);
 
@@ -409,18 +470,27 @@ function App() {
   }, [setShowCopyPasteDialog]);
 
 
-  if (viewRecipe) {
+  if (effectiveViewRecipe) {
+    // Only allow image generation in standalone view if the recipe is part of
+    // the user's own meal plan — shared-link views are stateless and have no
+    // persistence target.
+    const isOwnRecipe = !!mealPlan?.recipes.some(r => r.id === effectiveViewRecipe.id);
+    const canGenerateForView = canGenerateImages && isOwnRecipe;
     return (
       <div className="min-h-screen bg-bg-app p-8 flex flex-col items-center justify-center">
         <div className="max-w-2xl w-full">
           <RecipeCard
-            recipe={viewRecipe}
+            recipe={effectiveViewRecipe}
             index={0}
             isStandalone
             wakeLock={wakeLock}
             onClose={clearViewRecipe}
             missingIngredientsMinimized={recipeMissingIngredientsMinimized}
             onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
+            onGenerateImage={canGenerateForView ? () => recipeImage.generate(effectiveViewRecipe) : undefined}
+            onRemoveImage={canGenerateForView ? () => removeRecipeImage(effectiveViewRecipe.id) : undefined}
+            isImageLoading={recipeImage.isLoading(effectiveViewRecipe.id)}
+            imageError={recipeImage.getError(effectiveViewRecipe.id)}
           />
         </div>
       </div>
@@ -540,6 +610,10 @@ function App() {
                         onViewSingle={() => openRecipeView(recipe)}
                         missingIngredientsMinimized={recipeMissingIngredientsMinimized}
                         onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
+                        onGenerateImage={canGenerateImages ? () => recipeImage.generate(recipe) : undefined}
+                        onRemoveImage={canGenerateImages ? () => removeRecipeImage(recipe.id) : undefined}
+                        isImageLoading={recipeImage.isLoading(recipe.id)}
+                        imageError={recipeImage.getError(recipe.id)}
                       />
                     ))}
                   </div>

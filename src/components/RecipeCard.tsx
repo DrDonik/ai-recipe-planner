@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
@@ -19,9 +19,18 @@ interface RecipeCardProps {
     onClose?: () => void;
     missingIngredientsMinimized?: boolean;
     onToggleMissingIngredientsMinimize?: () => void;
+    /**
+     * When provided, the recipe shows an image-generation button. Pass undefined
+     * to hide the feature (e.g. in copy-paste mode, shared standalone views, or
+     * when no API key is configured).
+     */
+    onGenerateImage?: () => void;
+    onRemoveImage?: () => void;
+    isImageLoading?: boolean;
+    imageError?: string;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, isImageLoading = false, imageError }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -120,12 +129,74 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             </div>
 
+            {(recipe.imageDataUrl || isImageLoading || imageError) && (
+                <div className="mb-6 -mt-2 relative rounded-2xl overflow-hidden bg-white/30 dark:bg-black/20 border border-border-base/30">
+                    {recipe.imageDataUrl && (
+                        <motion.img
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.4 }}
+                            src={recipe.imageDataUrl}
+                            alt={recipe.title}
+                            className="w-full aspect-[4/3] object-cover"
+                        />
+                    )}
+                    {isImageLoading && !recipe.imageDataUrl && (
+                        <div className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-3 text-text-muted">
+                            <Loader2 size={32} className="animate-spin text-primary" />
+                            <span className="text-sm">{t.recipeImage.generating}</span>
+                        </div>
+                    )}
+                    {imageError && !recipe.imageDataUrl && !isImageLoading && (
+                        <div className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-3 text-text-muted p-6 text-center">
+                            <AlertCircle size={28} className="text-amber-500" />
+                            <span className="text-xs">{imageError}</span>
+                            {onGenerateImage && (
+                                <button
+                                    onClick={onGenerateImage}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors"
+                                >
+                                    <RefreshCw size={14} />
+                                    {t.recipeImage.retry}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                    {recipe.imageDataUrl && onRemoveImage && (
+                        <button
+                            onClick={onRemoveImage}
+                            className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                            aria-label={t.recipeImage.remove}
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
+            )}
+
             <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
                 <div className={`flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`}>
                     <Clock size={16} />
                     {recipe.time}
                 </div>
                 <div className="flex items-center gap-2">
+                    {onGenerateImage && !recipe.imageDataUrl && !isImageLoading && !imageError && (
+                        <button
+                            onClick={onGenerateImage}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={t.recipeImage.generate}
+                        >
+                            <ImageIcon size={18} />
+                        </button>
+                    )}
+                    {onGenerateImage && isImageLoading && (
+                        <div
+                            className="p-2 bg-primary/10 rounded-full flex items-center justify-center text-primary"
+                            aria-label={t.recipeImage.generating}
+                        >
+                            <Loader2 size={18} className="animate-spin" />
+                        </div>
+                    )}
                     {wakeLock?.isSupported && isStandalone && (
                         <button
                             onClick={wakeLock.toggle}
