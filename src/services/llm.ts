@@ -84,6 +84,7 @@ export interface ErrorTranslations {
   unexpectedError: string;
   imageBlocked: string;
   imageNoData: string;
+  imageQuotaExceeded: string;
 }
 
 
@@ -422,8 +423,17 @@ export const generateRecipeImage = async (
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || errors.fetchFailed);
+      // `|| {}` guards against a literal `null` JSON body, which `response.json()`
+      // resolves (without throwing) and would crash the `errorData.error` access below.
+      const errorData = (await response.json().catch(() => ({}))) || {};
+      // Free-tier Gemini API has limit: 0 for image-generation models, so the
+      // very first request returns 429 RESOURCE_EXHAUSTED. The raw Google
+      // message is opaque to non-developers — surface an actionable hint
+      // instead.
+      if (response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED') {
+        throw new Error(errors.imageQuotaExceeded);
+      }
+      throw new Error(errorData.error?.message || errors.unexpectedError);
     }
 
     const data = await response.json();
