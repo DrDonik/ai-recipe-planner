@@ -433,7 +433,7 @@ export const generateRecipeImage = async (
       if (response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED') {
         throw new Error(errors.imageQuotaExceeded);
       }
-      throw new Error(errorData.error?.message || errors.fetchFailed);
+      throw new Error(errorData.error?.message || errors.unexpectedError);
     }
 
     const data = await response.json();
