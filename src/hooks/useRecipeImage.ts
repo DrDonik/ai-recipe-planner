@@ -62,23 +62,36 @@ export function useRecipeImage(recipeIds: readonly string[]) {
         let cancelled = false;
         const sync = async () => {
             try {
-                const stored = await getAllRecipeImageIds();
+                const storedIds = new Set(await getAllRecipeImageIds());
                 if (cancelled) return;
                 const wanted = new Set(recipeIds);
+                const nextMap = { ...urlMapRef.current };
+                let changed = false;
 
                 // Drop orphaned URLs from local state.
-                for (const id of Object.keys(urlMapRef.current)) {
-                    if (!wanted.has(id)) replaceUrl(id, null);
+                for (const id of Object.keys(nextMap)) {
+                    if (!wanted.has(id)) {
+                        URL.revokeObjectURL(nextMap[id]);
+                        delete nextMap[id];
+                        changed = true;
+                    }
                 }
 
                 // Fetch any wanted images we don't have a URL for yet.
                 for (const id of recipeIds) {
                     if (cancelled) return;
-                    if (!stored.includes(id)) continue;
-                    if (urlMapRef.current[id]) continue;
+                    if (!storedIds.has(id) || nextMap[id]) continue;
                     const blob = await getRecipeImage(id);
-                    if (cancelled) return;
-                    if (blob) replaceUrl(id, blob);
+                    if (cancelled || !blob) continue;
+                    nextMap[id] = URL.createObjectURL(blob);
+                    changed = true;
+                }
+
+                // Single state update at the end so a meal plan with N images
+                // doesn't trigger N re-renders.
+                if (changed) {
+                    urlMapRef.current = nextMap;
+                    setImageUrls(nextMap);
                 }
 
                 // Prune orphaned IDB entries. Best-effort.
@@ -91,7 +104,7 @@ export function useRecipeImage(recipeIds: readonly string[]) {
         return () => {
             cancelled = true;
         };
-    }, [idsKey, recipeIds, replaceUrl]);
+    }, [idsKey, recipeIds]);
 
     // Revoke any object URLs the hook owns when it unmounts so the browser
     // can release the underlying blobs.
