@@ -20,17 +20,22 @@ interface RecipeCardProps {
     missingIngredientsMinimized?: boolean;
     onToggleMissingIngredientsMinimize?: () => void;
     /**
-     * When provided, the recipe shows an image-generation button. Pass undefined
-     * to hide the feature (e.g. in copy-paste mode, shared standalone views, or
+     * When provided, the card shows a Generate-image button. Pass undefined
+     * to hide the feature (copy-paste mode, shared standalone views, or
      * when no API key is configured).
      */
     onGenerateImage?: () => void;
     onRemoveImage?: () => void;
     isImageLoading?: boolean;
     imageError?: string;
+    /**
+     * Object URL for the recipe's persisted image (created from a Blob in
+     * IndexedDB). Undefined when no image has been generated yet.
+     */
+    imageUrl?: string;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, isImageLoading = false, imageError }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, isImageLoading = false, imageError, imageUrl }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -129,25 +134,25 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             </div>
 
-            {(recipe.imageDataUrl || isImageLoading || imageError) && (
+            {(imageUrl || isImageLoading || imageError) && (
                 <div className="mb-6 -mt-2 relative rounded-2xl overflow-hidden bg-white/30 dark:bg-black/20 border border-border-base/30">
-                    {recipe.imageDataUrl && (
+                    {imageUrl && (
                         <motion.img
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.4 }}
-                            src={recipe.imageDataUrl}
+                            src={imageUrl}
                             alt={recipe.title}
                             className="w-full aspect-[4/3] object-cover"
                         />
                     )}
-                    {isImageLoading && !recipe.imageDataUrl && (
+                    {isImageLoading && !imageUrl && (
                         <div className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-3 text-text-muted">
                             <Loader2 size={32} className="animate-spin text-primary" />
                             <span className="text-sm">{t.recipeImage.generating}</span>
                         </div>
                     )}
-                    {imageError && !recipe.imageDataUrl && !isImageLoading && (
+                    {imageError && !imageUrl && !isImageLoading && (
                         <div className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-3 text-text-muted p-6 text-center">
                             <AlertCircle size={28} className="text-amber-500" />
                             <span className="text-xs">{imageError}</span>
@@ -162,7 +167,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                             )}
                         </div>
                     )}
-                    {recipe.imageDataUrl && onRemoveImage && (
+                    {imageUrl && onRemoveImage && (
                         <button
                             onClick={onRemoveImage}
                             className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
@@ -180,7 +185,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {recipe.time}
                 </div>
                 <div className="flex items-center gap-2">
-                    {onGenerateImage && !recipe.imageDataUrl && !isImageLoading && !imageError && (
+                    {onGenerateImage && !imageUrl && !isImageLoading && !imageError && (
                         <button
                             onClick={onGenerateImage}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"

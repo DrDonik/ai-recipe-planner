@@ -1,26 +1,110 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { generateRecipeImage } from '../services/llm';
+import {
+    deleteRecipeImage,
+    getAllRecipeImageIds,
+    getRecipeImage,
+    pruneRecipeImages,
+    setRecipeImage,
+} from '../utils/imageStore';
 import type { Recipe } from '../types';
 
 /**
- * Manages on-demand image generation for individual recipes.
+ * Manages on-demand image generation and persistence for the recipes in the
+ * current meal plan.
  *
- * State (loading + per-recipe error) is transient and lives only in memory.
- * The generated image itself is persisted on the recipe via `onImageGenerated`,
- * which the caller wires to its meal-plan setter.
+ * Image bytes live in IndexedDB (as Blobs) rather than on the recipe object
+ * in localStorage — base64 data URLs would blow past Safari/iPadOS's ~5 MB
+ * localStorage cap after just a few generations. The hook exposes an object
+ * URL per recipe id (created from the persisted Blob) and revokes URLs when
+ * they are no longer needed.
+ *
+ * Loading and error state are transient (in memory only). Images are
+ * intentionally device-local: they are not part of the Gist sync payload
+ * (cheap to regenerate, expensive to ship) and not part of share URLs.
  */
-export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl: string) => void) {
+export function useRecipeImage(recipeIds: readonly string[]) {
     const { apiKey, t } = useSettings();
+    const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
     const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
     const [errors, setErrors] = useState<Record<string, string>>({});
     // Synchronous in-flight tracking. Using a ref (rather than reading
-    // `loadingIds` in `generate`'s deps) avoids two issues: (1) `generate` no
-    // longer needs `loadingIds` in its dep array, so it stays stable across
-    // loading-state flips and doesn't churn `RecipeCard` props; (2) the check
-    // is synchronous, so a rapid double-click can't slip past a not-yet-applied
-    // state update and fire two redundant requests.
+    // `loadingIds` inside `generate`) keeps `generate` referentially stable
+    // across loading-state flips so it doesn't churn `RecipeCard` props, and
+    // a rapid double-click can't slip past a not-yet-applied state update.
     const inFlightRef = useRef<Set<string>>(new Set());
+    // Mirror of imageUrls so the unmount cleanup can revoke without depending
+    // on the latest render's state snapshot.
+    const urlMapRef = useRef<Record<string, string>>({});
+
+    const replaceUrl = useCallback((recipeId: string, blob: Blob | null) => {
+        const previous = urlMapRef.current[recipeId];
+        if (previous) URL.revokeObjectURL(previous);
+        const next = blob ? URL.createObjectURL(blob) : undefined;
+        const nextMap = { ...urlMapRef.current };
+        if (next) {
+            nextMap[recipeId] = next;
+        } else {
+            delete nextMap[recipeId];
+        }
+        urlMapRef.current = nextMap;
+        setImageUrls(nextMap);
+    }, []);
+
+    // Stable key so the load effect re-runs only when the *set* of ids
+    // changes, not on every render that produces a new array reference.
+    const idsKey = useMemo(() => [...recipeIds].sort().join('\n'), [recipeIds]);
+
+    // Load images from IndexedDB for the current recipe ids, and prune any
+    // orphaned entries (recipes that no longer exist).
+    useEffect(() => {
+        let cancelled = false;
+        const sync = async () => {
+            try {
+                const stored = await getAllRecipeImageIds();
+                if (cancelled) return;
+                const wanted = new Set(recipeIds);
+
+                // Drop orphaned URLs from local state.
+                for (const id of Object.keys(urlMapRef.current)) {
+                    if (!wanted.has(id)) replaceUrl(id, null);
+                }
+
+                // Fetch any wanted images we don't have a URL for yet.
+                for (const id of recipeIds) {
+                    if (cancelled) return;
+                    if (!stored.includes(id)) continue;
+                    if (urlMapRef.current[id]) continue;
+                    const blob = await getRecipeImage(id);
+                    if (cancelled) return;
+                    if (blob) replaceUrl(id, blob);
+                }
+
+                // Prune orphaned IDB entries. Best-effort.
+                await pruneRecipeImages(wanted);
+            } catch {
+                // IndexedDB unavailable — degrade silently (no images loaded).
+            }
+        };
+        void sync();
+        return () => {
+            cancelled = true;
+        };
+    }, [idsKey, recipeIds, replaceUrl]);
+
+    // Revoke any object URLs the hook owns when it unmounts so the browser
+    // can release the underlying blobs.
+    useEffect(() => () => {
+        for (const url of Object.values(urlMapRef.current)) {
+            URL.revokeObjectURL(url);
+        }
+        urlMapRef.current = {};
+    }, []);
+
+    const getImageUrl = useCallback((recipeId: string): string | undefined => {
+        return imageUrls[recipeId];
+    }, [imageUrls]);
 
     const isLoading = useCallback((recipeId: string): boolean => {
         return loadingIds.has(recipeId);
@@ -47,8 +131,9 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
         });
 
         try {
-            const dataUrl = await generateRecipeImage(apiKey, recipe.title, recipe.ingredients, t.errors);
-            onImageGenerated(recipe.id, dataUrl);
+            const blob = await generateRecipeImage(apiKey, recipe.title, recipe.ingredients, t.errors);
+            await setRecipeImage(recipe.id, blob);
+            replaceUrl(recipe.id, blob);
         } catch (err) {
             const message = err instanceof Error ? err.message : t.errors.unexpectedError;
             setErrors(prev => ({ ...prev, [recipe.id]: message }));
@@ -60,7 +145,22 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
                 return next;
             });
         }
-    }, [apiKey, onImageGenerated, t.errors]);
+    }, [apiKey, replaceUrl, t.errors]);
+
+    const remove = useCallback(async (recipeId: string): Promise<void> => {
+        replaceUrl(recipeId, null);
+        setErrors(prev => {
+            if (!(recipeId in prev)) return prev;
+            const next = { ...prev };
+            delete next[recipeId];
+            return next;
+        });
+        try {
+            await deleteRecipeImage(recipeId);
+        } catch {
+            // Best effort — UI already shows the image as removed.
+        }
+    }, [replaceUrl]);
 
     const clearError = useCallback((recipeId: string) => {
         setErrors(prev => {
@@ -72,7 +172,7 @@ export function useRecipeImage(onImageGenerated: (recipeId: string, imageDataUrl
     }, []);
 
     return useMemo(
-        () => ({ generate, isLoading, getError, clearError }),
-        [generate, isLoading, getError, clearError],
+        () => ({ getImageUrl, isLoading, getError, clearError, generate, remove }),
+        [getImageUrl, isLoading, getError, clearError, generate, remove],
     );
 }

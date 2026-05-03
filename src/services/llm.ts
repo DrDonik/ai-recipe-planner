@@ -58,7 +58,6 @@ export const RecipeSchema = z.object({
   missingIngredients: z.array(IngredientSchema).optional(),
   nutrition: NutritionSchema.optional(),
   comments: z.string().optional(),
-  imageDataUrl: z.string().optional(),
 });
 
 export const MealPlanSchema = z.object({
@@ -378,15 +377,16 @@ export const fetchStorageTip = async (
 };
 
 /**
- * Generates a single appetizing food photo for a recipe via Gemini's image model.
- * Returns a base64 data URL ready to drop into an `<img src=…>`.
+ * Generates an appetizing food photo for a recipe via Gemini's image model.
+ * Returns the image as a Blob so the caller can persist it in IndexedDB
+ * without the ~33% size penalty of base64.
  */
 export const generateRecipeImage = async (
   apiKey: string,
   recipeTitle: string,
   ingredients: Ingredient[],
   errorTranslations?: ErrorTranslations
-): Promise<string> => {
+): Promise<Blob> => {
   const errors = errorTranslations ?? translations.English.errors;
 
   if (!apiKey) throw new Error(errors.apiKeyRequired);
@@ -423,13 +423,13 @@ export const generateRecipeImage = async (
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      // `|| {}` guards against a literal `null` JSON body, which `response.json()`
-      // resolves (without throwing) and would crash the `errorData.error` access below.
+      // `|| {}` guards against a literal `null` JSON body, which
+      // `response.json()` resolves (without throwing) and would otherwise
+      // crash the `errorData.error` access below.
       const errorData = (await response.json().catch(() => ({}))) || {};
       // Free-tier Gemini API has limit: 0 for image-generation models, so the
       // very first request returns 429 RESOURCE_EXHAUSTED. The raw Google
-      // message is opaque to non-developers — surface an actionable hint
-      // instead.
+      // message is opaque to non-developers — surface an actionable hint.
       if (response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED') {
         throw new Error(errors.imageQuotaExceeded);
       }
@@ -438,13 +438,9 @@ export const generateRecipeImage = async (
 
     const data = await response.json();
 
-    // Prompt-level block: the API returns no candidates and surfaces a
-    // promptFeedback.blockReason at the top level. Distinguish this from a
-    // generic empty response so the user sees the right message.
+    // Prompt-level block: no candidates, with a top-level promptFeedback.
     if (!data.candidates || data.candidates.length === 0) {
-      if (data.promptFeedback?.blockReason) {
-        throw new Error(errors.imageBlocked);
-      }
+      if (data.promptFeedback?.blockReason) throw new Error(errors.imageBlocked);
       throw new Error(errors.imageNoData);
     }
 
@@ -463,7 +459,10 @@ export const generateRecipeImage = async (
 
     if (!base64) throw new Error(errors.imageNoData);
 
-    return `data:${mimeType};base64,${base64}`;
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mimeType });
   } catch (error) {
     console.error('Image generation error:', error);
 
