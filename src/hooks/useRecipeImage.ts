@@ -104,7 +104,14 @@ export function useRecipeImage(recipeIds: readonly string[]) {
         return () => {
             cancelled = true;
         };
-    }, [idsKey, recipeIds]);
+        // `idsKey` already encodes the content of `recipeIds`. Including
+        // `recipeIds` itself would re-fire the effect on every meal-plan
+        // setter (e.g. an identical-content sync pull replaces the ref but
+        // not the contents) and undo the stabilization the memo is meant to
+        // provide. Reading `recipeIds` inside is safe because it's always
+        // in sync with `idsKey` whenever `idsKey` changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [idsKey]);
 
     // Revoke any object URLs the hook owns when it unmounts so the browser
     // can release the underlying blobs.
