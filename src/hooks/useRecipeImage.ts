@@ -65,33 +65,57 @@ export function useRecipeImage(recipeIds: readonly string[]) {
                 const storedIds = new Set(await getAllRecipeImageIds());
                 if (cancelled) return;
                 const wanted = new Set(recipeIds);
-                const nextMap = { ...urlMapRef.current };
-                let changed = false;
 
-                // Drop orphaned URLs from local state.
-                for (const id of Object.keys(nextMap)) {
-                    if (!wanted.has(id)) {
-                        URL.revokeObjectURL(nextMap[id]);
-                        delete nextMap[id];
-                        changed = true;
-                    }
+                // Identify orphans we want to revoke. Re-checked at commit
+                // time against the latest urlMapRef in case `remove()` got
+                // there first.
+                const orphanIds = new Set<string>();
+                for (const id of Object.keys(urlMapRef.current)) {
+                    if (!wanted.has(id)) orphanIds.add(id);
                 }
 
-                // Fetch any wanted images we don't have a URL for yet.
+                // Fetch any wanted-but-missing image blobs. URL creation is
+                // deferred to commit time so we don't leak a URL if a
+                // concurrent `generate()` produced one for the same id while
+                // we were awaiting `getRecipeImage`.
+                const additions = new Map<string, Blob>();
                 for (const id of recipeIds) {
                     if (cancelled) return;
-                    if (!storedIds.has(id) || nextMap[id]) continue;
+                    if (!storedIds.has(id)) continue;
+                    if (urlMapRef.current[id] || additions.has(id)) continue;
                     const blob = await getRecipeImage(id);
                     if (cancelled || !blob) continue;
-                    nextMap[id] = URL.createObjectURL(blob);
-                    changed = true;
+                    additions.set(id, blob);
                 }
 
-                // Single state update at the end so a meal plan with N images
-                // doesn't trigger N re-renders.
-                if (changed) {
-                    urlMapRef.current = nextMap;
-                    setImageUrls(nextMap);
+                // Synchronous commit. Read the latest urlMapRef *now* (not
+                // an early snapshot) and merge our delta into it. Doing the
+                // read-merge-write in one synchronous block prevents a
+                // concurrent `generate()`'s `replaceUrl()` from being
+                // clobbered by a stale snapshot. JS is single-threaded, so
+                // nothing can interleave between these statements.
+                if (orphanIds.size > 0 || additions.size > 0) {
+                    const latest = urlMapRef.current;
+                    const merged: Record<string, string> = {};
+                    let changed = false;
+                    for (const [id, url] of Object.entries(latest)) {
+                        if (orphanIds.has(id)) {
+                            URL.revokeObjectURL(url);
+                            changed = true;
+                        } else {
+                            merged[id] = url;
+                        }
+                    }
+                    for (const [id, blob] of additions) {
+                        // generate() may have raced us — keep its URL.
+                        if (merged[id]) continue;
+                        merged[id] = URL.createObjectURL(blob);
+                        changed = true;
+                    }
+                    if (changed) {
+                        urlMapRef.current = merged;
+                        setImageUrls(merged);
+                    }
                 }
 
                 // Prune orphaned IDB entries. Best-effort.
