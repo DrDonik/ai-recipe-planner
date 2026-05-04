@@ -37,8 +37,13 @@ export function useRecipeImage(recipeIds: readonly string[]) {
     // Mirror of imageUrls so the unmount cleanup can revoke without depending
     // on the latest render's state snapshot.
     const urlMapRef = useRef<Record<string, string>>({});
+    // Guards `replaceUrl` (called from the async `generate`) against running
+    // after unmount, when it would create a fresh object URL the cleanup has
+    // already missed and would set state on a dead component.
+    const isMountedRef = useRef(true);
 
     const replaceUrl = useCallback((recipeId: string, blob: Blob | null) => {
+        if (!isMountedRef.current) return;
         const previous = urlMapRef.current[recipeId];
         if (previous) URL.revokeObjectURL(previous);
         const next = blob ? URL.createObjectURL(blob) : undefined;
@@ -74,18 +79,29 @@ export function useRecipeImage(recipeIds: readonly string[]) {
                     if (!wanted.has(id)) orphanIds.add(id);
                 }
 
-                // Fetch any wanted-but-missing image blobs. URL creation is
-                // deferred to commit time so we don't leak a URL if a
+                // Fetch any wanted-but-missing image blobs in parallel —
+                // each call opens its own short readonly transaction, so
+                // serialising them was just round-trip latency. URL creation
+                // is deferred to commit time so we don't leak a URL if a
                 // concurrent `generate()` produced one for the same id while
-                // we were awaiting `getRecipeImage`.
+                // we were awaiting.
+                const fetchResults = await Promise.all(
+                    recipeIds
+                        .filter(id => storedIds.has(id) && !urlMapRef.current[id])
+                        .map(async id => {
+                            const blob = await getRecipeImage(id);
+                            return blob ? ([id, blob] as const) : null;
+                        }),
+                );
+                // Final guard before any side effects: if a newer effect
+                // instance is in flight, both the URL creations below and
+                // the trailing `pruneRecipeImages(wanted)` would operate on
+                // a stale id set — the prune in particular could delete
+                // images the new instance just persisted.
+                if (cancelled) return;
                 const additions = new Map<string, Blob>();
-                for (const id of recipeIds) {
-                    if (cancelled) return;
-                    if (!storedIds.has(id)) continue;
-                    if (urlMapRef.current[id] || additions.has(id)) continue;
-                    const blob = await getRecipeImage(id);
-                    if (cancelled || !blob) continue;
-                    additions.set(id, blob);
+                for (const result of fetchResults) {
+                    if (result) additions.set(result[0], result[1]);
                 }
 
                 // Synchronous commit. Read the latest urlMapRef *now* (not
@@ -140,6 +156,7 @@ export function useRecipeImage(recipeIds: readonly string[]) {
     // Revoke any object URLs the hook owns when it unmounts so the browser
     // can release the underlying blobs.
     useEffect(() => () => {
+        isMountedRef.current = false;
         for (const url of Object.values(urlMapRef.current)) {
             URL.revokeObjectURL(url);
         }

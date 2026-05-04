@@ -34,7 +34,10 @@ const openDb = (): Promise<IDBDatabase> => {
             dbPromise = null;
             reject(req.error ?? new Error('Failed to open IndexedDB'));
         };
-        req.onblocked = () => reject(new Error('IndexedDB upgrade blocked'));
+        req.onblocked = () => {
+            dbPromise = null;
+            reject(new Error('IndexedDB upgrade blocked'));
+        };
     });
     return dbPromise;
 };
