@@ -44,7 +44,6 @@ export interface Recipe {
   missingIngredients?: Ingredient[]; // Optional: excluded in shared recipes
   nutrition?: Nutrition; // Optional for backwards compatibility
   comments?: string; // Optional fun fact or remark from the LLM
-  imageDataUrl?: string; // Optional base64 data URL of an AI-generated image; stripped from sync/share payloads
 }
 
 /**
