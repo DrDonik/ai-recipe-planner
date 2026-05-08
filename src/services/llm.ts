@@ -305,10 +305,11 @@ export const parseRecipeResponse = (text: string, errorTranslations?: ErrorTrans
       const path = firstError.path.join('.');
       throw new Error(
         `${errors.invalidStructure}: ${firstError.message}${path ? ` at ${path}` : ''}. ` +
-        errors.tryAgain
+        errors.tryAgain,
+        { cause: error }
       );
     }
-    throw new Error(errors.invalidJson);
+    throw new Error(errors.invalidJson, { cause: error });
   }
 };
 
@@ -367,12 +368,12 @@ export const fetchStorageTip = async (
     console.error("Storage tip error:", error);
 
     if (error instanceof Error) {
-      if (error.name === 'AbortError') throw new Error(errors.timeout);
-      if (error.message.includes('Failed to fetch')) throw new Error(errors.networkError);
+      if (error.name === 'AbortError') throw new Error(errors.timeout, { cause: error });
+      if (error.message.includes('Failed to fetch')) throw new Error(errors.networkError, { cause: error });
       throw error;
     }
 
-    throw new Error(errors.unexpectedError);
+    throw new Error(errors.unexpectedError, { cause: error });
   }
 };
 
@@ -467,12 +468,12 @@ export const generateRecipeImage = async (
     console.error('Image generation error:', error);
 
     if (error instanceof Error) {
-      if (error.name === 'AbortError') throw new Error(errors.timeout);
-      if (error.message.includes('Failed to fetch')) throw new Error(errors.networkError);
+      if (error.name === 'AbortError') throw new Error(errors.timeout, { cause: error });
+      if (error.message.includes('Failed to fetch')) throw new Error(errors.networkError, { cause: error });
       throw error;
     }
 
-    throw new Error(errors.unexpectedError);
+    throw new Error(errors.unexpectedError, { cause: error });
   }
 };
 
@@ -547,15 +548,15 @@ export const generateRecipes = async (
       if (error.name === 'AbortError' || error.name === 'TimeoutError') {
         // Preserve AbortError when the caller initiated the cancel; otherwise it's a timeout.
         if (externalSignal?.aborted) throw error;
-        throw new Error(errors.timeout);
+        throw new Error(errors.timeout, { cause: error });
       }
       if (error.message.includes('Failed to fetch')) {
-        throw new Error(errors.networkError);
+        throw new Error(errors.networkError, { cause: error });
       }
       // Re-throw with original message if already a user-friendly error
       throw error;
     }
 
-    throw new Error(errors.unexpectedError);
+    throw new Error(errors.unexpectedError, { cause: error });
   }
 };
