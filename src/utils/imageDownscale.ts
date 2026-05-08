@@ -11,19 +11,16 @@ export const downscaleImage = async (
   maxDim: number = 1024,
   quality: number = 0.85
 ): Promise<{ base64: string; mimeType: string }> => {
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Failed to read image'));
-    reader.readAsDataURL(file);
-  });
-
+  // Use createObjectURL rather than FileReader.readAsDataURL: the latter allocates
+  // a ~Nx1.33 base64 string of the original (potentially multi-MB) photo, which
+  // is wasteful on memory-constrained mobile devices.
+  const objectUrl = URL.createObjectURL(file);
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const el = new Image();
     el.onload = () => resolve(el);
     el.onerror = () => reject(new Error('Failed to decode image'));
-    el.src = dataUrl;
-  });
+    el.src = objectUrl;
+  }).finally(() => URL.revokeObjectURL(objectUrl));
 
   const longEdge = Math.max(img.width, img.height);
   const scale = longEdge > maxDim ? maxDim / longEdge : 1;

@@ -162,9 +162,11 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
             // Defer focus until after the disabled state clears so the input is focusable.
             setTimeout(() => amountInputRef.current?.focus(), 0);
         } catch (err) {
+            // Defer focus until after `identifying` flips false in `finally` and the
+            // input's `disabled` attribute clears — `.focus()` on a disabled input is a no-op.
             if (err instanceof Error && err.name === 'AbortError') {
                 // User cancelled — no error message, return focus to the name field.
-                nameInputRef.current?.focus();
+                setTimeout(() => nameInputRef.current?.focus(), 0);
                 return;
             }
             const kind = err instanceof IdentifyIngredientError ? err.kind : 'error';
@@ -174,7 +176,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                 : kind === 'quota' ? t.identifyIngredient.quotaExceeded
                 : t.identifyIngredient.error;
             setIdentifyError(message);
-            nameInputRef.current?.focus();
+            setTimeout(() => nameInputRef.current?.focus(), 0);
         } finally {
             setIdentifying(false);
             identifyAbortRef.current = null;
