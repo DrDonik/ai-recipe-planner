@@ -358,6 +358,8 @@ function App() {
           setMealPlan(previousMealPlan);
           if (previousShoppingChecks !== null) {
             localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, previousShoppingChecks);
+          } else {
+            localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
           }
           clearNotification();
         }
