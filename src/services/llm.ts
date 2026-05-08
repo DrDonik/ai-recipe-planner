@@ -504,11 +504,10 @@ export const generateRecipes = async (
     styleWishes,
   });
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
-  const onExternalAbort = () => controller.abort();
-  if (externalSignal?.aborted) controller.abort();
-  else externalSignal?.addEventListener('abort', onExternalAbort);
+  const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
+  const signal = externalSignal
+    ? AbortSignal.any([externalSignal, timeoutSignal])
+    : timeoutSignal;
 
   try {
     const response = await fetch(
@@ -525,7 +524,7 @@ export const generateRecipes = async (
             },
           ],
         }),
-        signal: controller.signal,
+        signal,
       }
     );
 
@@ -545,7 +544,7 @@ export const generateRecipes = async (
 
     // Handle specific error types with user-friendly messages
     if (error instanceof Error) {
-      if (error.name === 'AbortError') {
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
         // Preserve AbortError when the caller initiated the cancel; otherwise it's a timeout.
         if (externalSignal?.aborted) throw error;
         throw new Error(errors.timeout);
@@ -558,8 +557,5 @@ export const generateRecipes = async (
     }
 
     throw new Error(errors.unexpectedError);
-  } finally {
-    clearTimeout(timeoutId);
-    externalSignal?.removeEventListener('abort', onExternalAbort);
   }
 };
