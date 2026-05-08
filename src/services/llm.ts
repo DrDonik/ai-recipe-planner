@@ -545,15 +545,28 @@ Respond with only one line. No explanation.`;
     }
 
     const data = await response.json();
-    const text: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    // Prompt-level block (no candidates, with promptFeedback) or empty candidate list.
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new IdentifyIngredientError(
+        'error',
+        data.promptFeedback?.blockReason ? 'Blocked by safety filter' : 'Empty response'
+      );
+    }
+    const candidate = data.candidates[0];
+    // Response-level block: finishReason is SAFETY / PROHIBITED_CONTENT / etc.
+    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+      throw new IdentifyIngredientError('error', 'Blocked by safety filter');
+    }
+    const text: string | undefined = candidate.content?.parts?.[0]?.text;
     if (!text) throw new IdentifyIngredientError('error', 'Empty response');
 
-    const cleaned = text.trim().replace(/^["']+|["']+$/g, '').trim();
+    // Strip wrapping quotes and any markdown emphasis the model occasionally adds despite the prompt.
+    const cleaned = text.trim().replace(/^["'*_]+|["'*_]+$/g, '').trim();
     if (cleaned === 'UNKNOWN') throw new IdentifyIngredientError('unknown', 'Unknown ingredient');
     if (cleaned === 'MULTIPLE') throw new IdentifyIngredientError('multiple', 'Multiple ingredients');
 
-    // The model occasionally appends a trailing period or quotes; strip them.
-    const finalName = cleaned.replace(/[.;:]+$/, '').trim();
+    const finalName = cleaned.replace(/[.;:!?]+$/, '').trim();
     if (!finalName) throw new IdentifyIngredientError('error', 'Empty name');
     return finalName;
   } catch (error) {
