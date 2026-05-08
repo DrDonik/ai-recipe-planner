@@ -54,6 +54,8 @@ function App() {
       : null
   );
   const notificationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const generateAbortRef = useRef<AbortController | null>(null);
+  const userAbortedRef = useRef(false);
 
   // Welcome Dialog State
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -342,6 +344,30 @@ function App() {
     });
   }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
+  // After a new plan replaces an existing one, offer a one-tap undo.
+  // Restores the prior plan and the shopping-list checkmarks that were cleared.
+  const offerMealPlanUndo = useCallback((previousMealPlan: MealPlan | null, previousShoppingChecks: string | null) => {
+    if (!previousMealPlan) return;
+    showNotification({
+      message: t.undo.mealPlanReplaced,
+      type: 'undo',
+      action: {
+        label: t.undo.action,
+        ariaLabel: `${t.undo.action} ${t.undo.mealPlanReplaced.toLowerCase()}`,
+        onClick: () => {
+          setMealPlan(previousMealPlan);
+          if (previousShoppingChecks !== null) {
+            localStorage.setItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED, previousShoppingChecks);
+          } else {
+            localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+          }
+          clearNotification();
+        }
+      },
+      timeout: 5000
+    });
+  }, [showNotification, clearNotification, setMealPlan, t.undo.mealPlanReplaced, t.undo.action]);
+
   const handleGenerate = useCallback(async () => {
     // Flush any pending input from PantryInput, StyleWish, SpiceRack or KitchenAppliances before generating
     const pendingItem = pantryInputRef.current?.flushPendingInput();
@@ -381,37 +407,56 @@ function App() {
     setLoading(true);
     clearNotification();
     // Don't clear mealPlan here - preserve it on failure so user doesn't lose their previous plan
+    const previousMealPlan = mealPlan;
+    const previousShoppingChecks = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+    const controller = new AbortController();
+    generateAbortRef.current = controller;
+    userAbortedRef.current = false;
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, appliancesToUse, styleWishesToUse, t.errors);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, appliancesToUse, styleWishesToUse, t.errors, controller.signal);
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+      offerMealPlanUndo(previousMealPlan, previousShoppingChecks);
     } catch (err: unknown) {
+      // User-initiated cancel: silently revert to ready state, keep previous plan
+      if (userAbortedRef.current && err instanceof Error && err.name === 'AbortError') return;
       const message = err instanceof Error ? err.message : t.generateError;
       showNotification({ message, type: 'error' });
       // Previous meal plan is preserved - user can still see their last successful generation
     } finally {
+      generateAbortRef.current = null;
+      userAbortedRef.current = false;
       setLoading(false);
     }
-  }, [pantryItems, spices, appliances, styleWishes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan]);
+  }, [pantryItems, spices, appliances, styleWishes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
+
+  const handleCancelGenerate = useCallback(() => {
+    if (!generateAbortRef.current) return;
+    userAbortedRef.current = true;
+    generateAbortRef.current.abort();
+  }, []);
 
   const handleCopyPasteSubmit = useCallback((response: string) => {
     setShowCopyPasteDialog(false);
     setLoading(true);
     clearNotification();
+    const previousMealPlan = mealPlan;
+    const previousShoppingChecks = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
 
     try {
       const plan = parseRecipeResponse(response, t.errors);
       setMealPlan(plan);
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+      offerMealPlanUndo(previousMealPlan, previousShoppingChecks);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t.parseError;
       showNotification({ message, type: 'error' });
     } finally {
       setLoading(false);
     }
-  }, [t.errors, t.parseError, setMealPlan, clearNotification, showNotification, setShowCopyPasteDialog]);
+  }, [t.errors, t.parseError, setMealPlan, clearNotification, showNotification, setShowCopyPasteDialog, mealPlan, offerMealPlanUndo]);
 
   const handleCopyPasteCancel = useCallback(() => {
     setShowCopyPasteDialog(false);
@@ -486,6 +531,7 @@ function App() {
               setOptionsMinimized={setOptionsMinimized}
               loading={loading}
               handleGenerate={handleGenerate}
+              onCancelGenerate={handleCancelGenerate}
               notification={notification}
             />
 

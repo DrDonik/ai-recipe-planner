@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2, X } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import type { Notification } from '../types';
 import { VALIDATION } from '../constants';
@@ -13,6 +13,7 @@ interface SettingsPanelProps {
     setOptionsMinimized: (minimized: boolean) => void;
     loading: boolean;
     handleGenerate: () => void;
+    onCancelGenerate: () => void;
     notification: Notification | null;
 }
 
@@ -21,6 +22,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
     setOptionsMinimized,
     loading,
     handleGenerate,
+    onCancelGenerate,
     notification
 }, ref) => {
     const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
@@ -224,10 +226,10 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
             </div>
 
             <button
-                onClick={handleGenerate}
-                disabled={loading}
+                onClick={loading ? onCancelGenerate : handleGenerate}
                 aria-busy={loading}
-                className={`btn btn-primary w-full py-4 text-lg rounded-xl shadow-lg shadow-primary/20 ${loading ? 'opacity-80 cursor-wait' : ''}`}
+                aria-label={loading ? t.cancelGeneration : undefined}
+                className="btn btn-primary w-full py-4 text-lg rounded-xl shadow-lg shadow-primary/20"
             >
                 {loading ? (
                     <>
@@ -237,6 +239,8 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                             aria-label={t.planning}
                         ></span>
                         <span aria-live="polite">{t.planning}</span>
+                        <span className="mx-2 opacity-60" aria-hidden="true">·</span>
+                        <X size={18} aria-hidden="true" /> {t.cancel}
                     </>
                 ) : (
                     <>
