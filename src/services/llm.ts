@@ -507,7 +507,8 @@ export const generateRecipes = async (
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
   const onExternalAbort = () => controller.abort();
-  externalSignal?.addEventListener('abort', onExternalAbort);
+  if (externalSignal?.aborted) controller.abort();
+  else externalSignal?.addEventListener('abort', onExternalAbort);
 
   try {
     const response = await fetch(
