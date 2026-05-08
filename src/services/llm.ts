@@ -486,7 +486,8 @@ export const generateRecipes = async (
   spices: string[] = [],
   appliances: string[] = [],
   styleWishes: string[] = [],
-  errorTranslations?: ErrorTranslations
+  errorTranslations?: ErrorTranslations,
+  externalSignal?: AbortSignal
 ): Promise<MealPlan> => {
   const errors = errorTranslations ?? translations.English.errors;
 
@@ -503,10 +504,12 @@ export const generateRecipes = async (
     styleWishes,
   });
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+  const onExternalAbort = () => controller.abort();
+  externalSignal?.addEventListener('abort', onExternalAbort);
 
+  try {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
       {
@@ -525,8 +528,6 @@ export const generateRecipes = async (
       }
     );
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error?.message || errors.fetchFailed);
@@ -544,6 +545,8 @@ export const generateRecipes = async (
     // Handle specific error types with user-friendly messages
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
+        // Preserve AbortError when the caller initiated the cancel; otherwise it's a timeout.
+        if (externalSignal?.aborted) throw error;
         throw new Error(errors.timeout);
       }
       if (error.message.includes('Failed to fetch')) {
@@ -554,5 +557,8 @@ export const generateRecipes = async (
     }
 
     throw new Error(errors.unexpectedError);
+  } finally {
+    clearTimeout(timeoutId);
+    externalSignal?.removeEventListener('abort', onExternalAbort);
   }
 };
