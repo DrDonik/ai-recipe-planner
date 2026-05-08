@@ -1,11 +1,15 @@
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
-import { Plus, Trash2, Refrigerator, Info, Loader2, X } from 'lucide-react';
+import { Plus, Trash2, Refrigerator, Info, Loader2, X, Camera } from 'lucide-react';
 import type { PantryItem } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
 import { useStorageTips } from '../hooks/useStorageTips';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import { PanelHeader } from './ui';
-import { VALIDATION } from '../constants';
+import { PhotoPrivacyDialog } from './PhotoPrivacyDialog';
+import { STORAGE_KEYS, VALIDATION } from '../constants';
+import { downscaleImage } from '../utils/imageDownscale';
+import { identifyIngredientFromImage, IdentifyIngredientError } from '../services/llm';
 
 interface PantryInputProps {
     pantryItems: PantryItem[];
@@ -30,19 +34,26 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     isMinimized,
     onToggleMinimize
 }, ref) => {
-    const { t, useCopyPaste, storageTipsEnabled } = useSettings();
+    const { t, useCopyPaste, storageTipsEnabled, apiKey, language } = useSettings();
     const tipsActive = storageTipsEnabled && !useCopyPaste;
+    const cameraEnabled = !useCopyPaste && !!apiKey;
     const { getTip, fetchTip, isLoading: isTipLoading, getError: getTipError } = useStorageTips();
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const [editingAmount, setEditingAmount] = useState('');
     const [openTipForId, setOpenTipForId] = useState<string | null>(null);
+    const [identifying, setIdentifying] = useState(false);
+    const [identifyError, setIdentifyError] = useState<string | null>(null);
+    const [showPhotoPrivacy, setShowPhotoPrivacy] = useState(false);
+    const [photoPrivacyAck, setPhotoPrivacyAck] = useLocalStorage<boolean>(STORAGE_KEYS.PHOTO_PRIVACY_ACK, false);
     const nameInputRef = useRef<HTMLInputElement>(null);
     const amountInputRef = useRef<HTMLInputElement>(null);
     const editAmountInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
     const isCancellingRef = useRef(false);
+    const identifyAbortRef = useRef<AbortController | null>(null);
 
     const handleTipClick = (item: PantryItem) => {
         if (openTipForId === item.id) {
@@ -100,6 +111,75 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         if (e.key === 'Enter') {
             e.preventDefault();
             amountInputRef.current?.focus();
+        }
+    };
+
+    const openFilePicker = () => {
+        setIdentifyError(null);
+        fileInputRef.current?.click();
+    };
+
+    const handleCameraClick = () => {
+        if (identifying) {
+            identifyAbortRef.current?.abort();
+            return;
+        }
+        if (!photoPrivacyAck) {
+            setShowPhotoPrivacy(true);
+            return;
+        }
+        openFilePicker();
+    };
+
+    const handlePhotoPrivacyAccept = () => {
+        setPhotoPrivacyAck(true);
+        setShowPhotoPrivacy(false);
+        // Wait a tick so the dialog unmounts and focus restoration doesn't fight the file picker.
+        setTimeout(() => openFilePicker(), 0);
+    };
+
+    const handlePhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        // Reset the input so picking the same file twice in a row still triggers change.
+        e.target.value = '';
+        if (!file || !apiKey) return;
+
+        setIdentifyError(null);
+        setIdentifying(true);
+        const controller = new AbortController();
+        identifyAbortRef.current = controller;
+
+        try {
+            const { base64, mimeType } = await downscaleImage(file);
+            const ingredient = await identifyIngredientFromImage(
+                apiKey,
+                base64,
+                mimeType,
+                language,
+                controller.signal
+            );
+            setName(ingredient);
+            // Defer focus until after the disabled state clears so the input is focusable.
+            setTimeout(() => amountInputRef.current?.focus(), 0);
+        } catch (err) {
+            // Defer focus until after `identifying` flips false in `finally` and the
+            // input's `disabled` attribute clears — `.focus()` on a disabled input is a no-op.
+            if (err instanceof Error && err.name === 'AbortError') {
+                // User cancelled — no error message, return focus to the name field.
+                setTimeout(() => nameInputRef.current?.focus(), 0);
+                return;
+            }
+            const kind = err instanceof IdentifyIngredientError ? err.kind : 'error';
+            const message =
+                kind === 'unknown' ? t.identifyIngredient.unknown
+                : kind === 'multiple' ? t.identifyIngredient.multiple
+                : kind === 'quota' ? t.identifyIngredient.quotaExceeded
+                : t.identifyIngredient.error;
+            setIdentifyError(message);
+            setTimeout(() => nameInputRef.current?.focus(), 0);
+        } finally {
+            setIdentifying(false);
+            identifyAbortRef.current = null;
         }
     };
 
@@ -168,17 +248,50 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                 <>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <div className="flex flex-col gap-3">
-                            <input
-                                ref={nameInputRef}
-                                type="text"
-                                placeholder={t.placeholders.ingredient}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                onKeyDown={handleNameKeyDown}
-                                maxLength={VALIDATION.MAX_INPUT_LENGTH}
-                                className="input-field w-full"
-                                aria-label={t.placeholders.ingredient}
-                            />
+                            <div className="relative">
+                                <input
+                                    ref={nameInputRef}
+                                    type="text"
+                                    placeholder={identifying ? t.identifyIngredient.identifying : t.placeholders.ingredient}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    onKeyDown={handleNameKeyDown}
+                                    maxLength={VALIDATION.MAX_INPUT_LENGTH}
+                                    disabled={identifying}
+                                    aria-busy={identifying}
+                                    className={`input-field w-full ${cameraEnabled ? 'pr-12' : ''}`}
+                                    aria-label={t.placeholders.ingredient}
+                                />
+                                {cameraEnabled && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCameraClick}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary/10 transition-colors"
+                                        aria-label={identifying ? t.identifyIngredient.cancelAriaLabel : t.identifyIngredient.buttonAriaLabel}
+                                    >
+                                        {identifying ? (
+                                            <Loader2 size={18} className="animate-spin" />
+                                        ) : (
+                                            <Camera size={18} />
+                                        )}
+                                    </button>
+                                )}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    onChange={handlePhotoSelected}
+                                    className="hidden"
+                                    aria-hidden="true"
+                                    tabIndex={-1}
+                                />
+                            </div>
+                            {identifyError && (
+                                <p role="alert" className="text-sm text-red-500">
+                                    {identifyError}
+                                </p>
+                            )}
                         </div>
                         <div className="flex gap-2">
                             <input
@@ -314,6 +427,12 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                         )}
                     </div>
                 </>
+            )}
+            {showPhotoPrivacy && (
+                <PhotoPrivacyDialog
+                    onAccept={handlePhotoPrivacyAccept}
+                    onCancel={() => setShowPhotoPrivacy(false)}
+                />
             )}
         </div>
     );

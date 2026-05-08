@@ -477,6 +477,112 @@ export const generateRecipeImage = async (
   }
 };
 
+export type IdentifyIngredientErrorKind = 'unknown' | 'multiple' | 'quota' | 'error';
+
+export class IdentifyIngredientError extends Error {
+  kind: IdentifyIngredientErrorKind;
+  constructor(kind: IdentifyIngredientErrorKind, message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'IdentifyIngredientError';
+    this.kind = kind;
+  }
+}
+
+/**
+ * Identifies a single food ingredient in a photo via Gemini's vision model.
+ * Returns the ingredient name as a plain string in the requested language.
+ * Throws an `IdentifyIngredientError` with a `kind` discriminator the UI uses
+ * to pick the right message (UNKNOWN, MULTIPLE, quota, or generic error).
+ */
+export const identifyIngredientFromImage = async (
+  apiKey: string,
+  base64Image: string,
+  mimeType: string,
+  language: string,
+  signal?: AbortSignal
+): Promise<string> => {
+  if (!apiKey) throw new IdentifyIngredientError('error', 'API Key is required');
+
+  const prompt = `You identify food ingredients in photos.
+
+Look at the photo and respond with EXACTLY ONE of:
+
+1. The name of the ingredient, in ${language}, with no extra words, punctuation, quantity, or description. Just the name.
+2. The exact token MULTIPLE — if the photo clearly shows two or more distinct food ingredients (e.g. an onion and a tomato together). Ignore incidental items like hands, plates, cutting boards, or packaging — those don't count as ingredients.
+3. The exact token UNKNOWN — if you cannot confidently identify the ingredient, the photo is unclear, or it does not show food.
+
+Respond with only one line. No explanation.`;
+
+  const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
+  const combinedSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+
+  try {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { inlineData: { mimeType, data: base64Image } },
+                { text: prompt },
+              ],
+            },
+          ],
+        }),
+        signal: combinedSignal,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = (await response.json().catch(() => ({}))) || {};
+      if (response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED') {
+        throw new IdentifyIngredientError('quota', 'Quota exceeded');
+      }
+      throw new IdentifyIngredientError('error', errorData.error?.message || 'Fetch failed');
+    }
+
+    const data = await response.json();
+
+    // Prompt-level block (no candidates, with promptFeedback) or empty candidate list.
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new IdentifyIngredientError(
+        'error',
+        data.promptFeedback?.blockReason ? 'Blocked by safety filter' : 'Empty response'
+      );
+    }
+    const candidate = data.candidates[0];
+    // Response-level block: finishReason is SAFETY / PROHIBITED_CONTENT / etc.
+    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+      throw new IdentifyIngredientError('error', 'Blocked by safety filter');
+    }
+    const text: string | undefined = candidate.content?.parts?.[0]?.text;
+    if (!text) throw new IdentifyIngredientError('error', 'Empty response');
+
+    // Strip wrapping quotes and any markdown emphasis the model occasionally adds despite the prompt.
+    const cleaned = text.trim().replace(/^["'*_]+|["'*_]+$/g, '').trim();
+    if (cleaned === 'UNKNOWN') throw new IdentifyIngredientError('unknown', 'Unknown ingredient');
+    if (cleaned === 'MULTIPLE') throw new IdentifyIngredientError('multiple', 'Multiple ingredients');
+
+    const finalName = cleaned.replace(/[.;:!?]+$/, '').trim();
+    if (!finalName) throw new IdentifyIngredientError('error', 'Empty name');
+    return finalName;
+  } catch (error) {
+    if (error instanceof IdentifyIngredientError) throw error;
+    if (error instanceof Error) {
+      // Caller-initiated abort: re-throw as-is so the UI can distinguish cancel from error.
+      if (error.name === 'AbortError' && signal?.aborted) throw error;
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        throw new IdentifyIngredientError('error', 'Timeout', { cause: error });
+      }
+    }
+    console.error('Identify ingredient error:', error);
+    throw new IdentifyIngredientError('error', 'Unexpected error', { cause: error });
+  }
+};
+
 export const generateRecipes = async (
   apiKey: string,
   ingredients: PantryItem[],
