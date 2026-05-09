@@ -18,9 +18,16 @@ export const downscaleImage = async (
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const el = new Image();
     el.onload = () => resolve(el);
-    el.onerror = () => reject(new Error('Failed to decode image'));
+    el.onerror = () => reject(new Error(`failed to decode image (type=${file.type || 'unknown'}, size=${file.size})`));
     el.src = objectUrl;
   }).finally(() => URL.revokeObjectURL(objectUrl));
+
+  // iOS in standalone (home-screen) mode sometimes hands over a HEIC original
+  // that decodes to zero dimensions; catch this explicitly so the caller can
+  // distinguish a decode failure from a network/API failure.
+  if (!img.width || !img.height) {
+    throw new Error(`zero-dimension image (type=${file.type || 'unknown'}, size=${file.size})`);
+  }
 
   const longEdge = Math.max(img.width, img.height);
   const scale = longEdge > maxDim ? maxDim / longEdge : 1;
@@ -36,7 +43,12 @@ export const downscaleImage = async (
 
   const mimeType = 'image/jpeg';
   const encoded = canvas.toDataURL(mimeType, quality);
-  // Strip the `data:image/jpeg;base64,` prefix.
-  const base64 = encoded.slice(encoded.indexOf(',') + 1);
+  const commaIdx = encoded.indexOf(',');
+  // `toDataURL` can return `'data:,'` (empty payload) on iOS for HEIC-sourced
+  // canvases; treat that as a decode failure instead of POSTing empty bytes.
+  if (commaIdx < 0 || commaIdx === encoded.length - 1) {
+    throw new Error(`empty data URL from canvas (type=${file.type || 'unknown'}, ${width}x${height})`);
+  }
+  const base64 = encoded.slice(commaIdx + 1);
   return { base64, mimeType };
 };

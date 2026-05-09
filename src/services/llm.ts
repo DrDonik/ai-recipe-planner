@@ -477,7 +477,7 @@ export const generateRecipeImage = async (
   }
 };
 
-export type IdentifyIngredientErrorKind = 'unknown' | 'multiple' | 'quota' | 'error';
+export type IdentifyIngredientErrorKind = 'unknown' | 'multiple' | 'quota' | 'decode' | 'error';
 
 export class IdentifyIngredientError extends Error {
   kind: IdentifyIngredientErrorKind;

@@ -47,6 +47,7 @@ export const translations = {
             unknown: "Couldn't identify the ingredient — please type it.",
             multiple: "Photo shows multiple ingredients — please photograph one at a time.",
             error: "Couldn't identify the photo. Please try again or type it.",
+            decodeFailed: "Couldn't read the photo on this device.",
             quotaExceeded: "Photo identification quota exceeded. Please try again later.",
         },
         photoPrivacy: {
@@ -296,6 +297,7 @@ export const translations = {
             unknown: "Zutat konnte nicht erkannt werden — bitte tippe sie ein.",
             multiple: "Das Foto zeigt mehrere Zutaten — bitte fotografiere jeweils nur eine.",
             error: "Foto konnte nicht ausgewertet werden. Bitte erneut versuchen oder eintippen.",
+            decodeFailed: "Das Foto konnte auf diesem Gerät nicht gelesen werden.",
             quotaExceeded: "Kontingent für die Foto-Erkennung erschöpft. Bitte später erneut versuchen.",
         },
         photoPrivacy: {
@@ -545,6 +547,7 @@ export const translations = {
             unknown: "Impossible d'identifier l'ingrédient — veuillez le saisir.",
             multiple: "La photo contient plusieurs ingrédients — veuillez les photographier un par un.",
             error: "Impossible d'analyser la photo. Veuillez réessayer ou saisir l'ingrédient.",
+            decodeFailed: "Impossible de lire la photo sur cet appareil.",
             quotaExceeded: "Quota d'identification par photo dépassé. Veuillez réessayer plus tard.",
         },
         photoPrivacy: {
@@ -794,6 +797,7 @@ export const translations = {
             unknown: "No se pudo identificar el ingrediente — por favor escríbelo.",
             multiple: "La foto contiene varios ingredientes — por favor fotografía uno a la vez.",
             error: "No se pudo analizar la foto. Por favor, inténtalo de nuevo o escríbelo.",
+            decodeFailed: "No se pudo leer la foto en este dispositivo.",
             quotaExceeded: "Cuota de identificación por foto agotada. Por favor, inténtalo más tarde.",
         },
         photoPrivacy: {
