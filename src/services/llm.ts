@@ -507,8 +507,8 @@ export const identifyIngredientFromImage = async (
 
 Look at the photo and respond with EXACTLY ONE of:
 
-1. The name of the ingredient, in ${language}, with no extra words, punctuation, quantity, or description. Just the name.
-2. The exact token MULTIPLE — if the photo clearly shows two or more distinct food ingredients (e.g. an onion and a tomato together). Ignore incidental items like hands, plates, cutting boards, or packaging — those don't count as ingredients.
+1. The name of the most prominent ingredient, in ${language}, with no extra words, punctuation, quantity, or description. Just the name. If one ingredient is clearly the main subject (centered, in focus, or taking up most of the frame), name that one — even if other ingredients are partly visible at the edges or in the background.
+2. The exact token MULTIPLE — only if two or more distinct food ingredients share the focus roughly equally and no single one stands out as the main subject. Ignore incidental items like hands, plates, cutting boards, or packaging — those don't count as ingredients.
 3. The exact token UNKNOWN — if you cannot confidently identify the ingredient, the photo is unclear, or it does not show food.
 
 Respond with only one line. No explanation.`;
