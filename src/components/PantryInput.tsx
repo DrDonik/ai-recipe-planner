@@ -150,7 +150,14 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         identifyAbortRef.current = controller;
 
         try {
-            const { base64, mimeType } = await downscaleImage(file);
+            let base64: string;
+            let mimeType: string;
+            try {
+                ({ base64, mimeType } = await downscaleImage(file));
+            } catch (decodeErr) {
+                const detail = decodeErr instanceof Error ? decodeErr.message : String(decodeErr);
+                throw new IdentifyIngredientError('decode', detail, { cause: decodeErr });
+            }
             const ingredient = await identifyIngredientFromImage(
                 apiKey,
                 base64,
@@ -170,11 +177,19 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                 return;
             }
             const kind = err instanceof IdentifyIngredientError ? err.kind : 'error';
-            const message =
+            const detail = err instanceof Error ? err.message : '';
+            const base =
                 kind === 'unknown' ? t.identifyIngredient.unknown
                 : kind === 'multiple' ? t.identifyIngredient.multiple
                 : kind === 'quota' ? t.identifyIngredient.quotaExceeded
+                : kind === 'decode' ? t.identifyIngredient.decodeFailed
                 : t.identifyIngredient.error;
+            // Append the underlying detail for decode/error so we can diagnose
+            // why iOS standalone (home-screen) webapp mode fails where Safari works.
+            const message =
+                (kind === 'decode' || kind === 'error') && detail
+                    ? `${base} (${detail})`
+                    : base;
             setIdentifyError(message);
             setTimeout(() => nameInputRef.current?.focus(), 0);
         } finally {
