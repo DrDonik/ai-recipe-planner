@@ -46,7 +46,7 @@ export const downscaleImage = async (
   const commaIdx = encoded.indexOf(',');
   // `toDataURL` can return `'data:,'` (empty payload) on iOS for HEIC-sourced
   // canvases; treat that as a decode failure instead of POSTing empty bytes.
-  if (commaIdx < 0 || encoded.length - commaIdx <= 1) {
+  if (commaIdx < 0 || commaIdx === encoded.length - 1) {
     throw new Error(`empty data URL from canvas (type=${file.type || 'unknown'}, ${width}x${height})`);
   }
   const base64 = encoded.slice(commaIdx + 1);
