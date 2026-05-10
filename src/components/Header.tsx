@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Trash2 } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Info, Trash2 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useStorageTips } from '../hooks/useStorageTips';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
@@ -327,6 +327,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                             {!useCopyPaste && hasAnyStorageTips && (
                                 <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <Info size={16} className="text-text-muted" aria-hidden="true" />
                                     <span className="text-sm text-text-muted">{t.storageTips.label}</span>
                                     <TooltipButton
                                         icon={<Trash2 size={14} />}
