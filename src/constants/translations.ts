@@ -135,7 +135,6 @@ export const translations = {
         },
         storageTips: {
             label: "Storage tips",
-            hint: "Tap the ⓘ next to an ingredient",
             iconAriaLabel: "Storage tip",
             popoverTitle: "Storage tip",
             loading: "Fetching storage tip…",
@@ -385,7 +384,6 @@ export const translations = {
         },
         storageTips: {
             label: "Lagerungstipps",
-            hint: "Tippe auf das ⓘ neben einer Zutat",
             iconAriaLabel: "Lagerungstipp",
             popoverTitle: "Lagerungstipp",
             loading: "Lade Lagerungstipp…",
@@ -635,7 +633,6 @@ export const translations = {
         },
         storageTips: {
             label: "Conseils de conservation",
-            hint: "Touchez l'icône ⓘ à côté d'un ingrédient",
             iconAriaLabel: "Conseil de conservation",
             popoverTitle: "Conseil de conservation",
             loading: "Chargement du conseil…",
@@ -885,7 +882,6 @@ export const translations = {
         },
         storageTips: {
             label: "Consejos de conservación",
-            hint: "Toca el ⓘ junto a un ingrediente",
             iconAriaLabel: "Consejo de conservación",
             popoverTitle: "Consejo de conservación",
             loading: "Obteniendo consejo…",
