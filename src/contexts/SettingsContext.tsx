@@ -71,8 +71,6 @@ interface SettingsContextType {
     setStyleWishes: (wishes: string[]) => void;
     language: string;
     setLanguage: (lang: string) => void;
-    storageTipsEnabled: boolean;
-    setStorageTipsEnabled: (enabled: boolean) => void;
     t: TranslationType;
     storagePersistError: boolean;
 }
@@ -131,9 +129,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [diet, setDiet, dietError] = useLocalStorage<string>(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
     const [language, setLanguage, languageError] = useLocalStorage<string>(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
-    const [storageTipsEnabled, setStorageTipsEnabled, storageTipsEnabledError] = useLocalStorage<boolean>(STORAGE_KEYS.STORAGE_TIPS_ENABLED, false);
 
-    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError || storageTipsEnabledError;
+    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError;
 
     const t = getTranslations(language);
 
@@ -145,7 +142,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         diet, setDiet,
         styleWishes, setStyleWishes,
         language, setLanguage,
-        storageTipsEnabled, setStorageTipsEnabled,
         t,
         storagePersistError
     };

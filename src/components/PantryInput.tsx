@@ -34,8 +34,8 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     isMinimized,
     onToggleMinimize
 }, ref) => {
-    const { t, useCopyPaste, storageTipsEnabled, apiKey, language } = useSettings();
-    const tipsActive = storageTipsEnabled && !useCopyPaste;
+    const { t, useCopyPaste, apiKey, language } = useSettings();
+    const tipsActive = !useCopyPaste && !!apiKey;
     const cameraEnabled = !useCopyPaste && !!apiKey;
     const { getTip, fetchTip, isLoading: isTipLoading, getError: getTipError } = useStorageTips();
     const [name, setName] = useState('');
