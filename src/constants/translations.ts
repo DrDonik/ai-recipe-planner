@@ -111,6 +111,7 @@ export const translations = {
             remove: "Remove image",
         },
         emptyPantry: "Empty Pantry",
+        clearShoppingList: "Clear Shopping List",
         nutritionPerServing: "Per serving (estimate)",
         calories: "kcal",
         carbs: "Carbs",
@@ -185,6 +186,7 @@ export const translations = {
         },
         undo: {
             pantryEmptied: "Pantry emptied",
+            shoppingListCleared: "Shopping list cleared",
             recipeDeleted: "Recipe deleted",
             apiKeyCleared: "API key cleared",
             storageTipsCleared: "Storage tips cleared",
@@ -360,6 +362,7 @@ export const translations = {
             remove: "Bild entfernen",
         },
         emptyPantry: "Vorrat leeren",
+        clearShoppingList: "Einkaufsliste leeren",
         nutritionPerServing: "Pro Portion (Schätzung)",
         calories: "kcal",
         carbs: "Kohlenhydrate",
@@ -434,6 +437,7 @@ export const translations = {
         },
         undo: {
             pantryEmptied: "Vorrat geleert",
+            shoppingListCleared: "Einkaufsliste geleert",
             recipeDeleted: "Rezept gelöscht",
             apiKeyCleared: "API-Schlüssel gelöscht",
             storageTipsCleared: "Lagerungstipps gelöscht",
@@ -609,6 +613,7 @@ export const translations = {
             remove: "Supprimer l'image",
         },
         emptyPantry: "Vider le garde-manger",
+        clearShoppingList: "Vider la liste de courses",
         nutritionPerServing: "Par portion (estimation)",
         calories: "kcal",
         carbs: "Glucides",
@@ -683,6 +688,7 @@ export const translations = {
         },
         undo: {
             pantryEmptied: "Garde-manger vidé",
+            shoppingListCleared: "Liste de courses vidée",
             recipeDeleted: "Recette supprimée",
             apiKeyCleared: "Clé API effacée",
             storageTipsCleared: "Conseils de conservation effacés",
@@ -858,6 +864,7 @@ export const translations = {
             remove: "Eliminar imagen",
         },
         emptyPantry: "Vaciar despensa",
+        clearShoppingList: "Vaciar lista de compras",
         nutritionPerServing: "Por porción (estimado)",
         calories: "kcal",
         carbs: "Carbohidratos",
@@ -932,6 +939,7 @@ export const translations = {
         },
         undo: {
             pantryEmptied: "Despensa vaciada",
+            shoppingListCleared: "Lista de compras vaciada",
             recipeDeleted: "Receta eliminada",
             apiKeyCleared: "Clave API eliminada",
             storageTipsCleared: "Consejos de conservación eliminados",
