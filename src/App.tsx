@@ -12,7 +12,7 @@ import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
-import { useLocalStorage } from './hooks/useLocalStorage';
+import { useLocalStorage, writeLocalStorageExternal } from './hooks/useLocalStorage';
 import { generateShareUrl } from './utils/sharing';
 import { parseSharedUrlParams } from './utils/sharedUrlParams';
 import { Header } from './components/Header';
@@ -279,6 +279,34 @@ function App() {
       item.id === id ? { ...item, amount: newAmount } : item
     ));
   }, [setPantryItems]);
+
+  const clearShoppingList = useCallback(() => {
+    if (!mealPlan) return;
+    const backupList = mealPlan.shoppingList;
+    const backupCheckedRaw = localStorage.getItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
+    setMealPlan({ ...mealPlan, shoppingList: [] });
+    writeLocalStorageExternal(STORAGE_KEYS.SHOPPING_LIST_CHECKED, undefined);
+    showNotification({
+      message: t.undo.shoppingListCleared,
+      type: 'undo',
+      action: {
+        label: t.undo.action,
+        ariaLabel: `${t.undo.action} ${t.undo.shoppingListCleared.toLowerCase()}`,
+        onClick: () => {
+          setMealPlan(prev => prev ? { ...prev, shoppingList: backupList } : prev);
+          if (backupCheckedRaw !== null) {
+            try {
+              writeLocalStorageExternal(STORAGE_KEYS.SHOPPING_LIST_CHECKED, JSON.parse(backupCheckedRaw));
+            } catch {
+              // Malformed backup — skip restoring checked state.
+            }
+          }
+          clearNotification();
+        }
+      },
+      timeout: 5000
+    });
+  }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.shoppingListCleared, t.undo.action]);
 
   const emptyPantry = useCallback(() => {
     const backup = [...pantryItems];
@@ -577,6 +605,7 @@ function App() {
                   isMinimized={shoppingListMinimized}
                   onToggleMinimize={handleToggleShoppingListMinimize}
                   onViewSingle={() => openShoppingListView(mealPlan.shoppingList)}
+                  onClear={clearShoppingList}
                   onPersistErrorChange={setShoppingListCheckedPersistError}
                 />
 

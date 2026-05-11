@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X } from 'lucide-react';
+import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -14,10 +14,11 @@ interface ShoppingListProps {
     isStandaloneView?: boolean;
     onViewSingle?: () => void;
     onClose?: () => void;
+    onClear?: () => void;
     onPersistErrorChange?: (hasError: boolean) => void;
 }
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onPersistErrorChange }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onClear, onPersistErrorChange }) => {
     const { t } = useSettings();
 
     // Load checked items from localStorage (used for main view and own list in standalone)
@@ -195,39 +196,53 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
             </div>
 
             {!isMinimized && (
-                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 list-none p-0 m-0" role="list">
-                    {items.map((item, i) => {
-                        const itemKey = getItemKey(item);
-                        const isChecked = checkedItems.has(itemKey);
-                        const checkboxId = `shopping-item-${i}`;
-                        return (
-                            <li
-                                key={`${itemKey}-${i}`}
-                                className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base hover:border-border-hover transition-colors p-3 shadow-sm cursor-pointer"
-                                onClick={(e) => {
-                                    // Avoid double-toggle when clicking the checkbox directly
-                                    if ((e.target as HTMLElement).tagName !== 'INPUT') {
-                                        toggleItem(itemKey);
-                                    }
-                                }}
+                <>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 list-none p-0 m-0" role="list">
+                        {items.map((item, i) => {
+                            const itemKey = getItemKey(item);
+                            const isChecked = checkedItems.has(itemKey);
+                            const checkboxId = `shopping-item-${i}`;
+                            return (
+                                <li
+                                    key={`${itemKey}-${i}`}
+                                    className="flex items-center justify-between bg-white/40 dark:bg-black/20 rounded-lg border border-border-base hover:border-border-hover transition-colors p-3 shadow-sm cursor-pointer"
+                                    onClick={(e) => {
+                                        // Avoid double-toggle when clicking the checkbox directly
+                                        if ((e.target as HTMLElement).tagName !== 'INPUT') {
+                                            toggleItem(itemKey);
+                                        }
+                                    }}
+                                >
+                                    <label htmlFor={checkboxId} className="flex items-center gap-3 cursor-pointer flex-1" onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            id={checkboxId}
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => toggleItem(itemKey)}
+                                            className="w-5 h-5 accent-primary rounded cursor-pointer"
+                                        />
+                                        <span className={`font-medium ${isChecked ? 'line-through text-text-muted' : ''}`}>{item.item}</span>
+                                    </label>
+                                    <span className="text-sm text-text-muted bg-white/50 dark:bg-black/30 rounded text-right px-3 py-1">
+                                        {item.amount}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                    {onClear && (
+                        <div className="flex justify-end mt-4">
+                            <button
+                                type="button"
+                                onClick={onClear}
+                                className="text-sm text-text-muted hover:text-red-500 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                             >
-                                <label htmlFor={checkboxId} className="flex items-center gap-3 cursor-pointer flex-1" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        id={checkboxId}
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => toggleItem(itemKey)}
-                                        className="w-5 h-5 accent-primary rounded cursor-pointer"
-                                    />
-                                    <span className={`font-medium ${isChecked ? 'line-through text-text-muted' : ''}`}>{item.item}</span>
-                                </label>
-                                <span className="text-sm text-text-muted bg-white/50 dark:bg-black/30 rounded text-right px-3 py-1">
-                                    {item.amount}
-                                </span>
-                            </li>
-                        );
-                    })}
-                </ul>
+                                <Trash2 size={14} />
+                                {t.clearShoppingList}
+                            </button>
+                        </div>
+                    )}
+                </>
             )}
         </motion.div>
     );
