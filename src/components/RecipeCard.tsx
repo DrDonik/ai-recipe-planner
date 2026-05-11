@@ -134,8 +134,49 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             </div>
 
+            <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
+                <div className={`flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`}>
+                    <Clock size={16} />
+                    {recipe.time}
+                </div>
+                <div className="flex items-center gap-2">
+                    {onGenerateImage && !imageUrl && !isImageLoading && !imageError && (
+                        <button
+                            onClick={onGenerateImage}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={t.recipeImage.generate}
+                        >
+                            <ImageIcon size={18} />
+                        </button>
+                    )}
+                    {wakeLock?.isSupported && isStandalone && (
+                        <button
+                            onClick={wakeLock.toggle}
+                            className={`rounded-full transition-all flex items-center justify-center h-9 w-9 ${
+                                wakeLock.isActive
+                                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                                    : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
+                            }`}
+                            aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
+                            aria-pressed={wakeLock.isActive}
+                        >
+                            {wakeLock.isActive ? <Sun size={16} /> : <SunDim size={16} />}
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={onDelete}
+                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
+                            aria-label={t.deleteRecipe}
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    )}
+                </div>
+            </div>
+
             {(imageUrl || isImageLoading || imageError) && (
-                <div className="mb-6 -mt-2 relative rounded-2xl overflow-hidden bg-white/30 dark:bg-black/20 border border-border-base/30">
+                <div className="mb-6 relative rounded-2xl overflow-hidden bg-white/30 dark:bg-black/20 border border-border-base/30">
                     {imageUrl && (
                         <motion.img
                             initial={{ opacity: 0 }}
@@ -178,55 +219,6 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     )}
                 </div>
             )}
-
-            <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
-                <div className={`flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`}>
-                    <Clock size={16} />
-                    {recipe.time}
-                </div>
-                <div className="flex items-center gap-2">
-                    {onGenerateImage && !imageUrl && !isImageLoading && !imageError && (
-                        <button
-                            onClick={onGenerateImage}
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
-                            aria-label={t.recipeImage.generate}
-                        >
-                            <ImageIcon size={18} />
-                        </button>
-                    )}
-                    {onGenerateImage && isImageLoading && (
-                        <div
-                            className="p-2 bg-primary/10 rounded-full flex items-center justify-center text-primary"
-                            aria-label={t.recipeImage.generating}
-                        >
-                            <Loader2 size={18} className="animate-spin" />
-                        </div>
-                    )}
-                    {wakeLock?.isSupported && isStandalone && (
-                        <button
-                            onClick={wakeLock.toggle}
-                            className={`rounded-full transition-all flex items-center justify-center h-9 w-9 ${
-                                wakeLock.isActive
-                                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                                    : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
-                            }`}
-                            aria-label={wakeLock.isActive ? t.screenKeptOn : t.keepScreenOn}
-                            aria-pressed={wakeLock.isActive}
-                        >
-                            {wakeLock.isActive ? <Sun size={16} /> : <SunDim size={16} />}
-                        </button>
-                    )}
-                    {onDelete && (
-                        <button
-                            onClick={onDelete}
-                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
-                            aria-label={t.deleteRecipe}
-                        >
-                            <Trash2 size={18} />
-                        </button>
-                    )}
-                </div>
-            </div>
 
             <div className="space-y-8 flex-grow">
                 <section>
