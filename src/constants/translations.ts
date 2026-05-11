@@ -134,12 +134,10 @@ export const translations = {
             copyPaste: "Copy & Paste"
         },
         storageTips: {
-            label: "Storage tips",
             iconAriaLabel: "Storage tip",
             popoverTitle: "Storage tip",
             loading: "Fetching storage tip…",
             close: "Close",
-            clearAll: "Clear all storage tips",
         },
         copyPaste: {
             title: "Copy & Paste",
@@ -187,7 +185,6 @@ export const translations = {
             pantryEmptied: "Pantry emptied",
             recipeDeleted: "Recipe deleted",
             apiKeyCleared: "API key cleared",
-            storageTipsCleared: "Storage tips cleared",
             mealPlanReplaced: "New meal plan created",
             action: "Undo"
         },
@@ -383,12 +380,10 @@ export const translations = {
             copyPaste: "Kopieren & Einfügen"
         },
         storageTips: {
-            label: "Lagerungstipps",
             iconAriaLabel: "Lagerungstipp",
             popoverTitle: "Lagerungstipp",
             loading: "Lade Lagerungstipp…",
             close: "Schließen",
-            clearAll: "Alle Lagerungstipps löschen",
         },
         copyPaste: {
             title: "Kopieren & Einfügen",
@@ -436,7 +431,6 @@ export const translations = {
             pantryEmptied: "Vorrat geleert",
             recipeDeleted: "Rezept gelöscht",
             apiKeyCleared: "API-Schlüssel gelöscht",
-            storageTipsCleared: "Lagerungstipps gelöscht",
             mealPlanReplaced: "Neuer Menüplan erstellt",
             action: "Rückgängig"
         },
@@ -632,12 +626,10 @@ export const translations = {
             copyPaste: "Copier-Coller"
         },
         storageTips: {
-            label: "Conseils de conservation",
             iconAriaLabel: "Conseil de conservation",
             popoverTitle: "Conseil de conservation",
             loading: "Chargement du conseil…",
             close: "Fermer",
-            clearAll: "Effacer tous les conseils de conservation",
         },
         copyPaste: {
             title: "Copier-Coller",
@@ -685,7 +677,6 @@ export const translations = {
             pantryEmptied: "Garde-manger vidé",
             recipeDeleted: "Recette supprimée",
             apiKeyCleared: "Clé API effacée",
-            storageTipsCleared: "Conseils de conservation effacés",
             mealPlanReplaced: "Nouveau plan de repas créé",
             action: "Annuler"
         },
@@ -881,12 +872,10 @@ export const translations = {
             copyPaste: "Copiar y Pegar"
         },
         storageTips: {
-            label: "Consejos de conservación",
             iconAriaLabel: "Consejo de conservación",
             popoverTitle: "Consejo de conservación",
             loading: "Obteniendo consejo…",
             close: "Cerrar",
-            clearAll: "Eliminar todos los consejos de conservación",
         },
         copyPaste: {
             title: "Copiar y Pegar",
@@ -934,7 +923,6 @@ export const translations = {
             pantryEmptied: "Despensa vaciada",
             recipeDeleted: "Receta eliminada",
             apiKeyCleared: "Clave API eliminada",
-            storageTipsCleared: "Consejos de conservación eliminados",
             mealPlanReplaced: "Nuevo plan de comidas creado",
             action: "Deshacer"
         },
