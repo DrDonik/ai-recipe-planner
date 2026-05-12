@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, type ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
 import { STORAGE_KEYS, DEFAULTS } from '../constants';
@@ -71,6 +71,8 @@ interface SettingsContextType {
     setStyleWishes: (wishes: string[]) => void;
     language: string;
     setLanguage: (lang: string) => void;
+    imageGenEnabled: boolean;
+    setImageGenEnabled: (enabled: boolean) => void;
     t: TranslationType;
     storagePersistError: boolean;
 }
@@ -123,14 +125,25 @@ const getInitialStyleWishes = (): string[] => {
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [useCopyPaste, setUseCopyPaste, useCopyPasteError] = useLocalStorage<boolean>(STORAGE_KEYS.USE_COPY_PASTE, getInitialUseCopyPaste());
-    const [apiKey, setApiKey, apiKeyError] = useLocalStorage<string>(STORAGE_KEYS.API_KEY, '');
+    const [apiKey, setApiKeyRaw, apiKeyError] = useLocalStorage<string>(STORAGE_KEYS.API_KEY, '');
     const [people, setPeople, peopleError] = useLocalStorage<number>(STORAGE_KEYS.PEOPLE_COUNT, DEFAULTS.PEOPLE_COUNT);
     const [meals, setMeals, mealsError] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
     const [diet, setDiet, dietError] = useLocalStorage<string>(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
     const [language, setLanguage, languageError] = useLocalStorage<string>(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
+    const [imageGenEnabled, setImageGenEnabled, imageGenEnabledError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_ENABLED, false);
 
-    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError;
+    // Reset the image-generation opt-in whenever the API key changes. The
+    // toggle is an explicit acknowledgement that the key supports paid
+    // image-gen, so a new key — possibly free-tier — must be re-confirmed.
+    // Skip the reset when the new value equals the current one (the input
+    // fires onChange per keystroke; identical values shouldn't reset).
+    const setApiKey = useCallback((key: string) => {
+        if (key !== apiKey && imageGenEnabled) setImageGenEnabled(false);
+        setApiKeyRaw(key);
+    }, [apiKey, setApiKeyRaw, imageGenEnabled, setImageGenEnabled]);
+
+    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError || imageGenEnabledError;
 
     const t = getTranslations(language);
 
@@ -142,6 +155,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         diet, setDiet,
         styleWishes, setStyleWishes,
         language, setLanguage,
+        imageGenEnabled, setImageGenEnabled,
         t,
         storagePersistError
     };

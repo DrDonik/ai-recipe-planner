@@ -38,7 +38,8 @@ export const translations = {
             unexpectedError: "An unexpected error occurred. Please try again.",
             imageBlocked: "Image generation was blocked by the safety filter.",
             imageNoData: "The image model returned no image. Please try again.",
-            imageQuotaExceeded: "Image generation requires a paid Gemini API tier — the image model is not available on the free tier.",
+            imageQuotaExceeded: "Image generation quota exceeded. Please try again later.",
+            imageFreeTierUnsupported: "Image generation isn't available on the free Gemini tier. The toggle has been turned off.",
         },
         identifyIngredient: {
             buttonAriaLabel: "Identify ingredient from photo",
@@ -109,6 +110,10 @@ export const translations = {
             generating: "Generating image…",
             retry: "Retry",
             remove: "Remove image",
+        },
+        imageGen: {
+            label: "Image generation",
+            tooltip: "Show per-recipe image generation buttons. Requires a paid Gemini API tier; each image incurs a per-call charge on your account.",
         },
         emptyPantry: "Empty Pantry",
         clearShoppingList: "Clear Shopping List",
@@ -286,7 +291,8 @@ export const translations = {
             unexpectedError: "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
             imageBlocked: "Die Bildgenerierung wurde vom Sicherheitsfilter blockiert.",
             imageNoData: "Das Bildmodell hat kein Bild zurückgegeben. Bitte versuche es erneut.",
-            imageQuotaExceeded: "Die Bildgenerierung erfordert ein kostenpflichtiges Gemini-API-Kontingent — im kostenlosen Tier ist das Bildmodell nicht verfügbar.",
+            imageQuotaExceeded: "Bildgenerierungs-Kontingent erschöpft. Bitte später erneut versuchen.",
+            imageFreeTierUnsupported: "Bildgenerierung ist im kostenlosen Gemini-Tier nicht verfügbar. Der Schalter wurde ausgeschaltet.",
         },
         identifyIngredient: {
             buttonAriaLabel: "Zutat per Foto erkennen",
@@ -357,6 +363,10 @@ export const translations = {
             generating: "Bild wird generiert…",
             retry: "Erneut versuchen",
             remove: "Bild entfernen",
+        },
+        imageGen: {
+            label: "Bildgenerierung",
+            tooltip: "Zeigt pro Rezept eine Schaltfläche zur Bildgenerierung an. Erfordert ein kostenpflichtiges Gemini-API-Kontingent; jedes Bild verursacht Kosten auf deinem Konto.",
         },
         emptyPantry: "Vorrat leeren",
         clearShoppingList: "Einkaufsliste leeren",
@@ -534,7 +544,8 @@ export const translations = {
             unexpectedError: "Une erreur inattendue s'est produite. Veuillez réessayer.",
             imageBlocked: "La génération d'image a été bloquée par le filtre de sécurité.",
             imageNoData: "Le modèle d'image n'a renvoyé aucune image. Veuillez réessayer.",
-            imageQuotaExceeded: "La génération d'images nécessite un palier Gemini payant — le modèle d'image n'est pas disponible dans le palier gratuit.",
+            imageQuotaExceeded: "Quota de génération d'images dépassé. Veuillez réessayer plus tard.",
+            imageFreeTierUnsupported: "La génération d'images n'est pas disponible dans le palier gratuit Gemini. L'interrupteur a été désactivé.",
         },
         identifyIngredient: {
             buttonAriaLabel: "Identifier l'ingrédient à partir d'une photo",
@@ -605,6 +616,10 @@ export const translations = {
             generating: "Génération de l'image…",
             retry: "Réessayer",
             remove: "Supprimer l'image",
+        },
+        imageGen: {
+            label: "Génération d'images",
+            tooltip: "Affiche les boutons de génération d'image pour chaque recette. Nécessite un palier Gemini payant ; chaque image entraîne des frais facturés à votre compte.",
         },
         emptyPantry: "Vider le garde-manger",
         clearShoppingList: "Vider la liste de courses",
@@ -782,7 +797,8 @@ export const translations = {
             unexpectedError: "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.",
             imageBlocked: "La generación de imágenes fue bloqueada por el filtro de seguridad.",
             imageNoData: "El modelo de imagen no devolvió ninguna imagen. Por favor, inténtalo de nuevo.",
-            imageQuotaExceeded: "La generación de imágenes requiere un plan Gemini de pago — el modelo de imagen no está disponible en el plan gratuito.",
+            imageQuotaExceeded: "Cuota de generación de imágenes agotada. Por favor, inténtalo más tarde.",
+            imageFreeTierUnsupported: "La generación de imágenes no está disponible en el plan gratuito de Gemini. El interruptor se ha desactivado.",
         },
         identifyIngredient: {
             buttonAriaLabel: "Identificar ingrediente desde una foto",
@@ -853,6 +869,10 @@ export const translations = {
             generating: "Generando imagen…",
             retry: "Reintentar",
             remove: "Eliminar imagen",
+        },
+        imageGen: {
+            label: "Generación de imágenes",
+            tooltip: "Muestra botones de generación de imágenes por receta. Requiere un plan Gemini de pago; cada imagen genera un cargo en tu cuenta.",
         },
         emptyPantry: "Vaciar despensa",
         clearShoppingList: "Vaciar lista de compras",

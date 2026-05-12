@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-import { generateRecipeImage } from '../services/llm';
+import { generateRecipeImage, ImageGenError } from '../services/llm';
 import {
     deleteRecipeImage,
     getAllRecipeImageIds,
@@ -24,8 +24,25 @@ import type { Recipe } from '../types';
  * intentionally device-local: they are not part of the Gist sync payload
  * (cheap to regenerate, expensive to ship) and not part of share URLs.
  */
-export function useRecipeImage(recipeIds: readonly string[]) {
+interface UseRecipeImageOptions {
+    /**
+     * Called once when a `generate()` attempt structurally identifies the
+     * current API key as free-tier (image-gen quota is 0). Wired by App.tsx
+     * to flip the user-facing image-generation toggle off and surface a
+     * toast. Distinct from the generic per-recipe error path so the caller
+     * can take a UI-wide action rather than just showing a card-level error.
+     */
+    onFreeTierLimit?: () => void;
+}
+
+export function useRecipeImage(recipeIds: readonly string[], options: UseRecipeImageOptions = {}) {
     const { apiKey, t } = useSettings();
+    // Keep the callback in a ref so `generate` stays referentially stable
+    // even if the parent passes a fresh function each render.
+    const onFreeTierLimitRef = useRef(options.onFreeTierLimit);
+    useEffect(() => {
+        onFreeTierLimitRef.current = options.onFreeTierLimit;
+    }, [options.onFreeTierLimit]);
     const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
     const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -196,8 +213,16 @@ export function useRecipeImage(recipeIds: readonly string[]) {
             await setRecipeImage(recipe.id, blob);
             replaceUrl(recipe.id, blob);
         } catch (err) {
-            const message = err instanceof Error ? err.message : t.errors.unexpectedError;
-            setErrors(prev => ({ ...prev, [recipe.id]: message }));
+            // Free-tier zero-limit is a UI-wide signal (snap the toggle off),
+            // not a per-card error — the card-level button is about to
+            // disappear anyway, so suppressing the per-recipe error here
+            // avoids a stale message lingering in state.
+            if (err instanceof ImageGenError && err.kind === 'free-tier-zero-limit') {
+                onFreeTierLimitRef.current?.();
+            } else {
+                const message = err instanceof Error ? err.message : t.errors.unexpectedError;
+                setErrors(prev => ({ ...prev, [recipe.id]: message }));
+            }
         } finally {
             inFlightRef.current.delete(recipe.id);
             setLoadingIds(prev => {
