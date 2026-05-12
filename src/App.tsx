@@ -28,7 +28,7 @@ function App() {
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
   const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
-  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, t, storagePersistError } = useSettings();
+  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, imageGenEnabled, setImageGenEnabled, t, storagePersistError } = useSettings();
 
   const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
@@ -79,14 +79,6 @@ function App() {
   // Multi-device sync via GitHub Gist (opt-in).
   const sync = useGistSync();
 
-  // On-demand recipe image generation, persisted in IndexedDB.
-  // Image generation requires a configured API key and direct-API mode (the
-  // copy-paste flow has no API call to make). Standalone shared-link views
-  // (no meal plan loaded) also can't generate, since there's nowhere to persist.
-  const recipeIds = useMemo(() => mealPlan?.recipes.map(r => r.id) ?? [], [mealPlan]);
-  const recipeImage = useRecipeImage(recipeIds);
-  const canGenerateImages = !useCopyPaste && !!apiKey;
-
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCloseWelcome = useCallback(() => setShowWelcome(false), []);
   const handleShowHelp = useCallback(() => setShowWelcome(true), []);
@@ -119,6 +111,20 @@ function App() {
     }
     setNotification(null);
   }, []);
+
+  // On-demand recipe image generation, persisted in IndexedDB.
+  // Image generation requires a configured API key, direct-API mode (the
+  // copy-paste flow has no API call to make), and the user-facing toggle
+  // confirming they want to spend money on a paid Gemini tier. Standalone
+  // shared-link views (no meal plan loaded) also can't generate, since
+  // there's nowhere to persist.
+  const recipeIds = useMemo(() => mealPlan?.recipes.map(r => r.id) ?? [], [mealPlan]);
+  const handleFreeTierLimit = useCallback(() => {
+    setImageGenEnabled(false);
+    showNotification({ message: t.errors.imageFreeTierUnsupported, type: 'error', timeout: 5000 });
+  }, [setImageGenEnabled, showNotification, t.errors.imageFreeTierUnsupported]);
+  const recipeImage = useRecipeImage(recipeIds, { onFreeTierLimit: handleFreeTierLimit });
+  const canGenerateImages = !useCopyPaste && !!apiKey && imageGenEnabled;
 
   // Storage error notification — deduplicated via ref guard
   const storageErrorShownRef = useRef(false);
@@ -509,7 +515,7 @@ function App() {
             missingIngredientsMinimized={recipeMissingIngredientsMinimized}
             onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
             onGenerateImage={canGenerateForView ? () => recipeImage.generate(viewRecipe) : undefined}
-            onRemoveImage={canGenerateForView ? () => recipeImage.remove(viewRecipe.id) : undefined}
+            onRemoveImage={isOwnRecipe ? () => recipeImage.remove(viewRecipe.id) : undefined}
             isImageLoading={recipeImage.isLoading(viewRecipe.id)}
             imageError={recipeImage.getError(viewRecipe.id)}
             imageUrl={recipeImage.getImageUrl(viewRecipe.id)}
@@ -635,7 +641,7 @@ function App() {
                         missingIngredientsMinimized={recipeMissingIngredientsMinimized}
                         onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
                         onGenerateImage={canGenerateImages ? () => recipeImage.generate(recipe) : undefined}
-                        onRemoveImage={canGenerateImages ? () => recipeImage.remove(recipe.id) : undefined}
+                        onRemoveImage={() => recipeImage.remove(recipe.id)}
                         isImageLoading={recipeImage.isLoading(recipe.id)}
                         imageError={recipeImage.getError(recipe.id)}
                         imageUrl={recipeImage.getImageUrl(recipe.id)}

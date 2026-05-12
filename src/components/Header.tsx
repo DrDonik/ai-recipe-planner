@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, ImageIcon, Info } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, STORAGE_KEYS } from '../constants';
 import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
     onClearNotification,
     syncStatus,
 }) => {
-    const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, t } = useSettings();
+    const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, imageGenEnabled, setImageGenEnabled, t } = useSettings();
 
     // Check on mount if existing user needs to see the security warning
     const [showSecurityDialog, setShowSecurityDialog] = useState(() => {
@@ -303,6 +303,32 @@ export const Header: React.FC<HeaderProps> = ({
                                     >
                                         <ExternalLink size={14} />
                                     </a>
+                                </div>
+                            )}
+
+                            {!useCopyPaste && apiKey && (
+                                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <ImageIcon size={14} className="text-text-muted" aria-hidden="true" />
+                                    <span className={`text-sm transition-colors ${imageGenEnabled ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+                                        {t.imageGen.label}
+                                    </span>
+                                    <button
+                                        onClick={() => setImageGenEnabled(!imageGenEnabled)}
+                                        className="relative w-12 h-6 bg-white/50 dark:bg-black/30 rounded-full border border-[var(--glass-border)] transition-colors hover:bg-white/70 dark:hover:bg-black/40"
+                                        role="switch"
+                                        aria-checked={imageGenEnabled}
+                                        aria-label={t.imageGen.label}
+                                    >
+                                        <span
+                                            className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${imageGenEnabled ? 'left-6' : 'left-0.5'}`}
+                                        />
+                                    </button>
+                                    <TooltipButton
+                                        icon={<Info size={14} className="text-text-muted" />}
+                                        tooltip={t.imageGen.tooltip}
+                                        ariaLabel={t.imageGen.tooltip}
+                                        className="!p-1"
+                                    />
                                 </div>
                             )}
 

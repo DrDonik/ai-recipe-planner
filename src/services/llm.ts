@@ -84,6 +84,24 @@ export interface ErrorTranslations {
   imageBlocked: string;
   imageNoData: string;
   imageQuotaExceeded: string;
+  imageFreeTierUnsupported: string;
+}
+
+/**
+ * Error thrown by `generateRecipeImage` when the failure is structurally
+ * identifiable (vs. a generic message). Lets callers react programmatically —
+ * e.g. snap an "image generation enabled" toggle off on a free-tier hit
+ * without parsing translated strings.
+ */
+export type ImageGenErrorKind = 'free-tier-zero-limit';
+
+export class ImageGenError extends Error {
+  readonly kind: ImageGenErrorKind;
+  constructor(message: string, kind: ImageGenErrorKind) {
+    super(message);
+    this.name = 'ImageGenError';
+    this.kind = kind;
+  }
 }
 
 
@@ -378,6 +396,43 @@ export const fetchStorageTip = async (
 };
 
 /**
+ * Detects the free-tier "limit: 0" RESOURCE_EXHAUSTED response shape. Reads
+ * both the structured `QuotaFailure` details and the human-readable message,
+ * since the structured payload is the documented contract but the message has
+ * historically been the only reliable carrier.
+ */
+const isFreeTierZeroLimit = (errorData: unknown): boolean => {
+  if (!errorData || typeof errorData !== 'object') return false;
+  const err = (errorData as { error?: unknown }).error;
+  if (!err || typeof err !== 'object') return false;
+
+  const message = (err as { message?: unknown }).message;
+  if (typeof message === 'string' && /free_tier_requests/i.test(message) && /limit:\s*0\b/.test(message)) {
+    return true;
+  }
+
+  const details = (err as { details?: unknown }).details;
+  if (Array.isArray(details)) {
+    for (const d of details) {
+      if (!d || typeof d !== 'object') continue;
+      const type = (d as { '@type'?: unknown })['@type'];
+      if (typeof type !== 'string' || !type.includes('QuotaFailure')) continue;
+      const violations = (d as { violations?: unknown }).violations;
+      if (!Array.isArray(violations)) continue;
+      for (const v of violations) {
+        if (!v || typeof v !== 'object') continue;
+        const metric = (v as { quotaMetric?: unknown }).quotaMetric;
+        const value = (v as { quotaValue?: unknown }).quotaValue;
+        if (typeof metric === 'string' && /free_tier/i.test(metric) && String(value) === '0') {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
+
+/**
  * Generates an appetizing food photo for a recipe via Gemini's image model.
  * Returns the image as a Blob so the caller can persist it in IndexedDB
  * without the ~33% size penalty of base64.
@@ -428,10 +483,16 @@ export const generateRecipeImage = async (
       // `response.json()` resolves (without throwing) and would otherwise
       // crash the `errorData.error` access below.
       const errorData = (await response.json().catch(() => ({}))) || {};
-      // Free-tier Gemini API has limit: 0 for image-generation models, so the
-      // very first request returns 429 RESOURCE_EXHAUSTED. The raw Google
-      // message is opaque to non-developers — surface an actionable hint.
-      if (response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED') {
+      const isRateLimit = response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED';
+      if (isRateLimit) {
+        // Free-tier keys have a structural limit of 0 for image-generation
+        // models — distinguishable from a paid-tier user who merely blew
+        // their per-minute/day cap. Surface it as a typed error so the
+        // caller can flip the user-facing toggle off instead of just
+        // displaying a generic rate-limit message.
+        if (isFreeTierZeroLimit(errorData)) {
+          throw new ImageGenError(errors.imageFreeTierUnsupported, 'free-tier-zero-limit');
+        }
         throw new Error(errors.imageQuotaExceeded);
       }
       throw new Error(errorData.error?.message || errors.unexpectedError);
