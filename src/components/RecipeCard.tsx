@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, ExternalLink, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
+import { Clock, ChefHat, AlertCircle, Maximize, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
@@ -116,9 +116,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         <button
                             onClick={onViewSingle}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
-                            aria-label={t.viewRecipe}
+                            aria-label={t.openFocusView}
                         >
-                            <ExternalLink size={18} />
+                            <Maximize size={18} />
                         </button>
                     )}
 

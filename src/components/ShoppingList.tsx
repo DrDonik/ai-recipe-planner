@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X, Trash2 } from 'lucide-react';
+import { ShoppingCart, Maximize, ChevronUp, ChevronDown, Info, X, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Ingredient, MealPlan } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -168,9 +168,9 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         <button
                             onClick={onViewSingle}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
-                            aria-label={t.openInNewTab}
+                            aria-label={t.openFocusView}
                         >
-                            <ExternalLink size={18} />
+                            <Maximize size={18} />
                         </button>
                     )}
                     {isStandaloneView && onClose && (
