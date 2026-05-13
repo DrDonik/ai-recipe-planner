@@ -193,16 +193,16 @@ export const Header: React.FC<HeaderProps> = ({
     return (
         <>
         <header className={`glass-panel !py-2 rounded-none border-x-0 border-t-0 sticky top-0 z-50 mb-4 backdrop-blur-xl transition-all duration-300 ${headerMinimized ? '!py-1' : ''}`}>
-            <div className="app-container flex flex-col items-center py-1">
-                <div className="flex flex-col items-start gap-3 relative w-max ml-12 sm:ml-0">
+            <div className="app-container flex flex-col items-start md:items-center py-1">
+                <div className="flex flex-col items-start gap-3 relative w-max ml-12 md:ml-0">
                     {/* Floating Leading Icon */}
-                    <div className={`absolute -left-14 sm:-left-16 top-0.5 p-2 bg-primary rounded-xl text-white shadow-lg shadow-primary/30 transition-all duration-300 ${headerMinimized ? 'scale-75' : ''}`}>
-                        <Utensils className={`transition-all duration-300 ${headerMinimized ? 'w-5 h-5' : 'w-6 h-6 sm:w-7 sm:h-7'}`} />
+                    <div className={`absolute -left-16 top-0.5 p-2 bg-primary rounded-xl text-white shadow-lg shadow-primary/30 transition-all duration-300 scale-75 ${headerMinimized ? '' : 'md:scale-100'}`}>
+                        <Utensils className={`transition-all duration-300 w-5 h-5 ${headerMinimized ? '' : 'md:w-7 md:h-7'}`} />
                     </div>
 
                     {/* Title with inline toggle button */}
                     <div className="flex items-center gap-3">
-                        <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${headerMinimized ? 'text-2xl' : 'text-4xl'}`}>
+                        <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${headerMinimized ? 'text-2xl' : 'text-2xl md:text-4xl'}`}>
                             AI Recipe Planner
                         </h1>
 

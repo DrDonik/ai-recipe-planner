@@ -586,8 +586,8 @@ function App() {
 
       <main className="app-container flex flex-col gap-8">
         {/* Input Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-          <div className="lg:col-span-1 space-y-6 relative z-10">
+        <section className="flex flex-col md:flex-row gap-12 md:items-start">
+          <div className={`md:flex-1 md:max-w-sm md:min-w-0 space-y-6 relative z-10 ${mealPlan ? 'order-3 md:order-none' : ''}`}>
             <SettingsPanel
               ref={settingsPanelRef}
               optionsMinimized={optionsMinimized}
@@ -629,10 +629,9 @@ function App() {
             />
           </div>
 
-          <div className="lg:col-span-2 space-y-8">
-            {/* Divider between input and results sections - narrow viewport only */}
-            <hr className="lg:hidden border-t-2 border-primary/30 -mt-4" />
+          {mealPlan && <hr className="md:hidden order-2 border-t-2 border-primary/30" />}
 
+          <div className={`md:flex-1 md:min-w-0 space-y-8 ${mealPlan ? 'order-1 md:order-none' : 'hidden md:block'}`}>
             {mealPlan ? (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <ShoppingList

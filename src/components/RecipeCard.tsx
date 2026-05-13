@@ -130,7 +130,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             {schemaJson && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaJson }} />}
 
             <div className="flex items-start justify-between mb-6 gap-4">
-                <h3 className={`${isStandalone ? 'text-3xl' : 'text-2xl'} font-bold leading-tight flex-1`}>
+                <h3 className={`${isStandalone ? 'text-2xl md:text-3xl' : 'text-2xl'} font-bold leading-tight flex-1`}>
                     {recipe.title}
                 </h3>
                 <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             )}
 
             <div className="space-y-8 flex-grow">
-                <section>
+                <section className={isStandalone ? '' : 'hidden md:block'}>
                     <div className="flex items-center gap-2 mb-4 text-secondary">
                         <ListChecks size={20} />
                         <h4 className={`font-bold uppercase tracking-wider ${isStandalone ? 'text-sm' : 'text-xs'}`}>{t.ingredients}</h4>
@@ -309,7 +309,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     </section>
                 )}
 
-                <section>
+                <section className={isStandalone ? '' : 'hidden md:block'}>
                     <div className="flex items-center gap-2 mb-4 text-secondary">
                         <ChefHat size={20} />
                         <h4 className={`font-bold uppercase tracking-wider ${isStandalone ? 'text-sm' : 'text-xs'}`}>{t.instructions}</h4>
@@ -331,7 +331,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </section>
 
                 {recipe.nutrition && (
-                    <div className="pt-4 border-t border-border-base/30">
+                    <div className={`pt-4 border-t border-border-base/30 ${isStandalone ? '' : 'hidden md:block'}`}>
                         <div className="flex items-center justify-between text-text-muted text-xs">
                             <span className="opacity-60">{t.nutritionPerServing}</span>
                             <div className="flex gap-3">
