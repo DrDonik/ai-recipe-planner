@@ -1,11 +1,11 @@
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { Plus, Trash2, Refrigerator, Info, Loader2, X, Camera } from 'lucide-react';
-import type { PantryItem } from '../types';
+import type { PantryItem, Notification } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
 import { useStorageTips } from '../hooks/useStorageTips';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { PanelHeader } from './ui';
+import { PanelHeader, UndoToast } from './ui';
 import { PhotoPrivacyDialog } from './PhotoPrivacyDialog';
 import { STORAGE_KEYS, VALIDATION } from '../constants';
 import { downscaleImage } from '../utils/imageDownscale';
@@ -19,6 +19,7 @@ interface PantryInputProps {
     onEmptyPantry: () => void;
     isMinimized: boolean;
     onToggleMinimize: () => void;
+    notification?: Notification | null;
 }
 
 export interface PantryInputRef {
@@ -32,7 +33,8 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     onUpdatePantryItem,
     onEmptyPantry,
     isMinimized,
-    onToggleMinimize
+    onToggleMinimize,
+    notification
 }, ref) => {
     const { t, useCopyPaste, apiKey, language } = useSettings();
     const tipsActive = !useCopyPaste && !!apiKey;
@@ -329,9 +331,13 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
 
                     <div className="grid grid-cols-1 gap-2 mt-2">
                         {pantryItems.length === 0 && (
-                            <div className="text-text-muted text-center py-8 italic border border-dashed border-[var(--glass-border)] rounded-xl bg-white/10">
-                                {t.noVeg}
-                            </div>
+                            notification?.anchor === 'pantry' ? (
+                                <UndoToast notification={notification} />
+                            ) : (
+                                <div className="text-text-muted text-center py-8 italic border border-dashed border-[var(--glass-border)] rounded-xl bg-white/10">
+                                    {t.noVeg}
+                                </div>
+                            )
                         )}
                         {pantryItems.map((item) => {
                             const cachedTip = tipsActive ? getTip(item.name) : undefined;

@@ -6,6 +6,7 @@ import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
 import { GistSyncDialog } from './GistSyncDialog';
 import { TooltipButton } from './ui/TooltipButton';
+import { UndoToast } from './ui/UndoToast';
 import { buildExportData, downloadExportFile, readImportFile, applyImportData } from '../utils/dataTransfer';
 import type { Notification } from '../types';
 import type { SyncStatus } from '../hooks/useGistSync';
@@ -17,6 +18,7 @@ interface HeaderProps {
     onShowNotification: (notification: Notification) => void;
     onClearNotification: () => void;
     syncStatus: SyncStatus;
+    notification: Notification | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
     onShowNotification,
     onClearNotification,
     syncStatus,
+    notification,
 }) => {
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, imageGenEnabled, setImageGenEnabled, t } = useSettings();
 
@@ -113,6 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
         onShowNotification({
             message: t.undo.apiKeyCleared,
             type: 'undo',
+            anchor: 'api-key',
             action: {
                 label: t.undo.action,
                 ariaLabel: `${t.undo.action} ${t.undo.apiKeyCleared.toLowerCase()}`,
@@ -383,6 +387,12 @@ export const Header: React.FC<HeaderProps> = ({
                                 />
                             </div>
                         </>
+                    )}
+
+                    {/* Anchored undo toast — renders in both minimized and expanded
+                        states since clearApiKeyWithUndo can fire from either. */}
+                    {notification?.anchor === 'api-key' && (
+                        <UndoToast notification={notification} />
                     )}
                 </div>
             </div>

@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Clock, ChefHat, AlertCircle, Maximize, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { Recipe } from '../types';
+import type { Recipe, Notification } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { UndoToast } from './ui/UndoToast';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -33,9 +34,15 @@ interface RecipeCardProps {
      * IndexedDB). Undefined when no image has been generated yet.
      */
     imageUrl?: string;
+    /**
+     * When true, the card renders only an undo toast in place of its content
+     * so the slot stays in the grid during the 5s undo window.
+     */
+    pendingDelete?: boolean;
+    deleteNotification?: Notification | null;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, isImageLoading = false, imageError, imageUrl }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, isImageLoading = false, imageError, imageUrl, pendingDelete = false, deleteNotification }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -97,6 +104,21 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         }
     }, [recipe]);
 
+
+    // Hold the slot for the full 5s deletion window even if the toast is
+    // displaced by another notification — otherwise the card would flash back
+    // into view before the timer fires.
+    if (pendingDelete) {
+        return (
+            <motion.div
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-card p-8 flex flex-col h-full relative shadow-glass"
+            >
+                {deleteNotification && <UndoToast notification={deleteNotification} />}
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
