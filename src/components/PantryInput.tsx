@@ -20,6 +20,7 @@ interface PantryInputProps {
     isMinimized: boolean;
     onToggleMinimize: () => void;
     notification?: Notification | null;
+    autoFocus?: boolean;
 }
 
 export interface PantryInputRef {
@@ -34,7 +35,8 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     onEmptyPantry,
     isMinimized,
     onToggleMinimize,
-    notification
+    notification,
+    autoFocus = true
 }, ref) => {
     const { t, useCopyPaste, apiKey, language } = useSettings();
     const tipsActive = !useCopyPaste && !!apiKey;
@@ -87,10 +89,13 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         }
     }, [tipsActive, openTipForId]);
 
-    // Focus ingredient field on mount
+    // Focus ingredient field on mount, unless suppressed (e.g. when a meal
+    // plan is already shown above the inputs and focusing would scroll past it).
     useEffect(() => {
-        nameInputRef.current?.focus({ preventScroll: true });
-    }, []);
+        if (autoFocus) {
+            nameInputRef.current?.focus({ preventScroll: true });
+        }
+    }, [autoFocus]);
 
     const flushPendingInput = (): PantryItem | null => {
         if (name.trim()) {
