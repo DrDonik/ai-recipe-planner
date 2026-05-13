@@ -178,14 +178,11 @@ function App() {
     showNotification({ message, type: 'error' });
   }, [sync.status, sync.errorKind, showNotification, t.sync.errorUnauthorized, t.sync.errorNotFound, t.sync.errorPayload, t.sync.errorNetwork]);
 
-  // Cleanup timeouts on unmount
+  // Cleanup notification timeout on unmount
   useEffect(() => {
     return () => {
       if (notificationTimeoutRef.current) {
         clearTimeout(notificationTimeoutRef.current);
-      }
-      if (pendingDeleteTimeoutRef.current) {
-        clearTimeout(pendingDeleteTimeoutRef.current);
       }
     };
   }, []);
@@ -374,11 +371,13 @@ function App() {
   }, [setMealPlan]);
 
   const deleteRecipe = useCallback((recipeId: string) => {
-    if (!mealPlan) return;
-    // Flush a still-pending earlier deletion so it doesn't get lost.
-    if (pendingDeleteTimeoutRef.current && pendingDeleteRecipeId && pendingDeleteRecipeId !== recipeId) {
+    // Clear any pending delete-timer. If a different recipe was pending, flush
+    // it synchronously so it doesn't get stranded.
+    if (pendingDeleteTimeoutRef.current) {
       clearTimeout(pendingDeleteTimeoutRef.current);
-      commitRecipeDeletion(pendingDeleteRecipeId);
+      if (pendingDeleteRecipeId && pendingDeleteRecipeId !== recipeId) {
+        commitRecipeDeletion(pendingDeleteRecipeId);
+      }
     }
     setPendingDeleteRecipeId(recipeId);
     pendingDeleteTimeoutRef.current = setTimeout(() => {
@@ -405,7 +404,7 @@ function App() {
       },
       timeout: 5000
     });
-  }, [mealPlan, pendingDeleteRecipeId, commitRecipeDeletion, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
+  }, [pendingDeleteRecipeId, commitRecipeDeletion, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
   // After a new plan replaces an existing one, offer a one-tap undo.
   // Restores the prior plan and the shopping-list checkmarks that were cleared.
