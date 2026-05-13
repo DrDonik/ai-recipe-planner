@@ -608,6 +608,7 @@ function App() {
               isMinimized={pantryMinimized}
               onToggleMinimize={handleTogglePantryMinimize}
               notification={notification}
+              autoFocus={!mealPlan}
             />
 
             <SpiceRack

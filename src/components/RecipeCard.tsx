@@ -242,7 +242,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             )}
 
-            <div className="space-y-8 flex-grow">
+            <div className="flex flex-col gap-8 flex-grow">
                 <section className={isStandalone ? '' : 'hidden md:block'}>
                     <div className="flex items-center gap-2 mb-4 text-secondary">
                         <ListChecks size={20} />
