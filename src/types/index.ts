@@ -56,10 +56,18 @@ export interface MealPlan {
 
 /**
  * A notification displayed to the user (error or undo message).
+ *
+ * `anchor` controls where the toast renders. Omitted (or `'generate'`) keeps
+ * it below the Generate button — the legacy spot. Other anchors render the
+ * toast where the destructive action happened so it stays in viewport on
+ * narrow screens. `anchorId` disambiguates among multiple instances of the
+ * same anchor (currently only used for `'recipe'` to identify which card).
  */
 export interface Notification {
   message: string;
   type: 'error' | 'undo';
+  anchor?: 'generate' | 'shopping-list' | 'pantry' | 'recipe' | 'api-key';
+  anchorId?: string;
   action?: {
     label: string;
     onClick: () => void;

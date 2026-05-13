@@ -178,11 +178,14 @@ function App() {
     showNotification({ message, type: 'error' });
   }, [sync.status, sync.errorKind, showNotification, t.sync.errorUnauthorized, t.sync.errorNotFound, t.sync.errorPayload, t.sync.errorNetwork]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (notificationTimeoutRef.current) {
         clearTimeout(notificationTimeoutRef.current);
+      }
+      if (pendingDeleteTimeoutRef.current) {
+        clearTimeout(pendingDeleteTimeoutRef.current);
       }
     };
   }, []);
@@ -295,6 +298,7 @@ function App() {
     showNotification({
       message: t.undo.shoppingListCleared,
       type: 'undo',
+      anchor: 'shopping-list',
       action: {
         label: t.undo.action,
         ariaLabel: `${t.undo.action} ${t.undo.shoppingListCleared.toLowerCase()}`,
@@ -320,6 +324,7 @@ function App() {
     showNotification({
       message: t.undo.pantryEmptied,
       type: 'undo',
+      anchor: 'pantry',
       action: {
         label: t.undo.action,
         ariaLabel: `${t.undo.action} ${t.undo.pantryEmptied.toLowerCase()}`,
@@ -354,29 +359,53 @@ function App() {
     setAppliances(prev => prev.filter(a => a !== applianceToRemove));
   }, [setAppliances]);
 
+  // Recipe deletion is deferred so the toast can occupy the card's grid slot
+  // for 5s. If the user deletes a second recipe before the timer fires, we
+  // commit the previous deletion synchronously to avoid stranding it.
+  const [pendingDeleteRecipeId, setPendingDeleteRecipeId] = useState<string | null>(null);
+  const pendingDeleteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const commitRecipeDeletion = useCallback((recipeId: string) => {
+    setMealPlan(prev => {
+      if (!prev) return prev;
+      const remaining = prev.recipes.filter(r => r.id !== recipeId);
+      return remaining.length === 0 ? null : { ...prev, recipes: remaining };
+    });
+  }, [setMealPlan]);
+
   const deleteRecipe = useCallback((recipeId: string) => {
     if (!mealPlan) return;
-    const backup = mealPlan;
-    const updatedRecipes = mealPlan.recipes.filter(r => r.id !== recipeId);
-    if (updatedRecipes.length === 0) {
-      setMealPlan(null);
-    } else {
-      setMealPlan({ ...mealPlan, recipes: updatedRecipes });
+    // Flush a still-pending earlier deletion so it doesn't get lost.
+    if (pendingDeleteTimeoutRef.current && pendingDeleteRecipeId && pendingDeleteRecipeId !== recipeId) {
+      clearTimeout(pendingDeleteTimeoutRef.current);
+      commitRecipeDeletion(pendingDeleteRecipeId);
     }
+    setPendingDeleteRecipeId(recipeId);
+    pendingDeleteTimeoutRef.current = setTimeout(() => {
+      commitRecipeDeletion(recipeId);
+      setPendingDeleteRecipeId(null);
+      pendingDeleteTimeoutRef.current = null;
+    }, 5000);
     showNotification({
       message: t.undo.recipeDeleted,
       type: 'undo',
+      anchor: 'recipe',
+      anchorId: recipeId,
       action: {
         label: t.undo.action,
         ariaLabel: `${t.undo.action} ${t.undo.recipeDeleted.toLowerCase()}`,
         onClick: () => {
-          setMealPlan(backup);
+          if (pendingDeleteTimeoutRef.current) {
+            clearTimeout(pendingDeleteTimeoutRef.current);
+            pendingDeleteTimeoutRef.current = null;
+          }
+          setPendingDeleteRecipeId(null);
           clearNotification();
         }
       },
       timeout: 5000
     });
-  }, [mealPlan, setMealPlan, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
+  }, [mealPlan, pendingDeleteRecipeId, commitRecipeDeletion, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
   // After a new plan replaces an existing one, offer a one-tap undo.
   // Restores the prior plan and the shopping-list checkmarks that were cleared.
@@ -553,6 +582,7 @@ function App() {
         onShowNotification={showNotification}
         onClearNotification={clearNotification}
         syncStatus={sync.status}
+        notification={notification}
       />
 
       <main className="app-container flex flex-col gap-8">
@@ -578,6 +608,7 @@ function App() {
               onEmptyPantry={emptyPantry}
               isMinimized={pantryMinimized}
               onToggleMinimize={handleTogglePantryMinimize}
+              notification={notification}
             />
 
             <SpiceRack
@@ -613,6 +644,7 @@ function App() {
                   onViewSingle={() => openShoppingListView(mealPlan.shoppingList)}
                   onClear={clearShoppingList}
                   onPersistErrorChange={setShoppingListCheckedPersistError}
+                  notification={notification}
                 />
 
                 <div>
@@ -643,6 +675,8 @@ function App() {
                         onGenerateImage={canGenerateImages ? () => recipeImage.generate(recipe) : undefined}
                         onRemoveImage={() => recipeImage.remove(recipe.id)}
                         isImageLoading={recipeImage.isLoading(recipe.id)}
+                        pendingDelete={pendingDeleteRecipeId === recipe.id}
+                        deleteNotification={pendingDeleteRecipeId === recipe.id ? notification : null}
                         imageError={recipeImage.getError(recipe.id)}
                         imageUrl={recipeImage.getImageUrl(recipe.id)}
                       />

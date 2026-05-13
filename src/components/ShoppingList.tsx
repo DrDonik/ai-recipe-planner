@@ -1,11 +1,12 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { ShoppingCart, ExternalLink, ChevronUp, ChevronDown, Info, X, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { Ingredient, MealPlan } from '../types';
+import type { Ingredient, MealPlan, Notification } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
 import { getItemKey, listsMatch } from '../utils/shoppingListHelpers';
+import { UndoToast } from './ui/UndoToast';
 
 interface ShoppingListProps {
     items: Ingredient[];
@@ -16,9 +17,10 @@ interface ShoppingListProps {
     onClose?: () => void;
     onClear?: () => void;
     onPersistErrorChange?: (hasError: boolean) => void;
+    notification?: Notification | null;
 }
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onClear, onPersistErrorChange }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized = false, onToggleMinimize, isStandaloneView = false, onViewSingle, onClose, onClear, onPersistErrorChange, notification }) => {
     const { t } = useSettings();
 
     // Load checked items from localStorage (used for main view and own list in standalone)
@@ -132,7 +134,22 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
     }, [isStandaloneView, isOwnList, setLocalStorageChecked]);
 
 
-    if (items.length === 0) return null;
+    if (items.length === 0) {
+        if (notification?.anchor === 'shopping-list') {
+            // Toast occupies the shopping-list slot while the undo window is open.
+            return (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0 }}
+                    className="glass-panel p-6"
+                >
+                    <UndoToast notification={notification} />
+                </motion.div>
+            );
+        }
+        return null;
+    }
 
     return (
         <motion.div
