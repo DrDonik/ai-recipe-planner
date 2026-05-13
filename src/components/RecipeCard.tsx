@@ -105,14 +105,17 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
     }, [recipe]);
 
 
-    if (pendingDelete && deleteNotification) {
+    // Hold the slot for the full 5s deletion window even if the toast is
+    // displaced by another notification — otherwise the card would flash back
+    // into view before the timer fires.
+    if (pendingDelete) {
         return (
             <motion.div
                 initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="glass-card p-8 flex flex-col h-full relative shadow-glass"
             >
-                <UndoToast notification={deleteNotification} />
+                {deleteNotification && <UndoToast notification={deleteNotification} />}
             </motion.div>
         );
     }

@@ -675,7 +675,13 @@ function App() {
                         onRemoveImage={() => recipeImage.remove(recipe.id)}
                         isImageLoading={recipeImage.isLoading(recipe.id)}
                         pendingDelete={pendingDeleteRecipeId === recipe.id}
-                        deleteNotification={pendingDeleteRecipeId === recipe.id ? notification : null}
+                        deleteNotification={
+                          pendingDeleteRecipeId === recipe.id &&
+                          notification?.anchor === 'recipe' &&
+                          notification?.anchorId === recipe.id
+                            ? notification
+                            : null
+                        }
                         imageError={recipeImage.getError(recipe.id)}
                         imageUrl={recipeImage.getImageUrl(recipe.id)}
                       />
