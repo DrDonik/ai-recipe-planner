@@ -214,7 +214,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
 
             {!isMinimized && (
                 <>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 list-none p-0 m-0" role="list">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 list-none p-0 m-0" role="list">
                         {items.map((item, i) => {
                             const itemKey = getItemKey(item);
                             const isChecked = checkedItems.has(itemKey);
