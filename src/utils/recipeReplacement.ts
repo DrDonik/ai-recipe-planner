@@ -25,6 +25,9 @@ export const buildMiniPantry = (recipe: Recipe, pantryItems: PantryItem[]): Pant
             const exact = recipe.ingredients?.find(ing => normalize(ing.item) === name);
             const match = exact ?? recipe.ingredients?.find(ing => {
                 const ingName = normalize(ing.item);
+                // Guard against empty names: every string "includes" '', which
+                // would otherwise produce false matches for missing names.
+                if (!name || !ingName) return false;
                 return ingName.includes(name) || name.includes(ingName);
             });
             return { id: pantryItem.id, name: pantryItem.name, amount: match?.amount ?? pantryItem.amount };
