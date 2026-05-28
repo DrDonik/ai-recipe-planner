@@ -1,6 +1,6 @@
 import type { PantryItem, Recipe, Ingredient } from '../types';
 
-const normalize = (s: string): string => s.toLowerCase().replace(/\s+/g, ' ').trim();
+const normalize = (s: string | undefined | null): string => (s ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
 
 /**
  * Reconstructs the slice of pantry a recipe was allocated, so a replacement
