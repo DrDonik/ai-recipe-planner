@@ -1,6 +1,7 @@
 import type { PantryItem, Recipe, Ingredient } from '../types';
 
-const normalize = (s: string | undefined | null): string => (s ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
+const normalize = (s: string | undefined | null): string =>
+    (s ?? '').toLowerCase().replace(/[.,/#!$%^&*;:{}=_`~()-]/g, '').replace(/\s+/g, ' ').trim();
 
 /**
  * Reconstructs the slice of pantry a recipe was allocated, so a replacement
@@ -25,10 +26,12 @@ export const buildMiniPantry = (recipe: Recipe, pantryItems: PantryItem[]): Pant
             const exact = recipe.ingredients?.find(ing => normalize(ing.item) === name);
             const match = exact ?? recipe.ingredients?.find(ing => {
                 const ingName = normalize(ing.item);
-                // Guard against empty names: every string "includes" '', which
-                // would otherwise produce false matches for missing names.
                 if (!name || !ingName) return false;
-                return ingName.includes(name) || name.includes(ingName);
+                // Word-subset match (one name's words all appear in the other)
+                // rather than substring, so "egg" doesn't match "eggplant".
+                const nameWords = name.split(' ');
+                const ingWords = ingName.split(' ');
+                return nameWords.every(w => ingWords.includes(w)) || ingWords.every(w => nameWords.includes(w));
             });
             return { id: pantryItem.id, name: pantryItem.name, amount: match?.amount ?? pantryItem.amount };
         })
