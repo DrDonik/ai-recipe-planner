@@ -14,13 +14,16 @@ const normalize = (s: string): string => s.toLowerCase().replace(/\s+/g, ' ').tr
  * longer exists are dropped.
  */
 export const buildMiniPantry = (recipe: Recipe, pantryItems: PantryItem[]): PantryItem[] => {
+    // Guard against legacy/shared recipes from localStorage that bypass Zod
+    // validation and may lack these fields.
+    if (!recipe.usedIngredients) return [];
     return recipe.usedIngredients
         .map((id): PantryItem | null => {
             const pantryItem = pantryItems.find(p => p.id === id);
             if (!pantryItem) return null;
             const name = normalize(pantryItem.name);
-            const exact = recipe.ingredients.find(ing => normalize(ing.item) === name);
-            const match = exact ?? recipe.ingredients.find(ing => {
+            const exact = recipe.ingredients?.find(ing => normalize(ing.item) === name);
+            const match = exact ?? recipe.ingredients?.find(ing => {
                 const ingName = normalize(ing.item);
                 return ingName.includes(name) || name.includes(ingName);
             });
