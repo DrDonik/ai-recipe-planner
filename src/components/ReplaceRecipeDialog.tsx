@@ -107,30 +107,22 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
 
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-3 p-3 border-t border-border-base/30">
-                    {isLoading ? (
-                        <button
-                            onClick={onCancelGenerate}
-                            className="btn flex items-center gap-2 px-4 py-2 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30"
-                        >
-                            {t.replaceRecipe.cancelGeneration}
-                        </button>
-                    ) : (
-                        <>
-                            <button
-                                onClick={onCancel}
-                                className="btn flex items-center gap-2 px-4 py-2 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30"
-                            >
-                                {t.replaceRecipe.cancel}
-                            </button>
-                            <button
-                                onClick={handleSubmit}
-                                className="btn btn-primary flex items-center gap-2 px-4 py-2 rounded-lg"
-                            >
-                                <RefreshCw size={18} />
-                                {t.replaceRecipe.submit}
-                            </button>
-                        </>
-                    )}
+                    {/* Both buttons stay mounted across loading so focus and layout
+                        don't shift; only their label/handler/disabled state changes. */}
+                    <button
+                        onClick={isLoading ? onCancelGenerate : onCancel}
+                        className="btn flex items-center gap-2 px-4 py-2 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30"
+                    >
+                        {isLoading ? t.replaceRecipe.cancelGeneration : t.replaceRecipe.cancel}
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                        className="btn btn-primary flex items-center gap-2 px-4 py-2 rounded-lg disabled:opacity-50"
+                    >
+                        {isLoading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
+                        {t.replaceRecipe.submit}
+                    </button>
                 </div>
             </div>
         </div>
