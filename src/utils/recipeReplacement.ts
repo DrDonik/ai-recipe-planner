@@ -10,7 +10,7 @@ const normalize = (s: string | undefined | null): string =>
  * `recipe.usedIngredients` lists pantry-item IDs, while the per-recipe amounts
  * live in `recipe.ingredients` keyed by free-text name. We map each ID back to
  * the pantry item and pull the amount the recipe actually used (matched by
- * name, exact first then a looser contains-match), falling back to the full
+ * name, exact first then a looser word-subset match), falling back to the full
  * pantry amount when no confident match is found. IDs whose pantry item no
  * longer exists are dropped.
  */
