@@ -10,9 +10,12 @@ import { KitchenAppliances, type KitchenAppliancesRef } from './components/Kitch
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
+import { ReplaceRecipeDialog } from './components/ReplaceRecipeDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage, writeLocalStorageExternal } from './hooks/useLocalStorage';
+import { buildMiniPantry, recomputeShoppingList } from './utils/recipeReplacement';
+import { generateId } from './utils/idGenerator';
 import { generateShareUrl } from './utils/sharing';
 import { parseSharedUrlParams } from './utils/sharedUrlParams';
 import { Header } from './components/Header';
@@ -65,6 +68,14 @@ function App() {
   // Copy-Paste Dialog State
   const [showCopyPasteDialog, setShowCopyPasteDialog] = useState(false);
   const [copyPastePrompt, setCopyPastePrompt] = useState('');
+
+  // Single-recipe replacement state. `replaceTarget` doubles as the dialog's
+  // open flag; the abort refs mirror the full-generation cancel mechanism.
+  const replaceAbortRef = useRef<AbortController | null>(null);
+  const replaceUserAbortedRef = useRef(false);
+  const [replaceTarget, setReplaceTarget] = useState<Recipe | null>(null);
+  const [replaceLoading, setReplaceLoading] = useState(false);
+  const [replaceError, setReplaceError] = useState<string | null>(null);
 
   // Single Recipe View State (initialized from shared-link URL if present)
   const [viewRecipe, setViewRecipe] = useState<Recipe | null>(initialSharedData.recipe);
@@ -125,6 +136,9 @@ function App() {
   }, [setImageGenEnabled, showNotification, t.errors.imageFreeTierUnsupported]);
   const recipeImage = useRecipeImage(recipeIds, { onFreeTierLimit: handleFreeTierLimit });
   const canGenerateImages = !useCopyPaste && !!apiKey && imageGenEnabled;
+  // Single-recipe replacement needs a live API call, so it's gated like image
+  // generation: direct-API mode with a key (no copy-paste support for now).
+  const canReplaceRecipes = !useCopyPaste && !!apiKey;
 
   // Storage error notification — deduplicated via ref guard
   const storageErrorShownRef = useRef(false);
@@ -524,6 +538,75 @@ function App() {
     setShowCopyPasteDialog(false);
   }, [setShowCopyPasteDialog]);
 
+  const openReplaceDialog = useCallback((recipe: Recipe) => {
+    setReplaceError(null);
+    setReplaceTarget(recipe);
+  }, []);
+
+  const closeReplaceDialog = useCallback(() => {
+    setReplaceTarget(null);
+    setReplaceError(null);
+  }, []);
+
+  const handleCancelReplace = useCallback(() => {
+    if (!replaceAbortRef.current) return;
+    replaceUserAbortedRef.current = true;
+    replaceAbortRef.current.abort();
+  }, []);
+
+  // Regenerate a single recipe in place. The discarded recipe's pantry slice
+  // (its used items, with the amounts it actually consumed) becomes the pantry
+  // for a 1-meal generation, so the kept recipes' allocations stay valid. The
+  // user's preference rides along as a one-off style wish. On success the new
+  // recipe takes the same grid slot and the shopping list is recomputed; on
+  // failure or cancel the original recipe is left untouched.
+  const handleReplaceSubmit = useCallback(async (preference: string) => {
+    const target = replaceTarget;
+    if (!target || !apiKey) return;
+
+    setReplaceLoading(true);
+    setReplaceError(null);
+    const controller = new AbortController();
+    replaceAbortRef.current = controller;
+    replaceUserAbortedRef.current = false;
+
+    const miniPantry = buildMiniPantry(target, pantryItems);
+    const trimmed = preference.trim();
+    const oneOffWishes = trimmed
+      ? [...styleWishes, `Replacing the recipe "${target.title}".`, trimmed]
+      : [...styleWishes, `Avoid recipes similar to "${target.title}".`];
+
+    try {
+      const plan = await generateRecipes(apiKey, miniPantry, people, 1, diet, language, spices, appliances, oneOffWishes, t.errors, controller.signal);
+      const newRecipe = plan.recipes[0];
+      if (!newRecipe) throw new Error(t.errors.emptyResponse);
+      // Force a fresh unique id so React keys and per-recipe image state can't
+      // collide with a recipe the model happened to label identically.
+      newRecipe.id = generateId();
+      setMealPlan(prev => {
+        if (!prev) return prev;
+        const idx = prev.recipes.findIndex(r => r.id === target.id);
+        if (idx === -1) return prev; // recipe was deleted while regenerating
+        const recipes = [...prev.recipes];
+        recipes[idx] = newRecipe;
+        return { ...prev, recipes, shoppingList: recomputeShoppingList(recipes) };
+      });
+      setReplaceTarget(null);
+    } catch (err: unknown) {
+      // User-initiated cancel: dismiss the dialog, keep the old recipe intact.
+      if (replaceUserAbortedRef.current && err instanceof Error && err.name === 'AbortError') {
+        setReplaceTarget(null);
+      } else {
+        const message = err instanceof Error ? err.message : t.generateError;
+        setReplaceError(message);
+      }
+    } finally {
+      replaceAbortRef.current = null;
+      replaceUserAbortedRef.current = false;
+      setReplaceLoading(false);
+    }
+  }, [replaceTarget, apiKey, pantryItems, styleWishes, people, diet, language, spices, appliances, t.errors, t.generateError, setMealPlan]);
+
 
   if (viewRecipe) {
     // Allow image generation in standalone view only when the recipe is part
@@ -571,6 +654,16 @@ function App() {
           prompt={copyPastePrompt}
           onSubmit={handleCopyPasteSubmit}
           onCancel={handleCopyPasteCancel}
+        />
+      )}
+      {replaceTarget && (
+        <ReplaceRecipeDialog
+          recipe={replaceTarget}
+          isLoading={replaceLoading}
+          error={replaceError}
+          onSubmit={handleReplaceSubmit}
+          onCancel={closeReplaceDialog}
+          onCancelGenerate={handleCancelReplace}
         />
       )}
 
@@ -672,6 +765,7 @@ function App() {
                         missingIngredientsMinimized={recipeMissingIngredientsMinimized}
                         onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
                         onGenerateImage={canGenerateImages ? () => recipeImage.generate(recipe) : undefined}
+                        onReplace={canReplaceRecipes ? () => openReplaceDialog(recipe) : undefined}
                         onRemoveImage={() => recipeImage.remove(recipe.id)}
                         isImageLoading={recipeImage.isLoading(recipe.id)}
                         pendingDelete={pendingDeleteRecipeId === recipe.id}

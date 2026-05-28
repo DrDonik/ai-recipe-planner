@@ -27,6 +27,11 @@ interface RecipeCardProps {
      */
     onGenerateImage?: () => void;
     onRemoveImage?: () => void;
+    /**
+     * When provided, the card shows a Replace button that regenerates this
+     * single recipe. Passed only in direct-API mode (mirrors image generation).
+     */
+    onReplace?: () => void;
     isImageLoading?: boolean;
     imageError?: string;
     /**
@@ -42,7 +47,7 @@ interface RecipeCardProps {
     deleteNotification?: Notification | null;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, isImageLoading = false, imageError, imageUrl, pendingDelete = false, deleteNotification }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, onReplace, isImageLoading = false, imageError, imageUrl, pendingDelete = false, deleteNotification }) => {
     const { t } = useSettings();
     const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
     const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -183,6 +188,15 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                             aria-pressed={wakeLock.isActive}
                         >
                             {wakeLock.isActive ? <Sun size={16} /> : <SunDim size={16} />}
+                        </button>
+                    )}
+                    {onReplace && (
+                        <button
+                            onClick={onReplace}
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            aria-label={t.replaceRecipe.button}
+                        >
+                            <RefreshCw size={18} />
                         </button>
                     )}
                     {onDelete && (
