@@ -1,7 +1,12 @@
 import type { PantryItem, Recipe, Ingredient } from '../types';
 
+// Punctuation stripped from names before matching. Built from a string (rather
+// than a regex literal) so the set can include "/" without escaping and without
+// any regex-literal delimiter ambiguity for minifiers/parsers/highlighters.
+const PUNCTUATION = new RegExp('[.,/#!$%^&*;:{}=_`~()-]', 'g');
+
 const normalize = (s: string | undefined | null): string =>
-    (s ?? '').toLowerCase().replace(/[.,/#!$%^&*;:{}=_`~()-]/g, '').replace(/\s+/g, ' ').trim();
+    (s ?? '').toLowerCase().replace(PUNCTUATION, '').replace(/\s+/g, ' ').trim();
 
 /**
  * Reconstructs the slice of pantry a recipe was allocated, so a replacement
