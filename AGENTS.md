@@ -34,6 +34,7 @@ The code will be carefully reviewed by an expert for correctness, security, edge
 ### When Adding Features
 
 - **Usability First**: Keep interactions minimal. Avoid adding steps or dialogs unless necessary.
+- **Interace Design**: Adhere to the Eight Golden Rules of Interface Design: @InterfaceDesign.md
 - **Minimize clicks**: Use sensible defaults, persist user choices
 - **Minimize scrolling**: Use collapsible panels, keep important actions visible
 - **All panels should be collapsible** with state persisted to localStorage
