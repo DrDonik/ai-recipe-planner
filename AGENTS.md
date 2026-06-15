@@ -38,7 +38,8 @@ The code will be carefully reviewed by an expert for correctness, security, edge
 - **Minimize clicks**: Use sensible defaults, persist user choices
 - **Minimize scrolling**: Use collapsible panels, keep important actions visible
 - **All panels should be collapsible** with state persisted to localStorage
-- Follow existing patterns for `PanelHeader` with minimize functionality
+- **Follow existing patterns** for `PanelHeader` with minimize functionality
+- **Never jump straight to implementation**. Always present your plan and the resulting user experience first and deliberate with the person requesting new code. Only implement new code when the requester explicitely states you should.
 
 ### When Working with Translations
 
