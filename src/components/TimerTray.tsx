@@ -40,7 +40,7 @@ export const TimerTray: React.FC = () => {
               </button>
             </div>
 
-            <ul className="flex flex-col gap-2" role="list">
+            <ul className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1" role="list">
               <AnimatePresence initial={false}>
                 {timers.map((timer) => {
                   const isDone = timer.status === 'done';
