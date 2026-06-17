@@ -96,11 +96,12 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!hasRunning) return;
     const tick = () => {
+      const now = Date.now();
       setTimers((prev) => {
         let changed = false;
         const next = prev.map((t) => {
           if (t.status !== 'running' || t.endsAt == null) return t;
-          const remainingMs = Math.max(0, t.endsAt - Date.now());
+          const remainingMs = Math.max(0, t.endsAt - now);
           if (remainingMs <= 0) {
             changed = true;
             return { ...t, remainingMs: 0, endsAt: null, status: 'done' as const };
@@ -116,7 +117,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
       });
     };
     tick();
-    const interval = setInterval(tick, 500);
+    const interval = setInterval(tick, 200);
     return () => clearInterval(interval);
   }, [hasRunning]);
 
@@ -138,25 +139,28 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const startTimer = useCallback((sourceId: string, label: string, durationMs: number) => {
     ensureAudio();
     const id = nextId();
+    const endsAt = Date.now() + durationMs;
     setTimers((prev) => [
       ...prev,
-      { id, sourceId, label, totalMs: durationMs, remainingMs: durationMs, endsAt: Date.now() + durationMs, status: 'running' },
+      { id, sourceId, label, totalMs: durationMs, remainingMs: durationMs, endsAt, status: 'running' },
     ]);
     return id;
   }, [ensureAudio]);
 
   const pauseTimer = useCallback((id: string) => {
+    const now = Date.now();
     setTimers((prev) => prev.map((t) =>
       t.id === id && t.status === 'running'
-        ? { ...t, status: 'paused', remainingMs: Math.max(0, (t.endsAt ?? Date.now()) - Date.now()), endsAt: null }
+        ? { ...t, status: 'paused', remainingMs: Math.max(0, (t.endsAt ?? now) - now), endsAt: null }
         : t));
   }, []);
 
   const resumeTimer = useCallback((id: string) => {
     ensureAudio();
+    const now = Date.now();
     setTimers((prev) => prev.map((t) =>
       t.id === id && t.status === 'paused'
-        ? { ...t, status: 'running', endsAt: Date.now() + t.remainingMs }
+        ? { ...t, status: 'running', endsAt: now + t.remainingMs }
         : t));
   }, [ensureAudio]);
 

@@ -51,7 +51,7 @@ export const TimerTray: React.FC = () => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className={`flex items-center gap-2 rounded-lg border p-2 ${
+                      className={`flex items-center gap-2 rounded-lg border p-2 overflow-hidden ${
                         isDone
                           ? 'bg-amber-500/10 border-amber-500/30 animate-pulse'
                           : 'bg-white/40 dark:bg-black/20 border-border-base/30'
