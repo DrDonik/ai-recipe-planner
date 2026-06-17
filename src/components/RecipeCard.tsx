@@ -111,6 +111,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
         }
     }, [recipe]);
 
+    // Parse each instruction's time phrases once per instruction set, rather
+    // than on every render (timer ticks re-render this card frequently).
+    const parsedSteps = useMemo(
+        () => recipe.instructions.map((step) => ({ step, segments: parseInstruction(step) })),
+        [recipe.instructions]
+    );
+
 
     // Hold the slot for the full 5s deletion window even if the toast is
     // displaced by another notification — otherwise the card would flash back
@@ -331,7 +338,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         <h4 className={`font-bold uppercase tracking-wider ${isStandalone ? 'text-sm' : 'text-xs'}`}>{t.instructions}</h4>
                     </div>
                     <ol className={`list-decimal list-inside space-y-4 ${isStandalone ? 'text-base' : 'text-sm'} opacity-90`}>
-                        {recipe.instructions.map((step, i) => (
+                        {parsedSteps.map(({ step, segments }, i) => (
                             <li
                                 key={`step-${i}-${step.slice(0, 20)}`}
                                 tabIndex={0}
@@ -340,7 +347,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleStepHighlight(i); }}}
                                 aria-current={activeStep === i ? 'step' : undefined}
                             >
-                                {parseInstruction(step).map((seg, si) =>
+                                {segments.map((seg, si) =>
                                     seg.type === 'timer'
                                         ? <TimerChip key={si} sourceId={`${recipe.id ?? recipe.title}::${i}::${si}`} text={seg.text} durationMs={seg.durationMs} label={step} />
                                         : <React.Fragment key={si}>{seg.text}</React.Fragment>
