@@ -85,13 +85,14 @@ export function formatDuration(ms: number): string {
  * Splits an instruction string into ordered text and timer segments.
  * Matched durations become {@link TimerSegment}s; everything else stays text.
  */
-export function parseInstruction(text: string): InstructionSegment[] {
+export function parseInstruction(text: string | null | undefined): InstructionSegment[] {
+  const safeText = text ?? '';
   const segments: InstructionSegment[] = [];
   let lastIndex = 0;
   TIMER_REGEX.lastIndex = 0;
 
   let match: RegExpExecArray | null;
-  while ((match = TIMER_REGEX.exec(text)) !== null) {
+  while ((match = TIMER_REGEX.exec(safeText)) !== null) {
     const [matched, n1, n2, unit] = match;
     const value = Math.max(parseSingleNumber(n1), n2 ? parseSingleNumber(n2) : 0);
     const durationMs = Math.round(value * unitToMs(unit));
@@ -101,14 +102,14 @@ export function parseInstruction(text: string): InstructionSegment[] {
     if (durationMs <= 0) continue;
 
     if (match.index > lastIndex) {
-      segments.push({ type: 'text', text: text.slice(lastIndex, match.index) });
+      segments.push({ type: 'text', text: safeText.slice(lastIndex, match.index) });
     }
     segments.push({ type: 'timer', text: matched, durationMs });
     lastIndex = match.index + matched.length;
   }
 
-  if (lastIndex < text.length) {
-    segments.push({ type: 'text', text: text.slice(lastIndex) });
+  if (lastIndex < safeText.length) {
+    segments.push({ type: 'text', text: safeText.slice(lastIndex) });
   }
   return segments;
 }

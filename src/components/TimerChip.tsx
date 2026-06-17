@@ -48,7 +48,7 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
     if (e.key === 'Enter' || e.key === ' ') e.stopPropagation();
   };
 
-  const display = done ? t.timers.done : active ? formatDuration(timer.remainingMs) : text;
+  const display = done ? t.timers.done : timer ? formatDuration(timer.remainingMs) : text;
 
   const colors = done
     ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 animate-pulse'
