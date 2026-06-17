@@ -30,6 +30,7 @@ export const TimerTray: React.FC = () => {
                 <span className="text-xs font-bold uppercase tracking-wider">{t.timers.title}</span>
               </div>
               <button
+                type="button"
                 onClick={toggleMuted}
                 aria-pressed={muted}
                 aria-label={muted ? t.timers.unmute : t.timers.mute}
@@ -71,6 +72,7 @@ export const TimerTray: React.FC = () => {
 
                       {!isDone && (
                         <button
+                          type="button"
                           onClick={() => (isRunning ? pauseTimer(timer.id) : resumeTimer(timer.id))}
                           aria-label={isRunning ? t.timers.pause : t.timers.resume}
                           className="p-1.5 rounded-full transition-colors text-text-muted hover:text-primary hover:bg-white/60 dark:hover:bg-black/30"
@@ -79,6 +81,7 @@ export const TimerTray: React.FC = () => {
                         </button>
                       )}
                       <button
+                        type="button"
                         onClick={() => cancelTimer(timer.id)}
                         aria-label={isDone ? t.timers.dismiss : t.timers.cancel}
                         className="p-1.5 rounded-full transition-colors text-text-muted hover:text-red-500 hover:bg-white/60 dark:hover:bg-black/30"

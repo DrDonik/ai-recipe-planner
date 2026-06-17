@@ -61,7 +61,7 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
       type="button"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      aria-label={done ? t.timers.dismiss : active ? t.timers.cancel : `${text} — ${t.timers.startAria}`}
+      aria-label={`${display} — ${done ? t.timers.dismiss : active ? t.timers.cancel : t.timers.startAria}`}
       className={`inline-flex items-center gap-1 align-middle rounded-full border px-1.5 py-0.5 mx-0.5 text-[0.85em] font-medium leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${colors}`}
     >
       {done ? <BellRing size={13} /> : <TimerIcon size={13} />}
