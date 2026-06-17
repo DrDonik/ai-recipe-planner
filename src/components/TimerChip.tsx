@@ -1,5 +1,5 @@
 import React from 'react';
-import { Timer as TimerIcon, BellRing } from 'lucide-react';
+import { Timer as TimerIcon, BellRing, Pause } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTimers } from '../contexts/TimerContext';
 import { formatDuration } from '../utils/parseTimers';
@@ -32,7 +32,8 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
   // remounts — e.g. opening the same recipe in the focus view.
   const timer = timers.find((t) => t.sourceId === sourceId);
   const done = timer?.status === 'done';
-  const active = !!timer && !done;
+  const paused = timer?.status === 'paused';
+  const running = timer?.status === 'running';
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -52,19 +53,21 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
 
   const colors = done
     ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 animate-pulse'
-    : active
+    : running
       ? 'bg-secondary/15 text-secondary border-secondary/30 hover:bg-secondary/25'
-      : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20';
+      : paused
+        ? 'bg-secondary/5 text-secondary/60 border-secondary/30 border-dashed hover:bg-secondary/15'
+        : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20';
 
   return (
     <button
       type="button"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      aria-label={`${display} — ${done ? t.timers.dismiss : active ? t.timers.cancel : t.timers.startAria}`}
+      aria-label={`${display} — ${done ? t.timers.dismiss : timer ? t.timers.cancel : t.timers.startAria}`}
       className={`inline-flex items-center gap-1 align-middle rounded-full border px-1.5 py-0.5 mx-0.5 text-[0.85em] font-medium leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${colors}`}
     >
-      {done ? <BellRing size={13} /> : <TimerIcon size={13} />}
+      {done ? <BellRing size={13} /> : paused ? <Pause size={13} /> : <TimerIcon size={13} />}
       <span className="tabular-nums">{display}</span>
     </button>
   );
