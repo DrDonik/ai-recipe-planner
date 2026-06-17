@@ -73,22 +73,32 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     if (muted) return;
     const ctx = audioRef.current;
     if (!ctx || ctx.state === 'closed') return;
-    if (ctx.state === 'suspended') void ctx.resume();
 
-    // Three short rising beeps.
-    const start = ctx.currentTime;
-    [0, 0.45, 0.9].forEach((offset, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 660 + i * 220;
-      gain.gain.setValueAtTime(0.0001, start + offset);
-      gain.gain.exponentialRampToValueAtTime(0.3, start + offset + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + offset + 0.35);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start + offset);
-      osc.stop(start + offset + 0.4);
-    });
+    // Three short rising beeps. Schedule against ctx.currentTime, which is only
+    // meaningful once the context is running — so wait for resume() to resolve
+    // before scheduling, otherwise the first beep can start in the past and be
+    // clipped or dropped.
+    const play = () => {
+      const start = ctx.currentTime;
+      [0, 0.45, 0.9].forEach((offset, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 660 + i * 220;
+        gain.gain.setValueAtTime(0.0001, start + offset);
+        gain.gain.exponentialRampToValueAtTime(0.3, start + offset + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + offset + 0.35);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start + offset);
+        osc.stop(start + offset + 0.4);
+      });
+    };
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(play).catch(() => {});
+    } else {
+      play();
+    }
   }, [muted]);
 
   // Drive a ticking countdown only while at least one timer is running.
