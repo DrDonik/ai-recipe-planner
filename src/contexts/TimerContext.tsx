@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 /**
  * Global cooking-timer state. Timers are started by tapping a time phrase in a
@@ -181,9 +181,9 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleMuted = useCallback(() => setMuted((m) => !m), []);
 
-  const value: TimerContextValue = {
+  const value = useMemo<TimerContextValue>(() => ({
     timers, muted, toggleMuted, startTimer, pauseTimer, resumeTimer, cancelTimer,
-  };
+  }), [timers, muted, toggleMuted, startTimer, pauseTimer, resumeTimer, cancelTimer]);
 
   return <TimerContext.Provider value={value}>{children}</TimerContext.Provider>;
 };
