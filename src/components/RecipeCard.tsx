@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import type { Recipe, Notification } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import { UndoToast } from './ui/UndoToast';
+import { TimerChip } from './TimerChip';
+import { parseInstruction } from '../utils/parseTimers';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -338,7 +340,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleStepHighlight(i); }}}
                                 aria-current={activeStep === i ? 'step' : undefined}
                             >
-                                {step}
+                                {parseInstruction(step).map((seg, si) =>
+                                    seg.type === 'timer'
+                                        ? <TimerChip key={si} text={seg.text} durationMs={seg.durationMs} label={step} />
+                                        : <React.Fragment key={si}>{seg.text}</React.Fragment>
+                                )}
                             </li>
                         ))}
                     </ol>
