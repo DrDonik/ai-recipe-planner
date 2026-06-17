@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Timer as TimerIcon, BellRing } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTimers } from '../contexts/TimerContext';
 import { formatDuration } from '../utils/parseTimers';
 
 interface TimerChipProps {
+  /**
+   * Stable identity of this phrase (`recipeId::stepIndex::segmentIndex`).
+   * Identical across the grid and focus views of the same recipe, so the chip
+   * keeps showing a running timer after a remount.
+   */
+  sourceId: string;
   /** The matched time phrase, e.g. "5 minutes". */
   text: string;
   durationMs: number;
@@ -18,15 +24,13 @@ interface TimerChipProps {
  * inside a step <li> that toggles its own highlight, so clicks/keys are stopped
  * from bubbling to the parent.
  */
-export const TimerChip: React.FC<TimerChipProps> = ({ text, durationMs, label }) => {
+export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs, label }) => {
   const { t } = useSettings();
-  const { startTimer, cancelTimer, getTimer } = useTimers();
-  const [id, setId] = useState<string | null>(null);
+  const { timers, startTimer, cancelTimer } = useTimers();
 
-  // A stale id (timer cancelled from the tray) simply resolves to undefined,
-  // which renders as the idle state — and ids are unique, so it never collides.
-  const timer = id ? getTimer(id) : undefined;
-
+  // Derive from global state (rather than local state) so the chip survives
+  // remounts — e.g. opening the same recipe in the focus view.
+  const timer = timers.find((t) => t.sourceId === sourceId);
   const done = timer?.status === 'done';
   const active = !!timer && !done;
 
@@ -34,9 +38,8 @@ export const TimerChip: React.FC<TimerChipProps> = ({ text, durationMs, label })
     e.stopPropagation();
     if (timer) {
       cancelTimer(timer.id);
-      setId(null);
     } else {
-      setId(startTimer(label, durationMs));
+      startTimer(sourceId, label, durationMs);
     }
   };
 

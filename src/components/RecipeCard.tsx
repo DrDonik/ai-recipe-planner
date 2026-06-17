@@ -342,7 +342,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                             >
                                 {parseInstruction(step).map((seg, si) =>
                                     seg.type === 'timer'
-                                        ? <TimerChip key={si} text={seg.text} durationMs={seg.durationMs} label={step} />
+                                        ? <TimerChip key={si} sourceId={`${recipe.id}::${i}::${si}`} text={seg.text} durationMs={seg.durationMs} label={step} />
                                         : <React.Fragment key={si}>{seg.text}</React.Fragment>
                                 )}
                             </li>

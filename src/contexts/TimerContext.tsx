@@ -14,6 +14,12 @@ export type TimerStatus = 'running' | 'paused' | 'done';
 
 export interface CookingTimer {
   id: string;
+  /**
+   * Stable identity of the originating time phrase
+   * (`recipeId::stepIndex::segmentIndex`). Lets a chip rediscover its own timer
+   * after a remount — e.g. when the same recipe is opened in the focus view.
+   */
+  sourceId: string;
   /** The recipe step the timer was started from — shown in the tray. */
   label: string;
   totalMs: number;
@@ -27,11 +33,10 @@ interface TimerContextValue {
   timers: CookingTimer[];
   muted: boolean;
   toggleMuted: () => void;
-  startTimer: (label: string, durationMs: number) => string;
+  startTimer: (sourceId: string, label: string, durationMs: number) => string;
   pauseTimer: (id: string) => void;
   resumeTimer: (id: string) => void;
   cancelTimer: (id: string) => void;
-  getTimer: (id: string) => CookingTimer | undefined;
 }
 
 const TimerContext = createContext<TimerContextValue | undefined>(undefined);
@@ -130,12 +135,12 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     if (ctx && ctx.state !== 'closed') ctx.close().catch(() => {});
   }, []);
 
-  const startTimer = useCallback((label: string, durationMs: number) => {
+  const startTimer = useCallback((sourceId: string, label: string, durationMs: number) => {
     ensureAudio();
     const id = nextId();
     setTimers((prev) => [
       ...prev,
-      { id, label, totalMs: durationMs, remainingMs: durationMs, endsAt: Date.now() + durationMs, status: 'running' },
+      { id, sourceId, label, totalMs: durationMs, remainingMs: durationMs, endsAt: Date.now() + durationMs, status: 'running' },
     ]);
     return id;
   }, [ensureAudio]);
@@ -160,11 +165,10 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     setTimers((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const getTimer = useCallback((id: string) => timers.find((t) => t.id === id), [timers]);
   const toggleMuted = useCallback(() => setMuted((m) => !m), []);
 
   const value: TimerContextValue = {
-    timers, muted, toggleMuted, startTimer, pauseTimer, resumeTimer, cancelTimer, getTimer,
+    timers, muted, toggleMuted, startTimer, pauseTimer, resumeTimer, cancelTimer,
   };
 
   return <TimerContext.Provider value={value}>{children}</TimerContext.Provider>;
