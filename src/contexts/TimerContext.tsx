@@ -45,7 +45,7 @@ let idCounter = 0;
 const nextId = () => `timer-${Date.now()}-${idCounter++}`;
 
 // The completion chime — three short rising beeps — is synthesized in code and
-// served as a WAV `data:` URL so no audio asset has to be bundled. It is played
+// exposed as a WAV object URL so no audio asset has to be bundled. It is played
 // through an <audio> element rather than the Web Audio API on purpose: on
 // iOS/iPadOS Safari, Web Audio is silenced by the device's mute switch, while
 // HTML5 media elements keep playing. A short lead of silence lets us unlock
@@ -57,9 +57,9 @@ const CHIME_BEEPS = [
   { freq: 1100, offset: 0.9 },
 ];
 
-let chimeDataUri: string | null = null;
-const getChimeDataUri = () => {
-  if (chimeDataUri) return chimeDataUri;
+let chimeUrl: string | null = null;
+const getChimeUrl = () => {
+  if (chimeUrl) return chimeUrl;
 
   const sampleRate = 44100;
   const beepDur = 0.4; // envelope window per beep
@@ -103,11 +103,8 @@ const getChimeDataUri = () => {
     view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
   }
 
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  chimeDataUri = `data:audio/wav;base64,${btoa(binary)}`;
-  return chimeDataUri;
+  chimeUrl = URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+  return chimeUrl;
 };
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
@@ -124,17 +121,17 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const ensureAudio = useCallback(() => {
     if (typeof Audio === 'undefined') return;
     if (!audioRef.current) {
-      audioRef.current = new Audio(getChimeDataUri());
+      audioRef.current = new Audio(getChimeUrl());
       audioRef.current.preload = 'auto';
     }
     // Prime playback within the current gesture: start, then immediately pause
-    // and rewind. The leading silence keeps this inaudible while still granting
-    // iOS permission to play the chime later without a fresh gesture.
+    // and rewind. iOS registers the synchronous play() call to unlock the
+    // element, while the synchronous pause() guarantees no sound is emitted.
     const el = audioRef.current;
-    el.play().then(() => {
-      el.pause();
-      el.currentTime = 0;
-    }).catch(() => {});
+    const playPromise = el.play();
+    el.pause();
+    el.currentTime = 0;
+    void playPromise?.catch(() => {});
   }, []);
 
   const playAlarm = useCallback(() => {
