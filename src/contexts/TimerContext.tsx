@@ -58,7 +58,7 @@ const CHIME_BEEPS = [
 ];
 
 let chimeUrl: string | null = null;
-const getChimeUrl = () => {
+const getChimeUrl = (): string => {
   if (chimeUrl) return chimeUrl;
 
   const sampleRate = 44100;
@@ -132,7 +132,6 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     // chime when another timer is started or resumed.
     const playPromise = el.play();
     el.pause();
-    el.currentTime = 0;
     void playPromise?.catch(() => {});
   }, []);
 
