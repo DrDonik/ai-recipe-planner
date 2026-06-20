@@ -219,21 +219,26 @@ function App() {
     prevViewShoppingListRef.current = viewShoppingList;
   }, [viewRecipe, viewShoppingList]);
 
-  // Keep the wake lock's lifetime tied to the single-recipe focus view: on by
-  // default when a recipe is opened, released when it's closed. The focus view
-  // is the only place exposing a toggle, so leaving the lock on after close
-  // would strand it with no way to turn it off.
+  // Keep the wake lock's lifetime tied to the single-recipe focus view: on when
+  // a recipe is open, released when it's closed. The focus view is the only
+  // place exposing a toggle, so leaving the lock on after close would strand it
+  // with no way to turn it off. openRecipeView already requests on the click
+  // gesture (for Safari); requesting here too is a harmless no-op that also
+  // covers the shared-link case, where a recipe is open on first load with no
+  // preceding gesture.
+  const isViewingRecipe = !!viewRecipe;
   useEffect(() => {
     if (!wakeLock.isSupported) return;
-    if (viewRecipe) {
+    if (isViewingRecipe) {
       wakeLock.request();
     } else {
       wakeLock.release();
     }
-    // Depend on the stable members, not the wakeLock object — it's a fresh
-    // literal every render and would otherwise re-run this effect constantly.
+    // request/release are stable useCallbacks; depending only on the boolean
+    // keeps the effect from re-running (and re-acquiring) on unrelated renders —
+    // e.g. when the user manually toggles the lock off inside the card.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewRecipe, wakeLock.isSupported, wakeLock.request, wakeLock.release]);
+  }, [isViewingRecipe, wakeLock.isSupported]);
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {
@@ -279,10 +284,17 @@ function App() {
   const openRecipeView = useCallback((recipe: Recipe) => {
     savedScrollPositionRef.current = window.scrollY;
     setViewRecipe(recipe);
+    // Acquire the wake lock here, synchronously within the click handler, so the
+    // request is tied to the user gesture. Safari/iOS rejects a request made
+    // from the effect below because by then the gesture's activation is gone.
+    wakeLock.request();
     // Update URL without reload
     const shareUrl = generateShareUrl(URL_PARAMS.RECIPE, recipe);
     window.history.pushState({}, '', shareUrl);
-  }, []);
+    // wakeLock.request is a stable useCallback; depending on the wakeLock object
+    // itself would needlessly rebuild this handler every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wakeLock.request]);
 
   const openShoppingListView = useCallback((items: Ingredient[]) => {
     savedScrollPositionRef.current = window.scrollY;
