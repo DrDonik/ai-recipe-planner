@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { SettingsProvider } from './contexts/SettingsContext'
 import { TimerProvider } from './contexts/TimerContext'
+import { CookingProgressProvider } from './contexts/CookingProgressContext'
 import { TimerTray } from './components/TimerTray'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -12,8 +13,10 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <SettingsProvider>
         <TimerProvider>
-          <App />
-          <TimerTray />
+          <CookingProgressProvider>
+            <App />
+            <TimerTray />
+          </CookingProgressProvider>
         </TimerProvider>
       </SettingsProvider>
     </ErrorBoundary>
