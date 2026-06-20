@@ -82,9 +82,11 @@ function App() {
   // Single Shopping List View State (initialized from shared-link URL if present)
   const [viewShoppingList, setViewShoppingList] = useState<Ingredient[] | null>(initialSharedData.shoppingList);
 
-  // Wake Lock for keeping screen on during cooking
-  // Note: Auto-activation was removed because Safari/iOS requires explicit user gesture
-  // to acquire a wake lock. The button is prominently displayed for users to tap.
+  // Wake Lock for keeping screen on during cooking. Acquired automatically when
+  // a single recipe is opened and released when it is closed (see effect below),
+  // so the lock's lifetime matches the focus view — the only place with a toggle.
+  // Note: Safari/iOS may reject the request when it isn't tied to a user gesture;
+  // the hook fails gracefully and the in-card button remains for manual tapping.
   const wakeLock = useWakeLock();
 
   // Multi-device sync via GitHub Gist (opt-in).
@@ -216,6 +218,22 @@ function App() {
     prevViewRecipeRef.current = viewRecipe;
     prevViewShoppingListRef.current = viewShoppingList;
   }, [viewRecipe, viewShoppingList]);
+
+  // Keep the wake lock's lifetime tied to the single-recipe focus view: on by
+  // default when a recipe is opened, released when it's closed. The focus view
+  // is the only place exposing a toggle, so leaving the lock on after close
+  // would strand it with no way to turn it off.
+  useEffect(() => {
+    if (!wakeLock.isSupported) return;
+    if (viewRecipe) {
+      wakeLock.request();
+    } else {
+      wakeLock.release();
+    }
+    // Depend on the stable members, not the wakeLock object — it's a fresh
+    // literal every render and would otherwise re-run this effect constantly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewRecipe, wakeLock.isSupported, wakeLock.request, wakeLock.release]);
 
   useEffect(() => {
     const updateMetaTags = (title: string, description: string, url: string) => {

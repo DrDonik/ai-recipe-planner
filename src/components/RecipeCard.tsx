@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Clock, ChefHat, AlertCircle, Maximize, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe, Notification } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { useCookingProgress } from '../contexts/CookingProgressContext';
 import { UndoToast } from './ui/UndoToast';
 import { TimerChip } from './TimerChip';
 import { parseInstruction } from '../utils/parseTimers';
@@ -51,24 +52,23 @@ interface RecipeCardProps {
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenInNewTab = false, isStandalone = false, wakeLock, onDelete, onViewSingle, onClose, missingIngredientsMinimized = false, onToggleMissingIngredientsMinimize, onGenerateImage, onRemoveImage, onReplace, isImageLoading = false, imageError, imageUrl, pendingDelete = false, deleteNotification }) => {
     const { t } = useSettings();
-    const [struckIngredients, setStruckIngredients] = useState<Set<number>>(new Set());
-    const [activeStep, setActiveStep] = useState<number | null>(null);
+    // Crossed-off ingredients and the highlighted step live in a shared,
+    // in-memory store keyed by recipe identity, so progress survives closing
+    // and reopening the card (and is mirrored between the overview and focus
+    // views) — mirroring how the cooking timers persist across remounts.
+    const progressKey = recipe.id ?? recipe.title;
+    const { getProgress, toggleIngredient: toggleIngredientFor, toggleStep } = useCookingProgress();
+    const { struckIngredients, activeStep } = getProgress(progressKey);
 
-    const toggleIngredient = useCallback((idx: number) => {
-        setStruckIngredients(prev => {
-            const next = new Set(prev);
-            if (next.has(idx)) {
-                next.delete(idx);
-            } else {
-                next.add(idx);
-            }
-            return next;
-        });
-    }, []);
+    const toggleIngredient = useCallback(
+        (idx: number) => toggleIngredientFor(progressKey, idx),
+        [toggleIngredientFor, progressKey]
+    );
 
-    const toggleStepHighlight = useCallback((idx: number) => {
-        setActiveStep(prev => prev === idx ? null : idx);
-    }, []);
+    const toggleStepHighlight = useCallback(
+        (idx: number) => toggleStep(progressKey, idx),
+        [toggleStep, progressKey]
+    );
 
     // Memoize the JSON-LD schema to avoid regeneration on every render
     // Wrapped in try-catch to prevent malformed recipe data from crashing the component
