@@ -119,15 +119,17 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const playedRef = useRef<Set<string>>(new Set());
 
   const ensureAudio = useCallback(() => {
-    if (typeof Audio === 'undefined') return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio(getChimeUrl());
-      audioRef.current.preload = 'auto';
-    }
-    // Prime playback within the current gesture: start, then immediately pause
-    // and rewind. iOS registers the synchronous play() call to unlock the
+    if (typeof Audio === 'undefined' || audioRef.current) return;
+
+    const el = new Audio(getChimeUrl());
+    el.preload = 'auto';
+    audioRef.current = el;
+
+    // Prime playback once, within the current gesture: start, then immediately
+    // pause and rewind. iOS registers the synchronous play() call to unlock the
     // element, while the synchronous pause() guarantees no sound is emitted.
-    const el = audioRef.current;
+    // Doing this only on first creation avoids interrupting an already-playing
+    // chime when another timer is started or resumed.
     const playPromise = el.play();
     el.pause();
     el.currentTime = 0;
@@ -187,6 +189,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     if (el) {
       el.pause();
       el.removeAttribute('src');
+      el.load(); // free buffered audio in WebKit/Safari
     }
   }, []);
 
