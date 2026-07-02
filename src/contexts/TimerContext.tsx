@@ -156,7 +156,11 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     // audible even when a busy main thread delays the cleanup. Afterwards the
     // element is pointed at the real chime for the alarm.
     const playPromise = el.play();
-    const settle = () => pointAtChime(el);
+    const settle = () => {
+      // The provider may have unmounted (and released the element) while the
+      // promise was pending — don't re-attach a source to a dead element.
+      if (audioRef.current === el) pointAtChime(el);
+    };
     void playPromise?.then(settle, settle);
   }, []);
 
