@@ -48,8 +48,8 @@ const nextId = () => `timer-${Date.now()}-${idCounter++}`;
 // exposed as a WAV object URL so no audio asset has to be bundled. It is played
 // through an <audio> element rather than the Web Audio API on purpose: on
 // iOS/iPadOS Safari, Web Audio is silenced by the device's mute switch, while
-// HTML5 media elements keep playing. A short lead of silence lets us unlock
-// playback on a user gesture (see ensureAudio) without an audible blip.
+// HTML5 media elements keep playing. A short lead of silence gives the looping
+// alarm a small breath between repetitions.
 const CHIME_LEAD_S = 0.15;
 const CHIME_BEEPS = [
   { freq: 660, offset: 0 },
@@ -57,29 +57,9 @@ const CHIME_BEEPS = [
   { freq: 1100, offset: 0.9 },
 ];
 
-let chimeUrl: string | null = null;
-const getChimeUrl = (): string => {
-  if (chimeUrl) return chimeUrl;
-
+/** Encodes mono 44.1kHz float samples as a WAV object URL. */
+const encodeWavUrl = (samples: Float32Array): string => {
   const sampleRate = 44100;
-  const beepDur = 0.4; // envelope window per beep
-  const attack = 0.05;
-  const decayTau = 0.0375; // exponential fall from 0.3 to ~0 over ~0.3s
-  const lastOffset = CHIME_BEEPS[CHIME_BEEPS.length - 1].offset;
-  const total = CHIME_LEAD_S + lastOffset + beepDur;
-  const length = Math.ceil(sampleRate * total);
-  const samples = new Float32Array(length);
-
-  CHIME_BEEPS.forEach(({ freq, offset }) => {
-    const startSample = Math.floor((CHIME_LEAD_S + offset) * sampleRate);
-    const beepSamples = Math.floor(beepDur * sampleRate);
-    for (let i = 0; i < beepSamples; i++) {
-      const t = i / sampleRate;
-      const env = t < attack ? 0.3 * (t / attack) : 0.3 * Math.exp(-(t - attack) / decayTau);
-      samples[startSample + i] += Math.sin(2 * Math.PI * freq * t) * env;
-    }
-  });
-
   const buffer = new ArrayBuffer(44 + samples.length * 2);
   const view = new DataView(buffer);
   const writeString = (offset: number, s: string) => {
@@ -103,8 +83,54 @@ const getChimeUrl = (): string => {
     view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
   }
 
-  chimeUrl = URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+  return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+};
+
+let chimeUrl: string | null = null;
+const getChimeUrl = (): string => {
+  if (chimeUrl) return chimeUrl;
+
+  const sampleRate = 44100;
+  const beepDur = 0.4; // envelope window per beep
+  const attack = 0.05;
+  const decayTau = 0.0375; // exponential fall from 0.3 to ~0 over ~0.3s
+  const lastOffset = CHIME_BEEPS[CHIME_BEEPS.length - 1].offset;
+  const total = CHIME_LEAD_S + lastOffset + beepDur;
+  const samples = new Float32Array(Math.ceil(sampleRate * total));
+
+  CHIME_BEEPS.forEach(({ freq, offset }) => {
+    const startSample = Math.floor((CHIME_LEAD_S + offset) * sampleRate);
+    const beepSamples = Math.floor(beepDur * sampleRate);
+    for (let i = 0; i < beepSamples; i++) {
+      const t = i / sampleRate;
+      const env = t < attack ? 0.3 * (t / attack) : 0.3 * Math.exp(-(t - attack) / decayTau);
+      samples[startSample + i] += Math.sin(2 * Math.PI * freq * t) * env;
+    }
+  });
+
+  chimeUrl = encodeWavUrl(samples);
   return chimeUrl;
+};
+
+// Half a second of pure silence, used to unlock the audio element on a user
+// gesture: whatever plays during unlocking is inaudible by construction.
+let silenceUrl: string | null = null;
+const getSilenceUrl = (): string => {
+  if (!silenceUrl) silenceUrl = encodeWavUrl(new Float32Array(22050));
+  return silenceUrl;
+};
+
+/**
+ * Points the element at the chime once it is past the silent unlock source.
+ * The gesture unlock is per-element in WebKit, so it survives the src swap.
+ */
+const pointAtChime = (el: HTMLAudioElement) => {
+  const url = getChimeUrl();
+  if (el.src !== url) {
+    el.pause();
+    el.src = url;
+    el.load();
+  }
 };
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
@@ -115,33 +141,31 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   // (starting/resuming a timer) so it is allowed to ring later when the timer
   // finishes — iOS only permits play() from within a gesture.
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  // Timers whose completion chime has already played, so we ring exactly once.
-  const playedRef = useRef<Set<string>>(new Set());
 
   const ensureAudio = useCallback(() => {
     if (typeof Audio === 'undefined' || audioRef.current) return;
 
-    const el = new Audio(getChimeUrl());
+    const el = new Audio(getSilenceUrl());
     el.preload = 'auto';
     audioRef.current = el;
 
-    // Prime playback once, within the current gesture: start, then immediately
-    // pause and rewind. iOS registers the synchronous play() call to unlock the
-    // element, while the synchronous pause() guarantees no sound is emitted.
-    // Doing this only on first creation avoids interrupting an already-playing
-    // chime when another timer is started or resumed.
+    // Prime playback once, within the current gesture, by actually playing the
+    // silent source — pausing only after the play() promise settles (a
+    // synchronous pause() would abort the pending play request and leave the
+    // element locked). Because the primed source is pure silence, nothing is
+    // audible even when a busy main thread delays the cleanup. Afterwards the
+    // element is pointed at the real chime for the alarm.
     const playPromise = el.play();
-    el.pause();
-    void playPromise?.catch(() => {});
+    const settle = () => {
+      // The provider may have unmounted (and released the element) while the
+      // promise was pending — don't re-attach a source to a dead element.
+      if (audioRef.current === el) pointAtChime(el);
+    };
+    void playPromise?.then(settle, settle);
   }, []);
 
-  const playAlarm = useCallback(() => {
-    if (muted) return;
-    const el = audioRef.current;
-    if (!el) return;
-    el.currentTime = 0;
-    el.play().catch(() => {});
-  }, [muted]);
+  // Whether any timer has finished and is waiting to be dismissed.
+  const anyDone = timers.some((t) => t.status === 'done');
 
   // Drive a ticking countdown only while at least one timer is running.
   const hasRunning = timers.some((t) => t.status === 'running');
@@ -173,13 +197,22 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(interval);
   }, [hasRunning]);
 
-  // Ring once for each timer that has just finished.
+  // Ring — looping like a kitchen timer — while at least one finished timer is
+  // waiting to be dismissed; stop as soon as the last one is dismissed or the
+  // alarm is muted. Unmuting while a timer is still done resumes ringing.
   useEffect(() => {
-    const newlyDone = timers.filter((t) => t.status === 'done' && !playedRef.current.has(t.id));
-    if (newlyDone.length === 0) return;
-    newlyDone.forEach((t) => playedRef.current.add(t.id));
-    playAlarm();
-  }, [timers, playAlarm]);
+    const el = audioRef.current;
+    if (!el) return;
+    if (anyDone && !muted) {
+      pointAtChime(el); // in case a timer finished before the unlock settled
+      el.loop = true;
+      el.currentTime = 0;
+      el.play().catch(() => {});
+    } else {
+      el.pause();
+      el.currentTime = 0;
+    }
+  }, [anyDone, muted]);
 
   // Release the audio element when the provider unmounts.
   useEffect(() => () => {
@@ -221,7 +254,6 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   }, [ensureAudio]);
 
   const cancelTimer = useCallback((id: string) => {
-    playedRef.current.delete(id);
     setTimers((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
