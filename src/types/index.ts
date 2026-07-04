@@ -12,6 +12,21 @@ export interface PantryItem {
 }
 
 /**
+ * A kitchen profile bundling a set of staples (spice rack) and appliances,
+ * e.g. "Home" vs. "Holiday home". The ACTIVE kitchen's lists live in the
+ * legacy SPICE_RACK / KITCHEN_APPLIANCES storage keys; the `spices` and
+ * `appliances` fields here are snapshots refreshed whenever the user
+ * switches away from a kitchen, so the entry for the active kitchen may be
+ * stale and must not be read while that kitchen is active.
+ */
+export interface Kitchen {
+  id: string;
+  name: string;
+  spices: string[];
+  appliances: string[];
+}
+
+/**
  * An ingredient used in a recipe or shopping list.
  */
 export interface Ingredient {

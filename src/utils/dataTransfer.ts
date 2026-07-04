@@ -28,6 +28,8 @@ const EXPORTABLE_KEYS = [
     STORAGE_KEYS.DIET_PREFERENCE,
     STORAGE_KEYS.STYLE_WISHES,
     STORAGE_KEYS.KITCHEN_APPLIANCES,
+    STORAGE_KEYS.KITCHENS,
+    STORAGE_KEYS.ACTIVE_KITCHEN_ID,
 ] as const;
 
 /**
@@ -37,6 +39,13 @@ const PantryItemSchema = z.object({
     id: z.string(),
     name: z.string(),
     amount: z.string(),
+});
+
+const KitchenSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    spices: z.array(z.string()),
+    appliances: z.array(z.string()),
 });
 
 const ExportDataSchema = z.object({
@@ -52,6 +61,10 @@ const ExportDataSchema = z.object({
         [STORAGE_KEYS.DIET_PREFERENCE]: z.string().optional(),
         [STORAGE_KEYS.STYLE_WISHES]: z.array(z.string()).optional(),
         [STORAGE_KEYS.KITCHEN_APPLIANCES]: z.array(z.string()).optional(),
+        // Absent in pre-1.5.0 exports; the app then recreates a single
+        // default kitchen from the spice rack / appliances keys on reload.
+        [STORAGE_KEYS.KITCHENS]: z.array(KitchenSchema).optional(),
+        [STORAGE_KEYS.ACTIVE_KITCHEN_ID]: z.string().optional(),
     }),
 });
 
