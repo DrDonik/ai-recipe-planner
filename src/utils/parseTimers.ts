@@ -87,10 +87,10 @@ export function formatDuration(ms: number): string {
 // mid-sentence in recipe text across EN/DE/ES/FR, so a period after them is
 // not a sentence boundary. Single letters ("z.", "B.") are excluded generically.
 const ABBREVIATIONS = new Set([
-  'ca', 'bzw', 'evtl', 'ggf', 'inkl', 'min', 'sek', 'std', 'tl', 'el', 'msp', 'pck', // DE
-  'approx', 'etc', 'oz', 'lb', 'lbs', 'tbsp', 'tsp', 'no', // EN
+  'ca', 'bzw', 'evtl', 'ggf', 'inkl', 'min', 'sek', 'std', 'tl', 'el', 'msp', 'pck', 'st', 'stk', // DE
+  'approx', 'etc', 'oz', 'lb', 'lbs', 'tbsp', 'tsp', 'no', 'pkg', 'pkgs', 'fl', 'qt', 'pt', 'gal', // EN
   'aprox', 'cda', 'cdta', 'núm', // ES
-  'env', 'càs', 'càc', // FR
+  'env', 'càs', 'càc', 'cuil', 'pers', // FR
 ]);
 
 /**
@@ -108,7 +108,7 @@ function isSentenceEndingPeriod(text: string, i: number): boolean {
   // The period must be followed by whitespace and an uppercase letter (a
   // following digit or lowercase letter means "ca. 10", "1.5", "10 Min. mehr").
   let j = i + 1;
-  while (j < text.length && /["')\]]/.test(text[j])) j++;
+  while (j < text.length && /["'’”“‘«»‹›)\]}]/.test(text[j])) j++;
   if (j >= text.length) return true;
   if (!/\s/.test(text[j])) return false;
   while (j < text.length && /\s/.test(text[j])) j++;
@@ -134,6 +134,8 @@ export function extractSentence(text: string, start: number, end: number): strin
       break;
     }
   }
+  // Skip the previous sentence's trailing quotes/brackets (e.g. `…rühren.“ Die`).
+  while (from < start && /["'’”“‘«»‹›)\]}\s]/.test(text[from])) from++;
   let to = text.length;
   for (let i = end; i < text.length; i++) {
     if (isBoundary(text, i)) {
