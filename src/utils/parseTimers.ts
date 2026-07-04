@@ -93,6 +93,10 @@ const ABBREVIATIONS = new Set([
   'env', 'càs', 'càc', 'cuil', 'pers', // FR
 ]);
 
+// Closing quotes/brackets that may sit between a sentence-ending period and
+// the following whitespace (`…lassen.“ Danach`, `…end.” Then`).
+const CLOSERS = /["'’”“‘«»‹›)\]}]/;
+
 /**
  * Whether the period at `text[i]` ends a sentence. Errs on the side of "no":
  * a missed boundary only makes the extracted sentence longer, never wrong.
@@ -108,7 +112,7 @@ function isSentenceEndingPeriod(text: string, i: number): boolean {
   // The period must be followed by whitespace and an uppercase letter (a
   // following digit or lowercase letter means "ca. 10", "1.5", "10 Min. mehr").
   let j = i + 1;
-  while (j < text.length && /["'’”“‘«»‹›)\]}]/.test(text[j])) j++;
+  while (j < text.length && CLOSERS.test(text[j])) j++;
   if (j >= text.length) return true;
   if (!/\s/.test(text[j])) return false;
   while (j < text.length && /\s/.test(text[j])) j++;
@@ -134,12 +138,17 @@ export function extractSentence(text: string, start: number, end: number): strin
       break;
     }
   }
-  // Skip the previous sentence's trailing quotes/brackets (e.g. `…rühren.“ Die`).
-  while (from < start && /["'’”“‘«»‹›)\]}\s]/.test(text[from])) from++;
+  // Step past the previous sentence's trailing quotes/brackets, then the
+  // inter-sentence whitespace — in that order, so an opening quote of this
+  // sentence (`…rühren! „Die Sauce…`) is left intact.
+  while (from < start && CLOSERS.test(text[from])) from++;
+  while (from < start && /\s/.test(text[from])) from++;
   let to = text.length;
   for (let i = end; i < text.length; i++) {
     if (isBoundary(text, i)) {
       to = text[i] === '\n' ? i : i + 1;
+      // Keep this sentence's own trailing quotes/brackets (`…lassen.“`).
+      while (to < text.length && CLOSERS.test(text[to])) to++;
       break;
     }
   }
