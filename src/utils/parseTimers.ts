@@ -19,6 +19,8 @@ export interface TimerSegment {
   text: string;
   /** Duration in milliseconds. For ranges, the longer end is used. */
   durationMs: number;
+  /** The sentence of the instruction containing the match. Used as the timer's label. */
+  sentence: string;
 }
 
 export type InstructionSegment = TextSegment | TimerSegment;
@@ -81,6 +83,78 @@ export function formatDuration(ms: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
+// Abbreviations (lowercased, sans period) that commonly precede a period
+// mid-sentence in recipe text across EN/DE/ES/FR, so a period after them is
+// not a sentence boundary. Single letters ("z.", "B.") are excluded generically.
+const ABBREVIATIONS = new Set([
+  'ca', 'bzw', 'evtl', 'ggf', 'inkl', 'min', 'sek', 'std', 'tl', 'el', 'msp', 'pck', 'st', 'stk', // DE
+  'approx', 'etc', 'oz', 'lb', 'lbs', 'tbsp', 'tsp', 'no', 'pkg', 'pkgs', 'fl', 'qt', 'pt', 'gal', // EN
+  'aprox', 'cda', 'cdta', 'núm', // ES
+  'env', 'càs', 'càc', 'cuil', 'pers', // FR
+]);
+
+// Closing quotes/brackets that may sit between a sentence-ending period and
+// the following whitespace (`…lassen.“ Danach`, `…end.” Then`).
+const CLOSERS = /["'’”“‘«»‹›)\]}]/;
+
+/**
+ * Whether the period at `text[i]` ends a sentence. Errs on the side of "no":
+ * a missed boundary only makes the extracted sentence longer, never wrong.
+ */
+function isSentenceEndingPeriod(text: string, i: number): boolean {
+  // The word directly before the period must not be an abbreviation. Single
+  // letters count as abbreviations/initials ("z. B.", "°C.").
+  let w = i;
+  while (w > 0 && /\p{L}/u.test(text[w - 1])) w--;
+  const word = text.slice(w, i);
+  if (word.length === 1 || ABBREVIATIONS.has(word.toLowerCase())) return false;
+
+  // The period must be followed by whitespace and an uppercase letter (a
+  // following digit or lowercase letter means "ca. 10", "1.5", "10 Min. mehr").
+  let j = i + 1;
+  while (j < text.length && CLOSERS.test(text[j])) j++;
+  if (j >= text.length) return true;
+  if (!/\s/.test(text[j])) return false;
+  while (j < text.length && /\s/.test(text[j])) j++;
+  return j >= text.length || /\p{Lu}/u.test(text[j]);
+}
+
+/** Whether `text[i]` is a sentence boundary. */
+const isBoundary = (text: string, i: number): boolean => {
+  const ch = text[i];
+  return ch === '\n' || ch === '!' || ch === '?' || (ch === '.' && isSentenceEndingPeriod(text, i));
+};
+
+/**
+ * Extracts the sentence of `text` containing the range [start, end). Used to
+ * label a timer with just the instruction sentence its time phrase sits in,
+ * e.g. "Die Sauce ca. 10 Minuten köcheln lassen." out of a multi-sentence step.
+ */
+export function extractSentence(text: string, start: number, end: number): string {
+  let from = 0;
+  for (let i = start - 1; i >= 0; i--) {
+    if (isBoundary(text, i)) {
+      from = i + 1;
+      break;
+    }
+  }
+  // Step past the previous sentence's trailing quotes/brackets, then the
+  // inter-sentence whitespace — in that order, so an opening quote of this
+  // sentence (`…rühren! „Die Sauce…`) is left intact.
+  while (from < start && CLOSERS.test(text[from])) from++;
+  while (from < start && /\s/.test(text[from])) from++;
+  let to = text.length;
+  for (let i = end; i < text.length; i++) {
+    if (isBoundary(text, i)) {
+      to = text[i] === '\n' ? i : i + 1;
+      // Keep this sentence's own trailing quotes/brackets (`…lassen.“`).
+      while (to < text.length && CLOSERS.test(text[to])) to++;
+      break;
+    }
+  }
+  return text.slice(from, to).trim();
+}
+
 /**
  * Splits an instruction string into ordered text and timer segments.
  * Matched durations become {@link TimerSegment}s; everything else stays text.
@@ -104,8 +178,13 @@ export function parseInstruction(text: string | null | undefined): InstructionSe
     if (match.index > lastIndex) {
       segments.push({ type: 'text', text: safeText.slice(lastIndex, match.index) });
     }
-    segments.push({ type: 'timer', text: matched, durationMs });
     lastIndex = match.index + matched.length;
+    segments.push({
+      type: 'timer',
+      text: matched,
+      durationMs,
+      sentence: extractSentence(safeText, match.index, lastIndex),
+    });
   }
 
   if (lastIndex < safeText.length) {

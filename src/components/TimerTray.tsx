@@ -59,7 +59,7 @@ export const TimerTray: React.FC = () => {
                       }`}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-text-muted truncate" title={timer.label}>{timer.label}</p>
+                        <p className="text-xs text-text-muted line-clamp-2" title={timer.label}>{timer.label}</p>
                         <p
                           className={`font-mono tabular-nums text-sm font-semibold ${
                             isDone ? 'text-amber-600 dark:text-amber-400' : 'text-text-main'
