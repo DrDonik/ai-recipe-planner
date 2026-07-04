@@ -64,7 +64,7 @@ const ExportDataSchema = z.object({
         // Absent in pre-1.5.0 exports; the app then recreates a single
         // default kitchen from the spice rack / appliances keys on reload.
         [STORAGE_KEYS.KITCHENS]: z.array(KitchenSchema).optional(),
-        [STORAGE_KEYS.ACTIVE_KITCHEN_ID]: z.string().optional(),
+        [STORAGE_KEYS.ACTIVE_KITCHEN_ID]: z.string().nullable().optional(),
     }),
 });
 

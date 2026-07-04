@@ -59,9 +59,16 @@ export const useKitchens = ({
             return;
         }
         if (!kitchens.some(k => k.id === activeKitchenId)) {
-            setActiveKitchenId(kitchens[0].id);
+            // The stored id points at a kitchen that no longer exists (e.g.
+            // it was deleted on another device). Load the fallback kitchen's
+            // snapshot instead of adopting the orphaned live lists — adopting
+            // them would clobber the fallback's data on the next switch-away.
+            const fallback = kitchens[0];
+            setActiveKitchenId(fallback.id);
+            setSpices(fallback.spices);
+            setAppliances(fallback.appliances);
         }
-    }, [kitchens, activeKitchenId, spices, appliances, setKitchens, setActiveKitchenId, defaultKitchenName]);
+    }, [kitchens, activeKitchenId, spices, appliances, setKitchens, setActiveKitchenId, setSpices, setAppliances, defaultKitchenName]);
 
     const activeKitchen = kitchens.find(k => k.id === activeKitchenId) ?? kitchens[0] ?? null;
     const activeId = activeKitchen?.id ?? null;
