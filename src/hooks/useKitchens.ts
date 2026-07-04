@@ -54,14 +54,15 @@ export const useKitchens = ({
     useEffect(() => {
         if (kitchens.length === 0) {
             const id = generateId();
-            // Functional update: if a concurrent external write (e.g. the
-            // initial sync pull) populated the registry between render and
-            // this effect, keep it. The then-dangling active id set below is
-            // healed by the invalid-id branch on the effect's next run.
+            // Functional updates: if a concurrent external write (e.g. the
+            // initial sync pull) populated the registry or the active id
+            // between render and this effect, keep those values. Any leftover
+            // inconsistency is healed by the invalid-id branch below on the
+            // effect's next run.
             setKitchens(prev => (prev.length === 0
                 ? [{ id, name: defaultKitchenName, spices, appliances }]
                 : prev));
-            setActiveKitchenId(id);
+            setActiveKitchenId(prev => prev ?? id);
             return;
         }
         if (!kitchens.some(k => k.id === activeKitchenId)) {
