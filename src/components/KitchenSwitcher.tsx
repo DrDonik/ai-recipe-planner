@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Info, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Kitchen } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
@@ -36,12 +36,12 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const rootRef = useRef<HTMLDivElement>(null);
 
-    const closePopover = () => {
+    const closePopover = useCallback(() => {
         setOpen(false);
         setEditMode(null);
         setNameInput('');
         setConfirmDeleteId(null);
-    };
+    }, []);
 
     // Close on outside click / Escape (standard popover behaviour).
     useEffect(() => {
@@ -60,7 +60,7 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
             document.removeEventListener('pointerdown', handlePointerDown);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [open]);
+    }, [open, closePopover]);
 
     const startCreate = () => {
         setEditMode({ type: 'create' });

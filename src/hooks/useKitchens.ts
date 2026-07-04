@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react';
 import type { Kitchen } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { useLocalStorage } from './useLocalStorage';
@@ -7,8 +7,8 @@ import { generateId } from '../utils/idGenerator';
 interface UseKitchensArgs {
     spices: string[];
     appliances: string[];
-    setSpices: React.Dispatch<React.SetStateAction<string[]>>;
-    setAppliances: React.Dispatch<React.SetStateAction<string[]>>;
+    setSpices: Dispatch<SetStateAction<string[]>>;
+    setAppliances: Dispatch<SetStateAction<string[]>>;
     /** Localized name for the auto-created initial kitchen ("Home"). */
     defaultKitchenName: string;
 }
