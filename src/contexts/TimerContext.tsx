@@ -20,7 +20,7 @@ export interface CookingTimer {
    * after a remount — e.g. when the same recipe is opened in the focus view.
    */
   sourceId: string;
-  /** The recipe step the timer was started from — shown in the tray. */
+  /** The instruction sentence the timer was started from — shown in the tray. */
   label: string;
   totalMs: number;
   remainingMs: number;

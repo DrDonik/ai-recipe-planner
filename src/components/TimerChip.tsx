@@ -14,7 +14,7 @@ interface TimerChipProps {
   /** The matched time phrase, e.g. "5 minutes". */
   text: string;
   durationMs: number;
-  /** The full recipe step, used as the timer's label in the tray. */
+  /** The instruction sentence containing the phrase, used as the timer's label in the tray. */
   label: string;
 }
 
