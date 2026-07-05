@@ -7,6 +7,7 @@ import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
 import { SpiceRack, type SpiceRackRef } from './components/SpiceRack';
 import { KitchenAppliances, type KitchenAppliancesRef } from './components/KitchenAppliances';
+import { KitchenSwitcher } from './components/KitchenSwitcher';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
@@ -14,6 +15,7 @@ import { ReplaceRecipeDialog } from './components/ReplaceRecipeDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage, writeLocalStorageExternal } from './hooks/useLocalStorage';
+import { useKitchens } from './hooks/useKitchens';
 import { buildMiniPantry, recomputeShoppingList } from './utils/recipeReplacement';
 import { generateId } from './utils/idGenerator';
 import { generateShareUrl } from './utils/sharing';
@@ -36,6 +38,17 @@ function App() {
   const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
   const [appliances, setAppliances, appliancesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.KITCHEN_APPLIANCES, []);
+
+  // Named kitchen profiles (e.g. "Home" vs. "Holiday home") bundling the
+  // spice rack and appliances; the active kitchen's lists stay in the two
+  // legacy keys above.
+  const kitchenProfiles = useKitchens({
+    spices,
+    appliances,
+    setSpices,
+    setAppliances,
+    defaultKitchenName: t.kitchen.defaultName,
+  });
 
   const [headerMinimized, setHeaderMinimized, headerMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
   const [optionsMinimized, setOptionsMinimized, optionsMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.OPTIONS_MINIMIZED, false);
@@ -148,7 +161,8 @@ function App() {
   const anyPersistError = storagePersistError || pantryPersistError || spicesPersistError ||
     appliancesPersistError || headerMinPersistError || optionsMinPersistError || pantryMinPersistError ||
     spiceRackMinPersistError || kitchenAppliancesMinPersistError || shoppingListMinPersistError ||
-    recipeMissingMinPersistError || mealPlanPersistError || shoppingListCheckedPersistError;
+    recipeMissingMinPersistError || mealPlanPersistError || shoppingListCheckedPersistError ||
+    kitchenProfiles.persistError;
 
   useEffect(() => {
     if (anyPersistError && !storageErrorShownRef.current) {
@@ -734,23 +748,40 @@ function App() {
               autoFocus={!mealPlan}
             />
 
-            <SpiceRack
-              ref={spiceRackRef}
-              spices={spices}
-              onAddSpice={addSpice}
-              onRemoveSpice={removeSpice}
-              isMinimized={spiceRackMinimized}
-              onToggleMinimize={handleToggleSpiceRackMinimize}
-            />
+            {/* Kitchen group: the switcher row and the left bracket line tie
+                the spice rack and appliances panels to the active kitchen
+                profile without indenting the panels themselves. */}
+            <div className="relative">
+              <div aria-hidden="true" className="absolute -left-3 top-1 bottom-1 w-1 rounded-full bg-primary/30" />
+              <KitchenSwitcher
+                kitchens={kitchenProfiles.kitchens}
+                activeKitchen={kitchenProfiles.activeKitchen}
+                onSwitch={kitchenProfiles.switchKitchen}
+                onCreate={kitchenProfiles.createKitchen}
+                onRename={kitchenProfiles.renameKitchen}
+                onDelete={kitchenProfiles.deleteKitchen}
+              />
 
-            <KitchenAppliances
-              ref={kitchenAppliancesRef}
-              appliances={appliances}
-              onAddAppliance={addAppliance}
-              onRemoveAppliance={removeAppliance}
-              isMinimized={kitchenAppliancesMinimized}
-              onToggleMinimize={handleToggleKitchenAppliancesMinimize}
-            />
+              <div className="mt-4 space-y-4">
+                <SpiceRack
+                  ref={spiceRackRef}
+                  spices={spices}
+                  onAddSpice={addSpice}
+                  onRemoveSpice={removeSpice}
+                  isMinimized={spiceRackMinimized}
+                  onToggleMinimize={handleToggleSpiceRackMinimize}
+                />
+
+                <KitchenAppliances
+                  ref={kitchenAppliancesRef}
+                  appliances={appliances}
+                  onAddAppliance={addAppliance}
+                  onRemoveAppliance={removeAppliance}
+                  isMinimized={kitchenAppliancesMinimized}
+                  onToggleMinimize={handleToggleKitchenAppliancesMinimize}
+                />
+              </div>
+            </div>
           </div>
 
           {mealPlan && <hr className="md:hidden order-2 border-t-2 border-primary/30" />}
