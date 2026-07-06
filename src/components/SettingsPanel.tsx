@@ -37,7 +37,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
 
         setNewStyleWish('');
 
-        if (styleWishes.includes(trimmed)) return null;
+        if (styleWishes.some(wish => wish.toLowerCase() === trimmed.toLowerCase())) return null;
 
         setStyleWishes([...styleWishes, trimmed]);
         return trimmed;
@@ -49,7 +49,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
 
         setNewPlannedRecipe('');
 
-        if (plannedRecipes.includes(trimmed)) return null;
+        if (plannedRecipes.some(recipe => recipe.toLowerCase() === trimmed.toLowerCase())) return null;
 
         setPlannedRecipes([...plannedRecipes, trimmed]);
         return trimmed;

@@ -537,7 +537,14 @@ function App() {
     userAbortedRef.current = false;
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, appliancesToUse, styleWishesToUse, plannedRecipesToUse, t.errors, controller.signal);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, {
+        spices: spicesToUse,
+        appliances: appliancesToUse,
+        styleWishes: styleWishesToUse,
+        plannedRecipes: plannedRecipesToUse,
+        errorTranslations: t.errors,
+        externalSignal: controller.signal,
+      });
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
@@ -624,7 +631,13 @@ function App() {
       : [...styleWishes, `Avoid recipes similar to "${target.title}".`];
 
     try {
-      const plan = await generateRecipes(apiKey, miniPantry, people, 1, diet, language, spices, appliances, oneOffWishes, [], t.errors, controller.signal);
+      const plan = await generateRecipes(apiKey, miniPantry, people, 1, diet, language, {
+        spices,
+        appliances,
+        styleWishes: oneOffWishes,
+        errorTranslations: t.errors,
+        externalSignal: controller.signal,
+      });
       const newRecipe = plan.recipes[0];
       if (!newRecipe) throw new Error(t.errors.emptyResponse);
       // Force a fresh unique id so React keys and per-recipe image state can't

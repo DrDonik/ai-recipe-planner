@@ -661,13 +661,24 @@ export const generateRecipes = async (
   meals: number,
   diet: string,
   language: string,
-  spices: string[] = [],
-  appliances: string[] = [],
-  styleWishes: string[] = [],
-  plannedRecipes: string[] = [],
-  errorTranslations?: ErrorTranslations,
-  externalSignal?: AbortSignal
+  options: {
+    spices?: string[];
+    appliances?: string[];
+    styleWishes?: string[];
+    plannedRecipes?: string[];
+    errorTranslations?: ErrorTranslations;
+    externalSignal?: AbortSignal;
+  } = {}
 ): Promise<MealPlan> => {
+  const {
+    spices = [],
+    appliances = [],
+    styleWishes = [],
+    plannedRecipes = [],
+    errorTranslations,
+    externalSignal,
+  } = options;
+
   const errors = errorTranslations ?? translations.English.errors;
 
   if (!apiKey) throw new Error(errors.apiKeyRequired);
