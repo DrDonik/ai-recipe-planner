@@ -69,6 +69,8 @@ interface SettingsContextType {
     setDiet: (diet: string) => void;
     styleWishes: string[];
     setStyleWishes: (wishes: string[]) => void;
+    plannedRecipes: string[];
+    setPlannedRecipes: (recipes: string[]) => void;
     language: string;
     setLanguage: (lang: string) => void;
     imageGenEnabled: boolean;
@@ -130,6 +132,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [meals, setMeals, mealsError] = useLocalStorage<number>(STORAGE_KEYS.MEALS_COUNT, DEFAULTS.MEALS_COUNT);
     const [diet, setDiet, dietError] = useLocalStorage<string>(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
+    const [plannedRecipes, setPlannedRecipes, plannedRecipesError] = useLocalStorage<string[]>(STORAGE_KEYS.PLANNED_RECIPES, []);
     const [language, setLanguage, languageError] = useLocalStorage<string>(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
     const [imageGenEnabled, setImageGenEnabled, imageGenEnabledError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_ENABLED, false);
 
@@ -143,7 +146,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         setApiKeyRaw(key);
     }, [apiKey, setApiKeyRaw, imageGenEnabled, setImageGenEnabled]);
 
-    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || languageError || imageGenEnabledError;
+    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || plannedRecipesError || languageError || imageGenEnabledError;
 
     const t = getTranslations(language);
 
@@ -154,6 +157,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         meals, setMeals,
         diet, setDiet,
         styleWishes, setStyleWishes,
+        plannedRecipes, setPlannedRecipes,
         language, setLanguage,
         imageGenEnabled, setImageGenEnabled,
         t,

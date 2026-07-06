@@ -33,7 +33,7 @@ function App() {
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
   const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
-  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, language, imageGenEnabled, setImageGenEnabled, t, storagePersistError } = useSettings();
+  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, plannedRecipes, language, imageGenEnabled, setImageGenEnabled, t, storagePersistError } = useSettings();
 
   const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
@@ -492,12 +492,14 @@ function App() {
     // Flush any pending input from PantryInput, StyleWish, SpiceRack or KitchenAppliances before generating
     const pendingItem = pantryInputRef.current?.flushPendingInput();
     const pendingStyleWish = settingsPanelRef.current?.flushPendingInput();
+    const pendingPlannedRecipe = settingsPanelRef.current?.flushPendingPlannedRecipe();
     const pendingSpice = spiceRackRef.current?.flushPendingInput();
     const pendingAppliance = kitchenAppliancesRef.current?.flushPendingInput();
 
     // If there was a pending item, include it in the pantry, style wishes, spicerack or appliances for generation
     const itemsToUse = pendingItem ? [...pantryItems, pendingItem] : pantryItems;
     const styleWishesToUse = pendingStyleWish ? [...styleWishes, pendingStyleWish] : styleWishes;
+    const plannedRecipesToUse = pendingPlannedRecipe ? [...plannedRecipes, pendingPlannedRecipe] : plannedRecipes;
     const spicesToUse = pendingSpice ? [...spices, pendingSpice] : spices;
     const appliancesToUse = pendingAppliance ? [...appliances, pendingAppliance] : appliances;
 
@@ -512,6 +514,7 @@ function App() {
         spices: spicesToUse,
         appliances: appliancesToUse,
         styleWishes: styleWishesToUse,
+        plannedRecipes: plannedRecipesToUse,
       });
       setCopyPastePrompt(prompt);
       setShowCopyPasteDialog(true);
@@ -534,7 +537,14 @@ function App() {
     userAbortedRef.current = false;
 
     try {
-      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, spicesToUse, appliancesToUse, styleWishesToUse, t.errors, controller.signal);
+      const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, {
+        spices: spicesToUse,
+        appliances: appliancesToUse,
+        styleWishes: styleWishesToUse,
+        plannedRecipes: plannedRecipesToUse,
+        errorTranslations: t.errors,
+        externalSignal: controller.signal,
+      });
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
@@ -550,7 +560,7 @@ function App() {
       userAbortedRef.current = false;
       setLoading(false);
     }
-  }, [pantryItems, spices, appliances, styleWishes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
+  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
 
   const handleCancelGenerate = useCallback(() => {
     if (!generateAbortRef.current) return;
@@ -621,7 +631,13 @@ function App() {
       : [...styleWishes, `Avoid recipes similar to "${target.title}".`];
 
     try {
-      const plan = await generateRecipes(apiKey, miniPantry, people, 1, diet, language, spices, appliances, oneOffWishes, t.errors, controller.signal);
+      const plan = await generateRecipes(apiKey, miniPantry, people, 1, diet, language, {
+        spices,
+        appliances,
+        styleWishes: oneOffWishes,
+        errorTranslations: t.errors,
+        externalSignal: controller.signal,
+      });
       const newRecipe = plan.recipes[0];
       if (!newRecipe) throw new Error(t.errors.emptyResponse);
       // Force a fresh unique id so React keys and per-recipe image state can't

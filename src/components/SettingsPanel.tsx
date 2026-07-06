@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Utensils, ChefHat, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2, X } from 'lucide-react';
+import { Utensils, ChefHat, NotepadText, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2, X } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import type { Notification } from '../types';
 import { VALIDATION } from '../constants';
@@ -7,6 +7,7 @@ import { UndoToast } from './ui/UndoToast';
 
 export interface SettingsPanelRef {
     flushPendingInput: () => string | null;
+    flushPendingPlannedRecipe: () => string | null;
 }
 
 interface SettingsPanelProps {
@@ -26,8 +27,9 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
     onCancelGenerate,
     notification
 }, ref) => {
-    const { diet, setDiet, styleWishes, setStyleWishes, people, setPeople, meals, setMeals, t } = useSettings();
+    const { diet, setDiet, styleWishes, setStyleWishes, plannedRecipes, setPlannedRecipes, people, setPeople, meals, setMeals, t } = useSettings();
     const [newStyleWish, setNewStyleWish] = useState('');
+    const [newPlannedRecipe, setNewPlannedRecipe] = useState('');
 
     const flushPendingInput = (): string | null => {
         const trimmed = newStyleWish.trim();
@@ -35,14 +37,27 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
 
         setNewStyleWish('');
 
-        if (styleWishes.includes(trimmed)) return null;
+        if (styleWishes.some(wish => wish.toLowerCase() === trimmed.toLowerCase())) return null;
 
         setStyleWishes([...styleWishes, trimmed]);
         return trimmed;
     };
 
+    const flushPendingPlannedRecipe = (): string | null => {
+        const trimmed = newPlannedRecipe.trim();
+        if (!trimmed) return null;
+
+        setNewPlannedRecipe('');
+
+        if (plannedRecipes.some(recipe => recipe.toLowerCase() === trimmed.toLowerCase())) return null;
+
+        setPlannedRecipes([...plannedRecipes, trimmed]);
+        return trimmed;
+    };
+
     useImperativeHandle(ref, () => ({
         flushPendingInput,
+        flushPendingPlannedRecipe,
     }));
 
     const handleAddStyleWish = (e: React.FormEvent) => {
@@ -52,6 +67,15 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
 
     const handleRemoveStyleWish = (wishToRemove: string) => {
         setStyleWishes(styleWishes.filter(wish => wish !== wishToRemove));
+    };
+
+    const handleAddPlannedRecipe = (e: React.FormEvent) => {
+        e.preventDefault();
+        flushPendingPlannedRecipe();
+    };
+
+    const handleRemovePlannedRecipe = (recipeToRemove: string) => {
+        setPlannedRecipes(plannedRecipes.filter(recipe => recipe !== recipeToRemove));
     };
 
     return (
@@ -137,6 +161,56 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveStyleWish(wish)}
+                                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
+                                            aria-label={t.remove}
+                                        >
+                                            <Trash2 size={10} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Separator */}
+                        <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent" />
+
+                        {/* Planned Recipes */}
+                        <div className="flex flex-col items-start gap-3">
+                            <div className="flex items-center gap-3">
+                                <NotepadText className="text-secondary" size={24} />
+                                <span>{t.plannedRecipes}</span>
+                            </div>
+                            <form onSubmit={handleAddPlannedRecipe} className="flex items-center gap-2 w-full">
+                                <input
+                                    id="planned-recipes-input"
+                                    type="text"
+                                    value={newPlannedRecipe}
+                                    onChange={(e) => setNewPlannedRecipe(e.target.value)}
+                                    placeholder={t.plannedRecipesPlaceholder}
+                                    maxLength={VALIDATION.MAX_INPUT_LENGTH}
+                                    className="input-field-sm bg-white/50 dark:bg-black/20 border-[var(--glass-border)] flex-1"
+                                    aria-label={t.plannedRecipesPlaceholder}
+                                />
+                                <button
+                                    type="submit"
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-primary hover:bg-primary-dark text-white shadow-sm transition-colors shrink-0"
+                                    aria-label={t.add}
+                                >
+                                    <Plus size={18} />
+                                </button>
+                            </form>
+                            <div className="flex flex-wrap gap-2 w-full">
+                                {plannedRecipes.length === 0 && (
+                                    <div className="text-text-muted text-center py-2 italic w-full text-sm">
+                                        {t.noPlannedRecipes}
+                                    </div>
+                                )}
+                                {plannedRecipes.map((recipe) => (
+                                    <div key={recipe} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
+                                        <span className="font-medium text-xs text-text-main">{recipe}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemovePlannedRecipe(recipe)}
                                             className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
                                             aria-label={t.remove}
                                         >
