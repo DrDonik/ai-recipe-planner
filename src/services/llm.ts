@@ -117,6 +117,7 @@ export interface RecipePromptParams {
   spices?: string[];
   appliances?: string[];
   styleWishes?: string[];
+  plannedRecipes?: string[];
 }
 
 /**
@@ -132,6 +133,7 @@ export const buildRecipePrompt = ({
   spices = [],
   appliances = [],
   styleWishes = [],
+  plannedRecipes = [],
 }: RecipePromptParams): string => {
   const pantryList = ingredients
     .map((v) => `- ${sanitizeUserInput(v.name)} (${sanitizeUserInput(v.amount)}) [ID: ${v.id}]`)
@@ -153,6 +155,13 @@ export const buildRecipePrompt = ({
     ? `STYLE/WISHES: ${sanitizedStyleWishes}`
     : "";
 
+  const sanitizedPlannedRecipes = plannedRecipes
+    .map(recipe => sanitizeUserInput(recipe, 200))
+    .filter(recipe => recipe.length > 0);
+  const plannedRecipesText = sanitizedPlannedRecipes.length > 0
+    ? `REQUESTED DISHES: ${sanitizedPlannedRecipes.join("; ")}. Each of these dishes MUST be planned as exactly one of the ${meals} meals (they count toward the ${meals} meals, in the order given; if there are more requested dishes than meals, prioritize the first ones). Create a full recipe for each requested dish, use my pantry ingredients where possible, and list everything I need to buy for it in "missingIngredients". Plan any remaining meals freely.`
+    : "";
+
   const sanitizedDiet = sanitizeUserInput(diet, 200);
 
   return `
@@ -168,6 +177,7 @@ export const buildRecipePrompt = ({
     DIETARY PREFERENCE: ${sanitizedDiet}
     LANGUAGE: ${language}
     ${styleWishesText}
+    ${plannedRecipesText}
 
     RULES:
     1. STRICTLY follow the dietary preference: ${sanitizedDiet}.${sanitizedStyleWishes ? ` Also respect the style/wishes: ${sanitizedStyleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
@@ -654,6 +664,7 @@ export const generateRecipes = async (
   spices: string[] = [],
   appliances: string[] = [],
   styleWishes: string[] = [],
+  plannedRecipes: string[] = [],
   errorTranslations?: ErrorTranslations,
   externalSignal?: AbortSignal
 ): Promise<MealPlan> => {
@@ -670,6 +681,7 @@ export const generateRecipes = async (
     spices,
     appliances,
     styleWishes,
+    plannedRecipes,
   });
 
   const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
