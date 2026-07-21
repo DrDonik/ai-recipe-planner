@@ -75,7 +75,7 @@ export const URL_PARAMS = {
  */
 export const API_CONFIG = {
     BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models',
-    MODEL: 'gemini-3-flash-preview',
+    MODEL: 'gemini-3.6-flash',
     IMAGE_MODEL: 'gemini-2.5-flash-image',
     TIMEOUT_MS: 60000,
     KEY_URL: 'https://aistudio.google.com/app/apikey',
