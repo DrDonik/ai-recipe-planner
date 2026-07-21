@@ -6,6 +6,11 @@ updates:
       interval: "weekly"
       day: "friday"
     open-pull-requests-limit: 10
+    ignore:
+      # typescript-eslint does not yet support TypeScript 7
+      # (peer range >=4.8.4 <6.1.0). Remove once it does.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         patterns:
