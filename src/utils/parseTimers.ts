@@ -17,8 +17,14 @@ export interface TimerSegment {
   type: 'timer';
   /** The exact matched text, e.g. "3-4 minutes". Shown on the chip. */
   text: string;
-  /** Duration in milliseconds. For ranges, the longer end is used. */
+  /** Duration in milliseconds. For ranges, the shorter end is used. */
   durationMs: number;
+  /**
+   * For ranges, the remainder up to the longer end ("3-4 minutes" → 1 minute).
+   * Runs as a follow-up timer once {@link durationMs} has elapsed. Absent for
+   * single durations.
+   */
+  followUpMs?: number;
   /** The sentence of the instruction containing the match. Used as the timer's label. */
   sentence: string;
 }
@@ -168,8 +174,17 @@ export function parseInstruction(text: string | null | undefined): InstructionSe
   let match: RegExpExecArray | null;
   while ((match = TIMER_REGEX.exec(safeText)) !== null) {
     const [matched, n1, n2, unit] = match;
-    const value = Math.max(parseSingleNumber(n1), n2 ? parseSingleNumber(n2) : 0);
-    const durationMs = Math.round(value * unitToMs(unit));
+    const first = parseSingleNumber(n1);
+    const second = n2 ? parseSingleNumber(n2) : first;
+    const unitMs = unitToMs(unit);
+    const shortMs = Math.round(Math.min(first, second) * unitMs);
+    const longMs = Math.round(Math.max(first, second) * unitMs);
+
+    // A range starts at its shorter end so the cook is alerted as soon as the
+    // food *can* be ready; the remainder follows as a second timer. A zero
+    // short end ("0-5 min") has nothing to alert on, so it runs to the long end.
+    const durationMs = shortMs > 0 ? shortMs : longMs;
+    const followUpMs = longMs - durationMs;
 
     // Leave non-positive durations as plain text (they'll be folded into the
     // next text slice since lastIndex isn't advanced past them).
@@ -183,6 +198,7 @@ export function parseInstruction(text: string | null | undefined): InstructionSe
       type: 'timer',
       text: matched,
       durationMs,
+      ...(followUpMs > 0 && { followUpMs }),
       sentence: extractSentence(safeText, match.index, lastIndex),
     });
   }
