@@ -14,17 +14,20 @@ interface TimerChipProps {
   /** The matched time phrase, e.g. "5 minutes". */
   text: string;
   durationMs: number;
+  /** For ranges, the extra time counted after `durationMs` has elapsed. */
+  followUpMs?: number;
   /** The instruction sentence containing the phrase, used as the timer's label in the tray. */
   label: string;
 }
 
 /**
  * An inline, clickable time phrase inside a recipe step. Tapping it starts a
- * countdown (shown in place and in the tray); tapping again cancels it. Lives
- * inside a step <li> that toggles its own highlight, so clicks/keys are stopped
- * from bubbling to the parent.
+ * countdown (shown in place and in the tray); tapping again cancels it. A range
+ * counts its shorter end first, chimes, then counts the remainder in amber.
+ * Lives inside a step <li> that toggles its own highlight, so clicks/keys are
+ * stopped from bubbling to the parent.
  */
-export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs, label }) => {
+export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs, followUpMs, label }) => {
   const { t } = useSettings();
   const { timers, startTimer, cancelTimer } = useTimers();
 
@@ -34,13 +37,14 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
   const done = timer?.status === 'done';
   const paused = timer?.status === 'paused';
   const running = timer?.status === 'running';
+  const followUp = timer?.phase === 'followUp';
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (timer) {
       cancelTimer(timer.id);
     } else {
-      startTimer(sourceId, label, durationMs);
+      startTimer(sourceId, label, durationMs, followUpMs);
     }
   };
 
@@ -51,20 +55,31 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
 
   const display = done ? t.timers.done : timer ? formatDuration(timer.remainingMs) : text;
 
-  const colors = done
-    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 animate-pulse'
-    : running
-      ? 'bg-secondary/15 text-secondary border-secondary/30 hover:bg-secondary/25'
-      : paused
-        ? 'bg-secondary/5 text-secondary/60 border-secondary/30 border-dashed hover:bg-secondary/15'
+  // Spoken time: announce the follow-up as such, and — before the start —
+  // spell out that a range begins at its shorter end.
+  const spokenTime = timer
+    ? followUp ? `${t.timers.followUp} ${display}` : display
+    : followUpMs
+      ? `${formatDuration(durationMs)} + ${formatDuration(followUpMs)} ${t.timers.followUp}`
+      : display;
+
+  // Amber marks the extra time of a range as well as the finished timer; only
+  // the finished one pulses. Pausing keeps the tone and adds the dashed border.
+  const tone = done || followUp
+    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/25'
+    : paused
+      ? 'bg-secondary/5 text-secondary/60 border-secondary/30 hover:bg-secondary/15'
+      : running
+        ? 'bg-secondary/15 text-secondary border-secondary/30 hover:bg-secondary/25'
         : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20';
+  const colors = `${tone}${done ? ' animate-pulse' : ''}${paused ? ' border-dashed' : ''}`;
 
   return (
     <button
       type="button"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      aria-label={`${display} — ${done ? t.timers.dismiss : timer ? t.timers.cancel : t.timers.startAria}`}
+      aria-label={`${spokenTime} — ${done ? t.timers.dismiss : timer ? t.timers.cancel : t.timers.startAria}`}
       className={`inline-flex items-center gap-1 align-middle rounded-full border px-1.5 py-0.5 mx-0.5 text-[0.85em] font-medium leading-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${colors}`}
     >
       {done ? <BellRing size={13} /> : paused ? <Pause size={13} /> : <TimerIcon size={13} />}

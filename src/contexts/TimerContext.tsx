@@ -12,6 +12,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 export type TimerStatus = 'running' | 'paused' | 'done';
 
+/**
+ * 'main' is the timer as started. A timer parsed from a range ("3-4 minutes")
+ * runs the shorter end first and then switches to 'followUp' for the remainder,
+ * so the cook is alerted at the earliest moment the food can be ready.
+ */
+export type TimerPhase = 'main' | 'followUp';
+
 export interface CookingTimer {
   id: string;
   /**
@@ -27,13 +34,16 @@ export interface CookingTimer {
   /** Epoch ms when a running timer will finish; null while paused or done. */
   endsAt: number | null;
   status: TimerStatus;
+  phase: TimerPhase;
+  /** Duration of the follow-up phase, cleared once it starts. */
+  followUpMs?: number;
 }
 
 interface TimerContextValue {
   timers: CookingTimer[];
   muted: boolean;
   toggleMuted: () => void;
-  startTimer: (sourceId: string, label: string, durationMs: number) => string;
+  startTimer: (sourceId: string, label: string, durationMs: number, followUpMs?: number) => string;
   pauseTimer: (id: string) => void;
   resumeTimer: (id: string) => void;
   cancelTimer: (id: string) => void;
@@ -133,9 +143,16 @@ const pointAtChime = (el: HTMLAudioElement) => {
   }
 };
 
+// How long a timer entering its follow-up phase chimes. Long enough for a few
+// repetitions of the alarm — a "look at the pan" nudge that falls silent by
+// itself, unlike the final alarm which rings until it is dismissed.
+const INTERIM_CHIME_MS = 3200;
+
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const [timers, setTimers] = useState<CookingTimer[]>([]);
   const [muted, setMuted] = useState(false);
+  /** Epoch ms until which the short follow-up chime should sound; 0 when idle. */
+  const [interimChimeUntil, setInterimChimeUntil] = useState(0);
 
   // <audio> element playing the synthesized chime. Unlocked on a user gesture
   // (starting/resuming a timer) so it is allowed to ring later when the timer
@@ -180,6 +197,18 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
           const remainingMs = Math.max(0, t.endsAt - now);
           if (remainingMs <= 0) {
             changed = true;
+            // A range's timer doesn't finish at its short end — it rolls over
+            // into the follow-up phase and keeps counting the remainder.
+            if (t.followUpMs) {
+              return {
+                ...t,
+                phase: 'followUp' as const,
+                totalMs: t.followUpMs,
+                remainingMs: t.followUpMs,
+                endsAt: now + t.followUpMs,
+                followUpMs: undefined,
+              };
+            }
             return { ...t, remainingMs: 0, endsAt: null, status: 'done' as const };
           }
           // Only re-render when the displayed second actually changes.
@@ -197,13 +226,24 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(interval);
   }, [hasRunning]);
 
+  // Announce each timer that rolls over into its follow-up phase, once.
+  const announcedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const inFollowUp = timers.filter((t) => t.phase === 'followUp').map((t) => t.id);
+    const hasNew = inFollowUp.some((id) => !announcedRef.current.has(id));
+    announcedRef.current = new Set(inFollowUp);
+    if (hasNew) setInterimChimeUntil(Date.now() + INTERIM_CHIME_MS);
+  }, [timers]);
+
   // Ring — looping like a kitchen timer — while at least one finished timer is
   // waiting to be dismissed; stop as soon as the last one is dismissed or the
   // alarm is muted. Unmuting while a timer is still done resumes ringing.
+  // The follow-up chime uses the same alarm but silences itself after a moment.
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    if (anyDone && !muted) {
+    const interimMsLeft = interimChimeUntil - Date.now();
+    if (!muted && (anyDone || interimMsLeft > 0)) {
       pointAtChime(el); // in case a timer finished before the unlock settled
       el.loop = true;
       el.currentTime = 0;
@@ -212,7 +252,12 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
       el.pause();
       el.currentTime = 0;
     }
-  }, [anyDone, muted]);
+    // A finished timer outranks the interim chime and keeps ringing regardless.
+    if (!anyDone && interimMsLeft > 0) {
+      const timeout = setTimeout(() => setInterimChimeUntil(0), interimMsLeft);
+      return () => clearTimeout(timeout);
+    }
+  }, [anyDone, muted, interimChimeUntil]);
 
   // Release the audio element when the provider unmounts.
   useEffect(() => () => {
@@ -225,13 +270,16 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const startTimer = useCallback((sourceId: string, label: string, durationMs: number) => {
+  const startTimer = useCallback((sourceId: string, label: string, durationMs: number, followUpMs?: number) => {
     ensureAudio();
     const id = nextId();
     const endsAt = Date.now() + durationMs;
     setTimers((prev) => [
       ...prev,
-      { id, sourceId, label, totalMs: durationMs, remainingMs: durationMs, endsAt, status: 'running' },
+      {
+        id, sourceId, label, totalMs: durationMs, remainingMs: durationMs, endsAt,
+        status: 'running', phase: 'main', followUpMs,
+      },
     ]);
     return id;
   }, [ensureAudio]);

@@ -45,6 +45,8 @@ export const TimerTray: React.FC = () => {
                 {timers.map((timer) => {
                   const isDone = timer.status === 'done';
                   const isRunning = timer.status === 'running';
+                  const isFollowUp = timer.phase === 'followUp';
+                  const amber = isDone || isFollowUp;
                   return (
                     <motion.li
                       key={timer.id}
@@ -53,16 +55,21 @@ export const TimerTray: React.FC = () => {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       className={`flex items-center gap-2 rounded-lg border p-2 overflow-hidden ${
-                        isDone
-                          ? 'bg-amber-500/10 border-amber-500/30 animate-pulse'
+                        amber
+                          ? `bg-amber-500/10 border-amber-500/30 ${isDone ? 'animate-pulse' : ''}`
                           : 'bg-white/40 dark:bg-black/20 border-border-base/30'
                       }`}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-text-muted line-clamp-2" title={timer.label}>{timer.label}</p>
+                        {isFollowUp && !isDone && (
+                          <p className="text-[0.65rem] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400" role="status">
+                            {t.timers.followUp}
+                          </p>
+                        )}
                         <p
                           className={`font-mono tabular-nums text-sm font-semibold ${
-                            isDone ? 'text-amber-600 dark:text-amber-400' : 'text-text-main'
+                            amber ? 'text-amber-600 dark:text-amber-400' : 'text-text-main'
                           }`}
                           role={isDone ? 'status' : undefined}
                         >
