@@ -10,7 +10,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Copy-
 
 ## Versioning & Release
 
-**Current version**: 1.7.0
+**Current version**: 1.8.0
 
 This project follows [Semantic Versioning](https://semver.org/) (SemVer):
 
@@ -20,11 +20,14 @@ This project follows [Semantic Versioning](https://semver.org/) (SemVer):
 
 ### Version Management Workflow
 
-1. Update version in `package.json` and `AGENTS.md`
+1. Update version in `package.json` (use `npm version X.Y.Z --no-git-tag-version` so `package-lock.json` stays in sync) and in `AGENTS.md`
 2. Commit changes with message: `chore: bump version to X.Y.Z`
-3. Create git tag: `git tag -a vX.Y.Z -m "Release version X.Y.Z"`
-4. Push commits and tags: `git push && git push --tags`
-5. GitHub Release is automatically created with a GitHub workflow.
+3. Get the commit onto `main` (push, or merge a pull request)
+4. `tag-release.yml` creates the `vX.Y.Z` tag automatically, which triggers `release.yml` to publish the GitHub Release.
+
+Tagging by hand is no longer necessary — the version in `package.json` is what
+drives a release. An existing tag is never overwritten, so re-running the
+workflow on an already-released version is a no-op.
 
 ## Implementation Guidelines
 

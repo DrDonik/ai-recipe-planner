@@ -1,0 +1,41 @@
+name: Tag release
+
+# Creates the vX.Y.Z tag whenever package.json's version reaches main without
+# a matching tag. The tag push then triggers release.yml.
+#
+# The GitHub App token is required, not cosmetic: a tag pushed with the default
+# GITHUB_TOKEN does not trigger other workflows, so release.yml would never run.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Create tag if the version is not tagged yet
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
+            echo "$VERSION is already tagged, nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release version ${VERSION#v}"
+          git push origin "$VERSION"
+          echo "Tagged $VERSION." >> $GITHUB_STEP_SUMMARY
