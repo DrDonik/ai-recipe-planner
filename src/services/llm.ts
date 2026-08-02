@@ -193,7 +193,8 @@ export const buildRecipePrompt = ({
   const dateText = `TODAY: ${today}${timeZone ? ` (time zone: ${timeZone})` : ''}`;
   // Assembled from our own numbers and a fixed lookup — see RecipePromptParams.
   const weatherLine = weather
-    ? `WEATHER (next ${OPEN_METEO.FORECAST_DAYS} days): ${weather.changeable ? 'changeable, ' : ''}${weather.minC}-${weather.maxC} °C, ${WEATHER_CONDITION_TEXT[weather.condition]}`
+    // "to" rather than a hyphen: a frosty week would otherwise read "-5--1 °C".
+    ? `WEATHER (next ${OPEN_METEO.FORECAST_DAYS} days): ${weather.changeable ? 'changeable, ' : ''}${weather.minC} to ${weather.maxC} °C, ${WEATHER_CONDITION_TEXT[weather.condition]}`
     : '';
   // Appended to the date line rather than given its own template slot, so the
   // prompt stays byte-identical to the pre-weather output when there is none.

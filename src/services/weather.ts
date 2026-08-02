@@ -128,7 +128,16 @@ export const searchLocations = async (
 
     const languageCode = GEOCODING_LANGUAGE[language] ?? 'en';
     const url = `${OPEN_METEO.GEOCODING_URL}?name=${encodeURIComponent(trimmed)}&count=5&language=${languageCode}&format=json`;
-    const parsed = GeocodingResponseSchema.safeParse(await fetchJson(url, signal));
+
+    let payload: unknown;
+    try {
+        payload = await fetchJson(url, signal);
+    } catch {
+        // Offline, rate-limited or aborted: an empty list is what the caller
+        // renders as "no matching place found".
+        return [];
+    }
+    const parsed = GeocodingResponseSchema.safeParse(payload);
     if (!parsed.success) return [];
 
     return (parsed.data.results ?? []).map((result) => {

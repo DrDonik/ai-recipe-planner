@@ -82,12 +82,17 @@ const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClea
             latitude: suggestion.latitude,
             longitude: suggestion.longitude,
         });
+        // Dropping the results is not redundant with the query comparison
+        // above: picking a hit whose name equals what was typed would otherwise
+        // leave the list matching, and open, after the location was applied.
         setQuery(suggestion.name);
+        setSearch(null);
     };
 
     const handleClear = () => {
         onClear();
         setQuery('');
+        setSearch(null);
     };
 
     return (
@@ -283,8 +288,13 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
     // What the model is told, in the user's language. Shown only when there is
     // something to show — no location, offline or a failed fetch leaves the
     // header exactly as it was before this feature existed.
+    // A tight en dash turns "-5–-1 °C" into a puzzle, so a range with a
+    // negative bound gets spaces around the dash.
+    const range = forecast
+        ? `${forecast.minC}${forecast.minC < 0 || forecast.maxC < 0 ? ' – ' : '–'}${forecast.maxC} °C`
+        : '';
     const weatherSummary = forecast && activeKitchen?.location
-        ? `${activeKitchen.location.name} · ${forecast.changeable ? `${t.kitchen.weatherChangeable}, ` : ''}${forecast.minC}–${forecast.maxC} °C, ${t.kitchen.weatherConditions[forecast.condition]}`
+        ? `${activeKitchen.location.name} · ${forecast.changeable ? `${t.kitchen.weatherChangeable}, ` : ''}${range}, ${t.kitchen.weatherConditions[forecast.condition]}`
         : null;
 
     return (
