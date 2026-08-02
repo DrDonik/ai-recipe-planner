@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Timer as TimerIcon, Pause, Play, X, Volume2, VolumeX } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
@@ -9,15 +9,42 @@ import { formatDuration } from '../utils/parseTimers';
  * Floating tray listing all active cooking timers, each labelled with the
  * recipe step it came from. Mounted once at the app root; renders nothing when
  * no timers are running.
+ *
+ * Publishes its own height as `--timer-tray-height` on the document root so
+ * other bottom-anchored floats can stack above it on screens too narrow to sit
+ * beside it (see RecipeChat). The tray is the one that stays put: a countdown
+ * is more time-critical than anything that would cover it.
  */
 export const TimerTray: React.FC = () => {
   const { t } = useSettings();
   const { timers, muted, toggleMuted, pauseTimer, resumeTimer, cancelTimer } = useTimers();
+  const trayRef = useRef<HTMLDivElement>(null);
+  const hasTimers = timers.length > 0;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = trayRef.current;
+    if (!el) {
+      root.style.setProperty('--timer-tray-height', '0px');
+      return;
+    }
+    // The extra 8px is the gap below the float stacked on top, kept here so the
+    // consumer is a plain `calc(1rem + var(...))`.
+    const publishHeight = () => root.style.setProperty('--timer-tray-height', `${el.offsetHeight + 8}px`);
+    publishHeight();
+    // The tray grows and shrinks as timers are added, finish, or are dismissed.
+    const observer = new ResizeObserver(publishHeight);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty('--timer-tray-height', '0px');
+    };
+  }, [hasTimers]);
 
   return (
     <AnimatePresence>
       {timers.length > 0 && (
-        <div className="fixed bottom-4 right-4 z-50 w-72 max-w-[calc(100vw-2rem)]">
+        <div ref={trayRef} className="fixed bottom-4 right-4 z-50 w-72 max-w-[calc(100vw-2rem)]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

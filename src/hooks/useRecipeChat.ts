@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { chatAboutRecipe, type ChatMessage, type RecipeChatContext } from '../services/llm';
+import { generateId } from '../utils/idGenerator';
 import type { Recipe } from '../types';
 
 /**
@@ -18,14 +19,26 @@ import type { Recipe } from '../types';
 
 export const chatKeyFor = (recipe: Recipe): string => recipe.id ?? recipe.title;
 
-const EMPTY_HISTORY: readonly ChatMessage[] = [];
+/**
+ * A transcript entry: the wire-level message plus a UI-only identity.
+ *
+ * The id anchors the timer chips parsed out of a reply — a chip's `sourceId`
+ * must stay stable across remounts but must never be reused, and a positional
+ * key would be: clearing the chat and asking again puts a fresh reply at the
+ * same index, where it would adopt the earlier message's running timer.
+ */
+export interface StoredChatMessage extends ChatMessage {
+    id: string;
+}
+
+const EMPTY_HISTORY: readonly StoredChatMessage[] = [];
 
 /** Cap on a single question, mirroring the app's other free-text limits. */
 export const MAX_CHAT_INPUT_LENGTH = 500;
 
 export function useRecipeChat() {
     const { apiKey, language, t } = useSettings();
-    const [histories, setHistories] = useState<Record<string, ChatMessage[]>>({});
+    const [histories, setHistories] = useState<Record<string, StoredChatMessage[]>>({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [pendingKey, setPendingKey] = useState<string | null>(null);
     // Synchronous in-flight guard, so a double-tap on Send can't slip past a
@@ -37,7 +50,7 @@ export function useRecipeChat() {
     const generationRef = useRef(0);
 
     const getMessages = useCallback(
-        (key: string): readonly ChatMessage[] => histories[key] ?? EMPTY_HISTORY,
+        (key: string): readonly StoredChatMessage[] => histories[key] ?? EMPTY_HISTORY,
         [histories]
     );
 
@@ -52,7 +65,7 @@ export function useRecipeChat() {
      */
     const run = useCallback(async (
         recipe: Recipe,
-        history: ChatMessage[],
+        history: StoredChatMessage[],
         context: RecipeChatContext
     ): Promise<void> => {
         const key = chatKeyFor(recipe);
@@ -73,7 +86,7 @@ export function useRecipeChat() {
                 errorTranslations: t.errors,
             });
             if (generationRef.current !== generation) return;
-            setHistories(prev => ({ ...prev, [key]: [...(prev[key] ?? []), { role: 'model', text: reply }] }));
+            setHistories(prev => ({ ...prev, [key]: [...(prev[key] ?? []), { id: generateId(), role: 'model', text: reply }] }));
         } catch (err) {
             if (generationRef.current !== generation) return;
             const message = err instanceof Error ? err.message : t.errors.unexpectedError;
@@ -88,7 +101,7 @@ export function useRecipeChat() {
         const trimmed = text.trim().slice(0, MAX_CHAT_INPUT_LENGTH);
         if (!trimmed || inFlightRef.current) return;
         const key = chatKeyFor(recipe);
-        const history: ChatMessage[] = [...(histories[key] ?? []), { role: 'user', text: trimmed }];
+        const history: StoredChatMessage[] = [...(histories[key] ?? []), { id: generateId(), role: 'user', text: trimmed }];
         setHistories(prev => ({ ...prev, [key]: history }));
         void run(recipe, history, context);
     }, [histories, run]);
