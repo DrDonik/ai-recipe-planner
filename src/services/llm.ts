@@ -166,6 +166,14 @@ export const buildRecipePrompt = ({
 
   const sanitizedDiet = sanitizeUserInput(diet, 200);
 
+  // Local (not UTC) ISO date, so the season hint stays correct around midnight.
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  // The IANA time zone lets the model infer hemisphere and climate region
+  // without asking the user for a location.
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const dateText = `TODAY: ${today}${timeZone ? ` (time zone: ${timeZone})` : ''}`;
+
   return `
     You are a smart recipe planner. 
 
@@ -178,6 +186,7 @@ export const buildRecipePrompt = ({
 
     DIETARY PREFERENCE: ${sanitizedDiet}
     LANGUAGE: ${language}
+    ${dateText}
     ${styleWishesText}
     ${plannedRecipesText}
 
@@ -200,6 +209,7 @@ export const buildRecipePrompt = ({
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
     18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.
+    19. Let the season at TODAY's date gently inform the recipes: which produce is at its best then, and whether lighter or heartier dishes fit the time of year. Treat the time zone only as a coarse hint for hemisphere and climate region; ignore it where it does not clearly indicate one, and only assume a holiday if the date makes it unmistakable. This is a soft guideline only — the dietary preference, style/wishes, requested dishes and good use of my pantry always take precedence, and no recipe should be rejected merely for being out of season. Do not state the date in the output.
     20. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK! Use single quotes (') for any quotations within the text.
     
     NUTRITION ESTIMATES:
