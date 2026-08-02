@@ -3,8 +3,10 @@ import { Sparkles } from 'lucide-react';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useGistSync } from './hooks/useGistSync';
 import { useRecipeImage } from './hooks/useRecipeImage';
+import { useRecipeChat } from './hooks/useRecipeChat';
 import { PantryInput, type PantryInputRef } from './components/PantryInput';
 import { RecipeCard } from './components/RecipeCard';
+import { RecipeChat } from './components/RecipeChat';
 import { SpiceRack, type SpiceRackRef } from './components/SpiceRack';
 import { KitchenAppliances, type KitchenAppliancesRef } from './components/KitchenAppliances';
 import { KitchenSwitcher } from './components/KitchenSwitcher';
@@ -154,6 +156,14 @@ function App() {
   // Single-recipe replacement needs a live API call, so it's gated like image
   // generation: direct-API mode with a key (no copy-paste support for now).
   const canReplaceRecipes = !useCopyPaste && !!apiKey;
+
+  // In-kitchen chat about the recipe being cooked. Same gate as above — a chat
+  // is only workable with a live API call, and unlike image generation it needs
+  // no persistence target, so it also works on a recipe opened from a shared
+  // link (using the viewer's own key). Transcripts are held here, at the app
+  // root, so they survive leaving and re-entering the focus view.
+  const recipeChat = useRecipeChat();
+  const canChat = !useCopyPaste && !!apiKey;
 
   // Storage error notification — deduplicated via ref guard
   const storageErrorShownRef = useRef(false);
@@ -692,6 +702,7 @@ function App() {
             imageUrl={recipeImage.getImageUrl(viewRecipe.id)}
           />
         </div>
+        {canChat && <RecipeChat recipe={viewRecipe} chat={recipeChat} />}
       </div>
     );
   }
