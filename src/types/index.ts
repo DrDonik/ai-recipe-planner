@@ -12,6 +12,18 @@ export interface PantryItem {
 }
 
 /**
+ * The place a kitchen stands in, used to look up a weather forecast.
+ * Geocoded once when the user picks a town, then stored as coordinates so
+ * no further name lookup is needed.
+ */
+export interface KitchenLocation {
+  /** Display name as shown in the UI. Never sent to the LLM. */
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
+/**
  * A kitchen profile bundling a set of staples (spice rack) and appliances,
  * e.g. "Home" vs. "Holiday home". The ACTIVE kitchen's lists live in the
  * legacy SPICE_RACK / KITCHEN_APPLIANCES storage keys; the `spices` and
@@ -24,6 +36,12 @@ export interface Kitchen {
   name: string;
   spices: string[];
   appliances: string[];
+  /**
+   * Optional: absent for kitchens created before this field existed and for
+   * everyone who never set a location. Unlike the list snapshots above, this
+   * is authoritative even while the kitchen is active.
+   */
+  location?: KitchenLocation;
 }
 
 /**

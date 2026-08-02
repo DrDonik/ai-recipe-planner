@@ -1,5 +1,5 @@
 import { useCallback, useEffect, type Dispatch, type SetStateAction } from 'react';
-import type { Kitchen } from '../types';
+import type { Kitchen, KitchenLocation } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { useLocalStorage } from './useLocalStorage';
 import { generateId } from '../utils/idGenerator';
@@ -20,6 +20,8 @@ export interface UseKitchensResult {
     switchKitchen: (id: string) => void;
     createKitchen: (name: string, copyCurrent: boolean) => void;
     renameKitchen: (id: string, name: string) => void;
+    /** Sets or (with `null`) clears the kitchen's weather location. */
+    setKitchenLocation: (id: string, location: KitchenLocation | null) => void;
     deleteKitchen: (id: string) => void;
     persistError: boolean;
 }
@@ -112,6 +114,19 @@ export const useKitchens = ({
         setKitchens(prev => prev.map(k => (k.id === id ? { ...k, name } : k)));
     }, [setKitchens]);
 
+    // Written straight to the registry entry — unlike the spice/appliance
+    // lists, the location has no live counterpart in a legacy storage key.
+    const setKitchenLocation = useCallback((id: string, location: KitchenLocation | null) => {
+        setKitchens(prev => prev.map(k => {
+            if (k.id !== id) return k;
+            if (!location) {
+                const { location: _removed, ...rest } = k;
+                return rest;
+            }
+            return { ...k, location };
+        }));
+    }, [setKitchens]);
+
     const deleteKitchen = useCallback((id: string) => {
         if (kitchens.length <= 1) return;
         if (id === activeId) {
@@ -130,6 +145,7 @@ export const useKitchens = ({
         switchKitchen,
         createKitchen,
         renameKitchen,
+        setKitchenLocation,
         deleteKitchen,
         persistError: kitchensPersistError || activeIdPersistError,
     };

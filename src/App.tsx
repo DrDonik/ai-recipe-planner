@@ -18,6 +18,7 @@ import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './servi
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
 import { useLocalStorage, writeLocalStorageExternal } from './hooks/useLocalStorage';
 import { useKitchens } from './hooks/useKitchens';
+import { useWeather } from './hooks/useWeather';
 import { buildMiniPantry, recomputeShoppingList } from './utils/recipeReplacement';
 import { generateId } from './utils/idGenerator';
 import { generateShareUrl } from './utils/sharing';
@@ -51,6 +52,11 @@ function App() {
     setAppliances,
     defaultKitchenName: t.kitchen.defaultName,
   });
+
+  // Prefetched and cached, because the copy-paste flow builds its prompt
+  // synchronously on click and cannot wait for a fetch. Undefined whenever
+  // the active kitchen has no location or no forecast could be obtained.
+  const forecast = useWeather(kitchenProfiles.activeKitchen?.location);
 
   const [headerMinimized, setHeaderMinimized, headerMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.HEADER_MINIMIZED, false);
   const [optionsMinimized, setOptionsMinimized, optionsMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.OPTIONS_MINIMIZED, false);
@@ -525,6 +531,7 @@ function App() {
         appliances: appliancesToUse,
         styleWishes: styleWishesToUse,
         plannedRecipes: plannedRecipesToUse,
+        weather: forecast,
       });
       setCopyPastePrompt(prompt);
       setShowCopyPasteDialog(true);
@@ -552,6 +559,7 @@ function App() {
         appliances: appliancesToUse,
         styleWishes: styleWishesToUse,
         plannedRecipes: plannedRecipesToUse,
+        weather: forecast,
         errorTranslations: t.errors,
         externalSignal: controller.signal,
       });
@@ -570,7 +578,7 @@ function App() {
       userAbortedRef.current = false;
       setLoading(false);
     }
-  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
+  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, forecast, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
 
   const handleCancelGenerate = useCallback(() => {
     if (!generateAbortRef.current) return;
@@ -783,9 +791,11 @@ function App() {
               <KitchenSwitcher
                 kitchens={kitchenProfiles.kitchens}
                 activeKitchen={kitchenProfiles.activeKitchen}
+                forecast={forecast}
                 onSwitch={kitchenProfiles.switchKitchen}
                 onCreate={kitchenProfiles.createKitchen}
                 onRename={kitchenProfiles.renameKitchen}
+                onSetLocation={kitchenProfiles.setKitchenLocation}
                 onDelete={kitchenProfiles.deleteKitchen}
               />
 

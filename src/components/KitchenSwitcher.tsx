@@ -1,20 +1,154 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Info, Pencil, Plus, Trash2 } from 'lucide-react';
-import type { Kitchen } from '../types';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { Check, ChevronDown, Info, MapPin, Pencil, Plus, Trash2, X } from 'lucide-react';
+import type { Kitchen, KitchenLocation } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import { TooltipButton } from './ui';
-import { VALIDATION } from '../constants';
+import { OPEN_METEO, VALIDATION } from '../constants';
+import { searchLocations, type Forecast, type LocationSuggestion } from '../services/weather';
 
 interface KitchenSwitcherProps {
     kitchens: Kitchen[];
     activeKitchen: Kitchen | null;
+    /** Forecast for the active kitchen's location, if any could be fetched. */
+    forecast?: Forecast;
     onSwitch: (id: string) => void;
     onCreate: (name: string, copyCurrent: boolean) => void;
     onRename: (id: string, name: string) => void;
+    onSetLocation: (id: string, location: KitchenLocation | null) => void;
     onDelete: (id: string) => void;
 }
 
-type EditMode = { type: 'create' } | { type: 'rename'; id: string } | null;
+type EditMode = { type: 'create' } | { type: 'edit'; id: string } | null;
+
+/** Debounce before a keystroke turns into a geocoding request. */
+const SEARCH_DEBOUNCE_MS = 300;
+
+interface LocationFieldProps {
+    kitchen: Kitchen;
+    onSelect: (location: KitchenLocation) => void;
+    onClear: () => void;
+}
+
+/**
+ * Town picker for a kitchen: type a name, pick a geocoding hit, and the
+ * coordinates are stored on the kitchen. Selecting or clearing applies
+ * immediately — there is nothing to confirm, and a half-typed name that
+ * matches no place simply does nothing.
+ */
+const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClear }) => {
+    const { language, t } = useSettings();
+    const inputId = useId();
+    const [query, setQuery] = useState(kitchen.location?.name ?? '');
+    // Results carry the query they belong to, so a stale list can be ignored
+    // during render instead of being cleared from the effect.
+    const [search, setSearch] = useState<{
+        query: string;
+        done: boolean;
+        suggestions: LocationSuggestion[];
+    } | null>(null);
+
+    // Debounced lookup. Skipped while the field still shows the stored
+    // location, so merely opening the editor costs no request.
+    useEffect(() => {
+        const trimmed = query.trim();
+        if (trimmed.length < 2 || trimmed === kitchen.location?.name) return;
+
+        let cancelled = false;
+        const controller = new AbortController();
+        const timer = setTimeout(() => {
+            setSearch({ query: trimmed, done: false, suggestions: [] });
+            searchLocations(trimmed, language, controller.signal)
+                .then(results => {
+                    if (!cancelled) setSearch({ query: trimmed, done: true, suggestions: results });
+                })
+                .catch(() => {
+                    if (!cancelled) setSearch({ query: trimmed, done: true, suggestions: [] });
+                });
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+            controller.abort();
+        };
+    }, [query, language, kitchen.location?.name]);
+
+    const current = search && search.query === query.trim() ? search : null;
+    const suggestions = current?.done ? current.suggestions : [];
+
+    const handleSelect = (suggestion: LocationSuggestion) => {
+        onSelect({
+            name: suggestion.name,
+            latitude: suggestion.latitude,
+            longitude: suggestion.longitude,
+        });
+        setQuery(suggestion.name);
+    };
+
+    const handleClear = () => {
+        onClear();
+        setQuery('');
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            <label htmlFor={inputId} className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                {t.kitchen.locationLabel}
+            </label>
+            <div className="flex items-center gap-1">
+                <input
+                    id={inputId}
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t.kitchen.locationPlaceholder}
+                    maxLength={VALIDATION.MAX_INPUT_LENGTH}
+                    autoComplete="off"
+                    className="input-field-sm w-full min-w-0 flex-1"
+                />
+                {kitchen.location && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="btn-icon p-1.5"
+                        aria-label={t.kitchen.locationClearAria}
+                    >
+                        <X size={14} />
+                    </button>
+                )}
+            </div>
+
+            {current && !current.done && <p className="text-xs text-text-muted">{t.kitchen.locationSearching}</p>}
+            {current?.done && suggestions.length === 0 && (
+                <p className="text-xs text-text-muted">{t.kitchen.locationNoResults}</p>
+            )}
+            {suggestions.length > 0 && (
+                <ul className="flex flex-col rounded-md border border-border-base overflow-hidden">
+                    {suggestions.map((suggestion) => (
+                        <li key={`${suggestion.latitude},${suggestion.longitude}`}>
+                            <button
+                                type="button"
+                                onClick={() => handleSelect(suggestion)}
+                                className="w-full px-2 py-1.5 text-left text-sm truncate hover:bg-bg-surface-hover text-text-main"
+                            >
+                                {suggestion.label}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            <a
+                href={OPEN_METEO.ATTRIBUTION_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[10px] text-text-muted hover:underline"
+            >
+                {t.kitchen.weatherAttribution}
+            </a>
+        </div>
+    );
+};
 
 /**
  * Group header row for the Spice Rack + Kitchen Appliances panels: shows
@@ -24,9 +158,11 @@ type EditMode = { type: 'create' } | { type: 'rename'; id: string } | null;
 export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
     kitchens,
     activeKitchen,
+    forecast,
     onSwitch,
     onCreate,
     onRename,
+    onSetLocation,
     onDelete,
 }) => {
     const { t } = useSettings();
@@ -68,10 +204,18 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
         setConfirmDeleteId(null);
     };
 
-    const startRename = (kitchen: Kitchen) => {
-        setEditMode({ type: 'rename', id: kitchen.id });
+    const startEdit = (kitchen: Kitchen) => {
+        setEditMode({ type: 'edit', id: kitchen.id });
         setNameInput(kitchen.name);
         setConfirmDeleteId(null);
+    };
+
+    // Shortcut from the weather line: straight into the active kitchen's
+    // editor, which is where a wrong or outdated location gets corrected.
+    const editActiveKitchen = () => {
+        if (!activeKitchen) return;
+        setOpen(true);
+        startEdit(activeKitchen);
     };
 
     const submitName = (copyCurrent: boolean) => {
@@ -136,7 +280,15 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
         </form>
     );
 
+    // What the model is told, in the user's language. Shown only when there is
+    // something to show — no location, offline or a failed fetch leaves the
+    // header exactly as it was before this feature existed.
+    const weatherSummary = forecast && activeKitchen?.location
+        ? `${activeKitchen.location.name} · ${forecast.changeable ? `${t.kitchen.weatherChangeable}, ` : ''}${forecast.minC}–${forecast.maxC} °C, ${t.kitchen.weatherConditions[forecast.condition]}`
+        : null;
+
     return (
+        <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
@@ -163,11 +315,18 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                 </button>
 
                 {open && (
-                    <div className="absolute right-0 top-full mt-2 z-50 w-64 glass-card p-3 flex flex-col gap-1">
+                    <div className="absolute right-0 top-full mt-2 z-50 w-72 glass-card p-3 flex flex-col gap-1">
                         {kitchens.map((kitchen) => (
                             <div key={kitchen.id} className="flex items-center gap-1">
-                                {editMode?.type === 'rename' && editMode.id === kitchen.id ? (
-                                    <div className="flex-1 min-w-0">{nameForm(kitchen)}</div>
+                                {editMode?.type === 'edit' && editMode.id === kitchen.id ? (
+                                    <div className="flex-1 min-w-0 flex flex-col gap-2">
+                                        {nameForm(kitchen)}
+                                        <LocationField
+                                            kitchen={kitchen}
+                                            onSelect={(location) => onSetLocation(kitchen.id, location)}
+                                            onClear={() => onSetLocation(kitchen.id, null)}
+                                        />
+                                    </div>
                                 ) : (
                                     <>
                                         <button
@@ -183,7 +342,15 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                                                 size={14}
                                                 className={`shrink-0 text-primary ${kitchen.id === activeKitchen?.id ? '' : 'invisible'}`}
                                             />
-                                            <span className="truncate">{kitchen.name}</span>
+                                            <span className="min-w-0 flex-1 flex flex-col">
+                                                <span className="truncate">{kitchen.name}</span>
+                                                {kitchen.location && (
+                                                    <span className="flex items-center gap-1 text-xs text-text-muted">
+                                                        <MapPin size={11} className="shrink-0" />
+                                                        <span className="truncate">{kitchen.location.name}</span>
+                                                    </span>
+                                                )}
+                                            </span>
                                         </button>
                                         {confirmDeleteId === kitchen.id ? (
                                             <button
@@ -200,9 +367,9 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                                             <>
                                                 <button
                                                     type="button"
-                                                    onClick={() => startRename(kitchen)}
+                                                    onClick={() => startEdit(kitchen)}
                                                     className="btn-icon p-1.5"
-                                                    aria-label={`${t.kitchen.renameAria}: ${kitchen.name}`}
+                                                    aria-label={`${t.kitchen.editAria}: ${kitchen.name}`}
                                                 >
                                                     <Pencil size={14} />
                                                 </button>
@@ -240,6 +407,22 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                     </div>
                 )}
             </div>
+        </div>
+
+        {weatherSummary && (
+            <button
+                type="button"
+                onClick={editActiveKitchen}
+                // No aria-label: the summary itself is the accessible name, so
+                // screen-reader users get the hint the sighted user sees rather
+                // than a duplicate of the pencil's label.
+                title={t.kitchen.weatherTooltip}
+                className="flex items-center gap-1 text-xs text-text-muted hover:text-text-main transition-colors text-left"
+            >
+                <MapPin size={12} className="shrink-0" />
+                <span className="truncate">{weatherSummary}</span>
+            </button>
+        )}
         </div>
     );
 };

@@ -39,6 +39,7 @@ export const STORAGE_KEYS = {
     STORAGE_TIPS_CACHE: 'storage_tips_cache',
     PHOTO_PRIVACY_ACK: 'photo_privacy_ack',
     IMAGE_GEN_ENABLED: 'image_gen_enabled',
+    WEATHER_CACHE: 'weather_cache',
 } as const;
 
 /**
@@ -79,6 +80,25 @@ export const API_CONFIG = {
     IMAGE_MODEL: 'gemini-3.1-flash-image',
     TIMEOUT_MS: 60000,
     KEY_URL: 'https://aistudio.google.com/app/apikey',
+} as const;
+
+/**
+ * Open-Meteo configuration. No API key required; the free tier is CC BY 4.0
+ * for non-commercial use, which is why the location editor credits it.
+ */
+export const OPEN_METEO = {
+    GEOCODING_URL: 'https://geocoding-api.open-meteo.com/v1/search',
+    FORECAST_URL: 'https://api.open-meteo.com/v1/forecast',
+    ATTRIBUTION_URL: 'https://open-meteo.com/',
+    /** Days summarized into the weather hint. */
+    FORECAST_DAYS: 4,
+    TIMEOUT_MS: 8000,
+    /** Cached forecasts older than this are refreshed in the background. */
+    STALE_MS: 3 * 60 * 60 * 1000,
+    /** Beyond this a cached forecast is dropped rather than used. */
+    MAX_AGE_MS: 24 * 60 * 60 * 1000,
+    /** Cache entries kept (one per location); oldest are evicted first. */
+    MAX_CACHE_ENTRIES: 8,
 } as const;
 
 /**
