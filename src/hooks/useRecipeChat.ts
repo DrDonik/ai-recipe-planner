@@ -31,6 +31,10 @@ export function useRecipeChat() {
     // Synchronous in-flight guard, so a double-tap on Send can't slip past a
     // not-yet-applied state update and fire two requests.
     const inFlightRef = useRef<string | null>(null);
+    // Bumped by `clear`. A reply (or error) whose generation is stale belongs
+    // to a transcript the user has since wiped, and is dropped — otherwise it
+    // would reappear as a lone answer with no question attached.
+    const generationRef = useRef(0);
 
     const getMessages = useCallback(
         (key: string): readonly ChatMessage[] => histories[key] ?? EMPTY_HISTORY,
@@ -54,6 +58,7 @@ export function useRecipeChat() {
         const key = chatKeyFor(recipe);
         if (inFlightRef.current) return;
         inFlightRef.current = key;
+        const generation = generationRef.current;
         setPendingKey(key);
         setErrors(prev => {
             if (!(key in prev)) return prev;
@@ -67,8 +72,10 @@ export function useRecipeChat() {
                 context,
                 errorTranslations: t.errors,
             });
+            if (generationRef.current !== generation) return;
             setHistories(prev => ({ ...prev, [key]: [...(prev[key] ?? []), { role: 'model', text: reply }] }));
         } catch (err) {
+            if (generationRef.current !== generation) return;
             const message = err instanceof Error ? err.message : t.errors.unexpectedError;
             setErrors(prev => ({ ...prev, [key]: message }));
         } finally {
@@ -95,6 +102,7 @@ export function useRecipeChat() {
     }, [histories, run]);
 
     const clear = useCallback((key: string) => {
+        generationRef.current += 1;
         setHistories(prev => {
             if (!(key in prev)) return prev;
             const next = { ...prev };

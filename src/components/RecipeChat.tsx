@@ -32,6 +32,10 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
     const [input, setInput] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
+    const launcherRef = useRef<HTMLButtonElement>(null);
+    // Skips the focus-return on first render, so merely entering the focus view
+    // doesn't steal focus from the recipe.
+    const wasOpenRef = useRef(false);
 
     const key = chatKeyFor(recipe);
     const messages = chat.getMessages(key);
@@ -56,8 +60,16 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
         if (el) el.scrollTop = el.scrollHeight;
     }, [messages.length, isPending, error, isOpen]);
 
+    // Move focus into the panel when it opens, and hand it back to the button
+    // when it closes — otherwise Escape or the close button drop focus on
+    // document.body and a keyboard user has to tab in from the top of the page.
     useEffect(() => {
-        if (isOpen) inputRef.current?.focus();
+        if (isOpen) {
+            inputRef.current?.focus();
+        } else if (wasOpenRef.current) {
+            launcherRef.current?.focus();
+        }
+        wasOpenRef.current = isOpen;
     }, [isOpen]);
 
     useEffect(() => {
@@ -81,6 +93,7 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
             <AnimatePresence>
                 {!isOpen && (
                     <motion.button
+                        ref={launcherRef}
                         type="button"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}

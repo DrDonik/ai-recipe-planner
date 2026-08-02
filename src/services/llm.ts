@@ -742,6 +742,17 @@ RULES:
 const MAX_CHAT_HISTORY_TURNS = 12;
 
 /**
+ * Trims the conversation to the last `MAX_CHAT_HISTORY_TURNS` turns, then drops
+ * any leading `model` turn the cut exposed: Gemini requires `contents` to start
+ * with a `user` role, so a window that opens on a reply is rejected outright.
+ */
+const trimChatHistory = (history: ChatMessage[]): ChatMessage[] => {
+  const window = history.slice(-MAX_CHAT_HISTORY_TURNS);
+  const firstUser = window.findIndex((message) => message.role === 'user');
+  return firstUser <= 0 ? window : window.slice(firstUser);
+};
+
+/**
  * Answers a question about a recipe, with the recipe and the user's cooking
  * progress as context. Returns the assistant's reply as plain text.
  *
@@ -755,19 +766,17 @@ export const chatAboutRecipe = async (
   options: {
     context?: RecipeChatContext;
     errorTranslations?: ErrorTranslations;
-    externalSignal?: AbortSignal;
   } = {}
 ): Promise<string> => {
-  const { context = {}, errorTranslations, externalSignal } = options;
+  const { context = {}, errorTranslations } = options;
   const errors = errorTranslations ?? translations.English.errors;
 
   if (!apiKey) throw new Error(errors.apiKeyRequired);
   if (history.length === 0) throw new Error(errors.unexpectedError);
 
-  const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
-  const signal = externalSignal
-    ? AbortSignal.any([externalSignal, timeoutSignal])
-    : timeoutSignal;
+  // No caller-supplied signal: the chat has no cancel affordance, and a reply
+  // that arrives after the panel is closed still belongs in the transcript.
+  const signal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
 
   try {
     const response = await fetch(
@@ -779,7 +788,7 @@ export const chatAboutRecipe = async (
           systemInstruction: {
             parts: [{ text: buildRecipeChatSystemInstruction(recipe, language, context) }],
           },
-          contents: history.slice(-MAX_CHAT_HISTORY_TURNS).map((message) => ({
+          contents: trimChatHistory(history).map((message) => ({
             role: message.role,
             parts: [{ text: message.text }],
           })),
@@ -819,8 +828,6 @@ export const chatAboutRecipe = async (
     console.error('Recipe chat error:', error);
 
     if (error instanceof Error) {
-      // Caller-initiated abort: re-throw as-is so the UI can distinguish it.
-      if (error.name === 'AbortError' && externalSignal?.aborted) throw error;
       if (error.name === 'AbortError' || error.name === 'TimeoutError') {
         throw new Error(errors.timeout, { cause: error });
       }
