@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Timer as TimerIcon, Pause, Play, X, Volume2, VolumeX } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
@@ -9,15 +9,48 @@ import { formatDuration } from '../utils/parseTimers';
  * Floating tray listing all active cooking timers, each labelled with the
  * recipe step it came from. Mounted once at the app root; renders nothing when
  * no timers are running.
+ *
+ * Publishes its own height as `--timer-tray-height` on the document root so
+ * other bottom-anchored floats can stack above it on screens too narrow to sit
+ * beside it (see RecipeChat). The tray is the one that stays put: a countdown
+ * is more time-critical than anything that would cover it.
  */
 export const TimerTray: React.FC = () => {
   const { t } = useSettings();
   const { timers, muted, toggleMuted, pauseTimer, resumeTimer, cancelTimer } = useTimers();
+  const trayRef = useRef<HTMLDivElement>(null);
+  const hasTimers = timers.length > 0;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = trayRef.current;
+    if (!el) {
+      root.style.setProperty('--timer-tray-height', '0px');
+      return;
+    }
+    // A non-zero height carries an extra 8px — the gap below the float stacked
+    // on top — so the consumer stays a plain `calc(1rem + var(...))`. Height 0
+    // must stay exactly 0: the observer also fires with 0 when AnimatePresence
+    // finally detaches the tray, and adding the gap there would strand the
+    // float 8px above its resting position for the rest of the session.
+    const publishHeight = () => {
+      const height = el.offsetHeight;
+      root.style.setProperty('--timer-tray-height', height > 0 ? `${height + 8}px` : '0px');
+    };
+    publishHeight();
+    // The tray grows and shrinks as timers are added, finish, or are dismissed.
+    const observer = new ResizeObserver(publishHeight);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty('--timer-tray-height', '0px');
+    };
+  }, [hasTimers]);
 
   return (
     <AnimatePresence>
       {timers.length > 0 && (
-        <div className="fixed bottom-4 right-4 z-50 w-72 max-w-[calc(100vw-2rem)]">
+        <div ref={trayRef} className="fixed bottom-4 right-4 z-50 w-72 max-w-[calc(100vw-2rem)]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

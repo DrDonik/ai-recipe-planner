@@ -4,8 +4,19 @@ import { MessageCircle, X, Send, Loader2, AlertCircle, RefreshCw, Eraser } from 
 import { useSettings } from '../contexts/SettingsContext';
 import { useCookingProgress } from '../contexts/CookingProgressContext';
 import { chatKeyFor, MAX_CHAT_INPUT_LENGTH, type RecipeChatController } from '../hooks/useRecipeChat';
+import { parseInstruction } from '../utils/parseTimers';
+import { TimerChip } from './TimerChip';
 import type { RecipeChatContext } from '../services/llm';
 import type { Recipe } from '../types';
+
+/**
+ * Bottom offset for the chat's floats. The chat sits bottom-left and the timer
+ * tray bottom-right; together they need 384 + 288 + gutters ≈ 704px, so below
+ * `md` (768px) they would overlap. There, the chat rides on top of the tray's
+ * published height instead — the tray keeps the corner, since a running
+ * countdown must never be covered by a conversation.
+ */
+const STACK_ABOVE_TRAY = 'bottom-[calc(1rem_+_var(--timer-tray-height,0px))] md:bottom-4';
 
 interface RecipeChatProps {
     /** The recipe being cooked — handed to the model as context. */
@@ -100,7 +111,7 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => setIsOpen(true)}
                         aria-label={t.recipeChat.open}
-                        className="fixed bottom-4 left-4 z-40 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary-hover transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        className={`fixed left-4 z-40 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary-hover transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${STACK_ABOVE_TRAY}`}
                     >
                         <MessageCircle size={24} />
                         {messages.length > 0 && (
@@ -119,7 +130,7 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
-                        className="fixed bottom-4 left-4 z-40 w-96 max-w-[calc(100vw-2rem)]"
+                        className={`fixed left-4 z-40 w-96 max-w-[calc(100vw-2rem)] ${STACK_ABOVE_TRAY}`}
                     >
                         <div
                             role="dialog"
@@ -169,16 +180,32 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
                                     </p>
                                 )}
 
-                                {messages.map((message, idx) => (
+                                {messages.map((message) => (
                                     <div
-                                        key={`${message.role}-${idx}`}
+                                        key={message.id}
                                         className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
                                             message.role === 'user'
                                                 ? 'self-end bg-primary/10 text-text-main'
                                                 : 'self-start bg-white/60 dark:bg-black/25 border border-border-base/30 text-text-main'
                                         }`}
                                     >
-                                        {message.text}
+                                        {/* Time phrases in a reply become the same one-tap timers as
+                                            in a recipe step. Only replies are parsed — a chip inside
+                                            the user's own question would be noise. */}
+                                        {message.role === 'model'
+                                            ? parseInstruction(message.text).map((segment, si) =>
+                                                segment.type === 'timer'
+                                                    ? <TimerChip
+                                                        key={si}
+                                                        sourceId={`${message.id}::${si}`}
+                                                        text={segment.text}
+                                                        durationMs={segment.durationMs}
+                                                        followUpMs={segment.followUpMs}
+                                                        label={segment.sentence}
+                                                    />
+                                                    : <React.Fragment key={si}>{segment.text}</React.Fragment>
+                                            )
+                                            : message.text}
                                     </div>
                                 ))}
 
