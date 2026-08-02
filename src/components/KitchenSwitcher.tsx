@@ -291,7 +291,7 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
     // A tight en dash turns "-5–-1 °C" into a puzzle, so a range with a
     // negative bound gets spaces around the dash.
     const range = forecast
-        ? `${forecast.minC}${forecast.minC < 0 || forecast.maxC < 0 ? ' – ' : '–'}${forecast.maxC} °C`
+        ? `${forecast.minHighC}${forecast.minHighC < 0 || forecast.maxHighC < 0 ? ' – ' : '–'}${forecast.maxHighC} °C`
         : '';
     const weatherSummary = forecast && activeKitchen?.location
         ? `${activeKitchen.location.name} · ${forecast.changeable ? `${t.kitchen.weatherChangeable}, ` : ''}${range}, ${t.kitchen.weatherConditions[forecast.condition]}`

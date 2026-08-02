@@ -101,7 +101,7 @@ export const translations = {
             locationNoResults: "No matching place found.",
             locationClearAria: "Remove location",
             weatherAttribution: "Weather data: Open-Meteo (CC BY 4.0)",
-            weatherTooltip: "Forecast for the coming days at this location. Used as a gentle hint when planning the recipes.",
+            weatherTooltip: "Daytime highs for the coming days at this location. Used as a gentle hint when planning the recipes.",
             weatherChangeable: "changeable",
             weatherConditions: {
                 clear: "mostly sunny",
@@ -429,7 +429,7 @@ export const translations = {
             locationNoResults: "Kein passender Ort gefunden.",
             locationClearAria: "Ort entfernen",
             weatherAttribution: "Wetterdaten: Open-Meteo (CC BY 4.0)",
-            weatherTooltip: "Vorhersage für die kommenden Tage an diesem Ort. Fließt als sanfter Hinweis in die Rezeptplanung ein.",
+            weatherTooltip: "Tageshöchstwerte der kommenden Tage an diesem Ort. Fließen als sanfter Hinweis in die Rezeptplanung ein.",
             weatherChangeable: "wechselhaft",
             weatherConditions: {
                 clear: "meist sonnig",
@@ -757,7 +757,7 @@ export const translations = {
             locationNoResults: "Aucun lieu correspondant trouvé.",
             locationClearAria: "Supprimer le lieu",
             weatherAttribution: "Données météo : Open-Meteo (CC BY 4.0)",
-            weatherTooltip: "Prévisions pour les prochains jours à cet endroit. Utilisées comme suggestion discrète pour les recettes.",
+            weatherTooltip: "Températures maximales des prochains jours à cet endroit. Utilisées comme suggestion discrète pour les recettes.",
             weatherChangeable: "variable",
             weatherConditions: {
                 clear: "plutôt ensoleillé",
@@ -1085,7 +1085,7 @@ export const translations = {
             locationNoResults: "No se encontró ningún lugar.",
             locationClearAria: "Quitar lugar",
             weatherAttribution: "Datos meteorológicos: Open-Meteo (CC BY 4.0)",
-            weatherTooltip: "Pronóstico para los próximos días en este lugar. Se usa como sugerencia suave al planificar las recetas.",
+            weatherTooltip: "Temperaturas máximas de los próximos días en este lugar. Se usan como sugerencia suave al planificar las recetas.",
             weatherChangeable: "cambiante",
             weatherConditions: {
                 clear: "mayormente soleado",

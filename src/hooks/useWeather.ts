@@ -15,6 +15,17 @@ type WeatherCache = Record<string, CacheEntry>;
 const cacheKey = (latitude: number, longitude: number): string =>
     `${latitude.toFixed(2)},${longitude.toFixed(2)}`;
 
+/**
+ * Guards against entries written by an earlier shape of `Forecast` (the
+ * summary moved from a min/max mix to daytime highs). Such an entry is treated
+ * as absent, so it is refetched instead of rendering as `NaN`.
+ */
+const usableEntry = (entry: CacheEntry | undefined): CacheEntry | undefined => (
+    typeof entry?.forecast?.minHighC === 'number' && typeof entry.forecast.maxHighC === 'number'
+        ? entry
+        : undefined
+);
+
 /** Keeps the newest entries only — the cache is a convenience, not a store. */
 const evictOldest = (cache: WeatherCache): WeatherCache => {
     const keys = Object.keys(cache);
@@ -53,7 +64,7 @@ export const useWeather = (location: KitchenLocation | undefined): Forecast | un
         if (latitude === undefined || longitude === undefined) return;
 
         const key = cacheKey(latitude, longitude);
-        const cached = cacheRef.current[key];
+        const cached = usableEntry(cacheRef.current[key]);
         const age = cached ? Date.now() - cached.fetchedAt : Infinity;
         if (age < OPEN_METEO.STALE_MS) return;
         // Too old to stand in for a forecast: drop it now, so a failing fetch

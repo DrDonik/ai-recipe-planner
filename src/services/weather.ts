@@ -13,12 +13,18 @@ import { OPEN_METEO } from '../constants';
 /** Coarse weather vocabulary the WMO codes are mapped onto. */
 export type WeatherCondition = 'clear' | 'cloudy' | 'rain' | 'snow' | 'storm' | 'fog';
 
-/** Summary of the next few days, as handed to the prompt builder. */
+/**
+ * Summary of the next few days, as handed to the prompt builder.
+ *
+ * Both temperatures are daytime highs: what a meal is planned around is how
+ * warm the day gets, not how cold the night was. Mixing in the nightly minima
+ * produced ranges like "19 to 37 °C" that say very little.
+ */
 export interface Forecast {
-    /** Lowest daily minimum over the forecast window, °C, whole numbers. */
-    minC: number;
-    /** Highest daily maximum over the forecast window, °C, whole numbers. */
-    maxC: number;
+    /** Coolest daily high in the window, °C, whole numbers. */
+    minHighC: number;
+    /** Warmest daily high in the window, °C, whole numbers. */
+    maxHighC: number;
     condition: WeatherCondition;
     /** Daily highs spread by more than 8 °C — the window has no single character. */
     changeable: boolean;
@@ -45,7 +51,6 @@ const GeocodingResponseSchema = z.object({
 
 const ForecastResponseSchema = z.object({
     daily: z.object({
-        temperature_2m_min: z.array(z.number()),
         temperature_2m_max: z.array(z.number()),
         weather_code: z.array(z.number()),
     }),
@@ -159,20 +164,20 @@ export const fetchForecast = async (
     signal?: AbortSignal,
 ): Promise<Forecast> => {
     const url = `${OPEN_METEO.FORECAST_URL}?latitude=${latitude}&longitude=${longitude}`
-        + `&daily=temperature_2m_min,temperature_2m_max,weather_code`
+        + `&daily=temperature_2m_max,weather_code`
         + `&forecast_days=${OPEN_METEO.FORECAST_DAYS}&timezone=auto`;
     const parsed = ForecastResponseSchema.safeParse(await fetchJson(url, signal));
     if (!parsed.success) throw new Error('Unexpected Open-Meteo forecast shape');
 
-    const { temperature_2m_min: mins, temperature_2m_max: maxs, weather_code: codes } = parsed.data.daily;
-    if (mins.length === 0 || maxs.length === 0 || codes.length === 0) {
+    const { temperature_2m_max: highs, weather_code: codes } = parsed.data.daily;
+    if (highs.length === 0 || codes.length === 0) {
         throw new Error('Empty Open-Meteo forecast');
     }
 
     return {
-        minC: Math.round(Math.min(...mins)),
-        maxC: Math.round(Math.max(...maxs)),
+        minHighC: Math.round(Math.min(...highs)),
+        maxHighC: Math.round(Math.max(...highs)),
         condition: dominantCondition(codes),
-        changeable: Math.max(...maxs) - Math.min(...maxs) > CHANGEABLE_SPREAD_C,
+        changeable: Math.max(...highs) - Math.min(...highs) > CHANGEABLE_SPREAD_C,
     };
 };
