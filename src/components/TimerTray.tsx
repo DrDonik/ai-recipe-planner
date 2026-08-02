@@ -28,9 +28,15 @@ export const TimerTray: React.FC = () => {
       root.style.setProperty('--timer-tray-height', '0px');
       return;
     }
-    // The extra 8px is the gap below the float stacked on top, kept here so the
-    // consumer is a plain `calc(1rem + var(...))`.
-    const publishHeight = () => root.style.setProperty('--timer-tray-height', `${el.offsetHeight + 8}px`);
+    // A non-zero height carries an extra 8px — the gap below the float stacked
+    // on top — so the consumer stays a plain `calc(1rem + var(...))`. Height 0
+    // must stay exactly 0: the observer also fires with 0 when AnimatePresence
+    // finally detaches the tray, and adding the gap there would strand the
+    // float 8px above its resting position for the rest of the session.
+    const publishHeight = () => {
+      const height = el.offsetHeight;
+      root.style.setProperty('--timer-tray-height', height > 0 ? `${height + 8}px` : '0px');
+    };
     publishHeight();
     // The tray grows and shrinks as timers are added, finish, or are dismissed.
     const observer = new ResizeObserver(publishHeight);

@@ -41,8 +41,11 @@ const FRACTION_CHARS = Object.keys(FRACTIONS).join('');
 // ("1½", "1.5", "1,5"), or a lone fraction glyph ("½").
 const NUMBER = `(?:\\d+(?:[.,]\\d+)?\\s*[${FRACTION_CHARS}]?|[${FRACTION_CHARS}])`;
 
-// Optional second number forming a range ("3-4", "3 to 4", "3 bis 4", "3 à 4").
-const RANGE = `(?:\\s*(?:-|–|—|to|bis|à)\\s*(${NUMBER}))?`;
+// Optional second number forming a range ("3-4", "3 to 4", "3 bis 4", "3 à 4",
+// "3 a 4"). The bare Spanish "a" is safe despite being a common word: it only
+// counts when it sits between two numbers that are themselves followed by a
+// time unit.
+const RANGE = `(?:\\s*(?:-|–|—|to|bis|à|a)\\s*(${NUMBER}))?`;
 
 // Unit words across EN/DE/ES/FR. Longer alternatives come first so "minutes"
 // wins over a bare "min". Bare single letters ("h", "s") are matched last and

@@ -16,7 +16,7 @@ import type { Recipe } from '../types';
  * published height instead — the tray keeps the corner, since a running
  * countdown must never be covered by a conversation.
  */
-const STACK_ABOVE_TRAY = 'bottom-[calc(1rem+var(--timer-tray-height,0px))] md:bottom-4';
+const STACK_ABOVE_TRAY = 'bottom-[calc(1rem_+_var(--timer-tray-height,0px))] md:bottom-4';
 
 interface RecipeChatProps {
     /** The recipe being cooked — handed to the model as context. */
