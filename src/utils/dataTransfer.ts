@@ -46,6 +46,13 @@ const KitchenSchema = z.object({
     name: z.string(),
     spices: z.array(z.string()),
     appliances: z.array(z.string()),
+    // Absent in exports written before the weather hint existed, and whenever
+    // the user set no location.
+    location: z.object({
+        name: z.string(),
+        latitude: z.number(),
+        longitude: z.number(),
+    }).optional(),
 });
 
 const ExportDataSchema = z.object({

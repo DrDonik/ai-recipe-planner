@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { API_CONFIG } from '../constants';
+import { API_CONFIG, OPEN_METEO } from '../constants';
 import { translations } from '../constants/translations';
 import type { PantryItem, MealPlan, Ingredient, Recipe } from '../types';
+import type { Forecast, WeatherCondition } from './weather';
 
 /**
  * Sanitizes user input to prevent prompt injection attacks.
@@ -120,7 +121,23 @@ export interface RecipePromptParams {
   appliances?: string[];
   styleWishes?: string[];
   plannedRecipes?: string[];
+  /**
+   * Forecast for the kitchen's location, if one is set and a forecast could
+   * be fetched. Passed as structured values, never as a ready-made string, so
+   * that nothing from the weather API's response can reach the prompt.
+   */
+  weather?: Forecast;
 }
+
+/** Fixed English phrasings for the weather hint — see `weather` above. */
+const WEATHER_CONDITION_TEXT: Record<WeatherCondition, string> = {
+  clear: 'mostly sunny',
+  cloudy: 'mostly cloudy',
+  rain: 'rainy',
+  snow: 'snowy',
+  storm: 'stormy',
+  fog: 'foggy',
+};
 
 /**
  * Builds the prompt for recipe generation.
@@ -136,6 +153,7 @@ export const buildRecipePrompt = ({
   appliances = [],
   styleWishes = [],
   plannedRecipes = [],
+  weather,
 }: RecipePromptParams): string => {
   const pantryList = ingredients
     .map((v) => `- ${sanitizeUserInput(v.name)} (${sanitizeUserInput(v.amount)}) [ID: ${v.id}]`)
@@ -173,6 +191,14 @@ export const buildRecipePrompt = ({
   // without asking the user for a location.
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const dateText = `TODAY: ${today}${timeZone ? ` (time zone: ${timeZone})` : ''}`;
+  // Assembled from our own numbers and a fixed lookup — see RecipePromptParams.
+  const weatherLine = weather
+    // "to" rather than a hyphen: a frosty week would otherwise read "-5--1 °C".
+    ? `WEATHER (next ${OPEN_METEO.FORECAST_DAYS} days, daytime highs): ${weather.changeable ? 'changeable, ' : ''}${weather.minHighC} to ${weather.maxHighC} °C, ${WEATHER_CONDITION_TEXT[weather.condition]}`
+    : '';
+  // Appended to the date line rather than given its own template slot, so the
+  // prompt stays byte-identical to the pre-weather output when there is none.
+  const contextText = weatherLine ? `${dateText}\n    ${weatherLine}` : dateText;
 
   return `
     You are a smart recipe planner. 
@@ -186,7 +212,7 @@ export const buildRecipePrompt = ({
 
     DIETARY PREFERENCE: ${sanitizedDiet}
     LANGUAGE: ${language}
-    ${dateText}
+    ${contextText}
     ${styleWishesText}
     ${plannedRecipesText}
 
@@ -209,7 +235,7 @@ export const buildRecipePrompt = ({
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
     18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.
-    19. Let the season at TODAY's date gently inform the recipes: which produce is at its best then, and whether lighter or heartier dishes fit the time of year. Treat the time zone only as a coarse hint for hemisphere and climate region; ignore it where it does not clearly indicate one, and only assume a holiday if the date makes it unmistakable. This is a soft guideline only — the dietary preference, style/wishes, requested dishes and good use of my pantry always take precedence, and no recipe should be rejected merely for being out of season. Do not state the date in the output.
+    19. Let the season at TODAY's date gently inform the recipes: which produce is at its best then, and whether lighter or heartier dishes fit the time of year. Treat the time zone only as a coarse hint for hemisphere and climate region; ignore it where it does not clearly indicate one, and only assume a holiday if the date makes it unmistakable.${weatherLine ? " If a WEATHER line is given, let the coming days' temperatures and conditions also guide how light or hearty and how cooling or warming the dishes are; it describes the whole period, so do not tie it to a particular meal." : ''} This is a soft guideline only — the dietary preference, style/wishes, requested dishes and good use of my pantry always take precedence, and no recipe should be rejected merely for being out of season. Do not state the date in the output.
     20. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK! Use single quotes (') for any quotations within the text.
     
     NUTRITION ESTIMATES:
@@ -864,6 +890,7 @@ export const generateRecipes = async (
     appliances?: string[];
     styleWishes?: string[];
     plannedRecipes?: string[];
+    weather?: Forecast;
     errorTranslations?: ErrorTranslations;
     externalSignal?: AbortSignal;
   } = {}
@@ -873,6 +900,7 @@ export const generateRecipes = async (
     appliances = [],
     styleWishes = [],
     plannedRecipes = [],
+    weather,
     errorTranslations,
     externalSignal,
   } = options;
@@ -891,6 +919,7 @@ export const generateRecipes = async (
     appliances,
     styleWishes,
     plannedRecipes,
+    weather,
   });
 
   const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
