@@ -49,3 +49,10 @@ The code will be carefully reviewed by an expert for correctness, security, edge
 - Add new keys to all language objects (English, German, Spanish, French) in `translations.ts`
 - Update component to use `t.yourNewKey` pattern
 - All LLM-generated content (recipes, ingredients) will be translated via prompt instructions
+
+### When Opening a Pull Request
+
+Structure the description after `.github/pull_request_template.md` and work
+through its checklist. Creating a pull request through the API does not fill the
+template in — copy it across yourself. Replace the comments rather than leaving
+them in the body, and drop a section that has nothing to say.
