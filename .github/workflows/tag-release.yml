@@ -11,6 +11,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Read-only is enough: checkout and the tag push both authenticate with the
+# app token, not with GITHUB_TOKEN.
+permissions:
+  contents: read
+
 jobs:
   tag:
     runs-on: ubuntu-latest
