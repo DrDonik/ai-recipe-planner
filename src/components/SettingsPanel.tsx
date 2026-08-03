@@ -143,7 +143,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                 />
                                 <button
                                     type="submit"
-                                    className="w-8 h-8 flex items-center justify-center rounded bg-primary hover:bg-primary-dark text-white shadow-sm transition-colors shrink-0"
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-primary hover:bg-primary-hover text-text-on-primary shadow-sm transition-colors shrink-0"
                                     aria-label={t.add}
                                 >
                                     <Plus size={18} />
@@ -193,7 +193,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                 />
                                 <button
                                     type="submit"
-                                    className="w-8 h-8 flex items-center justify-center rounded bg-primary hover:bg-primary-dark text-white shadow-sm transition-colors shrink-0"
+                                    className="w-8 h-8 flex items-center justify-center rounded bg-primary hover:bg-primary-hover text-text-on-primary shadow-sm transition-colors shrink-0"
                                     aria-label={t.add}
                                 >
                                     <Plus size={18} />
