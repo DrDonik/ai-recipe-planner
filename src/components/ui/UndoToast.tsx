@@ -33,7 +33,7 @@ export const UndoToast = ({ notification }: UndoToastProps) => (
         className={`p-4 rounded-xl border text-sm animate-in fade-in slide-in-from-top-2 flex items-center justify-between gap-3 ${
             notification.type === 'error'
                 ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900'
-                : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800'
+                : 'bg-warning/10 text-warning-text border-warning/30'
         }`}
     >
         <span className="flex-1">{renderTextWithLinks(notification.message)}</span>
@@ -44,7 +44,7 @@ export const UndoToast = ({ notification }: UndoToastProps) => (
                 className={`px-3 py-1 rounded-lg font-medium text-sm transition-colors shrink-0 ${
                     notification.type === 'error'
                         ? 'bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800'
-                        : 'bg-amber-200 hover:bg-amber-300 dark:bg-amber-800 dark:hover:bg-amber-700'
+                        : 'bg-warning/20 hover:bg-warning/30'
                 }`}
             >
                 {notification.action.label}

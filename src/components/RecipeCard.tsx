@@ -240,7 +240,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     )}
                     {imageError && !imageUrl && !isImageLoading && (
                         <div className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-3 text-text-muted p-6 text-center">
-                            <AlertCircle size={28} className="text-amber-500" />
+                            <AlertCircle size={28} className="text-warning-text" />
                             <span className="text-xs">{imageError}</span>
                             {onGenerateImage && (
                                 <button
@@ -303,16 +303,16 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </section>
 
                 {recipe.missingIngredients && recipe.missingIngredients.length > 0 && (
-                    <section className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
+                    <section className="bg-warning/5 border border-warning/20 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
                         <div className={`flex items-center justify-between ${!missingIngredientsMinimized ? 'mb-3' : ''}`}>
-                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                            <div className="flex items-center gap-2 text-warning-text">
                                 <AlertCircle size={18} />
                                 <h4 className="font-bold uppercase tracking-wider text-xs">{t.needToBuy}</h4>
                             </div>
                             {onToggleMissingIngredientsMinimize && (
                                 <button
                                     onClick={onToggleMissingIngredientsMinimize}
-                                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center justify-center"
+                                    className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-warning-text flex items-center justify-center"
                                     aria-label={missingIngredientsMinimized ? 'Expand' : 'Collapse'}
                                     aria-expanded={!missingIngredientsMinimized}
                                 >
@@ -323,7 +323,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         {!missingIngredientsMinimized && (
                             <div className="flex flex-wrap gap-2">
                                 {recipe.missingIngredients.map((ing, idx) => (
-                                    <span key={`missing-${ing.item}-${ing.amount}-${idx}`} className="bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/10">
+                                    <span key={`missing-${ing.item}-${ing.amount}-${idx}`} className="bg-warning/10 text-warning-text px-3 py-1 rounded-full text-xs font-semibold border border-warning/10">
                                         {ing.amount} {ing.item}
                                     </span>
                                 ))}

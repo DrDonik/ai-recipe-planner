@@ -36,7 +36,7 @@ export const PhotoPrivacyDialog = ({ onAccept, onCancel }: PhotoPrivacyDialogPro
                     {t.photoPrivacy.description}
                 </p>
 
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6">
+                <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 mb-6">
                     <p className="text-sm text-text-muted">
                         {t.photoPrivacy.note}
                     </p>

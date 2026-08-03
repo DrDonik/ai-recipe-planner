@@ -160,8 +160,8 @@ export const GistSyncDialog = ({
     const renderWarning = () => (
         <>
             <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-amber-500/20 rounded-xl">
-                    <ShieldAlert className="text-amber-500" size={24} />
+                <div className="p-2 bg-warning/20 rounded-xl">
+                    <ShieldAlert className="text-warning-text" size={24} />
                 </div>
                 <h2 id="sync-dialog-title" className="text-lg font-bold text-text-main">
                     {t.sync.securityTitle}
@@ -170,14 +170,14 @@ export const GistSyncDialog = ({
 
             <p className="text-text-base mb-4">{t.sync.securityDescription}</p>
 
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-4">
-                <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+            <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 mb-4">
+                <p className="text-sm font-medium text-warning-text mb-2">
                     {t.sync.securityRisks}
                 </p>
                 <ul className="space-y-2 text-sm text-text-muted">
                     {[t.sync.securityRisk1, t.sync.securityRisk2, t.sync.securityRisk3, t.sync.securityRisk4].map((risk, i) => (
                         <li key={i} className="flex items-start gap-2">
-                            <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                            <AlertTriangle className="text-warning-text shrink-0 mt-0.5" size={14} />
                             <span>{risk}</span>
                         </li>
                     ))}
@@ -190,7 +190,7 @@ export const GistSyncDialog = ({
                 <button
                     onClick={handleAcceptWarning}
                     autoFocus
-                    className="btn bg-amber-500 hover:bg-amber-600 text-white w-full py-3 rounded-xl shadow-lg"
+                    className="btn bg-warning hover:bg-warning-hover text-text-on-warning w-full py-3 rounded-xl shadow-lg"
                 >
                     {t.sync.securityAccept}
                 </button>
