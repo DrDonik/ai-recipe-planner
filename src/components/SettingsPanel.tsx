@@ -285,7 +285,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                 {loading ? (
                     <>
                         <span
-                            className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"
+                            className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"
                             role="status"
                             aria-label={t.planning}
                         ></span>
