@@ -196,7 +196,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="app-container flex flex-col items-start md:items-center py-1">
                 <div className="flex flex-col items-start gap-3 relative w-max ml-12 md:ml-0">
                     {/* Floating Leading Icon */}
-                    <div className={`absolute -left-16 top-0.5 p-2 bg-primary rounded-xl text-white shadow-lg shadow-primary/30 transition-all duration-300 scale-75 ${headerMinimized ? '' : 'md:scale-100'}`}>
+                    <div className={`absolute -left-16 top-0.5 p-2 bg-primary rounded-xl text-text-on-primary shadow-lg shadow-primary/30 transition-all duration-300 scale-75 ${headerMinimized ? '' : 'md:scale-100'}`}>
                         <Utensils className={`transition-all duration-300 w-5 h-5 ${headerMinimized ? '' : 'md:w-7 md:h-7'}`} />
                     </div>
 

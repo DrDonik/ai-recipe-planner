@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  /* Branding Colors - these reference :root CSS variables for dynamic theming */
-  --color-primary: hsl(155, 50%, 45%);
-  --color-primary-hover: hsl(155, 50%, 35%);
+  /* Branding Colors. These declarations exist so Tailwind emits the matching
+     utilities (bg-primary, text-primary, …); the values are light-mode
+     fallbacks. @theme lands in `@layer theme`, so the unlayered :root block
+     below always wins and is what actually drives the theme — keep the two in
+     sync, and give every token used by a utility a :root counterpart. */
+  --color-primary: hsl(155, 50%, 34%);
+  --color-primary-hover: hsl(155, 50%, 24%);
   --color-primary-light: hsl(155, 50%, 92%);
   --color-secondary: hsl(205, 70%, 50%);
 
@@ -15,6 +19,9 @@
   --color-text-main: hsl(240, 5%, 10%);
   --color-text-muted: hsl(240, 4%, 45%);
   --color-text-light: hsl(240, 5%, 98%);
+  /* Foreground for anything sitting on a filled --color-primary surface.
+     Flips to near-black in dark mode, where primary is light. */
+  --color-text-on-primary: hsl(0, 0%, 100%);
 
   --color-border-base: hsl(240, 5%, 85%);
   --color-border-hover: hsl(240, 5%, 70%);
@@ -33,10 +40,14 @@
   /* Universal Design Palette Base Neutrals: Zinc-like (Cool Greys) */
   --hue-neutral: 240;
 
-  /* Primary: Emerald/Teal - Accessible & Fresh */
+  /* Primary: Emerald/Teal - Accessible & Fresh.
+     34% keeps white-on-primary at 4.7:1 (WCAG AA) — primary doubles as a fill
+     under white text and as a text colour on light surfaces, and both roles
+     improve together as it darkens. Hover must stay below it so the button
+     still reads as advancing on hover. */
   --hue-primary: 155;
   --sat-primary: 50%;
-  --lig-primary: 45%;
+  --lig-primary: 34%;
 
   /* Secondary: Sky/Blue */
   --hue-secondary: 205;
@@ -49,13 +60,14 @@
   --color-text-main: hsl(var(--hue-neutral), 5%, 10%);
   --color-text-muted: hsl(var(--hue-neutral), 4%, 45%);
   --color-text-light: hsl(var(--hue-neutral), 5%, 98%);
+  --color-text-on-primary: hsl(0, 0%, 100%);
 
-  --color-border: hsl(var(--hue-neutral), 5%, 85%);
+  --color-border-base: hsl(var(--hue-neutral), 5%, 85%);
   --color-border-hover: hsl(var(--hue-neutral), 5%, 70%);
 
   /* Brand Colors */
   --color-primary: hsl(var(--hue-primary), var(--sat-primary), var(--lig-primary));
-  --color-primary-hover: hsl(var(--hue-primary), var(--sat-primary), 35%);
+  --color-primary-hover: hsl(var(--hue-primary), var(--sat-primary), 24%);
   --color-primary-light: hsl(var(--hue-primary), var(--sat-primary), 92%);
 
   --color-secondary: hsl(var(--hue-secondary), 70%, 50%);
@@ -78,8 +90,12 @@
 
     --color-text-main: hsl(var(--hue-neutral), 5%, 92%);
     --color-text-muted: hsl(var(--hue-neutral), 4%, 60%);
+    /* Dark mode keeps primary light so it stays legible as a text colour on
+       dark surfaces; filled primary therefore needs dark text (7.6:1) rather
+       than the white used in light mode. */
+    --color-text-on-primary: hsl(var(--hue-neutral), 5%, 10%);
 
-    --color-border: hsl(var(--hue-neutral), 5%, 20%);
+    --color-border-base: hsl(var(--hue-neutral), 5%, 20%);
     --color-border-hover: hsl(var(--hue-neutral), 5%, 30%);
 
     --color-primary: hsl(var(--hue-primary), 50%, 50%);
@@ -153,7 +169,7 @@ button {
   }
 
   .btn-primary {
-    @apply bg-primary text-white shadow-md hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
+    @apply bg-primary text-text-on-primary shadow-md hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
     box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
   }
 
