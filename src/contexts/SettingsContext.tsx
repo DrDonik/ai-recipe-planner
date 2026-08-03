@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, type ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { translations } from '../constants/translations';
 import { STORAGE_KEYS, DEFAULTS } from '../constants';
@@ -16,6 +16,17 @@ const BROWSER_LANGUAGE_MAP: Record<string, SupportedLanguage> = {
     'de': 'German',
     'fr': 'French',
     'es': 'Spanish',
+};
+
+/**
+ * BCP-47 tag per supported language, mirrored onto <html lang>. Without it
+ * screen readers announce every translation with English pronunciation.
+ */
+const LANGUAGE_TAGS: Record<SupportedLanguage, string> = {
+    English: 'en',
+    German: 'de',
+    French: 'fr',
+    Spanish: 'es',
 };
 
 /**
@@ -145,6 +156,13 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         if (key !== apiKey && imageGenEnabled) setImageGenEnabled(false);
         setApiKeyRaw(key);
     }, [apiKey, setApiKeyRaw, imageGenEnabled, setImageGenEnabled]);
+
+    // Mirror the UI language onto <html lang> so assistive technology switches
+    // pronunciation along with the interface.
+    useEffect(() => {
+        document.documentElement.lang =
+            LANGUAGE_TAGS[isValidLanguage(language) ? language : DEFAULTS.LANGUAGE];
+    }, [language]);
 
     const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || plannedRecipesError || languageError || imageGenEnabledError;
 
