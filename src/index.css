@@ -62,7 +62,7 @@
   --color-text-light: hsl(var(--hue-neutral), 5%, 98%);
   --color-text-on-primary: hsl(0, 0%, 100%);
 
-  --color-border: hsl(var(--hue-neutral), 5%, 85%);
+  --color-border-base: hsl(var(--hue-neutral), 5%, 85%);
   --color-border-hover: hsl(var(--hue-neutral), 5%, 70%);
 
   /* Brand Colors */
@@ -95,7 +95,7 @@
        than the white used in light mode. */
     --color-text-on-primary: hsl(var(--hue-neutral), 5%, 10%);
 
-    --color-border: hsl(var(--hue-neutral), 5%, 20%);
+    --color-border-base: hsl(var(--hue-neutral), 5%, 20%);
     --color-border-hover: hsl(var(--hue-neutral), 5%, 30%);
 
     --color-primary: hsl(var(--hue-primary), 50%, 50%);
