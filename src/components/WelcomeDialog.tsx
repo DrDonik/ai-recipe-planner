@@ -82,7 +82,7 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                     <div className="h-px bg-gradient-to-r from-transparent via-[var(--glass-border)] to-transparent my-4" />
 
                     <div className="flex gap-3">
-                        <HardDrive className="text-amber-500 shrink-0 mt-0.5" size={20} />
+                        <HardDrive className="text-warning-text shrink-0 mt-0.5" size={20} />
                         <p className="text-sm text-text-muted">{t.welcome.localStorage}</p>
                     </div>
                 </div>

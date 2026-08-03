@@ -27,8 +27,8 @@ export const ApiKeySecurityDialog = ({
                 className="glass-panel w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200 outline-none"
             >
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-amber-500/20 rounded-xl">
-                        <ShieldAlert className="text-amber-500" size={24} />
+                    <div className="p-2 bg-warning/20 rounded-xl">
+                        <ShieldAlert className="text-warning-text" size={24} />
                     </div>
                     <h2 id="security-dialog-title" className="text-lg font-bold text-text-main">
                         {t.apiKeySecurity.title}
@@ -39,25 +39,25 @@ export const ApiKeySecurityDialog = ({
                     {t.apiKeySecurity.description}
                 </p>
 
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-4">
-                    <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+                <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 mb-4">
+                    <p className="text-sm font-medium text-warning-text mb-2">
                         {t.apiKeySecurity.risks}
                     </p>
                     <ul className="space-y-2 text-sm text-text-muted">
                         <li className="flex items-start gap-2">
-                            <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                            <AlertTriangle className="text-warning-text shrink-0 mt-0.5" size={14} />
                             <span>{t.apiKeySecurity.risk1}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                            <AlertTriangle className="text-warning-text shrink-0 mt-0.5" size={14} />
                             <span>{t.apiKeySecurity.risk2}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                            <AlertTriangle className="text-warning-text shrink-0 mt-0.5" size={14} />
                             <span>{t.apiKeySecurity.risk3}</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                            <AlertTriangle className="text-warning-text shrink-0 mt-0.5" size={14} />
                             <span>{t.apiKeySecurity.risk4}</span>
                         </li>
                     </ul>
@@ -77,7 +77,7 @@ export const ApiKeySecurityDialog = ({
                     </button>
                     <button
                         onClick={onAccept}
-                        className="btn bg-amber-500 hover:bg-amber-600 text-white w-full py-3 rounded-xl shadow-lg"
+                        className="btn bg-warning hover:bg-warning-hover text-text-on-warning w-full py-3 rounded-xl shadow-lg"
                     >
                         {t.apiKeySecurity.understand}
                     </button>

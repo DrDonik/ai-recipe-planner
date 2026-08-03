@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
             case 'pushing':
                 return <Loader2 size={16} className="text-primary animate-spin" />;
             case 'pending':
-                return <Cloud size={16} className="text-amber-500" />;
+                return <Cloud size={16} className="text-warning-text" />;
             case 'synced':
                 return <Cloud size={16} className="text-primary" />;
             case 'error':

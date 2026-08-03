@@ -10,7 +10,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Copy-
 
 ## Versioning & Release
 
-**Current version**: 1.9.2
+**Current version**: 1.9.3
 
 This project follows [Semantic Versioning](https://semver.org/) (SemVer):
 

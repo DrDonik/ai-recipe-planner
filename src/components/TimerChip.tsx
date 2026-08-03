@@ -66,7 +66,7 @@ export const TimerChip: React.FC<TimerChipProps> = ({ sourceId, text, durationMs
   // Amber marks the extra time of a range as well as the finished timer; only
   // the finished one pulses. Pausing keeps the tone and adds the dashed border.
   const tone = done || followUp
-    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/25'
+    ? 'bg-warning/15 text-warning-text border-warning/30 hover:bg-warning/25'
     : paused
       ? 'bg-secondary/5 text-secondary/60 border-secondary/30 hover:bg-secondary/15'
       : running

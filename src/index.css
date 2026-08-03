@@ -23,6 +23,15 @@
      Flips to near-black in dark mode, where primary is light. */
   --color-text-on-primary: hsl(0, 0%, 100%);
 
+  /* Warning (amber). Split into a fill role and a text role: the fill stays
+     bright so it still reads as a warning, which forces dark text on top of
+     it, while amber used *as* text or as a meaningful icon has to be dark
+     enough on its own. One value cannot serve both. */
+  --color-warning: hsl(38, 92%, 50%);
+  --color-warning-hover: hsl(38, 92%, 43%);
+  --color-warning-text: hsl(28, 90%, 31%);
+  --color-text-on-warning: hsl(240, 5%, 10%);
+
   --color-border-base: hsl(240, 5%, 85%);
   --color-border-hover: hsl(240, 5%, 70%);
 
@@ -52,6 +61,14 @@
   /* Secondary: Sky/Blue */
   --hue-secondary: 205;
 
+  /* Warning: Amber. 50% is the familiar warning yellow; it is far too light to
+     carry white text (2.1:1), so --color-text-on-warning is near-black in both
+     themes (8.3:1) rather than the fill being darkened into a muddy orange.
+     --color-warning-text is the same hue several rungs down, dark enough to
+     clear 4.5:1 as text and as an icon on every surface it lands on, including
+     the amber tints. */
+  --hue-warning: 38;
+
   /* Light Mode Semantic Colors */
   --color-bg-app: hsl(var(--hue-neutral), 5%, 96%);
   --color-bg-surface: hsl(255, 100%, 100%);
@@ -61,6 +78,7 @@
   --color-text-muted: hsl(var(--hue-neutral), 4%, 45%);
   --color-text-light: hsl(var(--hue-neutral), 5%, 98%);
   --color-text-on-primary: hsl(0, 0%, 100%);
+  --color-text-on-warning: hsl(var(--hue-neutral), 5%, 10%);
 
   --color-border-base: hsl(var(--hue-neutral), 5%, 85%);
   --color-border-hover: hsl(var(--hue-neutral), 5%, 70%);
@@ -71,6 +89,10 @@
   --color-primary-light: hsl(var(--hue-primary), var(--sat-primary), 92%);
 
   --color-secondary: hsl(var(--hue-secondary), 70%, 50%);
+
+  --color-warning: hsl(var(--hue-warning), 92%, 50%);
+  --color-warning-hover: hsl(var(--hue-warning), 92%, 43%);
+  --color-warning-text: hsl(28, 90%, 31%);
 
   /* Glass Effects */
   --glass-bg: hsla(0, 0%, 100%, 0.7);
@@ -101,6 +123,13 @@
     --color-primary: hsl(var(--hue-primary), 50%, 50%);
     --color-primary-hover: hsl(var(--hue-primary), 50%, 60%);
     --color-primary-light: hsl(var(--hue-primary), 50%, 15%);
+
+    /* The fill and its dark foreground carry over unchanged — amber is light
+       enough that both roles already clear AA on a dark surface. Only the
+       hover flips direction (lighter, so the button still advances) and the
+       text rung moves up the scale to stay legible on dark. */
+    --color-warning-hover: hsl(var(--hue-warning), 92%, 58%);
+    --color-warning-text: hsl(43, 96%, 56%);
 
     --glass-bg: hsla(var(--hue-neutral), 5%, 12%, 0.6);
     --glass-border: hsla(var(--hue-neutral), 5%, 80%, 0.08);

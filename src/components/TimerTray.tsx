@@ -89,20 +89,20 @@ export const TimerTray: React.FC = () => {
                       exit={{ opacity: 0, height: 0 }}
                       className={`flex items-center gap-2 rounded-lg border p-2 overflow-hidden ${
                         amber
-                          ? `bg-amber-500/10 border-amber-500/30 ${isDone ? 'animate-pulse' : ''}`
+                          ? `bg-warning/10 border-warning/30 ${isDone ? 'animate-pulse' : ''}`
                           : 'bg-white/40 dark:bg-black/20 border-border-base/30'
                       }`}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-text-muted line-clamp-2" title={timer.label}>{timer.label}</p>
                         {isFollowUp && !isDone && (
-                          <p className="text-[0.65rem] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400" role="status">
+                          <p className="text-[0.65rem] font-bold uppercase tracking-wider text-warning-text" role="status">
                             {t.timers.followUp}
                           </p>
                         )}
                         <p
                           className={`font-mono tabular-nums text-sm font-semibold ${
-                            amber ? 'text-amber-600 dark:text-amber-400' : 'text-text-main'
+                            amber ? 'text-warning-text' : 'text-text-main'
                           }`}
                           role={isDone ? 'status' : undefined}
                         >
