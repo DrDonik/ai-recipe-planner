@@ -192,7 +192,6 @@ export const GistSyncDialog = ({
             <div className="flex flex-col gap-3">
                 <button
                     onClick={handleAcceptWarning}
-                    autoFocus
                     className="btn btn-warning w-full py-3 rounded-xl"
                 >
                     {t.sync.securityAccept}
