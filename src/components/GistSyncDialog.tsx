@@ -190,7 +190,7 @@ export const GistSyncDialog = ({
                 <button
                     onClick={handleAcceptWarning}
                     autoFocus
-                    className="btn bg-warning hover:bg-warning-hover text-text-on-warning w-full py-3 rounded-xl shadow-lg"
+                    className="btn bg-warning-fill hover:bg-warning-fill-hover text-text-on-warning w-full py-3 rounded-xl shadow-lg"
                 >
                     {t.sync.securityAccept}
                 </button>
