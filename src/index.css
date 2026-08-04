@@ -209,6 +209,20 @@ button {
     box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
   }
 
+  /* Dialog buttons carry meaning through colour, so the three roles are
+     classes rather than ad-hoc utilities: btn-primary marks the action that
+     ends an exposure of the user's data, btn-warning the action that creates
+     one, and btn-quiet an action that changes nothing at all — cancel, close,
+     go back. Anything that destroys user content stays red, which is why no
+     dialog uses red any more: none of them destroys anything. */
+  .btn-warning {
+    @apply bg-warning-fill text-text-on-warning shadow-md hover:bg-warning-fill-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+
+  .btn-quiet {
+    @apply bg-transparent text-text-muted hover:text-text-main hover:bg-bg-surface-hover disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
   .btn-icon {
     @apply p-2 bg-transparent text-text-muted rounded-md hover:text-text-main hover:bg-bg-surface-hover;
   }

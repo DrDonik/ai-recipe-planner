@@ -54,11 +54,14 @@ export const translations = {
             quotaExceeded: "Photo identification quota exceeded. Please try again later.",
         },
         photoPrivacy: {
-            title: "Identify ingredient from photo",
-            description: "Take or choose a photo of a single ingredient. The image is sent to Google Gemini, which returns the ingredient name.",
-            note: "The photo leaves your device. It is not stored by this app, but Google's terms apply.",
+            title: "Your photo will be sent to Google",
+            description: "To identify an ingredient, the picture is uploaded to Google Gemini, which returns the ingredient name.",
+            beforeYouSend: "Before you send:",
+            note1: "The photo leaves your device and is processed on Google's servers.",
+            note2: "Make sure no people, documents or anything else are in the frame.",
+            usage: "This app does not store the photo, but Google's terms and data handling apply.",
             cancel: "Cancel",
-            understand: "Continue",
+            send: "Send photo",
         },
         meals: "Meals to plan",
         dietOptions: {
@@ -246,16 +249,16 @@ export const translations = {
             copyFailed: "Couldn't copy automatically. Please select the text above and copy it manually."
         },
         apiKeySecurity: {
-            title: "API Key Storage Notice",
+            title: "Your API key will be stored in your browser",
             description: "Your API key will be stored in your browser's local storage in plain text.",
             risks: "This means:",
             risk1: "Anyone with access to this device can view your API key",
             risk2: "Browser extensions may be able to read it",
             risk3: "The key persists until you clear browser data",
             risk4: "The key will be visible in network requests (browser DevTools, network logs, proxies)",
-            recommendation: "For better security, consider using Copy & Paste mode instead, which doesn't store any credentials.",
+            usage: "The key is only used to call Google Gemini directly from your browser, for recipes, images and chat. No request passes through a server of this app.",
             understand: "I understand, continue",
-            useCopyPaste: "Use Copy & Paste instead"
+            cancel: "Cancel"
         },
         clearApiKey: {
             title: "Clear API Key?",
@@ -292,7 +295,7 @@ export const translations = {
             pullingTooltip: "Loading from GitHub…",
             disabledTooltip: "Sync is off",
             errorTooltip: "Sync error — click for details",
-            securityTitle: "GitHub Token Storage Notice",
+            securityTitle: "Your GitHub token will be stored in your browser",
             securityDescription: "To sync across devices, your GitHub Personal Access Token will be stored in your browser's local storage in plain text.",
             securityRisks: "Please understand:",
             securityRisk1: "Only create a token with the 'gist' scope — nothing more.",
@@ -383,11 +386,14 @@ export const translations = {
             quotaExceeded: "Kontingent für die Foto-Erkennung erschöpft. Bitte später erneut versuchen.",
         },
         photoPrivacy: {
-            title: "Zutat per Foto erkennen",
-            description: "Mache oder wähle ein Foto einer einzelnen Zutat. Das Bild wird an Google Gemini gesendet, das den Namen der Zutat zurückgibt.",
-            note: "Das Foto verlässt dein Gerät. Diese App speichert es nicht, aber es gelten die Bedingungen von Google.",
+            title: "Dein Foto wird an Google gesendet",
+            description: "Zum Erkennen der Zutat wird das Bild an Google Gemini hochgeladen, das den Namen der Zutat zurückgibt.",
+            beforeYouSend: "Bevor du sendest:",
+            note1: "Das Foto verlässt dein Gerät und wird auf Googles Servern verarbeitet.",
+            note2: "Achte darauf, dass keine Personen, Dokumente oder anderes mit im Bild sind.",
+            usage: "Diese App speichert das Foto nicht, es gelten aber Googles Bedingungen und Datenverarbeitung.",
             cancel: "Abbrechen",
-            understand: "Fortfahren",
+            send: "Foto senden",
         },
         meals: "Anzahl Mahlzeiten",
         dietOptions: {
@@ -575,16 +581,16 @@ export const translations = {
             copyFailed: "Automatisches Kopieren fehlgeschlagen. Bitte markiere den Text oben und kopiere ihn manuell."
         },
         apiKeySecurity: {
-            title: "Hinweis zur API-Schlüssel-Speicherung",
+            title: "Dein API-Schlüssel wird im Browser gespeichert",
             description: "Dein API-Schlüssel wird im lokalen Speicher deines Browsers als Klartext gespeichert.",
             risks: "Das bedeutet:",
             risk1: "Jeder mit Zugang zu diesem Gerät kann deinen API-Schlüssel einsehen",
             risk2: "Browser-Erweiterungen können ihn möglicherweise auslesen",
             risk3: "Der Schlüssel bleibt gespeichert, bis du die Browserdaten löschst",
             risk4: "Der Schlüssel ist in Netzwerkanfragen sichtbar (Browser-DevTools, Netzwerkprotokolle, Proxys)",
-            recommendation: "Für mehr Sicherheit empfehlen wir den Kopieren & Einfügen-Modus, der keine Zugangsdaten speichert.",
+            usage: "Der Schlüssel wird ausschließlich verwendet, um Google Gemini direkt aus deinem Browser aufzurufen — für Rezepte, Bilder und Chat. Keine Anfrage läuft über einen Server dieser App.",
             understand: "Verstanden, fortfahren",
-            useCopyPaste: "Kopieren & Einfügen verwenden"
+            cancel: "Abbrechen"
         },
         clearApiKey: {
             title: "API-Schlüssel löschen?",
@@ -621,7 +627,7 @@ export const translations = {
             pullingTooltip: "Lade von GitHub…",
             disabledTooltip: "Synchronisation ist aus",
             errorTooltip: "Sync-Fehler — klicken für Details",
-            securityTitle: "Hinweis zur Speicherung des GitHub-Tokens",
+            securityTitle: "Dein GitHub-Token wird im Browser gespeichert",
             securityDescription: "Für die Synchronisation zwischen Geräten wird dein GitHub Personal Access Token im lokalen Browser-Speicher im Klartext abgelegt.",
             securityRisks: "Bitte beachte:",
             securityRisk1: "Erstelle den Token ausschließlich mit dem Scope 'gist' — nicht mehr.",
@@ -712,11 +718,14 @@ export const translations = {
             quotaExceeded: "Quota d'identification par photo dépassé. Veuillez réessayer plus tard.",
         },
         photoPrivacy: {
-            title: "Identifier un ingrédient à partir d'une photo",
-            description: "Prenez ou choisissez une photo d'un seul ingrédient. L'image est envoyée à Google Gemini, qui renvoie le nom de l'ingrédient.",
-            note: "La photo quitte votre appareil. Cette application ne la stocke pas, mais les conditions de Google s'appliquent.",
+            title: "Votre photo sera envoyée à Google",
+            description: "Pour identifier un ingrédient, l'image est envoyée à Google Gemini, qui renvoie le nom de l'ingrédient.",
+            beforeYouSend: "Avant d'envoyer :",
+            note1: "La photo quitte votre appareil et est traitée sur les serveurs de Google.",
+            note2: "Veillez à ce qu'aucune personne, aucun document ni rien d'autre ne figure sur l'image.",
+            usage: "Cette application ne conserve pas la photo, mais les conditions et le traitement des données de Google s'appliquent.",
             cancel: "Annuler",
-            understand: "Continuer",
+            send: "Envoyer la photo",
         },
         meals: "Repas à planifier",
         dietOptions: {
@@ -904,16 +913,16 @@ export const translations = {
             copyFailed: "La copie automatique a échoué. Veuillez sélectionner le texte ci-dessus et le copier manuellement."
         },
         apiKeySecurity: {
-            title: "Avis de stockage de clé API",
+            title: "Votre clé API sera stockée dans votre navigateur",
             description: "Votre clé API sera stockée dans le stockage local de votre navigateur en texte clair.",
             risks: "Cela signifie :",
             risk1: "Toute personne ayant accès à cet appareil peut voir votre clé API",
             risk2: "Les extensions de navigateur peuvent potentiellement la lire",
             risk3: "La clé persiste jusqu'à ce que vous effaciez les données du navigateur",
             risk4: "La clé sera visible dans les requêtes réseau (DevTools du navigateur, journaux réseau, proxys)",
-            recommendation: "Pour plus de sécurité, envisagez d'utiliser le mode Copier-Coller, qui ne stocke aucune information d'identification.",
+            usage: "La clé sert uniquement à appeler Google Gemini directement depuis votre navigateur, pour les recettes, les images et le chat. Aucune requête ne passe par un serveur de cette application.",
             understand: "Je comprends, continuer",
-            useCopyPaste: "Utiliser Copier-Coller"
+            cancel: "Annuler"
         },
         clearApiKey: {
             title: "Effacer la clé API ?",
@@ -950,7 +959,7 @@ export const translations = {
             pullingTooltip: "Chargement depuis GitHub…",
             disabledTooltip: "Synchronisation désactivée",
             errorTooltip: "Erreur de synchronisation — cliquer pour les détails",
-            securityTitle: "Avertissement sur le stockage du jeton GitHub",
+            securityTitle: "Votre jeton GitHub sera stocké dans votre navigateur",
             securityDescription: "Pour synchroniser entre appareils, votre jeton d'accès personnel GitHub sera stocké en clair dans le stockage local du navigateur.",
             securityRisks: "À noter :",
             securityRisk1: "Créez un jeton uniquement avec la portée 'gist' — rien de plus.",
@@ -1041,11 +1050,14 @@ export const translations = {
             quotaExceeded: "Cuota de identificación por foto agotada. Por favor, inténtalo más tarde.",
         },
         photoPrivacy: {
-            title: "Identificar ingrediente desde una foto",
-            description: "Toma o elige una foto de un único ingrediente. La imagen se envía a Google Gemini, que devuelve el nombre del ingrediente.",
-            note: "La foto sale de tu dispositivo. Esta aplicación no la almacena, pero se aplican los términos de Google.",
+            title: "Tu foto se enviará a Google",
+            description: "Para identificar un ingrediente, la imagen se envía a Google Gemini, que devuelve el nombre del ingrediente.",
+            beforeYouSend: "Antes de enviar:",
+            note1: "La foto sale de tu dispositivo y se procesa en los servidores de Google.",
+            note2: "Asegúrate de que no aparezcan personas, documentos ni nada más en la imagen.",
+            usage: "Esta aplicación no almacena la foto, pero se aplican las condiciones y el tratamiento de datos de Google.",
             cancel: "Cancelar",
-            understand: "Continuar",
+            send: "Enviar foto",
         },
         meals: "Comidas a planificar",
         dietOptions: {
@@ -1233,16 +1245,16 @@ export const translations = {
             copyFailed: "No se pudo copiar automáticamente. Por favor, selecciona el texto de arriba y cópialo manualmente."
         },
         apiKeySecurity: {
-            title: "Aviso de almacenamiento de clave API",
+            title: "Tu clave API se almacenará en tu navegador",
             description: "Tu clave API se almacenará en el almacenamiento local de tu navegador en texto plano.",
             risks: "Esto significa:",
             risk1: "Cualquier persona con acceso a este dispositivo puede ver tu clave API",
             risk2: "Las extensiones del navegador pueden leerla",
             risk3: "La clave permanece hasta que borres los datos del navegador",
             risk4: "La clave será visible en solicitudes de red (DevTools del navegador, registros de red, proxies)",
-            recommendation: "Para mayor seguridad, considera usar el modo Copiar y Pegar, que no almacena ninguna credencial.",
+            usage: "La clave solo se usa para llamar a Google Gemini directamente desde tu navegador, para recetas, imágenes y chat. Ninguna solicitud pasa por un servidor de esta aplicación.",
             understand: "Entiendo, continuar",
-            useCopyPaste: "Usar Copiar y Pegar"
+            cancel: "Cancelar"
         },
         clearApiKey: {
             title: "¿Eliminar clave API?",
@@ -1279,7 +1291,7 @@ export const translations = {
             pullingTooltip: "Cargando desde GitHub…",
             disabledTooltip: "Sincronización desactivada",
             errorTooltip: "Error de sincronización — haga clic para más detalles",
-            securityTitle: "Aviso sobre el almacenamiento del token de GitHub",
+            securityTitle: "Tu token de GitHub se almacenará en tu navegador",
             securityDescription: "Para sincronizar entre dispositivos, su token de acceso personal de GitHub se almacenará en texto plano en el almacenamiento local del navegador.",
             securityRisks: "Tenga en cuenta:",
             securityRisk1: "Cree un token solo con el alcance 'gist' — nada más.",

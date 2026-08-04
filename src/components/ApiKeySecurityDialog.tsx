@@ -4,15 +4,15 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ApiKeySecurityDialogProps {
     onAccept: () => void;
-    onUseCopyPaste: () => void;
+    onCancel: () => void;
 }
 
 export const ApiKeySecurityDialog = ({
     onAccept,
-    onUseCopyPaste,
+    onCancel,
 }: ApiKeySecurityDialogProps) => {
     const { t } = useSettings();
-    const dialogRef = useFocusTrap(onUseCopyPaste);
+    const dialogRef = useFocusTrap(onCancel, true);
 
     return (
         <div
@@ -64,22 +64,21 @@ export const ApiKeySecurityDialog = ({
                 </div>
 
                 <p className="text-sm text-text-muted mb-6">
-                    {t.apiKeySecurity.recommendation}
+                    {t.apiKeySecurity.usage}
                 </p>
 
                 <div className="flex flex-col gap-3">
                     <button
-                        onClick={onUseCopyPaste}
-                        autoFocus
-                        className="btn btn-primary w-full py-3 rounded-xl shadow-lg shadow-primary/20"
-                    >
-                        {t.apiKeySecurity.useCopyPaste}
-                    </button>
-                    <button
                         onClick={onAccept}
-                        className="btn bg-warning-fill hover:bg-warning-fill-hover text-text-on-warning w-full py-3 rounded-xl shadow-lg"
+                        className="btn btn-warning w-full py-3 rounded-xl"
                     >
                         {t.apiKeySecurity.understand}
+                    </button>
+                    <button
+                        onClick={onCancel}
+                        className="btn btn-quiet w-full py-3 rounded-xl"
+                    >
+                        {t.apiKeySecurity.cancel}
                     </button>
                 </div>
             </div>

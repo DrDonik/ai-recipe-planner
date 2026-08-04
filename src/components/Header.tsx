@@ -11,6 +11,9 @@ import { buildExportData, downloadExportFile, readImportFile, applyImportData } 
 import type { Notification } from '../types';
 import type { SyncStatus } from '../hooks/useGistSync';
 
+const hasSeenApiKeyWarning = () =>
+    localStorage.getItem(STORAGE_KEYS.API_KEY_WARNING_SEEN) === 'true';
+
 interface HeaderProps {
     headerMinimized: boolean;
     setHeaderMinimized: (minimized: boolean) => void;
@@ -33,10 +36,9 @@ export const Header: React.FC<HeaderProps> = ({
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, imageGenEnabled, setImageGenEnabled, t } = useSettings();
 
     // Check on mount if existing user needs to see the security warning
-    const [showSecurityDialog, setShowSecurityDialog] = useState(() => {
-        const hasSeenWarning = localStorage.getItem(STORAGE_KEYS.API_KEY_WARNING_SEEN) === 'true';
-        return !hasSeenWarning && !!apiKey && !useCopyPaste;
-    });
+    const [showSecurityDialog, setShowSecurityDialog] = useState(
+        () => !hasSeenApiKeyWarning() && !!apiKey && !useCopyPaste
+    );
     const [showClearDialog, setShowClearDialog] = useState(false);
     const [showSyncDialog, setShowSyncDialog] = useState(false);
     const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
@@ -132,7 +134,15 @@ export const Header: React.FC<HeaderProps> = ({
 
     const handleModeToggle = () => {
         if (useCopyPaste) {
-            // Switching TO API Key mode - always show warning
+            // Switching TO API Key mode. The warning is about a key being
+            // stored, so it only earns its place while none is: with a key
+            // already in local storage the switch exposes nothing new, and
+            // once the warning has been acknowledged the header's persistent
+            // apiKeyStoredWarning tooltip carries the reminder from there.
+            if (apiKey || hasSeenApiKeyWarning()) {
+                setUseCopyPaste(false);
+                return;
+            }
             setPendingModeSwitch('toApiKey');
             setShowSecurityDialog(true);
         } else {
@@ -164,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
         setPendingModeSwitch(null);
     };
 
-    const handleSecurityUseCopyPaste = () => {
+    const handleSecurityCancel = () => {
         markApiKeyWarningSeen();
         setShowSecurityDialog(false);
 
@@ -401,7 +411,7 @@ export const Header: React.FC<HeaderProps> = ({
         {showSecurityDialog && (
             <ApiKeySecurityDialog
                 onAccept={handleSecurityAccept}
-                onUseCopyPaste={handleSecurityUseCopyPaste}
+                onCancel={handleSecurityCancel}
             />
         )}
 
