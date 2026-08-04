@@ -10,12 +10,17 @@ import { useEffect, useRef } from 'react';
  * - Handles Escape key to close the dialog
  *
  * @param onClose - Callback to close the dialog (called on Escape key)
+ * @param focusContainer - Focus the dialog itself instead of its first control.
+ *   Use this where no button is a safe default: the emphasised button is then
+ *   not the one Enter would trigger, so Enter is left doing nothing.
  * @returns ref - Ref to attach to the dialog container element
  */
-export function useFocusTrap(onClose: () => void) {
+export function useFocusTrap(onClose: () => void, focusContainer = false) {
     const dialogRef = useRef<HTMLDivElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
     const onCloseRef = useRef(onClose);
+    // Read once on mount, like onCloseRef, so the effect stays dependency-free
+    const focusContainerRef = useRef(focusContainer);
 
     // Keep the ref up to date without re-running the effect
     useEffect(() => {
@@ -49,7 +54,9 @@ export function useFocusTrap(onClose: () => void) {
         const isAlreadyFocusedInside = dialogRef.current?.contains(document.activeElement);
 
         if (!isAlreadyFocusedInside) {
-            if (focusableElements.length > 0) {
+            if (focusContainerRef.current) {
+                dialogRef.current?.focus();
+            } else if (focusableElements.length > 0) {
                 focusableElements[0].focus();
             } else {
                 // If no focusable elements, focus the dialog itself

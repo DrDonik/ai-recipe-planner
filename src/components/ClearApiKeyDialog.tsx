@@ -1,4 +1,4 @@
-import { Key, Trash2 } from 'lucide-react';
+import { Key } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -12,7 +12,7 @@ export const ClearApiKeyDialog = ({
     onKeep,
 }: ClearApiKeyDialogProps) => {
     const { t } = useSettings();
-    const dialogRef = useFocusTrap(onKeep);
+    const dialogRef = useFocusTrap(onKeep, true);
 
     return (
         <div
@@ -41,18 +41,16 @@ export const ClearApiKeyDialog = ({
 
                 <div className="flex flex-col gap-3">
                     <button
-                        onClick={onKeep}
-                        autoFocus
-                        className="btn bg-white/50 hover:bg-white/70 dark:bg-black/30 dark:hover:bg-black/40 text-text-main w-full py-3 rounded-xl border border-[var(--glass-border)]"
+                        onClick={onClear}
+                        className="btn btn-primary w-full py-3 rounded-xl"
                     >
-                        {t.clearApiKey.keep}
+                        {t.clearApiKey.clear}
                     </button>
                     <button
-                        onClick={onClear}
-                        className="btn bg-red-500 hover:bg-red-600 text-white w-full py-3 rounded-xl shadow-lg flex items-center justify-center gap-2"
+                        onClick={onKeep}
+                        className="btn btn-quiet w-full py-3 rounded-xl"
                     >
-                        <Trash2 size={18} />
-                        {t.clearApiKey.clear}
+                        {t.clearApiKey.keep}
                     </button>
                 </div>
             </div>

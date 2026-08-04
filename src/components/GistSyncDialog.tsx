@@ -44,7 +44,10 @@ export const GistSyncDialog = ({
     onShowInfo,
 }: GistSyncDialogProps) => {
     const { t } = useSettings();
-    const dialogRef = useFocusTrap(onClose);
+    // No button is a safe default in the warning and active steps. The setup
+    // step is unaffected: its token input carries autoFocus, and the trap
+    // leaves focus alone when something inside already holds it.
+    const dialogRef = useFocusTrap(onClose, true);
 
     const initiallyConfigured = readConfigured();
     const [step, setStep] = useState<Step>(() => {
@@ -189,14 +192,13 @@ export const GistSyncDialog = ({
             <div className="flex flex-col gap-3">
                 <button
                     onClick={handleAcceptWarning}
-                    autoFocus
-                    className="btn bg-warning-fill hover:bg-warning-fill-hover text-text-on-warning w-full py-3 rounded-xl shadow-lg"
+                    className="btn btn-warning w-full py-3 rounded-xl"
                 >
                     {t.sync.securityAccept}
                 </button>
                 <button
                     onClick={onClose}
-                    className="btn btn-primary w-full py-3 rounded-xl"
+                    className="btn btn-quiet w-full py-3 rounded-xl"
                 >
                     {t.sync.securityCancel}
                 </button>
@@ -269,21 +271,21 @@ export const GistSyncDialog = ({
                 <button
                     onClick={handleCreateNew}
                     disabled={busy}
-                    className="btn btn-primary w-full py-3 rounded-xl shadow-lg shadow-primary/20 disabled:opacity-60"
+                    className="btn btn-warning w-full py-3 rounded-xl"
                 >
                     {busy ? t.sync.creating : t.sync.createNew}
                 </button>
                 <button
                     onClick={handleUseExisting}
                     disabled={busy}
-                    className="btn bg-white/60 dark:bg-black/30 hover:bg-white/80 dark:hover:bg-black/40 text-text-main w-full py-3 rounded-xl border border-[var(--glass-border)] disabled:opacity-60"
+                    className="btn btn-warning w-full py-3 rounded-xl"
                 >
                     {busy ? t.sync.connecting : t.sync.useExisting}
                 </button>
                 <button
                     onClick={onClose}
                     disabled={busy}
-                    className="btn text-text-muted hover:text-text-main w-full py-2 rounded-xl"
+                    className="btn btn-quiet w-full py-2 rounded-xl"
                 >
                     {t.sync.close}
                 </button>
@@ -333,14 +335,13 @@ export const GistSyncDialog = ({
                 <div className="flex flex-col gap-3">
                     <button
                         onClick={handleDisable}
-                        className="btn bg-red-500 hover:bg-red-600 text-white w-full py-3 rounded-xl shadow-lg"
+                        className="btn btn-primary w-full py-3 rounded-xl"
                     >
                         {t.sync.disable}
                     </button>
                     <button
                         onClick={onClose}
-                        autoFocus
-                        className="btn btn-primary w-full py-3 rounded-xl"
+                        className="btn btn-quiet w-full py-3 rounded-xl"
                     >
                         {t.sync.close}
                     </button>
