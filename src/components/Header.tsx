@@ -175,7 +175,9 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     const handleSecurityCancel = () => {
-        markApiKeyWarningSeen();
+        // Deliberately no markApiKeyWarningSeen(): declining the warning is not
+        // acknowledging it, so a later switch to API Key mode must ask again —
+        // same as the Gist and photo dialogs, which only record consent on accept.
         setShowSecurityDialog(false);
 
         // Ask if user wants to clear or keep the API key
