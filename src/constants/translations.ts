@@ -5,6 +5,9 @@ export const translations = {
         instructions: "Instructions",
         needToBuy: "Need to Buy",
         shoppingList: "Shopping List",
+        /** Brand name — identical in every locale, but kept here so the visible
+         *  heading and the accessible names that quote it cannot drift apart. */
+        appTitle: "AI Recipe Planner",
         skipToContent: "Skip to main content",
         a11y: {
             expand: "Expand",
@@ -352,6 +355,7 @@ export const translations = {
         instructions: "Zubereitung",
         needToBuy: "Einkaufen",
         shoppingList: "Einkaufsliste",
+        appTitle: "AI Recipe Planner",
         skipToContent: "Zum Hauptinhalt springen",
         a11y: {
             expand: "Ausklappen",
@@ -699,6 +703,7 @@ export const translations = {
         instructions: "Instructions",
         needToBuy: "À Acheter",
         shoppingList: "Liste de Courses",
+        appTitle: "AI Recipe Planner",
         skipToContent: "Aller au contenu principal",
         a11y: {
             expand: "Développer",
@@ -1046,6 +1051,7 @@ export const translations = {
         instructions: "Instrucciones",
         needToBuy: "Necesitas Comprar",
         shoppingList: "Lista de Compras",
+        appTitle: "AI Recipe Planner",
         skipToContent: "Saltar al contenido principal",
         a11y: {
             expand: "Expandir",
