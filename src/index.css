@@ -180,6 +180,18 @@ button {
    else carries the indicator — unlayered, it would outrank every utility and
    nothing could. */
 @layer base {
+  /* Tailwind v4 counts outline-color among the properties transition-colors
+     animates, and this app uses that utility everywhere. Left alone, the ring
+     would fade in from whatever currentColor is — white on a filled button,
+     which is white-on-white for the first frames. Pinning the colour here
+     leaves nothing to animate: focus only flips outline-style and width, and
+     neither of those transitions. */
+  *,
+  ::before,
+  ::after {
+    outline-color: var(--color-primary);
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -218,8 +230,8 @@ button {
   /* The focused border tints the field itself; the outline above carries the
      contrast. Neither utility suppresses the outline any more, and they
      transition colours rather than everything — transition-all animated the
-     outline too, so the ring faded in over 200ms and lagged behind fast
-     tabbing. */
+     outline's width too, so the ring grew in over 200ms and lagged behind fast
+     tabbing. Its colour is pinned in the base layer above. */
   .input-field {
     @apply px-4 py-3 border border-border-base bg-bg-surface text-text-main rounded-md transition-colors duration-200 placeholder:text-text-muted focus:border-primary;
   }
