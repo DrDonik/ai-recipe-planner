@@ -317,3 +317,43 @@ body {
     @apply bg-primary-light rounded-md ring-4 ring-primary-light;
   }
 }
+
+/* Everything the CSS side animates — the ~15 animate-in fades, slides and
+   zooms, the theme cross-fade on body, the transition-colors on every control
+   — collapses to an instant change when the operating system asks for less
+   motion. Durations go to a hair above zero rather than `animation: none`, so
+   anything that waits for an animation to finish still gets its event and no
+   element is stranded mid-keyframe. Unlayered, so it outranks the utilities it
+   overrides.
+
+   Reducing motion must not cost feedback, which makes two exceptions:
+
+   animate-spin keeps turning, only slower. It is a small rotation in place —
+   not the travel across the viewport that provokes vestibular symptoms — and
+   at several call sites it is the entire message that the app is working
+   (PantryInput's inline lookups, the sync status in Header), where a frozen
+   spinner would read as a hang rather than as progress.
+
+   animate-pulse stops outright. It marks a finished timer, and both places
+   that use it — the inline chip and the tray row — already carry that state in
+   amber, in the word "done", through a swapped-in bell icon or a role="status"
+   announcement. Nothing about a finished timer becomes imperceptible without
+   it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animate-spin {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .animate-pulse {
+    animation: none !important;
+  }
+}
