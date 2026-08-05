@@ -104,7 +104,12 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKey
                         id="api-key-input"
                         type="password"
                         value={keyInput}
-                        onChange={(e) => setKeyInput(e.target.value)}
+                        onChange={(e) => {
+                            setKeyInput(e.target.value);
+                            // Typing is the repair, so the complaint goes away
+                            // with the condition that caused it.
+                            setFieldError(null);
+                        }}
                         placeholder={t.apiKeyPlaceholder}
                         className="w-full px-3 py-2 bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg outline-none focus:border-primary text-sm"
                         autoFocus
