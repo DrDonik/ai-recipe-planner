@@ -214,7 +214,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {/* Title with inline toggle button */}
                     <div className="flex items-center gap-3">
                         <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${headerMinimized ? 'text-2xl' : 'text-2xl md:text-4xl'}`}>
-                            AI Recipe Planner
+                            {t.appTitle}
                         </h1>
 
                         {/* API Key Warning Indicator (when minimized) */}
@@ -244,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                             onClick={() => setHeaderMinimized(!headerMinimized)}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label={headerMinimized ? 'Expand' : 'Collapse'}
+                            aria-label={`${headerMinimized ? t.a11y.expand : t.a11y.collapse}: ${t.appTitle}`}
                             aria-expanded={!headerMinimized}
                         >
                             {headerMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
