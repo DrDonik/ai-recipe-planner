@@ -111,7 +111,7 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => setIsOpen(true)}
                         aria-label={t.recipeChat.open}
-                        className={`fixed left-4 z-40 h-14 w-14 rounded-full bg-primary text-text-on-primary shadow-lg hover:bg-primary-hover transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${STACK_ABOVE_TRAY}`}
+                        className={`fixed left-4 z-40 h-14 w-14 rounded-full bg-primary text-text-on-primary shadow-lg hover:bg-primary-hover transition-colors flex items-center justify-center ${STACK_ABOVE_TRAY}`}
                     >
                         <MessageCircle size={24} />
                         {messages.length > 0 && (
@@ -266,14 +266,14 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
                                     }}
                                     placeholder={t.recipeChat.placeholder}
                                     aria-label={t.recipeChat.placeholder}
-                                    className="flex-1 min-w-0 bg-white/30 dark:bg-black/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                    className="flex-1 min-w-0 bg-white/30 dark:bg-black/20 rounded-lg px-3 py-2 text-sm"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => ask(input)}
                                     disabled={isPending || !input.trim()}
                                     aria-label={t.recipeChat.send}
-                                    className="p-2 rounded-full bg-primary text-text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                                    className="p-2 rounded-full bg-primary text-text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     <Send size={16} />
                                 </button>

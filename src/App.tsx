@@ -727,6 +727,9 @@ function App() {
 
   return (
     <div className="min-h-screen pb-20">
+      {/* First tab stop of the document, so the header's controls can be
+          skipped on every page load. */}
+      <a href="#main-content" className="skip-link">{t.skipToContent}</a>
       {showWelcome && <WelcomeDialog onClose={handleCloseWelcome} />}
       {showCopyPasteDialog && (
         <CopyPasteDialog
@@ -756,7 +759,9 @@ function App() {
         notification={notification}
       />
 
-      <main className="app-container flex flex-col gap-8">
+      {/* tabIndex lets the skip link move focus here, scroll-mt clears the
+          sticky header when the browser jumps to the anchor. */}
+      <main id="main-content" tabIndex={-1} className="app-container flex flex-col gap-8 scroll-mt-24">
         {/* Input Section */}
         <section className="flex flex-col md:flex-row gap-12 md:items-start">
           <div className={`md:flex-1 md:max-w-sm md:min-w-0 space-y-6 relative z-10 ${mealPlan ? 'order-3 md:order-none' : ''}`}>

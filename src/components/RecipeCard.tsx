@@ -151,7 +151,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {showOpenInNewTab && onViewSingle && (
                         <button
                             onClick={onViewSingle}
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors flex items-center justify-center text-text-muted hover:text-primary"
                             aria-label={t.openFocusView}
                         >
                             <Maximize size={18} />
@@ -161,7 +161,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {isStandalone && onClose && (
                         <button
                             onClick={onClose}
-                            className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-all text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary shrink-0"
+                            className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base shrink-0"
                             aria-label="Close"
                         >
                             <X size={20} />
@@ -179,7 +179,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {onGenerateImage && !imageUrl && !isImageLoading && !imageError && (
                         <button
                             onClick={onGenerateImage}
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors flex items-center justify-center text-text-muted hover:text-primary"
                             aria-label={t.recipeImage.generate}
                         >
                             <ImageIcon size={18} />
@@ -188,7 +188,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {wakeLock?.isSupported && isStandalone && (
                         <button
                             onClick={wakeLock.toggle}
-                            className={`rounded-full transition-all flex items-center justify-center h-9 w-9 ${
+                            className={`rounded-full transition-colors flex items-center justify-center h-9 w-9 ${
                                 wakeLock.isActive
                                     ? 'bg-primary/20 text-primary hover:bg-primary/30'
                                     : 'bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 text-text-muted hover:text-primary'
@@ -202,7 +202,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {onReplace && (
                         <button
                             onClick={onReplace}
-                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-all flex items-center justify-center text-text-muted hover:text-primary"
+                            className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors flex items-center justify-center text-text-muted hover:text-primary"
                             aria-label={t.replaceRecipe.button}
                         >
                             <RefreshCw size={18} />
@@ -211,7 +211,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {onDelete && (
                         <button
                             onClick={onDelete}
-                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-all flex items-center justify-center text-red-400 hover:text-red-500"
+                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-colors flex items-center justify-center text-red-400 hover:text-red-500"
                             aria-label={t.deleteRecipe}
                         >
                             <Trash2 size={18} />
@@ -256,7 +256,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {imageUrl && onRemoveImage && (
                         <button
                             onClick={onRemoveImage}
-                            className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full text-white transition-colors"
                             aria-label={t.recipeImage.remove}
                         >
                             <X size={16} />
@@ -281,7 +281,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                     key={ingredientKey}
                                     role="button"
                                     tabIndex={0}
-                                    className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3 cursor-pointer group/ing focus:outline-none focus:bg-primary/5 rounded"
+                                    className="flex flex-row items-center justify-between border-b border-dashed border-[var(--glass-border)] py-0.5 last:border-0 gap-3 cursor-pointer group/ing rounded"
                                     onClick={() => toggleIngredient(idx)}
                                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleIngredient(idx); }}}
                                     aria-pressed={isStruck}
@@ -342,7 +342,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                             <li
                                 key={`step-${i}-${step.slice(0, 20)}`}
                                 tabIndex={0}
-                                className={`pl-1 marker:text-primary marker:font-bold cursor-pointer transition-all focus:outline-none focus:bg-primary/5 rounded ${activeStep === i ? 'instruction-step-active' : ''}`}
+                                className={`pl-1 marker:text-primary marker:font-bold cursor-pointer transition-[background-color,box-shadow] rounded ${activeStep === i ? 'instruction-step-active' : ''}`}
                                 onClick={() => toggleStepHighlight(i)}
                                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleStepHighlight(i); }}}
                                 aria-current={activeStep === i ? 'step' : undefined}

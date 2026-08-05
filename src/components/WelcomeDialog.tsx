@@ -93,7 +93,7 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({ onClose }) => {
                             type="checkbox"
                             checked={dontShowAgain}
                             onChange={(e) => setDontShowAgain(e.target.checked)}
-                            className="w-4 h-4 rounded border-border-base text-primary focus:ring-primary/50"
+                            className="w-4 h-4 rounded border-border-base text-primary"
                         />
                         {t.welcome.dontShowAgain}
                     </label>

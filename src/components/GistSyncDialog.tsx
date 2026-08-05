@@ -231,7 +231,7 @@ export const GistSyncDialog = ({
                         onChange={(e) => setTokenInput(e.target.value)}
                         placeholder={t.sync.tokenPlaceholder}
                         disabled={busy}
-                        className="w-full px-3 py-2 bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg outline-none focus:border-primary text-sm"
+                        className="w-full px-3 py-2 bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg focus:border-primary text-sm"
                         autoFocus
                     />
                     <a
@@ -256,7 +256,7 @@ export const GistSyncDialog = ({
                         onChange={(e) => setGistIdInput(e.target.value)}
                         placeholder={t.sync.gistIdPlaceholder}
                         disabled={busy}
-                        className="w-full px-3 py-2 bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg outline-none focus:border-primary text-sm"
+                        className="w-full px-3 py-2 bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg focus:border-primary text-sm"
                     />
                 </div>
 

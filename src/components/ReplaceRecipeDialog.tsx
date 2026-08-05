@@ -59,7 +59,7 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-text-base"
                         aria-label={t.replaceRecipe.cancel}
                     >
                         <X size={20} />
@@ -86,7 +86,7 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
                         onChange={(e) => setPreference(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } }}
                         placeholder={t.replaceRecipe.placeholder}
-                        className="w-full bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+                        className="w-full bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm disabled:opacity-50"
                     />
                     <p className="text-xs text-text-muted">{t.replaceRecipe.hint}</p>
 
