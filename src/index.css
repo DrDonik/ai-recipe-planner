@@ -162,10 +162,6 @@ body {
   width: 100%;
 }
 
-button {
-  cursor: pointer;
-}
-
 /* One focus treatment for the whole app, so the indicator looks the same
    wherever the keyboard lands. `outline` follows border-radius, stays out of
    the layout and needs no ring-offset colour — Tailwind's default offset is
@@ -195,6 +191,14 @@ button {
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+  }
+
+  /* In @layer base so a utility can override it. Unlayered, this beat every
+     layered class: `disabled:cursor-not-allowed` on the button styles below
+     never took effect, and the info tooltips could not swap in cursor-help to
+     stop promising a click that leads nowhere. */
+  button {
+    cursor: pointer;
   }
 
   /* Elements that only take focus programmatically — the skip-link target, the
@@ -282,19 +286,25 @@ button {
     @apply relative inline-block;
   }
 
+  /* No pointer-events-none: WCAG 1.4.13 asks that the pointer can travel onto
+     the tooltip without it vanishing, which matters at high magnification
+     where the text may not fit beside the trigger. While hidden, `invisible`
+     already keeps it out of the way of everything underneath. */
   .tooltip-text {
-    @apply invisible absolute z-50 bottom-[125%] left-1/2 -ml-[100px] w-[200px] p-2 bg-bg-surface text-text-main text-center text-xs border border-border-base rounded-md shadow-glass opacity-0 transition-opacity duration-300 pointer-events-none;
+    @apply invisible absolute z-50 bottom-[125%] left-1/2 -ml-[100px] w-[200px] p-2 bg-bg-surface text-text-main text-center text-xs border border-border-base rounded-md shadow-glass opacity-0 transition-opacity duration-300;
   }
 
-  .tooltip-container:hover .tooltip-text,
-  .tooltip-container:focus-within .tooltip-text {
+  /* .tooltip-dismissed is set while Escape holds a tooltip closed, and cleared
+     by the next hover or focus. */
+  .tooltip-container:not(.tooltip-dismissed):hover .tooltip-text,
+  .tooltip-container:not(.tooltip-dismissed):focus-within .tooltip-text {
     @apply visible opacity-100;
   }
 
   /* Lift a panel above its siblings while one of its tooltips is shown,
      so the tooltip overflow paints above the panel immediately above. */
-  .glass-panel:has(.tooltip-container:hover),
-  .glass-panel:has(.tooltip-container:focus-within) {
+  .glass-panel:has(.tooltip-container:not(.tooltip-dismissed):hover),
+  .glass-panel:has(.tooltip-container:not(.tooltip-dismissed):focus-within) {
     @apply relative z-50;
   }
 
