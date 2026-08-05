@@ -244,7 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                             onClick={() => setHeaderMinimized(!headerMinimized)}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label={headerMinimized ? 'Expand' : 'Collapse'}
+                            aria-label={`${headerMinimized ? t.a11y.expand : t.a11y.collapse}: AI Recipe Planner`}
                             aria-expanded={!headerMinimized}
                         >
                             {headerMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}

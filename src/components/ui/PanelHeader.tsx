@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { ChevronUp, ChevronDown, Info } from 'lucide-react';
+import { useSettings } from '../../contexts/SettingsContext';
 import { TooltipButton } from './TooltipButton';
 
 interface PanelHeaderProps {
@@ -8,7 +9,6 @@ interface PanelHeaderProps {
     isMinimized: boolean;
     onToggleMinimize: () => void;
     infoTooltip?: string;
-    infoAriaLabel?: string;
     actions?: ReactNode;
 }
 
@@ -18,9 +18,10 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
     isMinimized,
     onToggleMinimize,
     infoTooltip,
-    infoAriaLabel,
     actions,
 }) => {
+    const { t } = useSettings();
+
     return (
         <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center gap-3">
@@ -33,13 +34,13 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
                     <TooltipButton
                         icon={<Info size={18} />}
                         tooltip={infoTooltip}
-                        ariaLabel={infoAriaLabel || 'Info'}
+                        ariaLabel={infoTooltip}
                     />
                 )}
                 <button
                     onClick={onToggleMinimize}
                     className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary flex items-center justify-center"
-                    aria-label={isMinimized ? 'Expand' : 'Collapse'}
+                    aria-label={`${isMinimized ? t.a11y.expand : t.a11y.collapse}: ${title}`}
                     aria-expanded={!isMinimized}
                 >
                     {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}

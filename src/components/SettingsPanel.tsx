@@ -92,7 +92,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                         <button
                             onClick={() => setOptionsMinimized(!optionsMinimized)}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-primary"
-                            aria-label={optionsMinimized ? 'Expand' : 'Collapse'}
+                            aria-label={`${optionsMinimized ? t.a11y.expand : t.a11y.collapse}: ${t.diet}`}
                             aria-expanded={!optionsMinimized}
                         >
                             {optionsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}

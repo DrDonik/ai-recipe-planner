@@ -263,7 +263,6 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                 isMinimized={isMinimized}
                 onToggleMinimize={onToggleMinimize}
                 infoTooltip={t.pantryInfo}
-                infoAriaLabel={t.pantryInfo}
             />
 
             {!isMinimized && (

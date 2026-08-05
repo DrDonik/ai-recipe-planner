@@ -162,7 +162,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                         <button
                             onClick={onClose}
                             className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base shrink-0"
-                            aria-label="Close"
+                            aria-label={t.a11y.close}
                         >
                             <X size={20} />
                         </button>
@@ -285,7 +285,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                     onClick={() => toggleIngredient(idx)}
                                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleIngredient(idx); }}}
                                     aria-pressed={isStruck}
-                                    aria-label={`${ing.item}, ${ing.amount}${isStruck ? ' (crossed off)' : ''}`}
+                                    aria-label={`${ing.item}, ${ing.amount}`}
                                 >
                                     <span className={`${isStandalone ? 'text-base' : 'text-sm'} transition-all ${isStruck
                                         ? "line-through opacity-50 text-text-muted"
@@ -313,7 +313,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                                 <button
                                     onClick={onToggleMissingIngredientsMinimize}
                                     className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-warning-text flex items-center justify-center"
-                                    aria-label={missingIngredientsMinimized ? 'Expand' : 'Collapse'}
+                                    aria-label={`${missingIngredientsMinimized ? t.a11y.expand : t.a11y.collapse}: ${t.needToBuy}`}
                                     aria-expanded={!missingIngredientsMinimized}
                                 >
                                     {missingIngredientsMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}

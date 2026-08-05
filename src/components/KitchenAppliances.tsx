@@ -55,7 +55,6 @@ export const KitchenAppliances = forwardRef<KitchenAppliancesRef, KitchenApplian
                 isMinimized={isMinimized}
                 onToggleMinimize={onToggleMinimize}
                 infoTooltip={t.kitchenAppliancesInfo}
-                infoAriaLabel={t.kitchenAppliancesInfo}
             />
 
             {!isMinimized && (

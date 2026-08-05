@@ -55,7 +55,6 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
                 isMinimized={isMinimized}
                 onToggleMinimize={onToggleMinimize}
                 infoTooltip={t.spiceRackInfo}
-                infoAriaLabel={t.spiceRackInfo}
             />
 
             {!isMinimized && (

@@ -84,7 +84,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                     <button
                         onClick={onCancel}
                         className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
-                        aria-label="Close"
+                        aria-label={t.a11y.close}
                     >
                         <X size={20} />
                     </button>

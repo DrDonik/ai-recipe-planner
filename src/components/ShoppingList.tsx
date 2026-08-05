@@ -194,7 +194,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         <button
                             onClick={onClose}
                             className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
-                            aria-label="Close"
+                            aria-label={t.a11y.close}
                         >
                             <X size={20} />
                         </button>
@@ -203,7 +203,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                         <button
                             onClick={onToggleMinimize}
                             className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors focus:opacity-100 flex items-center justify-center text-text-muted hover:text-primary"
-                            aria-label={isMinimized ? 'Expand' : 'Collapse'}
+                            aria-label={`${isMinimized ? t.a11y.expand : t.a11y.collapse}: ${t.shoppingList}`}
                             aria-expanded={!isMinimized}
                         >
                             {isMinimized ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
