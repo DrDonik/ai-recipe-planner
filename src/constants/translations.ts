@@ -215,8 +215,8 @@ export const translations = {
             getStarted: "Get Started"
         },
         modeSwitch: {
-            apiKey: "API Key",
-            copyPaste: "Copy & Paste"
+            label: "Gemini API",
+            tooltip: "Off: Copy & Paste — the prompt is prepared for any AI chat and nothing is stored. On: recipes are generated directly with your own Gemini API key."
         },
         storageTips: {
             iconAriaLabel: "Storage tip",
@@ -260,6 +260,14 @@ export const translations = {
             understand: "I understand, continue",
             cancel: "Cancel"
         },
+        apiKeyDialog: {
+            heading: "Gemini API key",
+            description: "The key is stored in this browser and sent straight to Google Gemini. Saving it also switches recipe generation to API Key mode.",
+            save: "Save key",
+            cancel: "Cancel",
+            errorEmpty: "Please enter an API key.",
+            editTooltip: "Change API key"
+        },
         clearApiKey: {
             title: "Clear API Key?",
             description: "Do you want to remove your stored API key from this device?",
@@ -288,6 +296,7 @@ export const translations = {
         },
         sync: {
             title: "Multi-Device Sync",
+            label: "Device sync",
             openSettings: "Sync settings",
             enabledTooltip: "Sync is active",
             pendingTooltip: "Changes will sync shortly…",
@@ -547,8 +556,8 @@ export const translations = {
             getStarted: "Los geht's"
         },
         modeSwitch: {
-            apiKey: "API-Schlüssel",
-            copyPaste: "Kopieren & Einfügen"
+            label: "Gemini API",
+            tooltip: "Aus: Kopieren & Einfügen — der Prompt wird für einen beliebigen KI-Chat vorbereitet, es wird nichts gespeichert. An: Rezepte werden direkt mit deinem eigenen Gemini-API-Schlüssel erzeugt."
         },
         storageTips: {
             iconAriaLabel: "Lagerungstipp",
@@ -592,6 +601,14 @@ export const translations = {
             understand: "Verstanden, fortfahren",
             cancel: "Abbrechen"
         },
+        apiKeyDialog: {
+            heading: "Gemini-API-Schlüssel",
+            description: "Der Schlüssel wird in diesem Browser gespeichert und direkt an Google Gemini gesendet. Mit dem Speichern wird die Rezeptgenerierung auf den API-Modus umgestellt.",
+            save: "Schlüssel speichern",
+            cancel: "Abbrechen",
+            errorEmpty: "Bitte gib einen API-Schlüssel ein.",
+            editTooltip: "API-Schlüssel ändern"
+        },
         clearApiKey: {
             title: "API-Schlüssel löschen?",
             description: "Möchtest du deinen gespeicherten API-Schlüssel von diesem Gerät entfernen?",
@@ -620,6 +637,7 @@ export const translations = {
         },
         sync: {
             title: "Geräte-Synchronisation",
+            label: "Geräte-Sync",
             openSettings: "Sync-Einstellungen",
             enabledTooltip: "Synchronisation aktiv",
             pendingTooltip: "Änderungen werden gleich synchronisiert…",
@@ -879,8 +897,8 @@ export const translations = {
             getStarted: "Commencer"
         },
         modeSwitch: {
-            apiKey: "Clé API",
-            copyPaste: "Copier-Coller"
+            label: "API Gemini",
+            tooltip: "Désactivé : Copier-Coller — l'invite est préparée pour n'importe quel chat IA et rien n'est stocké. Activé : les recettes sont générées directement avec votre propre clé API Gemini."
         },
         storageTips: {
             iconAriaLabel: "Conseil de conservation",
@@ -924,6 +942,14 @@ export const translations = {
             understand: "Je comprends, continuer",
             cancel: "Annuler"
         },
+        apiKeyDialog: {
+            heading: "Clé API Gemini",
+            description: "La clé est stockée dans ce navigateur et envoyée directement à Google Gemini. L'enregistrer bascule aussi la génération de recettes en mode clé API.",
+            save: "Enregistrer la clé",
+            cancel: "Annuler",
+            errorEmpty: "Veuillez saisir une clé API.",
+            editTooltip: "Modifier la clé API"
+        },
         clearApiKey: {
             title: "Effacer la clé API ?",
             description: "Voulez-vous supprimer votre clé API stockée de cet appareil ?",
@@ -952,6 +978,7 @@ export const translations = {
         },
         sync: {
             title: "Synchronisation multi-appareils",
+            label: "Synchronisation",
             openSettings: "Paramètres de synchronisation",
             enabledTooltip: "Synchronisation active",
             pendingTooltip: "Les modifications seront synchronisées bientôt…",
@@ -1211,8 +1238,8 @@ export const translations = {
             getStarted: "Empezar"
         },
         modeSwitch: {
-            apiKey: "Clave API",
-            copyPaste: "Copiar y Pegar"
+            label: "API de Gemini",
+            tooltip: "Desactivado: Copiar y Pegar — el prompt se prepara para cualquier chat de IA y no se almacena nada. Activado: las recetas se generan directamente con tu propia clave API de Gemini."
         },
         storageTips: {
             iconAriaLabel: "Consejo de conservación",
@@ -1256,6 +1283,14 @@ export const translations = {
             understand: "Entiendo, continuar",
             cancel: "Cancelar"
         },
+        apiKeyDialog: {
+            heading: "Clave API de Gemini",
+            description: "La clave se almacena en este navegador y se envía directamente a Google Gemini. Al guardarla también se cambia la generación de recetas al modo de clave API.",
+            save: "Guardar clave",
+            cancel: "Cancelar",
+            errorEmpty: "Introduce una clave API.",
+            editTooltip: "Cambiar la clave API"
+        },
         clearApiKey: {
             title: "¿Eliminar clave API?",
             description: "¿Quieres eliminar tu clave API almacenada de este dispositivo?",
@@ -1284,6 +1319,7 @@ export const translations = {
         },
         sync: {
             title: "Sincronización entre dispositivos",
+            label: "Sincronización",
             openSettings: "Ajustes de sincronización",
             enabledTooltip: "Sincronización activa",
             pendingTooltip: "Los cambios se sincronizarán en breve…",

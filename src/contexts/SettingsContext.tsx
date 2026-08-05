@@ -150,8 +150,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     // Reset the image-generation opt-in whenever the API key changes. The
     // toggle is an explicit acknowledgement that the key supports paid
     // image-gen, so a new key — possibly free-tier — must be re-confirmed.
-    // Skip the reset when the new value equals the current one (the input
-    // fires onChange per keystroke; identical values shouldn't reset).
+    // Skip the reset when the new value equals the current one: re-saving the
+    // unchanged key from the dialog is not a new key.
     const setApiKey = useCallback((key: string) => {
         if (key !== apiKey && imageGenEnabled) setImageGenEnabled(false);
         setApiKeyRaw(key);

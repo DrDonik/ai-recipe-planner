@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, ExternalLink, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, ImageIcon, Info } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, ImageIcon, Info } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
-import { API_CONFIG, STORAGE_KEYS } from '../constants';
-import { ApiKeySecurityDialog } from './ApiKeySecurityDialog';
+import { STORAGE_KEYS } from '../constants';
+import { ApiKeyDialog, type ApiKeyDialogStep } from './ApiKeyDialog';
 import { ClearApiKeyDialog } from './ClearApiKeyDialog';
 import { GistSyncDialog } from './GistSyncDialog';
 import { TooltipButton } from './ui/TooltipButton';
+import { Toggle } from './ui/Toggle';
 import { UndoToast } from './ui/UndoToast';
 import { buildExportData, downloadExportFile, readImportFile, applyImportData } from '../utils/dataTransfer';
 import type { Notification } from '../types';
@@ -36,12 +37,11 @@ export const Header: React.FC<HeaderProps> = ({
     const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, imageGenEnabled, setImageGenEnabled, t } = useSettings();
 
     // Check on mount if existing user needs to see the security warning
-    const [showSecurityDialog, setShowSecurityDialog] = useState(
-        () => !hasSeenApiKeyWarning() && !!apiKey && !useCopyPaste
+    const [apiDialogStep, setApiDialogStep] = useState<ApiKeyDialogStep | null>(
+        () => (!hasSeenApiKeyWarning() && !!apiKey && !useCopyPaste ? 'warning' : null)
     );
     const [showClearDialog, setShowClearDialog] = useState(false);
     const [showSyncDialog, setShowSyncDialog] = useState(false);
-    const [pendingModeSwitch, setPendingModeSwitch] = useState<'toApiKey' | 'toCopyPaste' | null>(null);
     const importFileRef = useRef<HTMLInputElement>(null);
 
     const syncIcon = (() => {
@@ -133,28 +133,27 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     const handleModeToggle = () => {
-        if (useCopyPaste) {
-            // Switching TO API Key mode. The warning is about a key being
-            // stored, so it only earns its place while none is: with a key
-            // already in local storage the switch exposes nothing new, and
-            // once the warning has been acknowledged the header's persistent
-            // apiKeyStoredWarning tooltip carries the reminder from there.
-            if (apiKey || hasSeenApiKeyWarning()) {
-                setUseCopyPaste(false);
-                return;
-            }
-            setPendingModeSwitch('toApiKey');
-            setShowSecurityDialog(true);
-        } else {
+        if (!useCopyPaste) {
             // Switching TO Copy & Paste mode
             if (apiKey) {
                 // Ask if user wants to clear or keep the API key
-                setPendingModeSwitch('toCopyPaste');
                 setShowClearDialog(true);
             } else {
                 setUseCopyPaste(true);
             }
+            return;
         }
+
+        // Switching TO API Key mode. A stored key is all the mode needs, and
+        // the warning is about a key being stored — so with one already in
+        // local storage the switch exposes nothing new and asks nothing. The
+        // header's persistent apiKeyStoredWarning tooltip carries the reminder
+        // from there.
+        if (apiKey) {
+            setUseCopyPaste(false);
+            return;
+        }
+        setApiDialogStep(hasSeenApiKeyWarning() ? 'key' : 'warning');
     };
 
     const markApiKeyWarningSeen = () => {
@@ -167,39 +166,39 @@ export const Header: React.FC<HeaderProps> = ({
 
     const handleSecurityAccept = () => {
         markApiKeyWarningSeen();
-        setShowSecurityDialog(false);
-        if (pendingModeSwitch === 'toApiKey') {
-            setUseCopyPaste(false);
-        }
-        setPendingModeSwitch(null);
+        setApiDialogStep('key');
     };
 
-    const handleSecurityCancel = () => {
+    const handleApiKeySave = (key: string) => {
+        setApiKey(key);
+        setUseCopyPaste(false);
+        setApiDialogStep(null);
+    };
+
+    const handleApiDialogCancel = () => {
         // Deliberately no markApiKeyWarningSeen(): declining the warning is not
         // acknowledging it, so a later switch to API Key mode must ask again —
         // same as the Gist and photo dialogs, which only record consent on accept.
-        setShowSecurityDialog(false);
+        const declinedWarning = apiDialogStep === 'warning';
+        setApiDialogStep(null);
 
-        // Ask if user wants to clear or keep the API key
-        if (apiKey) {
-            setPendingModeSwitch('toCopyPaste');
+        // Declining the warning while a key is already stored is the on-mount
+        // case for existing users: drop back to Copy & Paste and ask whether
+        // the key should be cleared. Every other cancel — an aborted switch, a
+        // closed key dialog — leaves the current mode untouched.
+        if (declinedWarning && !useCopyPaste && apiKey) {
             setShowClearDialog(true);
-        } else {
-            setUseCopyPaste(true);
-            setPendingModeSwitch(null);
         }
     };
 
     const handleClearApiKey = () => {
         setShowClearDialog(false);
-        setPendingModeSwitch(null);
         clearApiKeyWithUndo();
     };
 
     const handleKeepApiKey = () => {
         setShowClearDialog(false);
         setUseCopyPaste(true);
-        setPendingModeSwitch(null);
     };
 
     return (
@@ -265,88 +264,82 @@ export const Header: React.FC<HeaderProps> = ({
                                 </button>
                             </div>
 
-                            {/* Mode Toggle Switch */}
-                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <span className={`text-sm transition-colors ${useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
-                                    {t.modeSwitch.copyPaste}
-                                </span>
-                                <button
-                                    onClick={handleModeToggle}
-                                    className="relative w-12 h-6 bg-white/50 dark:bg-black/30 rounded-full border border-[var(--glass-border)] transition-colors hover:bg-white/70 dark:hover:bg-black/40"
-                                    role="switch"
-                                    aria-checked={!useCopyPaste}
-                                    aria-label={useCopyPaste ? t.modeSwitch.copyPaste : t.modeSwitch.apiKey}
-                                >
-                                    <span
-                                        className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${useCopyPaste ? 'left-0.5' : 'left-6'}`}
+                            {/* Settings switches. One grid so icon, label, switch
+                                and trailing affordance line up across all rows. */}
+                            <div className="grid grid-cols-[auto_auto_auto_auto] items-center gap-x-2 gap-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <Toggle
+                                    icon={<Key size={14} />}
+                                    label={t.modeSwitch.label}
+                                    checked={!useCopyPaste}
+                                    onChange={handleModeToggle}
+                                    trailing={
+                                        useCopyPaste ? (
+                                            apiKey ? (
+                                                /* A key outliving API Key mode is worth flagging;
+                                                   clicking offers to clear it. */
+                                                <TooltipButton
+                                                    icon={<AlertTriangle size={16} className="text-red-500" />}
+                                                    tooltip={t.apiKeyStoredWarning}
+                                                    ariaLabel={t.apiKeyStoredWarning}
+                                                    className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                                    onClick={() => setShowClearDialog(true)}
+                                                />
+                                            ) : (
+                                                <TooltipButton
+                                                    icon={<Info size={14} className="text-text-muted" />}
+                                                    tooltip={t.modeSwitch.tooltip}
+                                                    ariaLabel={t.modeSwitch.tooltip}
+                                                    className="!p-1"
+                                                />
+                                            )
+                                        ) : (
+                                            <TooltipButton
+                                                icon={<Key size={14} className="text-text-muted" />}
+                                                tooltip={t.apiKeyDialog.editTooltip}
+                                                ariaLabel={t.apiKeyDialog.editTooltip}
+                                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={() => setApiDialogStep('key')}
+                                            />
+                                        )
+                                    }
+                                />
+
+                                {!useCopyPaste && apiKey && (
+                                    <Toggle
+                                        icon={<ImageIcon size={14} />}
+                                        label={t.imageGen.label}
+                                        checked={imageGenEnabled}
+                                        onChange={() => setImageGenEnabled(!imageGenEnabled)}
+                                        trailing={
+                                            <TooltipButton
+                                                icon={<Info size={14} className="text-text-muted" />}
+                                                tooltip={t.imageGen.tooltip}
+                                                ariaLabel={t.imageGen.tooltip}
+                                                className="!p-1"
+                                            />
+                                        }
                                     />
-                                </button>
-                                <div className="flex items-center gap-1">
-                                    <span className={`text-sm transition-colors ${!useCopyPaste ? 'text-text-main font-medium' : 'text-text-muted'}`}>
-                                        {t.modeSwitch.apiKey}
-                                    </span>
-                                    {/* API Key Warning Indicator (when expanded) */}
-                                    {useCopyPaste && apiKey && (
+                                )}
+
+                                {/* Both directions open the dialog: switching on needs a
+                                    token, switching off discards one. */}
+                                <Toggle
+                                    icon={<Cloud size={14} />}
+                                    label={t.sync.label}
+                                    checked={syncStatus !== 'idle'}
+                                    onChange={() => setShowSyncDialog(true)}
+                                    opensDialog
+                                    trailing={
                                         <TooltipButton
-                                            icon={<AlertTriangle size={16} className="text-red-500" />}
-                                            tooltip={t.apiKeyStoredWarning}
-                                            ariaLabel={t.apiKeyStoredWarning}
+                                            icon={syncIcon}
+                                            tooltip={syncTooltip}
+                                            ariaLabel={t.sync.openSettings}
                                             className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                            onClick={() => setShowClearDialog(true)}
+                                            onClick={() => setShowSyncDialog(true)}
                                         />
-                                    )}
-                                </div>
+                                    }
+                                />
                             </div>
-
-                            {!useCopyPaste && (
-                                <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <label htmlFor="api-key-input" className="sr-only">{t.apiKeyLabel}</label>
-                                    <Key size={16} className="ml-2 text-text-muted" aria-hidden="true" />
-                                    <input
-                                        id="api-key-input"
-                                        type="password"
-                                        placeholder={t.apiKeyPlaceholder}
-                                        value={apiKey}
-                                        onChange={(e) => setApiKey(e.target.value)}
-                                        className="bg-transparent border-none outline-none text-sm w-40 px-2"
-                                    />
-                                    <a
-                                        href={API_CONFIG.KEY_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-text-muted hover:text-primary transition-colors p-1 rounded-full"
-                                        title={t.getApiKey}
-                                    >
-                                        <ExternalLink size={14} />
-                                    </a>
-                                </div>
-                            )}
-
-                            {!useCopyPaste && apiKey && (
-                                <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <ImageIcon size={14} className="text-text-muted" aria-hidden="true" />
-                                    <span className={`text-sm transition-colors ${imageGenEnabled ? 'text-text-main font-medium' : 'text-text-muted'}`}>
-                                        {t.imageGen.label}
-                                    </span>
-                                    <button
-                                        onClick={() => setImageGenEnabled(!imageGenEnabled)}
-                                        className="relative w-12 h-6 bg-white/50 dark:bg-black/30 rounded-full border border-[var(--glass-border)] transition-colors hover:bg-white/70 dark:hover:bg-black/40"
-                                        role="switch"
-                                        aria-checked={imageGenEnabled}
-                                        aria-label={t.imageGen.label}
-                                    >
-                                        <span
-                                            className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${imageGenEnabled ? 'left-6' : 'left-0.5'}`}
-                                        />
-                                    </button>
-                                    <TooltipButton
-                                        icon={<Info size={14} className="text-text-muted" />}
-                                        tooltip={t.imageGen.tooltip}
-                                        ariaLabel={t.imageGen.tooltip}
-                                        className="!p-1"
-                                    />
-                                </div>
-                            )}
 
                             <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label htmlFor="language-select" className="sr-only">{t.languageLabel}</label>
@@ -365,7 +358,8 @@ export const Header: React.FC<HeaderProps> = ({
                                 </select>
                             </div>
 
-                            {/* Export / Import / Sync */}
+                            {/* Export / Import — actions, not settings, hence
+                                buttons rather than switches. */}
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <input
                                     ref={importFileRef}
@@ -390,13 +384,6 @@ export const Header: React.FC<HeaderProps> = ({
                                     className="p-2 bg-white/50 dark:bg-black/20 rounded-full border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40 transition-colors text-text-muted hover:text-primary cursor-pointer"
                                     onClick={handleImportClick}
                                 />
-                                <TooltipButton
-                                    icon={syncIcon}
-                                    tooltip={syncTooltip}
-                                    ariaLabel={t.sync.openSettings}
-                                    className="p-2 bg-white/50 dark:bg-black/20 rounded-full border border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40 transition-colors cursor-pointer"
-                                    onClick={() => setShowSyncDialog(true)}
-                                />
                             </div>
                         </>
                     )}
@@ -410,10 +397,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
         </header>
 
-        {showSecurityDialog && (
-            <ApiKeySecurityDialog
-                onAccept={handleSecurityAccept}
-                onCancel={handleSecurityCancel}
+        {apiDialogStep && (
+            <ApiKeyDialog
+                step={apiDialogStep}
+                onAcceptWarning={handleSecurityAccept}
+                onSave={handleApiKeySave}
+                onCancel={handleApiDialogCancel}
             />
         )}
 
