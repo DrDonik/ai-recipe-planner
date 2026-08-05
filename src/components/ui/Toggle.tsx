@@ -35,14 +35,23 @@ export const Toggle: React.FC<ToggleProps> = ({
         </span>
         <button
             onClick={onChange}
-            className="relative w-12 h-6 bg-white/50 dark:bg-black/30 rounded-full border border-[var(--glass-border)] transition-colors hover:bg-white/70 dark:hover:bg-black/40"
+            /* The track carries the state as well as the knob's position: at a
+               glance a row of switches should read on or off by colour, not by
+               comparing knob offsets. */
+            className={`relative w-12 h-6 rounded-full border transition-colors ${
+                checked
+                    ? 'bg-primary border-primary hover:bg-primary-hover'
+                    : 'bg-white/50 dark:bg-black/30 border-[var(--glass-border)] hover:bg-white/70 dark:hover:bg-black/40'
+            }`}
             role="switch"
             aria-checked={checked}
             aria-label={ariaLabel ?? label}
             aria-haspopup={opensDialog ? 'dialog' : undefined}
         >
             <span
-                className={`absolute top-0.5 w-5 h-5 bg-primary rounded-full shadow-md transition-all duration-200 ${checked ? 'left-6' : 'left-0.5'}`}
+                className={`absolute top-0.5 w-5 h-5 rounded-full shadow-md transition-all duration-200 ${
+                    checked ? 'left-6 bg-text-on-primary' : 'left-0.5 bg-text-muted'
+                }`}
             />
         </button>
         <span className="flex items-center">{trailing}</span>
