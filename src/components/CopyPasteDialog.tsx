@@ -83,7 +83,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                     </h2>
                     <button
                         onClick={onCancel}
-                        className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -143,7 +143,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                     setError(null);
                                 }}
                                 placeholder={t.copyPaste.responsePlaceholder}
-                                className="w-full flex-1 bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                className="w-full flex-1 bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm font-mono resize-none"
                             />
                             {error && (
                                 <div

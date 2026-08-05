@@ -131,10 +131,12 @@ const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClea
                 <ul className="flex flex-col rounded-md border border-border-base overflow-hidden">
                     {suggestions.map((suggestion) => (
                         <li key={`${suggestion.latitude},${suggestion.longitude}`}>
+                            {/* Flush against an overflow-hidden list, so the
+                                focus ring has to sit inside the button. */}
                             <button
                                 type="button"
                                 onClick={() => handleSelect(suggestion)}
-                                className="w-full px-2 py-1.5 text-left text-sm truncate hover:bg-bg-surface-hover text-text-main"
+                                className="w-full px-2 py-1.5 text-left text-sm truncate hover:bg-bg-surface-hover text-text-main focus-visible:outline-offset-[-2px]"
                             >
                                 {suggestion.label}
                             </button>

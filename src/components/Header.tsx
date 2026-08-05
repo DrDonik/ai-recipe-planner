@@ -341,14 +341,17 @@ export const Header: React.FC<HeaderProps> = ({
                                 />
                             </div>
 
-                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300">
+                            {/* The select is transparent inside this pill, so a
+                                rectangular outline on the select itself would cut
+                                across it. The ring goes on the pill instead. */}
+                            <div className="flex items-center gap-2 bg-white/50 dark:bg-black/20 p-1.5 rounded-full border border-[var(--glass-border)] animate-in fade-in slide-in-from-top-2 duration-300 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary has-[:focus-visible]:outline-offset-2">
                                 <label htmlFor="language-select" className="sr-only">{t.languageLabel}</label>
                                 <Globe size={16} className="ml-2 text-text-muted" aria-hidden="true" />
                                 <select
                                     id="language-select"
                                     value={language}
                                     onChange={(e) => setLanguage(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-sm px-2 cursor-pointer font-medium text-text-main w-full"
+                                    className="bg-transparent border-none focus-visible:outline-none text-sm px-2 cursor-pointer font-medium text-text-main w-full"
                                     aria-label={t.languageLabel}
                                 >
                                     <option value="German">Deutsch</option>
