@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Timer as TimerIcon, Pause, Play, X, Volume2, VolumeX } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTimers } from '../contexts/TimerContext';
@@ -20,6 +20,13 @@ export const TimerTray: React.FC = () => {
   const { timers, muted, toggleMuted, pauseTimer, resumeTimer, cancelTimer } = useTimers();
   const trayRef = useRef<HTMLDivElement>(null);
   const hasTimers = timers.length > 0;
+  // The root MotionConfig already drops transforms and the `layout` animation
+  // below, but not the explicit height keys — and those are the ones that move
+  // things: the tray is bottom-anchored, so a row growing in pushes the rows
+  // above it (and the running countdowns being read there) upwards, and the
+  // ResizeObserver republishes --timer-tray-height on every frame of the tween,
+  // which drags RecipeChat's float along with it on narrow screens.
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -84,9 +91,9 @@ export const TimerTray: React.FC = () => {
                     <motion.li
                       key={timer.id}
                       layout
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
+                      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                      animate={reducedMotion ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
+                      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
                       className={`flex items-center gap-2 rounded-lg border p-2 overflow-hidden ${
                         amber
                           ? `bg-warning/10 border-warning/30 ${isDone ? 'animate-pulse' : ''}`
