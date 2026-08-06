@@ -76,6 +76,18 @@ const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClea
     const current = search && search.query === query.trim() ? search : null;
     const suggestions = current?.done ? current.suggestions : [];
 
+    // Spoken mirror of the three states below, which arrive asynchronously and
+    // would otherwise land silently. The list stays outside the region: it is
+    // the count that carries the news, and wrapping the options themselves
+    // would have all of them re-read on every keystroke.
+    const liveStatus = !current
+        ? ''
+        : !current.done
+            ? t.kitchen.locationSearching
+            : suggestions.length === 0
+                ? t.kitchen.locationNoResults
+                : `${suggestions.length} ${suggestions.length === 1 ? t.kitchen.locationResultsOne : t.kitchen.locationResultsMany}`;
+
     const handleSelect = (suggestion: LocationSuggestion) => {
         onSelect({
             name: suggestion.name,
@@ -122,6 +134,12 @@ const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClea
                     </button>
                 )}
             </div>
+
+            {/* Always mounted, so the region predates its own text — one created
+                alongside its first message is announced by almost no screen
+                reader. `sr-only` is absolutely positioned and so costs this
+                flex column no gap while empty. */}
+            <p className="sr-only" aria-live="polite">{liveStatus}</p>
 
             {current && !current.done && <p className="text-xs text-text-muted">{t.kitchen.locationSearching}</p>}
             {current?.done && suggestions.length === 0 && (
