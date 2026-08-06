@@ -276,6 +276,11 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                 )}
             </div>
 
+            {/* Rendered whether or not a run is in flight: a live region only
+                announces changes to text it already had, so one that appears
+                together with "planning" stays silent. */}
+            <p className="sr-only" role="status">{loading ? t.planning : ''}</p>
+
             <button
                 onClick={loading ? onCancelGenerate : handleGenerate}
                 aria-busy={loading}
@@ -286,10 +291,9 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                     <>
                         <span
                             className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"
-                            role="status"
-                            aria-label={t.planning}
+                            aria-hidden="true"
                         ></span>
-                        <span aria-live="polite">{t.planning}</span>
+                        <span>{t.planning}</span>
                         <span className="mx-2 opacity-60" aria-hidden="true">·</span>
                         <X size={18} aria-hidden="true" /> {t.cancel}
                     </>

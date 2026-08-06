@@ -28,6 +28,25 @@ export const TimerTray: React.FC = () => {
   // which drags RecipeChat's float along with it on narrow screens.
   const reducedMotion = useReducedMotion();
 
+  // Spoken counterpart of the chime: the alarm says *that* a timer reached its
+  // end, this says *which* one. Derived while rendering rather than pushed on
+  // the transition, which keeps the running countdown out of the region — the
+  // string only moves when a phase does, so the ticks change nothing and
+  // nothing is re-announced.
+  //
+  // The label is the instruction sentence the timer was started from, long
+  // enough that it only earns its place once a second timer exists to tell it
+  // apart from. The state leads either way, so the point of the announcement
+  // lands before any sentence does.
+  const withLabel = timers.length > 1;
+  const announcement = timers
+    .filter((timer) => timer.status === 'done' || timer.phase === 'followUp')
+    .map((timer) => {
+      const state = timer.status === 'done' ? t.timers.done : t.timers.followUp;
+      return withLabel ? `${state}: ${timer.label}` : state;
+    })
+    .join(' ');
+
   useEffect(() => {
     const root = document.documentElement;
     const el = trayRef.current;
@@ -55,94 +74,100 @@ export const TimerTray: React.FC = () => {
   }, [hasTimers]);
 
   return (
-    <AnimatePresence>
-      {timers.length > 0 && (
-        <div ref={trayRef} className="fixed bottom-4 right-4 z-50 w-72 max-w-[calc(100vw-2rem)]">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="glass-panel !p-3 shadow-glass"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 text-text-main">
-                <TimerIcon size={16} className="text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider">{t.timers.title}</span>
+    <>
+      {/* Mounted at the app root for the whole session, so the region is in the
+          DOM long before a timer flips. A live region inserted together with
+          its first text is announced by almost no screen reader — which is
+          why the role cannot simply live on the rows below. */}
+      <p className="sr-only" role="status">{announcement}</p>
+      <AnimatePresence>
+        {timers.length > 0 && (
+          <div ref={trayRef} className="fixed bottom-4 right-4 z-50 w-72 max-w-[calc(100vw-2rem)]">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="glass-panel !p-3 shadow-glass"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-text-main">
+                  <TimerIcon size={16} className="text-primary" />
+                  <span className="text-xs font-bold uppercase tracking-wider">{t.timers.title}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleMuted}
+                  aria-pressed={muted}
+                  aria-label={muted ? t.timers.unmute : t.timers.mute}
+                  className="p-1.5 rounded-full transition-colors text-text-muted hover:text-primary hover:bg-white/50 dark:hover:bg-black/30"
+                >
+                  {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={toggleMuted}
-                aria-pressed={muted}
-                aria-label={muted ? t.timers.unmute : t.timers.mute}
-                className="p-1.5 rounded-full transition-colors text-text-muted hover:text-primary hover:bg-white/50 dark:hover:bg-black/30"
-              >
-                {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-              </button>
-            </div>
 
-            <ul className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1" role="list">
-              <AnimatePresence initial={false}>
-                {timers.map((timer) => {
-                  const isDone = timer.status === 'done';
-                  const isRunning = timer.status === 'running';
-                  const isFollowUp = timer.phase === 'followUp';
-                  const amber = isDone || isFollowUp;
-                  return (
-                    <motion.li
-                      key={timer.id}
-                      layout
-                      initial={reducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-                      animate={reducedMotion ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
-                      exit={reducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-                      className={`flex items-center gap-2 rounded-lg border p-2 overflow-hidden ${
-                        amber
-                          ? `bg-warning/10 border-warning/30 ${isDone ? 'animate-pulse' : ''}`
-                          : 'bg-white/40 dark:bg-black/20 border-border-base/30'
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-text-muted line-clamp-2" title={timer.label}>{timer.label}</p>
-                        {isFollowUp && !isDone && (
-                          <p className="text-[0.65rem] font-bold uppercase tracking-wider text-warning-text" role="status">
-                            {t.timers.followUp}
+              <ul className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1" role="list">
+                <AnimatePresence initial={false}>
+                  {timers.map((timer) => {
+                    const isDone = timer.status === 'done';
+                    const isRunning = timer.status === 'running';
+                    const isFollowUp = timer.phase === 'followUp';
+                    const amber = isDone || isFollowUp;
+                    return (
+                      <motion.li
+                        key={timer.id}
+                        layout
+                        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                        animate={reducedMotion ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
+                        exit={reducedMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                        className={`flex items-center gap-2 rounded-lg border p-2 overflow-hidden ${
+                          amber
+                            ? `bg-warning/10 border-warning/30 ${isDone ? 'animate-pulse' : ''}`
+                            : 'bg-white/40 dark:bg-black/20 border-border-base/30'
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-text-muted line-clamp-2" title={timer.label}>{timer.label}</p>
+                          {isFollowUp && !isDone && (
+                            <p className="text-[0.65rem] font-bold uppercase tracking-wider text-warning-text">
+                              {t.timers.followUp}
+                            </p>
+                          )}
+                          <p
+                            className={`font-mono tabular-nums text-sm font-semibold ${
+                              amber ? 'text-warning-text' : 'text-text-main'
+                            }`}
+                          >
+                            {isDone ? t.timers.done : formatDuration(timer.remainingMs)}
                           </p>
-                        )}
-                        <p
-                          className={`font-mono tabular-nums text-sm font-semibold ${
-                            amber ? 'text-warning-text' : 'text-text-main'
-                          }`}
-                          role={isDone ? 'status' : undefined}
-                        >
-                          {isDone ? t.timers.done : formatDuration(timer.remainingMs)}
-                        </p>
-                      </div>
+                        </div>
 
-                      {!isDone && (
+                        {!isDone && (
+                          <button
+                            type="button"
+                            onClick={() => (isRunning ? pauseTimer(timer.id) : resumeTimer(timer.id))}
+                            aria-label={isRunning ? t.timers.pause : t.timers.resume}
+                            className="p-1.5 rounded-full transition-colors text-text-muted hover:text-primary hover:bg-white/60 dark:hover:bg-black/30"
+                          >
+                            {isRunning ? <Pause size={14} /> : <Play size={14} />}
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => (isRunning ? pauseTimer(timer.id) : resumeTimer(timer.id))}
-                          aria-label={isRunning ? t.timers.pause : t.timers.resume}
-                          className="p-1.5 rounded-full transition-colors text-text-muted hover:text-primary hover:bg-white/60 dark:hover:bg-black/30"
+                          onClick={() => cancelTimer(timer.id)}
+                          aria-label={isDone ? t.timers.dismiss : t.timers.cancel}
+                          className="p-1.5 rounded-full transition-colors text-text-muted hover:text-red-500 hover:bg-white/60 dark:hover:bg-black/30"
                         >
-                          {isRunning ? <Pause size={14} /> : <Play size={14} />}
+                          <X size={14} />
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => cancelTimer(timer.id)}
-                        aria-label={isDone ? t.timers.dismiss : t.timers.cancel}
-                        className="p-1.5 rounded-full transition-colors text-text-muted hover:text-red-500 hover:bg-white/60 dark:hover:bg-black/30"
-                      >
-                        <X size={14} />
-                      </button>
-                    </motion.li>
-                  );
-                })}
-              </AnimatePresence>
-            </ul>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+                      </motion.li>
+                    );
+                  })}
+                </AnimatePresence>
+              </ul>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
