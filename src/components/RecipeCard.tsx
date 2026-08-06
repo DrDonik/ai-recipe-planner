@@ -266,6 +266,16 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             )}
 
             <div className="flex flex-col gap-8 flex-grow">
+                {/* Ingredients, instructions and nutrition stay hidden below `md`
+                    by deliberate choice. On a phone the grid card answers only
+                    "which of my planned meals do I cook today" and "what do I
+                    still have to buy" — the latter has its own section below.
+                    Everything else in the ingredient list is pantry stock the
+                    user already owns, and a quantity shortfall is meant to
+                    surface as a missing ingredient (see the pantry amount rules
+                    in services/llm.ts), not by reading amounts off the card.
+                    Cooking happens in the standalone view, which has the wake
+                    lock, larger type and the recipe chat. */}
                 <section className={isStandalone ? '' : 'hidden md:block'}>
                     <div className="flex items-center gap-2 mb-4 text-secondary">
                         <ListChecks size={20} />

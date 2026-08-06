@@ -128,7 +128,7 @@ export const TimerTray: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-text-muted line-clamp-2" title={timer.label}>{timer.label}</p>
                           {isFollowUp && !isDone && (
-                            <p className="text-[0.65rem] font-bold uppercase tracking-wider text-warning-text">
+                            <p className="text-xs font-bold uppercase tracking-wider text-warning-text">
                               {t.timers.followUp}
                             </p>
                           )}

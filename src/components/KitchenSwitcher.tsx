@@ -167,7 +167,7 @@ const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClea
                 href={OPEN_METEO.ATTRIBUTION_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[10px] text-text-muted hover:underline"
+                className="text-xs text-text-muted hover:underline"
             >
                 {t.kitchen.weatherAttribution}
             </a>
