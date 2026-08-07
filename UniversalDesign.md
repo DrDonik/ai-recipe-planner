@@ -63,7 +63,9 @@ offset, on `:focus-visible`, declared in `@layer base`.
   a whole panel reads as an error.
 - Opting out is allowed where something else visibly carries the indicator
   (the language pill, the inset ring on flush list items). That is why the
-  rule lives in `@layer base`: unlayered, no utility could override it.
+  rule lives in `@layer base` rather than outside the layers: Tailwind's
+  utilities sit in the later `@layer utilities` and can therefore override it.
+  Unlayered, it would outrank every utility and no opt-out would be possible.
 
 ## Keyboard
 

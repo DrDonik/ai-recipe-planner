@@ -36,9 +36,12 @@ no account and an API-key route for users who want one.
 
 Every action gets a response, scaled to the weight of the action.
 
-**Here:** anything asynchronous carries a visually hidden `role="status"`
-region beside its visible indicator, so the spinner is not the only channel.
-Feedback outranks motion reduction: under `prefers-reduced-motion` the spinner
+**Here:** an asynchronous operation gets a visually hidden `role="status"`
+region beside its visible indicator, so the spinner is not the only channel —
+generation, the timers and the location search have one (#297). Known gap:
+`CopyPasteDialog` still announces a finished copy only by relabelling the
+button, which is disabled in the same moment. Feedback outranks motion
+reduction: under `prefers-reduced-motion` the spinner
 keeps turning at 1.5s, because at several call sites the spinner *is* the
 entire message and a frozen one reads as a hang. `animate-pulse` may stop —
 what it marks is also said in words, in colour and in an announcement.
