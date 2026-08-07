@@ -31,10 +31,13 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
             <div className="flex items-center gap-2">
                 {actions}
                 {infoTooltip && (
+                    /* A short name, not the explanation: a name cannot be
+                       skipped, a description can. Naming the panel keeps the
+                       info buttons apart in a screen reader's button list. */
                     <TooltipButton
                         icon={<Info size={18} />}
                         tooltip={infoTooltip}
-                        ariaLabel={infoTooltip}
+                        ariaLabel={`${t.a11y.info}: ${title}`}
                     />
                 )}
                 <button

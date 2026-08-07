@@ -88,7 +88,7 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
                                     type="button"
                                     onClick={() => onRemoveSpice(spice)}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
-                                    aria-label={t.remove}
+                                    aria-label={`${t.remove}: ${spice}`}
                                 >
                                     <Trash2 size={10} />
                                 </button>

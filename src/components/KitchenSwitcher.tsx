@@ -327,7 +327,7 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                 <TooltipButton
                     icon={<Info size={14} />}
                     tooltip={t.kitchen.info}
-                    ariaLabel={t.kitchen.info}
+                    ariaLabel={`${t.a11y.info}: ${t.kitchen.caption}`}
                 />
             </div>
 

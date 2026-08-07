@@ -431,7 +431,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                     type="button"
                                     onClick={() => onRemovePantryItem(item.id)}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-1.5 transition-colors"
-                                    aria-label={t.remove}
+                                    aria-label={`${t.remove}: ${item.name}`}
                                 >
                                     <Trash2 size={16} />
                                 </button>

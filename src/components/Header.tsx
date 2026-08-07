@@ -288,7 +288,7 @@ export const Header: React.FC<HeaderProps> = ({
                                                 <TooltipButton
                                                     icon={<Info size={14} className="text-text-muted" />}
                                                     tooltip={t.modeSwitch.tooltip}
-                                                    ariaLabel={t.modeSwitch.tooltip}
+                                                    ariaLabel={`${t.a11y.info}: ${t.modeSwitch.label}`}
                                                     className="!p-1"
                                                 />
                                             )
@@ -314,7 +314,7 @@ export const Header: React.FC<HeaderProps> = ({
                                             <TooltipButton
                                                 icon={<Info size={14} className="text-text-muted" />}
                                                 tooltip={t.imageGen.tooltip}
-                                                ariaLabel={t.imageGen.tooltip}
+                                                ariaLabel={`${t.a11y.info}: ${t.imageGen.label}`}
                                                 className="!p-1"
                                             />
                                         }
