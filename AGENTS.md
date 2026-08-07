@@ -10,7 +10,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Copy-
 
 ## Versioning & Release
 
-**Current version**: 1.12.2
+**Current version**: 1.12.3
 
 This project follows [Semantic Versioning](https://semver.org/) (SemVer):
 
@@ -37,7 +37,8 @@ The code will be carefully reviewed by an expert for correctness, security, edge
 ### When Adding Features
 
 - **Usability First**: Keep interactions minimal. Avoid adding steps or dialogs unless necessary.
-- **Interace Design**: Adhere to the Eight Golden Rules of Interface Design: @InterfaceDesign.md
+- **Interface Design**: Adhere to the Eight Golden Rules of Interface Design, and to what each has come to mean here: @InterfaceDesign.md
+- **Universal Design**: Golden Rule 2 in full — the accessibility conventions this repo is bound to: @UniversalDesign.md
 - **Minimize clicks**: Use sensible defaults, persist user choices
 - **Minimize scrolling**: Use collapsible panels, keep important actions visible
 - **All panels should be collapsible** with state persisted to localStorage
