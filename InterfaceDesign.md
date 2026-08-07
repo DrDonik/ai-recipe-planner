@@ -1,35 +1,103 @@
-# The Eight Golden Rules of Interface Design 
+# The Eight Golden Rules of Interface Design
 
-## 1. Strive for consistency.
+Shneiderman's eight rules, each followed by what it has come to mean in this
+codebase. The rule is the shared vocabulary; the note under it is the
+commitment already made and the artifact that carries it.
 
-Consistent sequences of actions should be required in similar situations; identical terminology should be used in prompts, menus, and help screens; and consistent color, layout, capitalization, fonts, and so on, should be employed throughout. Exceptions, such as required confirmation of the delete command or no echoing of passwords, should be comprehensible and limited in number
+Cite them by number in pull requests. A rule with nothing concrete under it is
+not yet a commitment — add the artifact rather than the aspiration.
 
-## 2. Seek universal usability.
+## 1. Strive for consistency
 
-Recognize the needs of diverse users and design for plasticity, facilitating transformation of content. Novice to expert differences, age ranges, disabilities, international variations, and technological diversity each enrich the spectrum of requirements that guides design. Adding features for novices, such as explanations, and features for experts, such as shortcuts and faster pacing, enriches the interface design and improves perceived quality.
+Identical sequences for identical situations, one term per concept, one visual
+treatment per role.
 
-## 3. Offer informative feedback.
+**Here:** one focus ring for the whole app, declared once in `@layer base`.
+`PanelHeader` for every panel, `Toggle` for every setting row, `.btn-primary` /
+`.btn-warning` / `.btn-quiet` for every dialog button. When a pattern exists,
+extend it instead of adding a variant beside it — #292 replaced eleven
+per-component focus treatments with one, and #291 collapsed three differently
+shaped settings controls onto a single row. Export and import stay icon
+buttons precisely because they are actions, not settings, and must not look
+like the switches.
 
-For every user action, there should be an interface feedback. For frequent and minor actions, the response can be modest, whereas for infrequent and major actions, the response should be more substantial. Visual presentation of the objects of interest provides a convenient environment for showing changes explicitly (see the discussion of direct manipulation in Chapter 7).
+## 2. Seek universal usability
 
-## 4. Design dialogs to yield closure.
+Novice and expert, age ranges, disabilities, international variation,
+technological diversity.
 
-Sequences of actions should be organized into groups with a beginning, middle, and end. Informative feedback at the completion of a group of actions gives users the satisfaction of accomplishment, a sense of relief, a signal to drop contingency plans from their minds, and an indicator to prepare for the next group of actions. For example, e-commerce websites move users from selecting products to the checkout, ending with a clear confirmation page that completes the transaction.
+**Here:** the accessibility conventions this repo is bound to are large enough
+to live in their own file — see @UniversalDesign.md. Beyond those: every
+visible string and every accessible name goes through `translations.ts` in all
+four languages, and recipe generation offers both a Copy-Paste route that needs
+no account and an API-key route for users who want one.
 
-## 5. Prevent errors.
+## 3. Offer informative feedback
 
-As much as possible, design the interface so that users cannot make serious errors; for example, gray out menu items that are not appropriate and do not allow alphabetic characters in numeric entry fields (Section 3.3.5). If users make an error, the interface should offer simple, constructive, and specific instructions for recovery. For example, users should not have to retype an entire name-address form if they enter an invalid zip code but rather should be guided to repair only the faulty part. Erroneous actions should leave the interface state unchanged, or the interface should give instructions about restoring the state.
+Every action gets a response, scaled to the weight of the action.
 
-## 6. Permit easy reversal of actions.
+**Here:** an asynchronous operation gets a visually hidden `role="status"`
+region beside its visible indicator, so the spinner is not the only channel —
+generation, the timers and the location search have one (#297). Known gap:
+`CopyPasteDialog` still announces a finished copy only by relabelling the
+button, which is disabled in the same moment. Feedback outranks motion
+reduction: under `prefers-reduced-motion` the spinner
+keeps turning at 1.5s, because at several call sites the spinner *is* the
+entire message and a frozen one reads as a hang. `animate-pulse` may stop —
+what it marks is also said in words, in colour and in an announcement.
 
-As much as possible, actions should be reversible. This feature relieves anxiety, since users know that errors can be undone, and encourages exploration of unfamiliar options. The units of reversibility may be a single action, a data-entry task, or a complete group of actions, such as entry of a name-address block.
+## 4. Design dialogs to yield closure
 
-## 7. Keep users in control.
+Beginning, middle, end, with the end stated.
 
-Experienced users strongly desire the sense that they are in charge of the interface and that the interface responds to their actions. They don’t want surprises or changes in familiar behavior, and they are annoyed by tedious data-entry sequences, difficulty in obtaining necessary information, and inability to produce their desired result.
+**Here:** the three consent dialogs share one shape — a declarative title
+naming what happens, what is stored or sent, a short list of consequences, then
+what the credential or photo is actually used for (#289). Consent is recorded
+on accept only; dismissing a dialog closes nothing out (#290).
 
-## 8. Reduce short-term memory load.
+## 5. Prevent errors
 
-Humans’ limited capacity for information processing in short-term memory (the rule of thumb is that people can remember “seven plus or minus two chunks” of information) requires that designers avoid interfaces in which users must remember information from one display and then use that information on another display. It means that cellphones should not require reentry of phone numbers, website locations should remain visible, and lengthy forms should be compacted to fit a single display.
+Make the serious mistake hard to make, and recovery specific when it happens.
 
-These underlying principles must be interpreted, refined, and extended for each environment. They have their limitations, but they provide a good starting point for mobile, desktop, and web designers. The principles presented in the ensuing sections focus on increasing users’ productivity by providing simplified data-entry procedures, comprehensible displays, and rapid informative feedback to increase feelings of competence, mastery, and control over the system.
+**Here:** dialog buttons are coloured by *exposure*, not by destructiveness
+(#289) — `btn-warning` puts data somewhere it can be read, `btn-primary` ends
+an exposure already running, `btn-quiet` changes nothing at all. Clearing an
+API key destroys something and is still green, because it ends the exposure the
+dialog is about. Red is reserved for irreversible loss of user content, which
+is why no dialog currently uses it. Where the emphasised button is the risky
+one, no button is a default: `useFocusTrap(onClose, true)` focuses the dialog
+itself and Enter does nothing until the user picks.
+
+## 6. Permit easy reversal of actions
+
+**Here:** `UndoToast` with an action, rather than a confirmation dialog in
+front of the deed. A confirmation taxes every correct action to catch the rare
+wrong one; an undo charges only the user who was actually wrong. Reserve
+dialogs for what an undo cannot walk back — data that has already left the
+device.
+
+## 7. Keep users in control
+
+No surprises, no changes to familiar behaviour, no tedious sequences.
+
+**Here:** every setting persists to localStorage, so nothing is asked twice.
+Escape closes any dialog. A tooltip's first Escape dismisses the tooltip only
+and is swallowed before it can close the dialog behind it; a second press gets
+through (#293). Nothing leaves the device without a switch having been flipped
+for it.
+
+## 8. Reduce short-term memory load
+
+Roughly seven plus or minus two chunks; never make users carry information
+between displays.
+
+**Here:** panels collapse with their state persisted, and the pantry stays on
+screen while a recipe is generated. Credentials are entered once and never
+re-asked. Accessible names carry their object — "Collapse: Diet", not
+"Collapse" — so a control is intelligible without remembering which heading it
+sat beneath.
+
+---
+
+Source: Ben Shneiderman, *Designing the User Interface*. The rules are quoted
+in condensed form; the commentary is this project's own.
