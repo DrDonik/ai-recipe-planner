@@ -1,10 +1,11 @@
-import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Refrigerator, Info, Loader2, X, Camera } from 'lucide-react';
 import type { PantryItem, Notification } from '../types';
 import { generateId } from '../utils/idGenerator';
 import { useSettings } from '../contexts/SettingsContext';
 import { useStorageTips } from '../hooks/useStorageTips';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useRemovalFocus } from '../hooks/useRemovalFocus';
 import { PanelHeader, UndoToast } from './ui';
 import { PhotoPrivacyDialog } from './PhotoPrivacyDialog';
 import { STORAGE_KEYS, VALIDATION } from '../constants';
@@ -56,8 +57,10 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     const editAmountInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
     const isCancellingRef = useRef(false);
     const identifyAbortRef = useRef<AbortController | null>(null);
+    const rememberRemoval = useRemovalFocus(listRef, nameInputRef, '[data-remove-entry]', pantryItems.length);
 
     const handleTipClick = (item: PantryItem) => {
         if (openTipForId === item.id) {
@@ -70,13 +73,37 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
         }
     };
 
+    // Closing from inside the popover — Escape, or its own close button —
+    // unmounts whatever had focus, so hand it back to the icon that opened it
+    // rather than letting it fall to <body>. An outside click keeps using the
+    // plain setter: the pointer has already chosen where it is going.
+    const closeTip = useCallback(() => {
+        if (!openTipForId) return;
+        const trigger = document.querySelector<HTMLElement>(
+            `[data-storage-tip-trigger="${CSS.escape(openTipForId)}"]`
+        );
+        setOpenTipForId(null);
+        trigger?.focus();
+    }, [openTipForId]);
+
+    useEffect(() => {
+        if (!openTipForId) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key !== 'Escape') return;
+            e.stopPropagation();
+            closeTip();
+        };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, [openTipForId, closeTip]);
+
     useEffect(() => {
         if (!openTipForId) return;
         const handler = (e: MouseEvent) => {
             const target = e.target as Element | null;
             if (!target) return;
             if (popoverRef.current?.contains(target)) return;
-            if (target.closest('[data-storage-tip-trigger="true"]')) return;
+            if (target.closest('[data-storage-tip-trigger]')) return;
             setOpenTipForId(null);
         };
         document.addEventListener('mousedown', handler);
@@ -333,7 +360,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                         </div>
                     </form>
 
-                    <div className="grid grid-cols-1 gap-2 mt-2">
+                    <div ref={listRef} className="grid grid-cols-1 gap-2 mt-2">
                         {pantryItems.length === 0 && (
                             notification?.anchor === 'pantry' ? (
                                 <UndoToast notification={notification} />
@@ -343,7 +370,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 </div>
                             )
                         )}
-                        {pantryItems.map((item) => {
+                        {pantryItems.map((item, index) => {
                             const cachedTip = tipsActive ? getTip(item.name) : undefined;
                             const tipLoading = tipsActive && isTipLoading(item.name);
                             const tipError = tipsActive ? getTipError(item.name) : undefined;
@@ -355,7 +382,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                         <div className="relative">
                                             <button
                                                 type="button"
-                                                data-storage-tip-trigger="true"
+                                                data-storage-tip-trigger={item.id}
                                                 onClick={() => handleTipClick(item)}
                                                 className={`w-6 h-6 flex items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10 ${cachedTip ? 'ring-2 ring-primary/40' : ''}`}
                                                 aria-label={`${t.storageTips.iconAriaLabel}: ${item.name}`}
@@ -380,7 +407,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                                         </span>
                                                         <button
                                                             type="button"
-                                                            onClick={() => setOpenTipForId(null)}
+                                                            onClick={closeTip}
                                                             className="text-text-muted hover:text-primary transition-colors p-0.5 rounded-full"
                                                             aria-label={t.storageTips.close}
                                                         >
@@ -429,7 +456,8 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => onRemovePantryItem(item.id)}
+                                    data-remove-entry
+                                    onClick={() => { rememberRemoval(index); onRemovePantryItem(item.id); }}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-1.5 transition-colors"
                                     aria-label={`${t.remove}: ${item.name}`}
                                 >
@@ -442,7 +470,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                             <div className="flex justify-end mt-2">
                                 <button
                                     type="button"
-                                    onClick={onEmptyPantry}
+                                    onClick={() => { rememberRemoval(0); onEmptyPantry(); }}
                                     className="text-sm text-text-muted hover:text-red-500 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                                 >
                                     <Trash2 size={14} />
