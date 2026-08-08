@@ -217,7 +217,7 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
                                 )}
 
                                 {error && !isPending && (
-                                    <div role="alert" className="flex items-start gap-2 text-xs text-red-500">
+                                    <div role="alert" className="flex items-start gap-2 text-xs text-danger-text">
                                         <AlertCircle size={14} className="shrink-0 mt-0.5" />
                                         <span className="flex-1">{error}</span>
                                         <button

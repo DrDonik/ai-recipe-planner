@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
             case 'synced':
                 return <Cloud size={16} className="text-primary" />;
             case 'error':
-                return <Cloud size={16} className="text-red-500" />;
+                return <Cloud size={16} className="text-danger-text" />;
             case 'idle':
             default:
                 return <CloudOff size={16} className="text-text-muted" />;
@@ -259,7 +259,7 @@ export const Header: React.FC<HeaderProps> = ({
                             indicator above stays hidden. */}
                         {headerMinimized && syncKeptOff && (
                             <TooltipButton
-                                icon={<AlertTriangle size={16} className="text-red-500" />}
+                                icon={<AlertTriangle size={16} className="text-danger-text" />}
                                 tooltip={t.sync.tokenStoredWarning}
                                 ariaLabel={t.sync.tokenStoredWarning}
                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
@@ -340,7 +340,7 @@ export const Header: React.FC<HeaderProps> = ({
                                     trailing={
                                         syncKeptOff ? (
                                             <TooltipButton
-                                                icon={<AlertTriangle size={16} className="text-red-500" />}
+                                                icon={<AlertTriangle size={16} className="text-danger-text" />}
                                                 tooltip={t.sync.tokenStoredWarning}
                                                 ariaLabel={t.sync.tokenStoredWarning}
                                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"

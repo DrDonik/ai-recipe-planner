@@ -161,7 +161,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveStyleWish(wish)}
-                                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
+                                            className="text-danger hover:text-danger-text hover:bg-danger/10 rounded-full p-0.5 transition-colors"
                                             aria-label={t.remove}
                                         >
                                             <Trash2 size={10} />
@@ -211,7 +211,7 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                         <button
                                             type="button"
                                             onClick={() => handleRemovePlannedRecipe(recipe)}
-                                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
+                                            className="text-danger hover:text-danger-text hover:bg-danger/10 rounded-full p-0.5 transition-colors"
                                             aria-label={t.remove}
                                         >
                                             <Trash2 size={10} />

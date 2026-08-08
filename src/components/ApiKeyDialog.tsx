@@ -132,7 +132,7 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onDelete, onCancel
                 </div>
 
                 {fieldError && (
-                    <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                    <p className="text-sm text-danger-text" role="alert">
                         {fieldError}
                     </p>
                 )}

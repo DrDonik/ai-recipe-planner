@@ -252,7 +252,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ items, isMinimized =
                             <button
                                 type="button"
                                 onClick={onClear}
-                                className="text-sm text-text-muted hover:text-red-500 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                                className="text-sm text-text-muted hover:text-danger-text hover:bg-danger/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                             >
                                 <Trash2 size={14} />
                                 {t.clearShoppingList}
