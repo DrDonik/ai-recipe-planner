@@ -77,7 +77,7 @@ export const ClearApiKeyDialog = ({
                             onClick={onCancel}
                             className="btn btn-quiet w-full py-3 rounded-xl"
                         >
-                            {t.clearApiKey.cancel}
+                            {t.cancel}
                         </button>
                     )}
                 </div>

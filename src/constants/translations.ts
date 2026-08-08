@@ -290,7 +290,6 @@ export const translations = {
             disableDescription: "Recipes will be prepared for copy & paste from now on. Your API key stays in this browser unless you delete it here.",
             disableAndClear: "Switch off and delete key",
             disableAndKeep: "Switch off and keep key",
-            cancel: "Cancel"
         },
         undo: {
             pantryEmptied: "Pantry emptied",
@@ -355,7 +354,6 @@ export const translations = {
             storedClear: "Delete token",
             storedKeep: "Keep token",
             tokenStoredWarning: "GitHub token stored in local storage",
-            close: "Close",
             pulledNotification: "Synced from another device",
             errorUnauthorized: "Sync error: token is unauthorized or revoked. Please update it.",
             errorNotFound: "Sync error: the Gist was not found. It may have been deleted on GitHub.",
@@ -652,7 +650,6 @@ export const translations = {
             disableDescription: "Rezepte werden ab jetzt zum Kopieren und Einfügen vorbereitet. Dein API-Schlüssel bleibt in diesem Browser gespeichert, sofern du ihn hier nicht löschst.",
             disableAndClear: "Ausschalten und Schlüssel löschen",
             disableAndKeep: "Ausschalten und Schlüssel behalten",
-            cancel: "Abbrechen"
         },
         undo: {
             pantryEmptied: "Vorrat geleert",
@@ -717,7 +714,6 @@ export const translations = {
             storedClear: "Token löschen",
             storedKeep: "Token behalten",
             tokenStoredWarning: "GitHub-Token im lokalen Speicher gespeichert",
-            close: "Schließen",
             pulledNotification: "Von anderem Gerät synchronisiert",
             errorUnauthorized: "Sync-Fehler: Token ist ungültig oder widerrufen. Bitte aktualisieren.",
             errorNotFound: "Sync-Fehler: Der Gist wurde nicht gefunden. Er wurde möglicherweise auf GitHub gelöscht.",
@@ -1014,7 +1010,6 @@ export const translations = {
             disableDescription: "Les recettes seront désormais préparées pour le copier-coller. Votre clé API reste dans ce navigateur, sauf si vous la supprimez ici.",
             disableAndClear: "Désactiver et supprimer la clé",
             disableAndKeep: "Désactiver et conserver la clé",
-            cancel: "Annuler"
         },
         undo: {
             pantryEmptied: "Garde-manger vidé",
@@ -1079,7 +1074,6 @@ export const translations = {
             storedClear: "Supprimer le jeton",
             storedKeep: "Conserver le jeton",
             tokenStoredWarning: "Jeton GitHub stocké dans le stockage local",
-            close: "Fermer",
             pulledNotification: "Synchronisé depuis un autre appareil",
             errorUnauthorized: "Erreur de synchronisation : jeton invalide ou révoqué. Veuillez le mettre à jour.",
             errorNotFound: "Erreur de synchronisation : Gist introuvable. Il a peut-être été supprimé sur GitHub.",
@@ -1376,7 +1370,6 @@ export const translations = {
             disableDescription: "A partir de ahora las recetas se prepararán para copiar y pegar. Tu clave API permanece en este navegador salvo que la elimines aquí.",
             disableAndClear: "Desactivar y eliminar la clave",
             disableAndKeep: "Desactivar y mantener la clave",
-            cancel: "Cancelar"
         },
         undo: {
             pantryEmptied: "Despensa vaciada",
@@ -1441,7 +1434,6 @@ export const translations = {
             storedClear: "Eliminar token",
             storedKeep: "Mantener token",
             tokenStoredWarning: "Token de GitHub almacenado en almacenamiento local",
-            close: "Cerrar",
             pulledNotification: "Sincronizado desde otro dispositivo",
             errorUnauthorized: "Error de sincronización: token no autorizado o revocado. Por favor actualícelo.",
             errorNotFound: "Error de sincronización: Gist no encontrado. Puede haber sido eliminado en GitHub.",

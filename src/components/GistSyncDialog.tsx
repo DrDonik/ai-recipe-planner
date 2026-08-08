@@ -295,7 +295,7 @@ export const GistSyncDialog = ({
                     disabled={busy}
                     className="btn btn-quiet w-full py-2 rounded-xl"
                 >
-                    {t.sync.close}
+                    {t.cancel}
                 </button>
             </div>
         </>
@@ -361,7 +361,7 @@ export const GistSyncDialog = ({
                         onClick={onClose}
                         className="btn btn-quiet w-full py-3 rounded-xl"
                     >
-                        {t.sync.close}
+                        {t.cancel}
                     </button>
                 </div>
             </>
