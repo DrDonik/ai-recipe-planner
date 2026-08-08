@@ -32,6 +32,12 @@
   --color-warning-text: hsl(28, 90%, 31%);
   --color-text-on-warning: hsl(0, 0%, 100%);
 
+  /* Danger (red), two roles and deliberately no third: the accent that tints
+     surfaces, draws borders and colours the icon inside a named button, and red
+     used as text or as an icon that is itself the message. */
+  --color-danger: hsl(0, 84%, 60%);
+  --color-danger-text: hsl(0, 74%, 36%);
+
   --color-border-base: hsl(240, 5%, 85%);
   --color-border-hover: hsl(240, 5%, 70%);
   --color-border-strong: hsl(240, 4%, 40%);
@@ -73,6 +79,23 @@
      text and as an icon on every surface it lands on, tints included. */
   --hue-warning: 38;
 
+  /* Danger: Red. Two rungs, and no fill pair — #289 reserves red as a button
+     fill for irreversible loss of user content, which nothing in this app does,
+     so declaring one would only invite the red button that rule forbids.
+     --color-danger is the accent: tints, borders, and the icon inside a button
+     that already says what it does in its accessible name, where red is an
+     affordance rather than a state (3.8:1 in light mode, 4.4:1 in dark, against
+     the 3:1 SC 1.4.11 asks of non-text). --color-danger-text is the rung for red
+     that has to be read — every error message, and the icons that carry a state
+     no label repeats — at 8.0:1 on an opaque light surface and 7.0:1 on the
+     danger/10 tint. It sits two rungs below the accent rather than one because
+     half the errors in this app appear inside a dialog, where the glass over the
+     black/50 backdrop costs it most of its headroom: 40% lightness measured
+     6.9:1 opaque but only 4.6:1 there, where 36% still holds 5.3:1.
+     text-red-500 sat at 3.8:1 as text and was under the threshold at seven call
+     sites. */
+  --hue-danger: 0;
+
   /* Light Mode Semantic Colors */
   --color-bg-app: hsl(var(--hue-neutral), 5%, 96%);
   --color-bg-surface: hsl(255, 100%, 100%);
@@ -103,6 +126,9 @@
   --color-warning-fill: hsl(30, 92%, 36%);
   --color-warning-fill-hover: hsl(30, 92%, 30%);
   --color-warning-text: hsl(28, 90%, 31%);
+
+  --color-danger: hsl(var(--hue-danger), 84%, 60%);
+  --color-danger-text: hsl(var(--hue-danger), 74%, 36%);
 
   /* Glass Effects */
   --glass-bg: hsla(0, 0%, 100%, 0.7);
@@ -147,6 +173,10 @@
     --color-warning-fill: hsl(var(--hue-warning), 92%, 50%);
     --color-warning-fill-hover: hsl(var(--hue-warning), 92%, 58%);
     --color-warning-text: hsl(43, 96%, 56%);
+
+    /* The accent holds at 60% — it is already 4.4:1 on the dark surface. Only
+       the text rung moves, up rather than down, exactly as the amber one does. */
+    --color-danger-text: hsl(var(--hue-danger), 90%, 70%);
 
     --glass-bg: hsla(var(--hue-neutral), 5%, 12%, 0.6);
     --glass-border: hsla(var(--hue-neutral), 5%, 80%, 0.08);

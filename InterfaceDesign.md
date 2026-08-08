@@ -52,9 +52,12 @@ Every action gets a response, scaled to the weight of the action.
 
 **Here:** an asynchronous operation gets a visually hidden `role="status"`
 region beside its visible indicator, so the spinner is not the only channel —
-generation, the timers and the location search have one (#297). Known gap:
-`CopyPasteDialog` still announces a finished copy only by relabelling the
-button, which is disabled in the same moment. Feedback outranks motion
+generation, the timers and the location search have one (#297), and so does the
+copy in `CopyPasteDialog`, which used to announce a finished copy only by
+relabelling the button it disabled in the same moment (#302). Where an action
+can end two ways, both ends share the region — a copy that succeeded and a copy
+that failed are one concern, and two regions for them would talk over each
+other. Feedback outranks motion
 reduction: under `prefers-reduced-motion` the spinner
 keeps turning at 1.5s, because at several call sites the spinner *is* the
 entire message and a frozen one reads as a hang. `animate-pulse` may stop —
@@ -87,10 +90,19 @@ Make the serious mistake hard to make, and recovery specific when it happens.
 (#289) — `btn-warning` puts data somewhere it can be read, `btn-primary` ends
 an exposure already running, `btn-quiet` changes nothing at all. Clearing an
 API key destroys something and is still green, because it ends the exposure the
-dialog is about. Red is reserved for irreversible loss of user content, which
-is why no dialog currently uses it. Where the emphasised button is the risky
+dialog is about. Where the emphasised button is the risky
 one, no button is a default: `useFocusTrap(onClose, true)` focuses the dialog
 itself and Enter does nothing until the user picks.
+
+**Red says what went wrong or what removes something; it does not fill a
+button.** #289 reserved red for irreversible loss of user content and noted that
+no dialog used it — but thirty call sites already spoke red as error text and as
+the remove affordance, so the reservation could only hold by leaving all thirty
+untokenised. It now holds where it does work: the `danger` tokens carry errors
+and removal, and there is no `-fill` pair for a button label to sit on, so the
+red button that rule forbids cannot be built without adding one deliberately
+(#302). A button that destroys still follows the exposure axis — clearing the
+API key is green because it ends an exposure.
 
 Switching a credential off has one shape wherever it appears (#302, #305). The
 toggle commits nothing; the dialog does, through three exits — delete the

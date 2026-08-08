@@ -155,7 +155,7 @@ export const TimerTray: React.FC = () => {
                           type="button"
                           onClick={() => cancelTimer(timer.id)}
                           aria-label={isDone ? t.timers.dismiss : t.timers.cancel}
-                          className="p-1.5 rounded-full transition-colors text-text-muted hover:text-red-500 hover:bg-white/60 dark:hover:bg-black/30"
+                          className="p-1.5 rounded-full transition-colors text-text-muted hover:text-danger hover:bg-white/60 dark:hover:bg-black/30"
                         >
                           <X size={14} />
                         </button>

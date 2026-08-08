@@ -40,8 +40,8 @@ export class ErrorBoundary extends Component<Props, State> {
             return (
                 <div className="min-h-screen bg-bg-app flex items-center justify-center p-8">
                     <div className="glass-panel p-8 max-w-md w-full text-center">
-                        <div className="bg-red-500/10 p-4 rounded-full w-fit mx-auto mb-4">
-                            <AlertTriangle size={48} className="text-red-500" />
+                        <div className="bg-danger/10 p-4 rounded-full w-fit mx-auto mb-4">
+                            <AlertTriangle size={48} className="text-danger-text" />
                         </div>
                         <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
                         <p className="text-text-muted mb-6">
@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
                                 <summary className="cursor-pointer text-sm font-medium text-text-muted">
                                     Error details
                                 </summary>
-                                <div className="mt-2 text-xs overflow-auto text-red-600 dark:text-red-400 space-y-2">
+                                <div className="mt-2 text-xs overflow-auto text-danger-text space-y-2">
                                     <div>
                                         <strong>Message:</strong>
                                         <pre className="mt-1">{this.state.error.message}</pre>

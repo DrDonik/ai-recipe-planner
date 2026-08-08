@@ -24,6 +24,11 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const dialogRef = useFocusTrap(onCancel);
 
+    // Both outcomes of the button the user just pressed, so they share one
+    // region rather than competing. Derived while rendering, never pushed on a
+    // transition, and the error keeps its visible text below either step.
+    const announcement = error ?? (copied ? t.copyPaste.copied : '');
+
     const handleCopyAndProceed = async () => {
         try {
             await navigator.clipboard.writeText(prompt);
@@ -90,6 +95,11 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                     </button>
                 </div>
 
+                {/* Outside the step switch, so the region outlives the content
+                    it describes — one mounted alongside its first message is
+                    announced by almost no screen reader. */}
+                <p className="sr-only" role="status">{announcement}</p>
+
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-3 min-h-0 flex flex-col gap-2">
                     {step === 'copy' ? (
@@ -108,11 +118,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                 </pre>
                             </div>
                             {error && (
-                                <div
-                                    role="alert"
-                                    aria-live="assertive"
-                                    className="flex items-center gap-2 text-sm text-red-500"
-                                >
+                                <div className="flex items-center gap-2 text-sm text-danger-text">
                                     <AlertCircle size={16} className="shrink-0" />
                                     <span>{error}</span>
                                 </div>
@@ -146,11 +152,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                                 className="w-full flex-1 bg-white/30 dark:bg-black/20 rounded-lg p-3 text-sm font-mono resize-none"
                             />
                             {error && (
-                                <div
-                                    role="alert"
-                                    aria-live="assertive"
-                                    className="flex items-center gap-2 text-sm text-red-500"
-                                >
+                                <div className="flex items-center gap-2 text-sm text-danger-text">
                                     <AlertCircle size={16} />
                                     <span>{error}</span>
                                 </div>

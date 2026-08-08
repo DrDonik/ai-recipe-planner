@@ -269,7 +269,7 @@ export const GistSyncDialog = ({
                 </div>
 
                 {fieldError && (
-                    <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                    <p className="text-sm text-danger-text" role="alert">
                         {fieldError}
                     </p>
                 )}
@@ -333,8 +333,8 @@ export const GistSyncDialog = ({
                 </div>
 
                 {errorMessage && (
-                    <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                        <p className="text-sm text-red-700 dark:text-red-400">{errorMessage}</p>
+                    <div className="mb-4 bg-danger/10 border border-danger/30 rounded-lg p-3">
+                        <p className="text-sm text-danger-text">{errorMessage}</p>
                     </div>
                 )}
 

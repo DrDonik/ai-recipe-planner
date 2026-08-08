@@ -211,7 +211,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     {onDelete && (
                         <button
                             onClick={onDelete}
-                            className="p-2 bg-white/50 hover:bg-red-100 dark:bg-black/20 dark:hover:bg-red-900/30 rounded-full transition-colors flex items-center justify-center text-red-400 hover:text-red-500"
+                            className="p-2 bg-white/50 hover:bg-danger/10 dark:bg-black/20 dark:hover:bg-danger/20 rounded-full transition-colors flex items-center justify-center text-danger hover:text-danger-text"
                             aria-label={t.deleteRecipe}
                         >
                             <Trash2 size={18} />

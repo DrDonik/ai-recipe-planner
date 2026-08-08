@@ -339,7 +339,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 />
                             </div>
                             {identifyError && (
-                                <p role="alert" className="text-sm text-red-500">
+                                <p role="alert" className="text-sm text-danger-text">
                                     {identifyError}
                                 </p>
                             )}
@@ -425,7 +425,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                                             {t.storageTips.loading}
                                                         </p>
                                                     ) : tipError ? (
-                                                        <p className="text-sm text-red-500">{tipError}</p>
+                                                        <p className="text-sm text-danger-text">{tipError}</p>
                                                     ) : null}
                                                 </div>
                                             )}
@@ -461,7 +461,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                     type="button"
                                     data-remove-entry
                                     onClick={() => { rememberRemoval(index); onRemovePantryItem(item.id); }}
-                                    className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-1.5 transition-colors"
+                                    className="text-danger hover:text-danger-text hover:bg-danger/10 rounded-full p-1.5 transition-colors"
                                     aria-label={`${t.remove}: ${item.name}`}
                                 >
                                     <Trash2 size={16} />
@@ -474,7 +474,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                 <button
                                     type="button"
                                     onClick={() => { rememberRemoval(0); onEmptyPantry(); }}
-                                    className="text-sm text-text-muted hover:text-red-500 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                                    className="text-sm text-text-muted hover:text-danger-text hover:bg-danger/10 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                                 >
                                     <Trash2 size={14} />
                                     {t.emptyPantry}

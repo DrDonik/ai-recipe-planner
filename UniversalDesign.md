@@ -30,6 +30,30 @@ works for the other:
 | `--color-warning-text` | amber as text, or as a meaningful icon |
 | `--color-text-on-warning` | the label on the fill |
 
+Red splits the same way but stops at two rungs, because nothing fills a button
+with it (Rule 5 in @InterfaceDesign.md):
+
+| Token | Role |
+| --- | --- |
+| `--color-danger` | the accent behind tints and borders, and the icon inside a button that already names itself — red as affordance |
+| `--color-danger-text` | red that has to be read: every error message, and an icon that is itself the state |
+
+**The cheap rung is the one that fails.** `text-red-500` reads as *the* red and
+was used for both roles at thirty sites; it measures 3.8:1 on white, which is
+fine for the icon and under the 4.5:1 threshold for all seven places it was
+carrying words (#302). Where a hue serves text and non-text alike, the value
+that satisfies the looser rule will get used for both — so give the stricter
+role its own token rather than trusting the call site to pick.
+
+**Measure a text token where the text actually sits.** Half of this app's error
+messages appear inside a dialog, and the glass over the `bg-black/50` backdrop
+takes roughly two points off every ratio measured against an opaque surface:
+`--color-danger-text` reads 8.0:1 on the pantry card and 5.3:1 in
+`CopyPasteDialog`. The first draft of the token passed on paper at 6.9:1 and
+came out at 4.6:1 there, inside rounding of the threshold. `--color-border-strong`
+carries the same two numbers for the same reason. An opaque-surface ratio is not
+the number to put in a pull request if the component lives on glass.
+
 **A border that identifies a control is not a hairline.** `--color-border-base`
 separates surfaces and measures 1.4:1 against white — fine for that job, far
 under the 3:1 SC 1.4.11 asks of anything marking a control. A button whose only
