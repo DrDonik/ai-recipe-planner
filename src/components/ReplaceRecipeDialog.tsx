@@ -98,7 +98,7 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
                     )}
 
                     {error && !isLoading && (
-                        <div role="alert" aria-live="assertive" className="flex items-center gap-2 text-sm text-red-500">
+                        <div role="alert" className="flex items-center gap-2 text-sm text-danger-text">
                             <AlertCircle size={16} className="shrink-0" />
                             <span>{error}</span>
                         </div>

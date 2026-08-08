@@ -15,7 +15,7 @@ const renderTextWithLinks = (text: string) => {
                     href={part}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline hover:text-red-800 transition-colors"
+                    className="underline hover:opacity-80 transition-opacity"
                 >
                     {part}
                 </a>
@@ -28,11 +28,10 @@ const renderTextWithLinks = (text: string) => {
 export const UndoToast = ({ notification }: UndoToastProps) => (
     <div
         role="alert"
-        aria-live="assertive"
         aria-atomic="true"
         className={`p-4 rounded-xl border text-sm animate-in fade-in slide-in-from-top-2 flex items-center justify-between gap-3 ${
             notification.type === 'error'
-                ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900'
+                ? 'bg-danger/10 text-danger-text border-danger/30'
                 : 'bg-warning/10 text-warning-text border-warning/30'
         }`}
     >
@@ -43,7 +42,7 @@ export const UndoToast = ({ notification }: UndoToastProps) => (
                 aria-label={notification.action.ariaLabel || notification.action.label}
                 className={`px-3 py-1 rounded-lg font-medium text-sm transition-colors shrink-0 ${
                     notification.type === 'error'
-                        ? 'bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800'
+                        ? 'bg-danger/20 hover:bg-danger/30'
                         : 'bg-warning/20 hover:bg-warning/30'
                 }`}
             >

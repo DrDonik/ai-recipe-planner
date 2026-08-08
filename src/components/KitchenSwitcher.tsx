@@ -139,7 +139,7 @@ const LocationField: React.FC<LocationFieldProps> = ({ kitchen, onSelect, onClea
                 alongside its first message is announced by almost no screen
                 reader. `sr-only` is absolutely positioned and so costs this
                 flex column no gap while empty. */}
-            <p className="sr-only" aria-live="polite">{liveStatus}</p>
+            <p className="sr-only" role="status">{liveStatus}</p>
 
             {current && !current.done && <p className="text-xs text-text-muted">{t.kitchen.locationSearching}</p>}
             {current?.done && suggestions.length === 0 && (
@@ -389,7 +389,7 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                                                     onDelete(kitchen.id);
                                                     closePopover();
                                                 }}
-                                                className="px-2 py-1 text-xs font-semibold rounded-md bg-red-500/10 text-red-500 hover:bg-red-500/20 whitespace-nowrap"
+                                                className="px-2 py-1 text-xs font-semibold rounded-md bg-danger/10 text-danger-text hover:bg-danger/20 whitespace-nowrap"
                                             >
                                                 {t.kitchen.confirmDelete}
                                             </button>
@@ -407,7 +407,7 @@ export const KitchenSwitcher: React.FC<KitchenSwitcherProps> = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => setConfirmDeleteId(kitchen.id)}
-                                                        className="btn-icon p-1.5 hover:text-red-500"
+                                                        className="btn-icon p-1.5 hover:text-danger"
                                                         aria-label={`${t.kitchen.deleteAria}: ${kitchen.name}`}
                                                     >
                                                         <Trash2 size={14} />
