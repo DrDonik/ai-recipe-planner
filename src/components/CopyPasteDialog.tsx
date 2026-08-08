@@ -83,7 +83,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                     </h2>
                     <button
                         onClick={onCancel}
-                        className="p-2 bg-white/50 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30 rounded-full transition-colors text-text-muted hover:text-text-base"
+                        className="btn-icon transition-colors"
                         aria-label={t.a11y.close}
                     >
                         <X size={20} />
@@ -186,7 +186,7 @@ export const CopyPasteDialog: React.FC<CopyPasteDialogProps> = ({
                         <>
                             <button
                                 onClick={() => setStep('copy')}
-                                className="btn flex items-center gap-2 px-4 py-2 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30"
+                                className="btn btn-quiet flex items-center gap-2 px-4 py-2 rounded-lg"
                             >
                                 {t.copyPaste.back}
                             </button>

@@ -163,8 +163,8 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKey
             >
                 <button
                     onClick={onCancel}
-                    className="absolute top-3 right-3 p-1 text-text-muted hover:text-text-main rounded-full transition-colors"
-                    aria-label={t.apiKeyDialog.cancel}
+                    className="btn-icon absolute top-3 right-3 transition-colors"
+                    aria-label={t.a11y.close}
                 >
                     <X size={18} />
                 </button>

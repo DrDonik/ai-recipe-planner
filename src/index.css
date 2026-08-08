@@ -34,6 +34,7 @@
 
   --color-border-base: hsl(240, 5%, 85%);
   --color-border-hover: hsl(240, 5%, 70%);
+  --color-border-strong: hsl(240, 4%, 40%);
 
   /* Radii */
   --radius-xl: 1rem;
@@ -85,6 +86,11 @@
 
   --color-border-base: hsl(var(--hue-neutral), 5%, 85%);
   --color-border-hover: hsl(var(--hue-neutral), 5%, 70%);
+  /* border-base is a hairline that separates surfaces: 1.4:1 against white, far
+     below the 3:1 that SC 1.4.11 asks of anything identifying a control. A
+     button whose only boundary is its border needs this rung instead — 6.1:1
+     on an opaque surface, 4.2:1 on the composited dialog glass. */
+  --color-border-strong: hsl(var(--hue-neutral), 4%, 40%);
 
   /* Brand Colors */
   --color-primary: hsl(var(--hue-primary), var(--sat-primary), var(--lig-primary));
@@ -123,6 +129,10 @@
 
     --color-border-base: hsl(var(--hue-neutral), 5%, 20%);
     --color-border-hover: hsl(var(--hue-neutral), 5%, 30%);
+    /* Lighter than the surface here rather than darker, and one rung below the
+       muted text so the outline reads as a boundary and not as a label: 5.1:1
+       on the composited dialog glass. */
+    --color-border-strong: hsl(var(--hue-neutral), 4%, 55%);
 
     --color-primary: hsl(var(--hue-primary), 50%, 50%);
     --color-primary-hover: hsl(var(--hue-primary), 50%, 60%);
@@ -259,23 +269,32 @@ body {
     @apply fixed left-4 top-2 z-[60] -translate-y-[300%] rounded-md border border-border-base bg-bg-surface px-4 py-2 font-semibold text-primary shadow-glass transition-transform duration-200 focus-visible:translate-y-0;
   }
 
+  /* The transparent border is not decoration: btn-quiet carries a real one, and
+     without a matching border the filled buttons stand 2px shorter in the same
+     stack. */
   .btn-primary {
-    @apply bg-primary text-text-on-primary shadow-md hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
+    @apply bg-primary text-text-on-primary border border-transparent shadow-md hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
     box-shadow: 0 4px 6px -1px hsla(var(--hue-primary), 60%, 40%, 0.2);
   }
 
   /* Dialog buttons carry meaning through colour, so the three roles are
      classes rather than ad-hoc utilities: btn-primary marks the action that
      ends an exposure of the user's data, btn-warning the action that creates
-     one, and btn-quiet an action that changes nothing at all — cancel, close,
-     go back. Anything that destroys user content stays red, which is why no
-     dialog uses red any more: none of them destroys anything. */
+     one or leaves one running, and btn-quiet an action that changes nothing at
+     all — cancel, close, go back. Anything that destroys user content stays
+     red, which is why no dialog uses red any more: none of them destroys
+     anything the user cannot restore. */
   .btn-warning {
-    @apply bg-warning-fill text-text-on-warning shadow-md hover:bg-warning-fill-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
+    @apply bg-warning-fill text-text-on-warning border border-transparent shadow-md hover:bg-warning-fill-hover disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none;
   }
 
+  /* Quiet is not invisible. A transparent fill with muted text left the cancel
+     buttons with no boundary at all and a 3.5:1 label on the composited dialog
+     glass — under the 4.5:1 for text, and nothing to mark it as a control. It
+     is an outline button instead: full-strength label, a border that clears
+     3:1, and still no fill, so it cannot outweigh the primary beside it. */
   .btn-quiet {
-    @apply bg-transparent text-text-muted hover:text-text-main hover:bg-bg-surface-hover disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply bg-transparent border border-border-strong text-text-main hover:bg-bg-surface-hover disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
   .btn-icon {

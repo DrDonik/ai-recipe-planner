@@ -35,6 +35,11 @@ export const STORAGE_KEYS = {
     GIST_TOKEN: 'gist_sync_token',
     GIST_ID: 'gist_sync_id',
     SYNC_UPDATED_AT: 'sync_updated_at',
+    /* Set to 'false' when sync is switched off while the token is deliberately
+       kept. Absent means on, so devices configured before this existed keep
+       syncing. Never listed in SYNCED_STORAGE_KEYS: switching sync off here
+       must not switch it off everywhere else. */
+    SYNC_ENABLED: 'sync_enabled',
     GIST_TOKEN_WARNING_SEEN: 'gist_token_warning_seen',
     STORAGE_TIPS_CACHE: 'storage_tips_cache',
     PHOTO_PRIVACY_ACK: 'photo_privacy_ack',

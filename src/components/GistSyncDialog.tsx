@@ -9,12 +9,16 @@ import {
     GistNotFoundError,
     GistPayloadError,
     GistUnauthorizedError,
+    isSyncEnabled,
     pullGist,
     applySyncPayload,
+    readStoredSyncConfig,
+    setSyncEnabled,
 } from '../services/gistSync';
 import type { SyncStatus } from '../hooks/useGistSync';
 
-type Step = 'warning' | 'setup' | 'active';
+/** 'stored' is sync switched off with the token deliberately kept. */
+type Step = 'warning' | 'setup' | 'active' | 'stored';
 
 interface GistSyncDialogProps {
     onClose: () => void;
@@ -22,17 +26,6 @@ interface GistSyncDialogProps {
     onShowError: (message: string) => void;
     onShowInfo: (message: string) => void;
 }
-
-const readConfigured = (): { token: string; gistId: string } | null => {
-    const rawToken = localStorage.getItem(STORAGE_KEYS.GIST_TOKEN);
-    const rawId = localStorage.getItem(STORAGE_KEYS.GIST_ID);
-    if (!rawToken || !rawId) return null;
-    try {
-        return { token: JSON.parse(rawToken), gistId: JSON.parse(rawId) };
-    } catch {
-        return null;
-    }
-};
 
 const hasSeenWarning = (): boolean =>
     localStorage.getItem(STORAGE_KEYS.GIST_TOKEN_WARNING_SEEN) === 'true';
@@ -49,9 +42,9 @@ export const GistSyncDialog = ({
     // leaves focus alone when something inside already holds it.
     const dialogRef = useFocusTrap(onClose, true);
 
-    const initiallyConfigured = readConfigured();
+    const initiallyConfigured = readStoredSyncConfig();
     const [step, setStep] = useState<Step>(() => {
-        if (initiallyConfigured) return 'active';
+        if (initiallyConfigured) return isSyncEnabled() ? 'active' : 'stored';
         return hasSeenWarning() ? 'setup' : 'warning';
     });
 
@@ -79,6 +72,9 @@ export const GistSyncDialog = ({
     const persistConfig = (token: string, gistId: string) => {
         localStorage.setItem(STORAGE_KEYS.GIST_TOKEN, JSON.stringify(token));
         localStorage.setItem(STORAGE_KEYS.GIST_ID, JSON.stringify(gistId));
+        // Setting sync up again clears an earlier switch-off, which would
+        // otherwise leave the fresh config sitting there unused.
+        setSyncEnabled(true);
     };
 
     const handleCreateNew = async () => {
@@ -137,11 +133,23 @@ export const GistSyncDialog = ({
         }
     };
 
-    const handleDisable = () => {
-        localStorage.removeItem(STORAGE_KEYS.GIST_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.GIST_ID);
-        localStorage.removeItem(STORAGE_KEYS.SYNC_UPDATED_AT);
-        // Reload to reset sync hook state cleanly.
+    /**
+     * Switching sync off, with the token's fate decided by the button pressed —
+     * the same two outcomes the API-key toggle offers. Keeping it flips the
+     * per-device flag and leaves the credential in place; deleting it takes the
+     * config back to its unconfigured state.
+     */
+    const handleDisable = (keepToken: boolean) => {
+        if (keepToken) {
+            setSyncEnabled(false);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.GIST_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.GIST_ID);
+            localStorage.removeItem(STORAGE_KEYS.SYNC_UPDATED_AT);
+            localStorage.removeItem(STORAGE_KEYS.SYNC_ENABLED);
+        }
+        // Reload to reset sync hook state cleanly. It also rules out an undo
+        // toast here, which is why the dialog says the deletion is final.
         window.location.reload();
     };
 
@@ -332,12 +340,22 @@ export const GistSyncDialog = ({
 
                 <p className="text-sm text-text-muted mb-6">{t.sync.disableNote}</p>
 
+                {/* Same three outcomes as the API-key toggle, in the same
+                    colours: deleting the token ends the exposure, keeping it
+                    carries it on, closing decides nothing and leaves sync
+                    running. */}
                 <div className="flex flex-col gap-3">
                     <button
-                        onClick={handleDisable}
+                        onClick={() => handleDisable(false)}
                         className="btn btn-primary w-full py-3 rounded-xl"
                     >
-                        {t.sync.disable}
+                        {t.sync.disableAndClear}
+                    </button>
+                    <button
+                        onClick={() => handleDisable(true)}
+                        className="btn btn-warning w-full py-3 rounded-xl"
+                    >
+                        {t.sync.disableAndKeep}
                     </button>
                     <button
                         onClick={onClose}
@@ -349,6 +367,42 @@ export const GistSyncDialog = ({
             </>
         );
     };
+
+    /**
+     * Sync off, token kept. Reached from the header warning rather than from
+     * the switch — flipping that back on needs no dialog, since the stored
+     * token is all it takes. Keeping the token changes nothing, so this variant
+     * needs no third button.
+     */
+    const renderStored = () => (
+        <>
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-warning/20 rounded-xl">
+                    <AlertTriangle className="text-warning-text" size={24} />
+                </div>
+                <h2 id="sync-dialog-title" className="text-lg font-bold text-text-main">
+                    {t.sync.storedHeading}
+                </h2>
+            </div>
+
+            <p className="text-sm text-text-muted mb-6">{t.sync.storedNote}</p>
+
+            <div className="flex flex-col gap-3">
+                <button
+                    onClick={() => handleDisable(false)}
+                    className="btn btn-primary w-full py-3 rounded-xl"
+                >
+                    {t.sync.storedClear}
+                </button>
+                <button
+                    onClick={onClose}
+                    className="btn btn-quiet w-full py-3 rounded-xl"
+                >
+                    {t.sync.storedKeep}
+                </button>
+            </div>
+        </>
+    );
 
     return (
         <div
@@ -364,14 +418,15 @@ export const GistSyncDialog = ({
             >
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 p-1 text-text-muted hover:text-text-main rounded-full transition-colors"
-                    aria-label={t.sync.close}
+                    className="btn-icon absolute top-3 right-3 transition-colors"
+                    aria-label={t.a11y.close}
                 >
                     <X size={18} />
                 </button>
                 {step === 'warning' && renderWarning()}
                 {step === 'setup' && renderSetup()}
                 {step === 'active' && renderActive()}
+                {step === 'stored' && renderStored()}
             </div>
         </div>
     );

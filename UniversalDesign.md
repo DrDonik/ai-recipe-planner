@@ -30,6 +30,15 @@ works for the other:
 | `--color-warning-text` | amber as text, or as a meaningful icon |
 | `--color-text-on-warning` | the label on the fill |
 
+**A border that identifies a control is not a hairline.** `--color-border-base`
+separates surfaces and measures 1.4:1 against white — fine for that job, far
+under the 3:1 SC 1.4.11 asks of anything marking a control. A button whose only
+boundary is its border takes `--color-border-strong` instead: 4.2:1 on the
+composited dialog glass in light mode, 5.2:1 in dark (#302). That is what turned
+`.btn-quiet` from a transparent surface with a 3.5:1 label — no boundary, and
+text under the threshold — into an outline button that still carries no fill and
+so cannot outweigh the primary beside it.
+
 **A filled button must not outweigh its neighbours.** Contrast alone is not
 enough: at 50% lightness amber was 2.6× as bright as the primary fill, so the
 risky choice drew the eye more than the recommended one whatever colour its
