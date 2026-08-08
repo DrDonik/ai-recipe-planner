@@ -70,7 +70,6 @@ export const translations = {
             note1: "The photo leaves your device and is processed on Google's servers.",
             note2: "Make sure no people, documents or anything else are in the frame.",
             usage: "This app does not store the photo, but Google's terms and data handling apply.",
-            cancel: "Cancel",
             send: "Send photo",
         },
         meals: "Meals to plan",
@@ -181,7 +180,6 @@ export const translations = {
             placeholder: "e.g. something lighter, with chicken, Asian…",
             hint: "Leave empty to simply get a different recipe.",
             submit: "Replace",
-            cancel: "Cancel",
             generating: "Finding a new recipe…",
             cancelGeneration: "Cancel replacement",
         },
@@ -235,7 +233,6 @@ export const translations = {
             iconAriaLabel: "Storage tip",
             popoverTitle: "Storage tip",
             loading: "Fetching storage tip…",
-            close: "Close",
         },
         copyPaste: {
             title: "Copy & Paste",
@@ -270,14 +267,12 @@ export const translations = {
             risk3: "The key persists until you clear browser data",
             risk4: "The key will be visible in network requests (browser DevTools, network logs, proxies)",
             usage: "The key is only used to call Google Gemini directly from your browser, for recipes, images and chat. No request passes through a server of this app.",
-            understand: "I understand, continue",
-            cancel: "Cancel"
+            understand: "I understand, continue"
         },
         apiKeyDialog: {
             heading: "Gemini API key",
             description: "The key is stored in this browser and sent straight to Google Gemini. Saving it also switches recipe generation to API Key mode.",
             save: "Save key",
-            cancel: "Cancel",
             errorEmpty: "Please enter an API key.",
             editTooltip: "Change API key"
         },
@@ -289,8 +284,7 @@ export const translations = {
             disableTitle: "Switch off API Key mode?",
             disableDescription: "Recipes will be prepared for copy & paste from now on. Your API key stays in this browser unless you delete it here.",
             disableAndClear: "Switch off and delete key",
-            disableAndKeep: "Switch off and keep key",
-            cancel: "Cancel"
+            disableAndKeep: "Switch off and keep key"
         },
         undo: {
             pantryEmptied: "Pantry emptied",
@@ -331,7 +325,6 @@ export const translations = {
             securityRisk4: "Revoke the token on GitHub if this device is lost or shared.",
             securityRecommendation: "The token is only used to read and write a single private Gist holding your recipe data.",
             securityAccept: "I understand, continue",
-            securityCancel: "Cancel",
             setupHeading: "Set up sync",
             setupDescription: "Paste a GitHub Personal Access Token with the 'gist' scope. If you already have a sync Gist from another device, enter its ID too; otherwise leave it empty and a new Gist will be created.",
             tokenLabel: "Personal Access Token",
@@ -355,7 +348,6 @@ export const translations = {
             storedClear: "Delete token",
             storedKeep: "Keep token",
             tokenStoredWarning: "GitHub token stored in local storage",
-            close: "Close",
             pulledNotification: "Synced from another device",
             errorUnauthorized: "Sync error: token is unauthorized or revoked. Please update it.",
             errorNotFound: "Sync error: the Gist was not found. It may have been deleted on GitHub.",
@@ -433,7 +425,6 @@ export const translations = {
             note1: "Das Foto verlässt dein Gerät und wird auf Googles Servern verarbeitet.",
             note2: "Achte darauf, dass keine Personen, Dokumente oder anderes mit im Bild sind.",
             usage: "Diese App speichert das Foto nicht, es gelten aber Googles Bedingungen und Datenverarbeitung.",
-            cancel: "Abbrechen",
             send: "Foto senden",
         },
         meals: "Anzahl Mahlzeiten",
@@ -543,7 +534,6 @@ export const translations = {
             placeholder: "z. B. etwas Leichteres, mit Hähnchen, asiatisch…",
             hint: "Leer lassen, um einfach ein anderes Rezept zu erhalten.",
             submit: "Ersetzen",
-            cancel: "Abbrechen",
             generating: "Neues Rezept wird gesucht…",
             cancelGeneration: "Ersetzen abbrechen",
         },
@@ -597,7 +587,6 @@ export const translations = {
             iconAriaLabel: "Lagerungstipp",
             popoverTitle: "Lagerungstipp",
             loading: "Lade Lagerungstipp…",
-            close: "Schließen",
         },
         copyPaste: {
             title: "Kopieren & Einfügen",
@@ -632,14 +621,12 @@ export const translations = {
             risk3: "Der Schlüssel bleibt gespeichert, bis du die Browserdaten löschst",
             risk4: "Der Schlüssel ist in Netzwerkanfragen sichtbar (Browser-DevTools, Netzwerkprotokolle, Proxys)",
             usage: "Der Schlüssel wird ausschließlich verwendet, um Google Gemini direkt aus deinem Browser aufzurufen — für Rezepte, Bilder und Chat. Keine Anfrage läuft über einen Server dieser App.",
-            understand: "Verstanden, fortfahren",
-            cancel: "Abbrechen"
+            understand: "Verstanden, fortfahren"
         },
         apiKeyDialog: {
             heading: "Gemini-API-Schlüssel",
             description: "Der Schlüssel wird in diesem Browser gespeichert und direkt an Google Gemini gesendet. Mit dem Speichern wird die Rezeptgenerierung auf den API-Modus umgestellt.",
             save: "Schlüssel speichern",
-            cancel: "Abbrechen",
             errorEmpty: "Bitte gib einen API-Schlüssel ein.",
             editTooltip: "API-Schlüssel ändern"
         },
@@ -651,8 +638,7 @@ export const translations = {
             disableTitle: "API-Schlüssel-Modus ausschalten?",
             disableDescription: "Rezepte werden ab jetzt zum Kopieren und Einfügen vorbereitet. Dein API-Schlüssel bleibt in diesem Browser gespeichert, sofern du ihn hier nicht löschst.",
             disableAndClear: "Ausschalten und Schlüssel löschen",
-            disableAndKeep: "Ausschalten und Schlüssel behalten",
-            cancel: "Abbrechen"
+            disableAndKeep: "Ausschalten und Schlüssel behalten"
         },
         undo: {
             pantryEmptied: "Vorrat geleert",
@@ -693,7 +679,6 @@ export const translations = {
             securityRisk4: "Widerrufe den Token auf GitHub, falls das Gerät verloren geht oder geteilt wird.",
             securityRecommendation: "Der Token wird nur verwendet, um einen einzigen privaten Gist mit deinen Rezeptdaten zu lesen und zu schreiben.",
             securityAccept: "Verstanden, fortfahren",
-            securityCancel: "Abbrechen",
             setupHeading: "Synchronisation einrichten",
             setupDescription: "Füge einen GitHub Personal Access Token mit Scope 'gist' ein. Wenn du bereits von einem anderen Gerät aus einen Sync-Gist hast, trage seine ID ein; sonst lass das Feld leer und es wird ein neuer Gist erstellt.",
             tokenLabel: "Personal Access Token",
@@ -717,7 +702,6 @@ export const translations = {
             storedClear: "Token löschen",
             storedKeep: "Token behalten",
             tokenStoredWarning: "GitHub-Token im lokalen Speicher gespeichert",
-            close: "Schließen",
             pulledNotification: "Von anderem Gerät synchronisiert",
             errorUnauthorized: "Sync-Fehler: Token ist ungültig oder widerrufen. Bitte aktualisieren.",
             errorNotFound: "Sync-Fehler: Der Gist wurde nicht gefunden. Er wurde möglicherweise auf GitHub gelöscht.",
@@ -795,7 +779,6 @@ export const translations = {
             note1: "La photo quitte votre appareil et est traitée sur les serveurs de Google.",
             note2: "Veillez à ce qu'aucune personne, aucun document ni rien d'autre ne figure sur l'image.",
             usage: "Cette application ne conserve pas la photo, mais les conditions et le traitement des données de Google s'appliquent.",
-            cancel: "Annuler",
             send: "Envoyer la photo",
         },
         meals: "Repas à planifier",
@@ -905,7 +888,6 @@ export const translations = {
             placeholder: "p. ex. plus léger, avec du poulet, asiatique…",
             hint: "Laissez vide pour simplement obtenir une autre recette.",
             submit: "Remplacer",
-            cancel: "Annuler",
             generating: "Recherche d'une nouvelle recette…",
             cancelGeneration: "Annuler le remplacement",
         },
@@ -959,7 +941,6 @@ export const translations = {
             iconAriaLabel: "Conseil de conservation",
             popoverTitle: "Conseil de conservation",
             loading: "Chargement du conseil…",
-            close: "Fermer",
         },
         copyPaste: {
             title: "Copier-Coller",
@@ -994,14 +975,12 @@ export const translations = {
             risk3: "La clé persiste jusqu'à ce que vous effaciez les données du navigateur",
             risk4: "La clé sera visible dans les requêtes réseau (DevTools du navigateur, journaux réseau, proxys)",
             usage: "La clé sert uniquement à appeler Google Gemini directement depuis votre navigateur, pour les recettes, les images et le chat. Aucune requête ne passe par un serveur de cette application.",
-            understand: "Je comprends, continuer",
-            cancel: "Annuler"
+            understand: "Je comprends, continuer"
         },
         apiKeyDialog: {
             heading: "Clé API Gemini",
             description: "La clé est stockée dans ce navigateur et envoyée directement à Google Gemini. L'enregistrer bascule aussi la génération de recettes en mode clé API.",
             save: "Enregistrer la clé",
-            cancel: "Annuler",
             errorEmpty: "Veuillez saisir une clé API.",
             editTooltip: "Modifier la clé API"
         },
@@ -1013,8 +992,7 @@ export const translations = {
             disableTitle: "Désactiver le mode clé API ?",
             disableDescription: "Les recettes seront désormais préparées pour le copier-coller. Votre clé API reste dans ce navigateur, sauf si vous la supprimez ici.",
             disableAndClear: "Désactiver et supprimer la clé",
-            disableAndKeep: "Désactiver et conserver la clé",
-            cancel: "Annuler"
+            disableAndKeep: "Désactiver et conserver la clé"
         },
         undo: {
             pantryEmptied: "Garde-manger vidé",
@@ -1055,7 +1033,6 @@ export const translations = {
             securityRisk4: "Révoquez le jeton sur GitHub si l'appareil est perdu ou partagé.",
             securityRecommendation: "Le jeton sert uniquement à lire et écrire un seul Gist privé contenant vos données de recettes.",
             securityAccept: "J'ai compris, continuer",
-            securityCancel: "Annuler",
             setupHeading: "Configurer la synchronisation",
             setupDescription: "Collez un jeton d'accès personnel GitHub avec la portée 'gist'. Si vous disposez déjà d'un Gist de synchronisation depuis un autre appareil, entrez son identifiant ; sinon, laissez le champ vide et un nouveau Gist sera créé.",
             tokenLabel: "Jeton d'accès personnel",
@@ -1079,7 +1056,6 @@ export const translations = {
             storedClear: "Supprimer le jeton",
             storedKeep: "Conserver le jeton",
             tokenStoredWarning: "Jeton GitHub stocké dans le stockage local",
-            close: "Fermer",
             pulledNotification: "Synchronisé depuis un autre appareil",
             errorUnauthorized: "Erreur de synchronisation : jeton invalide ou révoqué. Veuillez le mettre à jour.",
             errorNotFound: "Erreur de synchronisation : Gist introuvable. Il a peut-être été supprimé sur GitHub.",
@@ -1157,7 +1133,6 @@ export const translations = {
             note1: "La foto sale de tu dispositivo y se procesa en los servidores de Google.",
             note2: "Asegúrate de que no aparezcan personas, documentos ni nada más en la imagen.",
             usage: "Esta aplicación no almacena la foto, pero se aplican las condiciones y el tratamiento de datos de Google.",
-            cancel: "Cancelar",
             send: "Enviar foto",
         },
         meals: "Comidas a planificar",
@@ -1267,7 +1242,6 @@ export const translations = {
             placeholder: "p. ej. algo más ligero, con pollo, asiático…",
             hint: "Déjalo vacío para obtener simplemente otra receta.",
             submit: "Reemplazar",
-            cancel: "Cancelar",
             generating: "Buscando una nueva receta…",
             cancelGeneration: "Cancelar reemplazo",
         },
@@ -1321,7 +1295,6 @@ export const translations = {
             iconAriaLabel: "Consejo de conservación",
             popoverTitle: "Consejo de conservación",
             loading: "Obteniendo consejo…",
-            close: "Cerrar",
         },
         copyPaste: {
             title: "Copiar y Pegar",
@@ -1356,14 +1329,12 @@ export const translations = {
             risk3: "La clave permanece hasta que borres los datos del navegador",
             risk4: "La clave será visible en solicitudes de red (DevTools del navegador, registros de red, proxies)",
             usage: "La clave solo se usa para llamar a Google Gemini directamente desde tu navegador, para recetas, imágenes y chat. Ninguna solicitud pasa por un servidor de esta aplicación.",
-            understand: "Entiendo, continuar",
-            cancel: "Cancelar"
+            understand: "Entiendo, continuar"
         },
         apiKeyDialog: {
             heading: "Clave API de Gemini",
             description: "La clave se almacena en este navegador y se envía directamente a Google Gemini. Al guardarla también se cambia la generación de recetas al modo de clave API.",
             save: "Guardar clave",
-            cancel: "Cancelar",
             errorEmpty: "Introduce una clave API.",
             editTooltip: "Cambiar la clave API"
         },
@@ -1375,8 +1346,7 @@ export const translations = {
             disableTitle: "¿Desactivar el modo clave API?",
             disableDescription: "A partir de ahora las recetas se prepararán para copiar y pegar. Tu clave API permanece en este navegador salvo que la elimines aquí.",
             disableAndClear: "Desactivar y eliminar la clave",
-            disableAndKeep: "Desactivar y mantener la clave",
-            cancel: "Cancelar"
+            disableAndKeep: "Desactivar y mantener la clave"
         },
         undo: {
             pantryEmptied: "Despensa vaciada",
@@ -1417,7 +1387,6 @@ export const translations = {
             securityRisk4: "Revoque el token en GitHub si el dispositivo se pierde o se comparte.",
             securityRecommendation: "El token se usa únicamente para leer y escribir un solo Gist privado con los datos de sus recetas.",
             securityAccept: "Entiendo, continuar",
-            securityCancel: "Cancelar",
             setupHeading: "Configurar sincronización",
             setupDescription: "Pegue un token de acceso personal de GitHub con el alcance 'gist'. Si ya tiene un Gist de sincronización desde otro dispositivo, introduzca su ID; si no, déjelo vacío y se creará un nuevo Gist.",
             tokenLabel: "Token de acceso personal",
@@ -1441,7 +1410,6 @@ export const translations = {
             storedClear: "Eliminar token",
             storedKeep: "Mantener token",
             tokenStoredWarning: "Token de GitHub almacenado en almacenamiento local",
-            close: "Cerrar",
             pulledNotification: "Sincronizado desde otro dispositivo",
             errorUnauthorized: "Error de sincronización: token no autorizado o revocado. Por favor actualícelo.",
             errorNotFound: "Error de sincronización: Gist no encontrado. Puede haber sido eliminado en GitHub.",

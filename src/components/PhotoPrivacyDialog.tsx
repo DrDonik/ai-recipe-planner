@@ -65,7 +65,7 @@ export const PhotoPrivacyDialog = ({ onAccept, onCancel }: PhotoPrivacyDialogPro
                         onClick={onCancel}
                         className="btn btn-quiet w-full py-3 rounded-xl"
                     >
-                        {t.photoPrivacy.cancel}
+                        {t.cancel}
                     </button>
                 </div>
             </div>

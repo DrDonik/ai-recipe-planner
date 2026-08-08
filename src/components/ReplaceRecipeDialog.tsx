@@ -113,7 +113,7 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
                         onClick={isLoading ? onCancelGenerate : onCancel}
                         className="btn btn-quiet flex items-center gap-2 px-4 py-2 rounded-lg"
                     >
-                        {isLoading ? t.replaceRecipe.cancelGeneration : t.replaceRecipe.cancel}
+                        {isLoading ? t.replaceRecipe.cancelGeneration : t.cancel}
                     </button>
                     <button
                         onClick={handleSubmit}

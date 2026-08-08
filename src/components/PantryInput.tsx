@@ -409,7 +409,7 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
                                                             type="button"
                                                             onClick={closeTip}
                                                             className="text-text-muted hover:text-primary transition-colors p-0.5 rounded-full"
-                                                            aria-label={t.storageTips.close}
+                                                            aria-label={t.a11y.close}
                                                         >
                                                             <X size={14} />
                                                         </button>

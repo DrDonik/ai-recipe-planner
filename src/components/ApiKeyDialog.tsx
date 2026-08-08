@@ -76,7 +76,7 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKey
                     onClick={onCancel}
                     className="btn btn-quiet w-full py-3 rounded-xl"
                 >
-                    {t.apiKeySecurity.cancel}
+                    {t.cancel}
                 </button>
             </div>
         </>
@@ -143,7 +143,7 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKey
                     onClick={onCancel}
                     className="btn btn-quiet w-full py-3 rounded-xl"
                 >
-                    {t.apiKeyDialog.cancel}
+                    {t.cancel}
                 </button>
             </div>
         </>

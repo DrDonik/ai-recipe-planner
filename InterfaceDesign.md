@@ -27,6 +27,12 @@ one — `ApiKeyDialog`, `GistSyncDialog`, `CopyPasteDialog`, `ReplaceRecipeDialo
 and a third way to say no is noise. Every X is `.btn-icon`, and every one is
 named `t.a11y.close`; three separate keys said "close" before #302.
 
+The neutral exit is worded the same way everywhere: **Cancel**, from `t.cancel`,
+never "Close". Six per-dialog keys spelled that one word and `GistSyncDialog`
+called its neutral button "Close", which read as a fourth outcome in a dialog
+whose other two buttons decide the credential's fate. Closing is what the **X**
+does; the button that decides nothing says so.
+
 ## 2. Seek universal usability
 
 Novice and expert, age ranges, disabilities, international variation,
