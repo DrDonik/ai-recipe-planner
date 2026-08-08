@@ -1,7 +1,8 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2, ChefHat } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { PanelHeader } from './ui';
+import { useRemovalFocus } from '../hooks/useRemovalFocus';
 import { VALIDATION } from '../constants';
 
 export interface KitchenAppliancesRef {
@@ -25,6 +26,9 @@ export const KitchenAppliances = forwardRef<KitchenAppliancesRef, KitchenApplian
 }, ref) => {
     const { t } = useSettings();
     const [newAppliance, setNewAppliance] = useState('');
+    const listRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const rememberRemoval = useRemovalFocus(listRef, inputRef, '[data-remove-entry]', appliances.length);
 
     const flushPendingInput = (): string | null => {
         const trimmed = newAppliance.trim();
@@ -61,6 +65,7 @@ export const KitchenAppliances = forwardRef<KitchenAppliancesRef, KitchenApplian
                 <>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                         <input
+                            ref={inputRef}
                             type="text"
                             placeholder={t.appliancesPlaceholder}
                             value={newAppliance}
@@ -74,19 +79,20 @@ export const KitchenAppliances = forwardRef<KitchenAppliancesRef, KitchenApplian
                         </button>
                     </form>
 
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div ref={listRef} className="flex flex-wrap gap-2 mt-2">
                         {appliances.length === 0 && (
                             <div className="text-text-muted text-center py-4 italic w-full">
                                 {t.noAppliances}
                             </div>
                         )}
 
-                        {appliances.map((appliance) => (
+                        {appliances.map((appliance, index) => (
                             <div key={appliance} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
                                 <span className="font-medium text-xs text-text-main">{appliance}</span>
                                 <button
                                     type="button"
-                                    onClick={() => onRemoveAppliance(appliance)}
+                                    data-remove-entry
+                                    onClick={() => { rememberRemoval(index); onRemoveAppliance(appliance); }}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
                                     aria-label={`${t.remove}: ${appliance}`}
                                 >

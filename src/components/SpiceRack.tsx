@@ -1,7 +1,8 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Plus, Trash2, Leaf } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { PanelHeader } from './ui';
+import { useRemovalFocus } from '../hooks/useRemovalFocus';
 import { VALIDATION } from '../constants';
 
 export interface SpiceRackRef {
@@ -25,6 +26,9 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
 }, ref) => {
     const { t } = useSettings();
     const [newSpice, setNewSpice] = useState('');
+    const listRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const rememberRemoval = useRemovalFocus(listRef, inputRef, '[data-remove-entry]', spices.length);
 
     const flushPendingInput = (): string | null => {
         const trimmedSpice = newSpice.trim();
@@ -61,6 +65,7 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
                 <>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                         <input
+                            ref={inputRef}
                             type="text"
                             placeholder={t.spicesPlaceholder}
                             value={newSpice}
@@ -74,19 +79,20 @@ export const SpiceRack = forwardRef<SpiceRackRef, SpiceRackProps>(({
                         </button>
                     </form>
 
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div ref={listRef} className="flex flex-wrap gap-2 mt-2">
                         {spices.length === 0 && (
                             <div className="text-text-muted text-center py-4 italic w-full">
                                 {t.noSpices}
                             </div>
                         )}
 
-                        {spices.map((spice) => (
+                        {spices.map((spice, index) => (
                             <div key={spice} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
                                 <span className="font-medium text-xs text-text-main">{spice}</span>
                                 <button
                                     type="button"
-                                    onClick={() => onRemoveSpice(spice)}
+                                    data-remove-entry
+                                    onClick={() => { rememberRemoval(index); onRemoveSpice(spice); }}
                                     className="text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-full p-0.5 transition-colors"
                                     aria-label={`${t.remove}: ${spice}`}
                                 >
