@@ -27,6 +27,12 @@ one — `ApiKeyDialog`, `GistSyncDialog`, `CopyPasteDialog`, `ReplaceRecipeDialo
 and a third way to say no is noise. Every X is `.btn-icon`, and every one is
 named `t.a11y.close`; three separate keys said "close" before #302.
 
+The neutral exit is worded the same way everywhere: **Cancel**, from `t.cancel`,
+never "Close". Six per-dialog keys spelled that one word and `GistSyncDialog`
+called its neutral button "Close", which read as a fourth outcome in a dialog
+whose other two buttons decide the credential's fate. Closing is what the **X**
+does; the button that decides nothing says so.
+
 ## 2. Seek universal usability
 
 Novice and expert, age ranges, disabilities, international variation,
@@ -35,8 +41,10 @@ technological diversity.
 **Here:** the accessibility conventions this repo is bound to are large enough
 to live in their own file — see @UniversalDesign.md. Beyond those: every
 visible string and every accessible name goes through `translations.ts` in all
-four languages, and recipe generation offers both a Copy-Paste route that needs
-no account and an API-key route for users who want one.
+four languages, and meal-plan generation offers both a Copy-Paste route that
+needs no account and a direct route for users who want one. The two are a choice
+about that one step, not two tiers of the app: a stored key powers photo
+recognition, storage tips, images, replacement and chat on either route.
 
 ## 3. Offer informative feedback
 
@@ -56,10 +64,20 @@ what it marks is also said in words, in colour and in an announcement.
 
 Beginning, middle, end, with the end stated.
 
-**Here:** the three consent dialogs share one shape — a declarative title
+**Here:** the four consent dialogs share one shape — a declarative title
 naming what happens, what is stored or sent, a short list of consequences, then
-what the credential or photo is actually used for (#289). Consent is recorded
-on accept only; dismissing a dialog closes nothing out (#290).
+what the credential, photo or generated image is actually used for (#289).
+Consent is recorded on accept only; dismissing a dialog closes nothing out
+(#290).
+
+One dialog per new *kind* of exposure or cost, not one per feature. A stored
+API key powers six things — meal plans, photo recognition, storage tips,
+recipe images, replacement and the cooking chat — and only two of them ask
+anything beyond the key's own storage warning: the photo, because an image
+leaves the device, and image generation, because it is billed per call.
+Replacement, tips and chat send the same kind of text the key was entered for,
+so they ask nothing. A fourth dialog in front of them would tax the capability
+without telling the user something new.
 
 ## 5. Prevent errors
 
@@ -74,15 +92,26 @@ is why no dialog currently uses it. Where the emphasised button is the risky
 one, no button is a default: `useFocusTrap(onClose, true)` focuses the dialog
 itself and Enter does nothing until the user picks.
 
-Switching a credential off has one shape wherever it appears (#302). The toggle
-commits nothing; the dialog does, through three exits — delete the credential
-(`btn-primary`, the exposure ends), keep it (`btn-warning`, the exposure runs
-on), or cancel (`btn-quiet`, nothing moves, and Escape lands here). Before that,
-both of `ClearApiKeyDialog`'s buttons *and* its Escape switched to Copy & Paste:
-the dialog posed a question the flip had already answered, and no exit led back
-to API-key mode. A switch that a dialog gates may only be moved by an exit that
-decided something. The mirror image is just as binding — with the credential
-already stored, flipping the switch back on asks nothing at all.
+Switching a credential off has one shape wherever it appears (#302, #305). The
+toggle commits nothing; the dialog does, through three exits — delete the
+credential (`btn-primary`, the exposure ends), keep it (`btn-warning`, the
+exposure runs on), or cancel (`btn-quiet`, nothing moves, and Escape lands
+here). A switch that a dialog gates may only be moved by an exit that decided
+something. The mirror image is just as binding — with the credential already
+stored, flipping the switch back on asks nothing at all. Sync is where that
+shape lives; the API key no longer has a switch to gate.
+
+**A switch may not gate a credential it does not own.** The Gemini API key was
+tied to the generation route, so turning direct generation off asked what should
+become of the key — a question the flip has no business asking now that the key
+also drives photo recognition, storage tips, images, replacement and chat. The
+route switch therefore commits in both directions, and the key's deletion moved
+into the key's own dialog: `ApiKeyDialog` offers it (`btn-primary`, the exposure
+ends) beside saving (`btn-warning`, the exposure begins), and hands the decision
+to `ClearApiKeyDialog`, which steps in rather than stacking. Two states
+disappeared with the coupling: a key that outlived its feature, and the red flag
+that used to mark it. A stored key is always in use, so there is nothing left to
+warn about that its own icon does not already say.
 
 ## 6. Permit easy reversal of actions
 
@@ -106,8 +135,20 @@ No surprises, no changes to familiar behaviour, no tedious sequences.
 **Here:** every setting persists to localStorage, so nothing is asked twice.
 Escape closes any dialog. A tooltip's first Escape dismisses the tooltip only
 and is swallowed before it can close the dialog behind it; a second press gets
-through (#293). Nothing leaves the device without a switch having been flipped
-for it.
+through (#293). Nothing leaves the device unasked: a credential is entered
+deliberately, every request that uses it starts with a click, and the two that
+expose something the key's own warning did not cover ask once before the first
+one.
+
+**A control that vanishes is a surprise; a control that cannot act is a dead
+end.** Image generation was a header switch that only existed with a key in
+API mode, so it appeared and disappeared as other settings moved. Disabling it
+instead would have been worse — a `disabled` switch is not focusable, so it
+cannot carry the tooltip that would explain itself, and UniversalDesign.md's
+"nothing reachable that does nothing" rules it out either way. The switch is
+gone: the capability shows up wherever it is used, and the question it was
+really asking — *do you know this costs money?* — is asked at the button that
+spends it.
 
 ## 8. Reduce short-term memory load
 

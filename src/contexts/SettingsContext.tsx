@@ -84,8 +84,10 @@ interface SettingsContextType {
     setPlannedRecipes: (recipes: string[]) => void;
     language: string;
     setLanguage: (lang: string) => void;
-    imageGenEnabled: boolean;
-    setImageGenEnabled: (enabled: boolean) => void;
+    imageGenAck: boolean;
+    setImageGenAck: (acknowledged: boolean) => void;
+    imageGenUnsupported: boolean;
+    setImageGenUnsupported: (unsupported: boolean) => void;
     t: TranslationType;
     storagePersistError: boolean;
 }
@@ -93,9 +95,11 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 /**
- * Determine the initial value for useCopyPaste mode:
- * - Default to true (Copy & Paste mode) for new users
- * - But if user already has an API key stored, default to false (API Key mode)
+ * Determine the initial value for useCopyPaste mode. The flag decides one
+ * thing only — where the meal plan comes from — while every other capability
+ * follows the stored key alone:
+ * - Default to true (Copy & Paste) for new users
+ * - But if user already has an API key stored, default to false (direct API)
  */
 const getInitialUseCopyPaste = (): boolean => {
     const savedPreference = localStorage.getItem(STORAGE_KEYS.USE_COPY_PASTE);
@@ -109,6 +113,16 @@ const getInitialUseCopyPaste = (): boolean => {
     // New user: check if they have an existing API key (from before this update)
     const existingApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
     return !existingApiKey; // true (Copy & Paste) if no key, false (API Key mode) if key exists
+};
+
+/**
+ * Carry a pre-1.14 image-generation opt-in over as the cost acknowledgement.
+ * The old switch meant "I know these images are billed to me", which is
+ * exactly what the first-click dialog now asks, so anyone who had it on is
+ * not asked again. Only consulted when the new key is absent.
+ */
+const getInitialImageGenAck = (): boolean => {
+    return localStorage.getItem(STORAGE_KEYS.LEGACY_IMAGE_GEN_ENABLED) === 'true';
 };
 
 /**
@@ -145,17 +159,19 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
     const [plannedRecipes, setPlannedRecipes, plannedRecipesError] = useLocalStorage<string[]>(STORAGE_KEYS.PLANNED_RECIPES, []);
     const [language, setLanguage, languageError] = useLocalStorage<string>(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
-    const [imageGenEnabled, setImageGenEnabled, imageGenEnabledError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_ENABLED, false);
+    const [imageGenAck, setImageGenAck, imageGenAckError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_ACK, getInitialImageGenAck());
+    const [imageGenUnsupported, setImageGenUnsupported, imageGenUnsupportedError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_UNSUPPORTED, false);
 
-    // Reset the image-generation opt-in whenever the API key changes. The
-    // toggle is an explicit acknowledgement that the key supports paid
-    // image-gen, so a new key — possibly free-tier — must be re-confirmed.
+    // Forget that image generation was unsupported whenever the API key
+    // changes: the flag records a quota belonging to one key, so a different
+    // key deserves an attempt. The cost acknowledgement is deliberately kept —
+    // it is about what the user understands, not about which key is stored.
     // Skip the reset when the new value equals the current one: re-saving the
     // unchanged key from the dialog is not a new key.
     const setApiKey = useCallback((key: string) => {
-        if (key !== apiKey && imageGenEnabled) setImageGenEnabled(false);
+        if (key !== apiKey && imageGenUnsupported) setImageGenUnsupported(false);
         setApiKeyRaw(key);
-    }, [apiKey, setApiKeyRaw, imageGenEnabled, setImageGenEnabled]);
+    }, [apiKey, setApiKeyRaw, imageGenUnsupported, setImageGenUnsupported]);
 
     // Mirror the UI language onto <html lang> so assistive technology switches
     // pronunciation along with the interface.
@@ -164,7 +180,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             LANGUAGE_TAGS[isValidLanguage(language) ? language : DEFAULTS.LANGUAGE];
     }, [language]);
 
-    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || plannedRecipesError || languageError || imageGenEnabledError;
+    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || plannedRecipesError || languageError || imageGenAckError || imageGenUnsupportedError;
 
     const t = getTranslations(language);
 
@@ -177,7 +193,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         styleWishes, setStyleWishes,
         plannedRecipes, setPlannedRecipes,
         language, setLanguage,
-        imageGenEnabled, setImageGenEnabled,
+        imageGenAck, setImageGenAck,
+        imageGenUnsupported, setImageGenUnsupported,
         t,
         storagePersistError
     };
