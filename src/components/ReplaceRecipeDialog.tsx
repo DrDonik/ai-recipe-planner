@@ -59,8 +59,8 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
                     </h2>
                     <button
                         onClick={handleClose}
-                        className="p-2 bg-white/50 hover:bg-white/80 dark:bg-black/20 dark:hover:bg-black/40 rounded-full transition-colors text-text-muted hover:text-text-base"
-                        aria-label={t.replaceRecipe.cancel}
+                        className="btn-icon transition-colors"
+                        aria-label={t.a11y.close}
                     >
                         <X size={20} />
                     </button>
@@ -111,7 +111,7 @@ export const ReplaceRecipeDialog: React.FC<ReplaceRecipeDialogProps> = ({
                         don't shift; only their label/handler/disabled state changes. */}
                     <button
                         onClick={isLoading ? onCancelGenerate : onCancel}
-                        className="btn flex items-center gap-2 px-4 py-2 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30"
+                        className="btn btn-quiet flex items-center gap-2 px-4 py-2 rounded-lg"
                     >
                         {isLoading ? t.replaceRecipe.cancelGeneration : t.replaceRecipe.cancel}
                     </button>
