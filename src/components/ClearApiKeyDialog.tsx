@@ -8,12 +8,13 @@ interface ClearApiKeyDialogProps {
 }
 
 /**
- * The API key's only destructive exit, reached from the key dialog.
+ * The API key's only destructive exit, reached from the key dialog and from the
+ * key's own switch being turned off.
  *
- * It gates no switch: the key is not tied to a mode any more, so there is no
- * flip to undo and no third outcome to offer. Two exits are the whole question
- * — delete the key (the exposure ends) or keep it (nothing changes), which is
- * also where Escape lands.
+ * It gates that switch, but unlike the sync dialog it still offers two exits
+ * rather than three: a kept key is a key in use, so there is no stored-but-off
+ * state for a "keep it" to move the switch into. Keeping and cancelling are one
+ * outcome — nothing changes — and that is where Escape lands.
  */
 export const ClearApiKeyDialog = ({ onClear, onKeep }: ClearApiKeyDialogProps) => {
     const { t } = useSettings();

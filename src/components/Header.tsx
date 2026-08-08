@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Info } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Info, Sparkles, Pencil } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
 import { ApiKeyDialog, type ApiKeyDialogStep } from './ApiKeyDialog';
@@ -47,8 +47,9 @@ export const Header: React.FC<HeaderProps> = ({
     const importFileRef = useRef<HTMLInputElement>(null);
 
     // Sync config as stored on this device, read at render because every path
-    // that changes it reloads the page. `syncKeptOff` is the counterpart of a
-    // stored API key in Copy & Paste mode: the credential outlived the feature.
+    // that changes it reloads the page. `syncKeptOff` is a token that outlived
+    // the feature it was entered for — the state the API key no longer has,
+    // which is why only sync's switch-off asks a third question.
     const syncKeptOff = readStoredSyncConfig() !== null && !isSyncEnabled();
 
     const syncIcon = (() => {
@@ -159,6 +160,20 @@ export const Header: React.FC<HeaderProps> = ({
         // collects it, behind the storage warning on first use.
         if (apiKey) {
             setUseCopyPaste(false);
+            return;
+        }
+        setApiDialogStep(hasSeenApiKeyWarning() ? 'key' : 'warning');
+    };
+
+    const handleApiKeyToggle = () => {
+        // The one switch that owns the key, so it is allowed to gate it. Both
+        // directions open a dialog and neither commits here: switching on, the
+        // key dialog stores the key (behind the storage warning on first use);
+        // switching off, ClearApiKeyDialog decides. Unlike sync there is no
+        // third exit, because a key kept is a key in use — the switch has no
+        // stored-but-off state to land in.
+        if (apiKey) {
+            setShowClearDialog(true);
             return;
         }
         setApiDialogStep(hasSeenApiKeyWarning() ? 'key' : 'warning');
@@ -295,7 +310,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 and trailing affordance line up across all rows. */}
                             <div className="grid grid-cols-[auto_auto_auto_auto] items-center gap-x-2 gap-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <Toggle
-                                    icon={<Key size={14} />}
+                                    icon={<Sparkles size={14} />}
                                     label={t.modeSwitch.label}
                                     checked={!useCopyPaste}
                                     onChange={handleModeToggle}
@@ -303,14 +318,34 @@ export const Header: React.FC<HeaderProps> = ({
                                        without a key. Every other flip commits on
                                        the spot, in both directions. */
                                     opensDialog={useCopyPaste && !apiKey}
-                                    /* The key's own control, and independent of
-                                       the mode: with a key stored it is what the
-                                       other four capabilities run on, so it stays
-                                       reachable in Copy & Paste too. */
+                                    trailing={
+                                        <TooltipButton
+                                            icon={<Info size={14} className="text-text-muted" />}
+                                            tooltip={t.modeSwitch.tooltip}
+                                            ariaLabel={`${t.a11y.info}: ${t.modeSwitch.label}`}
+                                            className="!p-1"
+                                        />
+                                    }
+                                />
+
+                                {/* The key is a stored credential like the Gist
+                                    token, so it gets the same shape: a switch that
+                                    is on exactly when the key is stored, and reads
+                                    as one at a glance rather than as an icon that
+                                    happens to be clickable. Independent of the
+                                    mode — with a key stored it is what photo
+                                    recognition, tips, images, replacement and chat
+                                    run on, in Copy & Paste too. */}
+                                <Toggle
+                                    icon={<Key size={14} />}
+                                    label={t.apiKeyDialog.heading}
+                                    checked={!!apiKey}
+                                    onChange={handleApiKeyToggle}
+                                    opensDialog
                                     trailing={
                                         apiKey ? (
                                             <TooltipButton
-                                                icon={<Key size={14} className="text-text-muted" />}
+                                                icon={<Pencil size={14} className="text-text-muted" />}
                                                 tooltip={t.apiKeyDialog.editTooltip}
                                                 ariaLabel={t.apiKeyDialog.editTooltip}
                                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
@@ -319,8 +354,8 @@ export const Header: React.FC<HeaderProps> = ({
                                         ) : (
                                             <TooltipButton
                                                 icon={<Info size={14} className="text-text-muted" />}
-                                                tooltip={t.modeSwitch.tooltip}
-                                                ariaLabel={`${t.a11y.info}: ${t.modeSwitch.label}`}
+                                                tooltip={t.apiKeyDialog.tooltip}
+                                                ariaLabel={`${t.a11y.info}: ${t.apiKeyDialog.heading}`}
                                                 className="!p-1"
                                             />
                                         )

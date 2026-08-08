@@ -232,7 +232,7 @@ export const translations = {
         },
         modeSwitch: {
             label: "Generate directly",
-            tooltip: "Off: the meal-plan prompt is prepared for any AI chat. On: the meal plan is generated directly with your stored Gemini API key. Photo recognition, storage tips, recipe images, single-recipe replacement and the cooking chat run on the key either way."
+            tooltip: "Off: the meal-plan prompt is prepared for any AI chat. On: the meal plan is generated directly with your stored Gemini API key."
         },
         storageTips: {
             iconAriaLabel: "Storage tip",
@@ -280,7 +280,8 @@ export const translations = {
             save: "Save key",
             delete: "Delete key",
             errorEmpty: "Please enter an API key.",
-            editTooltip: "Change API key"
+            editTooltip: "Change API key",
+            tooltip: "Off: no key is stored, and meal plans are prepared for copy & paste. On: the key is stored in this browser and enables direct generation, photo recognition, storage tips, recipe images, single-recipe replacement and the cooking chat."
         },
         clearApiKey: {
             title: "Clear API Key?",
@@ -587,7 +588,7 @@ export const translations = {
         },
         modeSwitch: {
             label: "Direkt generieren",
-            tooltip: "Aus: der Prompt für den Menüplan wird für einen beliebigen KI-Chat vorbereitet. An: der Menüplan wird direkt mit deinem gespeicherten Gemini-API-Schlüssel erzeugt. Fotoerkennung, Lagerungstipps, Rezeptbilder, das Ersetzen einzelner Rezepte und der Kochchat laufen so oder so über den Schlüssel."
+            tooltip: "Aus: der Prompt für den Menüplan wird für einen beliebigen KI-Chat vorbereitet. An: der Menüplan wird direkt mit deinem gespeicherten Gemini-API-Schlüssel erzeugt."
         },
         storageTips: {
             iconAriaLabel: "Lagerungstipp",
@@ -635,7 +636,8 @@ export const translations = {
             save: "Schlüssel speichern",
             delete: "Schlüssel löschen",
             errorEmpty: "Bitte gib einen API-Schlüssel ein.",
-            editTooltip: "API-Schlüssel ändern"
+            editTooltip: "API-Schlüssel ändern",
+            tooltip: "Aus: es ist kein Schlüssel gespeichert, und Menüpläne werden zum Kopieren & Einfügen vorbereitet. An: der Schlüssel wird in diesem Browser gespeichert und ermöglicht direktes Generieren, Fotoerkennung, Lagerungstipps, Rezeptbilder, das Ersetzen einzelner Rezepte und den Kochchat."
         },
         clearApiKey: {
             title: "API-Schlüssel löschen?",
@@ -942,7 +944,7 @@ export const translations = {
         },
         modeSwitch: {
             label: "Génération directe",
-            tooltip: "Désactivé : l'invite du plan de repas est préparée pour n'importe quel chat IA. Activé : le plan de repas est généré directement avec votre clé API Gemini stockée. La reconnaissance photo, les conseils de conservation, les images de recettes, le remplacement d'une recette et le chat de cuisine fonctionnent avec la clé dans les deux cas."
+            tooltip: "Désactivé : l'invite du plan de repas est préparée pour n'importe quel chat IA. Activé : le plan de repas est généré directement avec votre clé API Gemini stockée."
         },
         storageTips: {
             iconAriaLabel: "Conseil de conservation",
@@ -990,7 +992,8 @@ export const translations = {
             save: "Enregistrer la clé",
             delete: "Supprimer la clé",
             errorEmpty: "Veuillez saisir une clé API.",
-            editTooltip: "Modifier la clé API"
+            editTooltip: "Modifier la clé API",
+            tooltip: "Désactivé : aucune clé n'est stockée et les plans de repas sont préparés pour le copier-coller. Activé : la clé est stockée dans ce navigateur et permet la génération directe, la reconnaissance photo, les conseils de conservation, les images de recettes, le remplacement d'une recette et le chat de cuisine."
         },
         clearApiKey: {
             title: "Effacer la clé API ?",
@@ -1297,7 +1300,7 @@ export const translations = {
         },
         modeSwitch: {
             label: "Generación directa",
-            tooltip: "Desactivado: el prompt del plan de comidas se prepara para cualquier chat de IA. Activado: el plan de comidas se genera directamente con tu clave API de Gemini almacenada. El reconocimiento de fotos, los consejos de conservación, las imágenes de recetas, el reemplazo de una receta y el chat de cocina funcionan con la clave en ambos casos."
+            tooltip: "Desactivado: el prompt del plan de comidas se prepara para cualquier chat de IA. Activado: el plan de comidas se genera directamente con tu clave API de Gemini almacenada."
         },
         storageTips: {
             iconAriaLabel: "Consejo de conservación",
@@ -1345,7 +1348,8 @@ export const translations = {
             save: "Guardar clave",
             delete: "Eliminar clave",
             errorEmpty: "Introduce una clave API.",
-            editTooltip: "Cambiar la clave API"
+            editTooltip: "Cambiar la clave API",
+            tooltip: "Desactivado: no hay ninguna clave almacenada y los planes de comidas se preparan para copiar y pegar. Activado: la clave se almacena en este navegador y habilita la generación directa, el reconocimiento de fotos, los consejos de conservación, las imágenes de recetas, el reemplazo de una receta y el chat de cocina."
         },
         clearApiKey: {
             title: "¿Eliminar clave API?",
