@@ -8,6 +8,7 @@ import { GistSyncDialog } from './GistSyncDialog';
 import { TooltipButton } from './ui/TooltipButton';
 import { Toggle } from './ui/Toggle';
 import { UndoToast } from './ui/UndoToast';
+import { isSyncEnabled, readStoredSyncConfig, setSyncEnabled } from '../services/gistSync';
 import { buildExportData, downloadExportFile, readImportFile, applyImportData } from '../utils/dataTransfer';
 import type { Notification } from '../types';
 import type { SyncStatus } from '../hooks/useGistSync';
@@ -40,9 +41,15 @@ export const Header: React.FC<HeaderProps> = ({
     const [apiDialogStep, setApiDialogStep] = useState<ApiKeyDialogStep | null>(
         () => (!hasSeenApiKeyWarning() && !!apiKey && !useCopyPaste ? 'warning' : null)
     );
-    const [showClearDialog, setShowClearDialog] = useState(false);
+    // 'disable' gates a switch-off, 'cleanup' tidies a key left behind by one.
+    const [clearDialog, setClearDialog] = useState<'disable' | 'cleanup' | null>(null);
     const [showSyncDialog, setShowSyncDialog] = useState(false);
     const importFileRef = useRef<HTMLInputElement>(null);
+
+    // Sync config as stored on this device, read at render because every path
+    // that changes it reloads the page. `syncKeptOff` is the counterpart of a
+    // stored API key in Copy & Paste mode: the credential outlived the feature.
+    const syncKeptOff = readStoredSyncConfig() !== null && !isSyncEnabled();
 
     const syncIcon = (() => {
         switch (syncStatus) {
@@ -134,10 +141,11 @@ export const Header: React.FC<HeaderProps> = ({
 
     const handleModeToggle = () => {
         if (!useCopyPaste) {
-            // Switching TO Copy & Paste mode
+            // Switching TO Copy & Paste mode. With a key stored, the dialog
+            // gates the switch: nothing is committed until one of its two
+            // switch-off buttons is pressed.
             if (apiKey) {
-                // Ask if user wants to clear or keep the API key
-                setShowClearDialog(true);
+                setClearDialog('disable');
             } else {
                 setUseCopyPaste(true);
             }
@@ -187,18 +195,34 @@ export const Header: React.FC<HeaderProps> = ({
         // the key should be cleared. Every other cancel — an aborted switch, a
         // closed key dialog — leaves the current mode untouched.
         if (declinedWarning && !useCopyPaste && apiKey) {
-            setShowClearDialog(true);
+            setClearDialog('disable');
         }
     };
 
     const handleClearApiKey = () => {
-        setShowClearDialog(false);
+        setClearDialog(null);
         clearApiKeyWithUndo();
     };
 
     const handleKeepApiKey = () => {
-        setShowClearDialog(false);
+        setClearDialog(null);
         setUseCopyPaste(true);
+    };
+
+    // The exit that decides nothing: API Key mode keeps running, the key stays
+    // where it was. Escape lands here too.
+    const handleCancelClearDialog = () => setClearDialog(null);
+
+    const handleSyncToggle = () => {
+        // A token kept from an earlier switch-off is all sync needs, so turning
+        // it back on asks nothing — the same shortcut API Key mode takes when a
+        // key is already stored.
+        if (syncKeptOff) {
+            setSyncEnabled(true);
+            window.location.reload();
+            return;
+        }
+        setShowSyncDialog(true);
     };
 
     return (
@@ -224,7 +248,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 tooltip={t.apiKeyStoredWarning}
                                 ariaLabel={t.apiKeyStoredWarning}
                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => setShowClearDialog(true)}
+                                onClick={() => setClearDialog('cleanup')}
                             />
                         )}
 
@@ -235,6 +259,19 @@ export const Header: React.FC<HeaderProps> = ({
                                 icon={syncIcon}
                                 tooltip={syncTooltip}
                                 ariaLabel={t.sync.openSettings}
+                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setShowSyncDialog(true)}
+                            />
+                        )}
+
+                        {/* A token outliving sync is worth the same flag as a key
+                            outliving API Key mode — sync is idle here, so the
+                            indicator above stays hidden. */}
+                        {headerMinimized && syncKeptOff && (
+                            <TooltipButton
+                                icon={<AlertTriangle size={16} className="text-red-500" />}
+                                tooltip={t.sync.tokenStoredWarning}
+                                ariaLabel={t.sync.tokenStoredWarning}
                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
                                 onClick={() => setShowSyncDialog(true)}
                             />
@@ -272,6 +309,10 @@ export const Header: React.FC<HeaderProps> = ({
                                     label={t.modeSwitch.label}
                                     checked={!useCopyPaste}
                                     onChange={handleModeToggle}
+                                    /* Only the flips that actually open one: with
+                                       a key stored, switching on commits straight
+                                       away; without one, switching off does. */
+                                    opensDialog={useCopyPaste ? !apiKey : !!apiKey}
                                     trailing={
                                         useCopyPaste ? (
                                             apiKey ? (
@@ -282,7 +323,7 @@ export const Header: React.FC<HeaderProps> = ({
                                                     tooltip={t.apiKeyStoredWarning}
                                                     ariaLabel={t.apiKeyStoredWarning}
                                                     className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                                    onClick={() => setShowClearDialog(true)}
+                                                    onClick={() => setClearDialog('cleanup')}
                                                 />
                                             ) : (
                                                 <TooltipButton
@@ -304,6 +345,10 @@ export const Header: React.FC<HeaderProps> = ({
                                     }
                                 />
 
+                                {/* Deliberately the odd one out: image generation
+                                    stores and exposes nothing, so it commits on
+                                    the spot and needs neither dialog nor
+                                    aria-haspopup. */}
                                 {!useCopyPaste && apiKey && (
                                     <Toggle
                                         icon={<ImageIcon size={14} />}
@@ -321,22 +366,34 @@ export const Header: React.FC<HeaderProps> = ({
                                     />
                                 )}
 
-                                {/* Both directions open the dialog: switching on needs a
-                                    token, switching off discards one. */}
+                                {/* Switching on needs a token and switching off asks
+                                    what becomes of it — except with a token kept
+                                    from an earlier switch-off, which turns sync
+                                    back on directly. */}
                                 <Toggle
                                     icon={<Cloud size={14} />}
                                     label={t.sync.label}
                                     checked={syncStatus !== 'idle'}
-                                    onChange={() => setShowSyncDialog(true)}
-                                    opensDialog
+                                    onChange={handleSyncToggle}
+                                    opensDialog={!syncKeptOff}
                                     trailing={
-                                        <TooltipButton
-                                            icon={syncIcon}
-                                            tooltip={syncTooltip}
-                                            ariaLabel={t.sync.openSettings}
-                                            className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                            onClick={() => setShowSyncDialog(true)}
-                                        />
+                                        syncKeptOff ? (
+                                            <TooltipButton
+                                                icon={<AlertTriangle size={16} className="text-red-500" />}
+                                                tooltip={t.sync.tokenStoredWarning}
+                                                ariaLabel={t.sync.tokenStoredWarning}
+                                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={() => setShowSyncDialog(true)}
+                                            />
+                                        ) : (
+                                            <TooltipButton
+                                                icon={syncIcon}
+                                                tooltip={syncTooltip}
+                                                ariaLabel={t.sync.openSettings}
+                                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={() => setShowSyncDialog(true)}
+                                            />
+                                        )
                                     }
                                 />
                             </div>
@@ -409,10 +466,12 @@ export const Header: React.FC<HeaderProps> = ({
             />
         )}
 
-        {showClearDialog && (
+        {clearDialog && (
             <ClearApiKeyDialog
+                variant={clearDialog}
                 onClear={handleClearApiKey}
                 onKeep={handleKeepApiKey}
+                onCancel={handleCancelClearDialog}
             />
         )}
 

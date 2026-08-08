@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { GIST_API, SYNCED_STORAGE_KEYS } from '../constants';
+import { GIST_API, STORAGE_KEYS, SYNCED_STORAGE_KEYS } from '../constants';
 import { writeLocalStorageExternal } from '../hooks/useLocalStorage';
 
 /**
@@ -49,6 +49,47 @@ export class GistPayloadError extends Error {
         this.name = 'GistPayloadError';
     }
 }
+
+export interface SyncConfig {
+    token: string;
+    gistId: string;
+}
+
+/**
+ * The credentials as stored, whether or not sync is currently switched on.
+ * Use this to answer "is a token still sitting in this browser?" — the header
+ * warns about a kept token on exactly this basis.
+ */
+export const readStoredSyncConfig = (): SyncConfig | null => {
+    const rawToken = localStorage.getItem(STORAGE_KEYS.GIST_TOKEN);
+    const rawId = localStorage.getItem(STORAGE_KEYS.GIST_ID);
+    if (!rawToken || !rawId) return null;
+    try {
+        const token = JSON.parse(rawToken);
+        const gistId = JSON.parse(rawId);
+        if (typeof token !== 'string' || typeof gistId !== 'string' || !token || !gistId) {
+            return null;
+        }
+        return { token, gistId };
+    } catch {
+        return null;
+    }
+};
+
+/** Off only when explicitly switched off; absent reads as on. */
+export const isSyncEnabled = (): boolean =>
+    localStorage.getItem(STORAGE_KEYS.SYNC_ENABLED) !== 'false';
+
+export const setSyncEnabled = (enabled: boolean): void => {
+    localStorage.setItem(STORAGE_KEYS.SYNC_ENABLED, enabled ? 'true' : 'false');
+};
+
+/**
+ * The config sync actually runs with: null while sync is switched off, even
+ * though a token may still be stored.
+ */
+export const readActiveSyncConfig = (): SyncConfig | null =>
+    isSyncEnabled() ? readStoredSyncConfig() : null;
 
 /**
  * Builds a sync payload from the currently persisted localStorage values.

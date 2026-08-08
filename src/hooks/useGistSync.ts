@@ -8,6 +8,7 @@ import {
     GistUnauthorizedError,
     pullGist,
     pushGist,
+    readActiveSyncConfig,
 } from '../services/gistSync';
 import { subscribeToLocalStorageChanges } from './useLocalStorage';
 
@@ -46,22 +47,6 @@ const classifyError = (err: unknown): SyncErrorKind => {
     return 'network';
 };
 
-const readConfig = () => {
-    const rawToken = localStorage.getItem(STORAGE_KEYS.GIST_TOKEN);
-    const rawId = localStorage.getItem(STORAGE_KEYS.GIST_ID);
-    if (!rawToken || !rawId) return null;
-    try {
-        const token = JSON.parse(rawToken);
-        const gistId = JSON.parse(rawId);
-        if (typeof token !== 'string' || typeof gistId !== 'string' || !token || !gistId) {
-            return null;
-        }
-        return { token, gistId };
-    } catch {
-        return null;
-    }
-};
-
 /**
  * Orchestrates Gist-based sync for the app:
  *
@@ -74,7 +59,9 @@ const readConfig = () => {
  * GIST_API.PUSH_DEBOUNCE_MS to coalesce rapid edits.
  */
 export const useGistSync = (): UseGistSyncResult => {
-    const config = readConfig();
+    // Null while sync is switched off, so a token kept on this device sits
+    // unused rather than quietly syncing on.
+    const config = readActiveSyncConfig();
     const isConfigured = config !== null;
 
     const [status, setStatus] = useState<SyncStatus>(isConfigured ? 'pulling' : 'idle');
@@ -91,7 +78,7 @@ export const useGistSync = (): UseGistSyncResult => {
     // Run pull exactly once on mount. The effect reads its own config to
     // avoid a stale closure if the hook ever receives config via props.
     useEffect(() => {
-        const cfg = readConfig();
+        const cfg = readActiveSyncConfig();
         if (!cfg) {
             pullCompleteRef.current = true;
             return;
@@ -134,7 +121,7 @@ export const useGistSync = (): UseGistSyncResult => {
         if (!isConfigured) return;
 
         const performPush = async () => {
-            const cfg = readConfig();
+            const cfg = readActiveSyncConfig();
             if (!cfg) return;
 
             if (pushInFlightRef.current) {

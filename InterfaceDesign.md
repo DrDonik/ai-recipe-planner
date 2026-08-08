@@ -21,6 +21,12 @@ shaped settings controls onto a single row. Export and import stay icon
 buttons precisely because they are actions, not settings, and must not look
 like the switches.
 
+A dialog's close **X** follows one rule: dialogs holding a task or a form get
+one — `ApiKeyDialog`, `GistSyncDialog`, `CopyPasteDialog`, `ReplaceRecipeDialog`
+— and single-question dialogs do not, because their buttons already answer them
+and a third way to say no is noise. Every X is `.btn-icon`, and every one is
+named `t.a11y.close`; three separate keys said "close" before #302.
+
 ## 2. Seek universal usability
 
 Novice and expert, age ranges, disabilities, international variation,
@@ -68,6 +74,16 @@ is why no dialog currently uses it. Where the emphasised button is the risky
 one, no button is a default: `useFocusTrap(onClose, true)` focuses the dialog
 itself and Enter does nothing until the user picks.
 
+Switching a credential off has one shape wherever it appears (#302). The toggle
+commits nothing; the dialog does, through three exits — delete the credential
+(`btn-primary`, the exposure ends), keep it (`btn-warning`, the exposure runs
+on), or cancel (`btn-quiet`, nothing moves, and Escape lands here). Before that,
+both of `ClearApiKeyDialog`'s buttons *and* its Escape switched to Copy & Paste:
+the dialog posed a question the flip had already answered, and no exit led back
+to API-key mode. A switch that a dialog gates may only be moved by an exit that
+decided something. The mirror image is just as binding — with the credential
+already stored, flipping the switch back on asks nothing at all.
+
 ## 6. Permit easy reversal of actions
 
 **Here:** `UndoToast` with an action, rather than a confirmation dialog in
@@ -75,6 +91,13 @@ front of the deed. A confirmation taxes every correct action to catch the rare
 wrong one; an undo charges only the user who was actually wrong. Reserve
 dialogs for what an undo cannot walk back — data that has already left the
 device.
+
+Two credentials, two contracts, and the difference is admitted rather than
+hidden: clearing the API key keeps its five-second undo, while deleting the
+Gist token has none, because `handleDisable` reloads the page to reset the sync
+hook and no toast survives a reload. That path says so in words instead — the
+dialog states the deletion is final (#302). Where an undo is impossible, the
+dialog owes the user that sentence.
 
 ## 7. Keep users in control
 
