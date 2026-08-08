@@ -201,9 +201,14 @@ export const translations = {
                 "Can anything be prepared ahead?",
             ],
         },
-        imageGen: {
-            label: "Image generation",
-            tooltip: "Show per-recipe image generation buttons. Requires a paid Gemini API tier; each image incurs a per-call charge on your account.",
+        imageGenCost: {
+            title: "Recipe images cost money",
+            description: "Each image is drawn by Google Gemini with your stored API key and billed to your Google account.",
+            beforeYouStart: "Before the first image:",
+            note1: "Image generation needs a paid Gemini tier — a free-tier key cannot do it.",
+            note2: "Every image is charged separately, including one you generate again.",
+            usage: "The recipe's title and ingredients are sent to Google Gemini to draw the picture. Images stay on this device: they are never synced and never part of a shared link.",
+            generate: "Generate image",
         },
         emptyPantry: "Empty Pantry",
         clearShoppingList: "Clear Shopping List",
@@ -219,15 +224,15 @@ export const translations = {
             spiceRack: "The Spice Rack stores staples like spices and oils that you always have on hand.",
             settings: "Choose your diet preference, number of people, and how many meals to plan.",
             copyPasteMode: "Use Copy & Paste mode (default) to work with any AI chat (ChatGPT, Claude, Gemini, etc.) without storing credentials.",
-            apiKey: "Alternatively, you can use a Gemini API key for a more streamlined experience. Get one at Google AI Studio.",
+            apiKey: "A Gemini API key generates meal plans directly, and also unlocks photo recognition, storage tips, recipe images, single-recipe replacement and the cooking chat. Get one at Google AI Studio.",
             generates: "Hit 'Generate' and the AI will create personalized recipes with a consolidated shopping list.",
             localStorage: "Your settings and recipes are saved in your browser's local storage. If you clear your browser data, this information will be lost.",
             dontShowAgain: "Don't show this again",
             getStarted: "Get Started"
         },
         modeSwitch: {
-            label: "Gemini API",
-            tooltip: "Off: Copy & Paste — the prompt is prepared for any AI chat and nothing is stored. On: recipes are generated directly with your own Gemini API key."
+            label: "Generate directly",
+            tooltip: "Off: the meal-plan prompt is prepared for any AI chat. On: the meal plan is generated directly with your stored Gemini API key. Photo recognition, storage tips, recipe images, single-recipe replacement and the cooking chat run on the key either way."
         },
         storageTips: {
             iconAriaLabel: "Storage tip",
@@ -266,25 +271,22 @@ export const translations = {
             risk2: "Browser extensions may be able to read it",
             risk3: "The key persists until you clear browser data",
             risk4: "The key will be visible in network requests (browser DevTools, network logs, proxies)",
-            usage: "The key is only used to call Google Gemini directly from your browser, for recipes, images and chat. No request passes through a server of this app.",
+            usage: "The key is only used to call Google Gemini directly from your browser — for meal plans, photo recognition, storage tips, images, replacement and chat. No request passes through a server of this app.",
             understand: "I understand, continue"
         },
         apiKeyDialog: {
             heading: "Gemini API key",
-            description: "The key is stored in this browser and sent straight to Google Gemini. Saving it also switches recipe generation to API Key mode.",
+            description: "The key is stored in this browser and sent straight to Google Gemini. It powers photo recognition, storage tips, recipe images, single-recipe replacement and the cooking chat; saving it also switches meal-plan generation over to the API, which you can switch back at any time.",
             save: "Save key",
+            delete: "Delete key",
             errorEmpty: "Please enter an API key.",
             editTooltip: "Change API key"
         },
         clearApiKey: {
             title: "Clear API Key?",
-            description: "Do you want to remove your stored API key from this device?",
+            description: "Photo recognition, storage tips, recipe images, single-recipe replacement and the cooking chat stop being offered, and meal plans go back to copy & paste. You can undo this for a few seconds.",
             clear: "Yes, clear it",
-            keep: "No, keep it",
-            disableTitle: "Switch off API Key mode?",
-            disableDescription: "Recipes will be prepared for copy & paste from now on. Your API key stays in this browser unless you delete it here.",
-            disableAndClear: "Switch off and delete key",
-            disableAndKeep: "Switch off and keep key"
+            keep: "No, keep it"
         },
         undo: {
             pantryEmptied: "Pantry emptied",
@@ -294,7 +296,6 @@ export const translations = {
             mealPlanReplaced: "New meal plan created",
             action: "Undo"
         },
-        apiKeyStoredWarning: "API key stored in local storage",
         aiDisclaimer: "The recipes are generated directly by AI. AI can make mistakes. Always cook with common sense.",
         dataTransfer: {
             exportData: "Export data",
@@ -555,9 +556,14 @@ export const translations = {
                 "Kann man etwas vorbereiten?",
             ],
         },
-        imageGen: {
-            label: "Bildgenerierung",
-            tooltip: "Zeigt pro Rezept eine Schaltfläche zur Bildgenerierung an. Erfordert ein kostenpflichtiges Gemini-API-Kontingent; jedes Bild verursacht Kosten auf deinem Konto.",
+        imageGenCost: {
+            title: "Rezeptbilder kosten Geld",
+            description: "Jedes Bild wird von Google Gemini mit deinem gespeicherten API-Schlüssel erzeugt und deinem Google-Konto verrechnet.",
+            beforeYouStart: "Vor dem ersten Bild:",
+            note1: "Bildgenerierung braucht ein kostenpflichtiges Gemini-Kontingent — mit einem Gratis-Schlüssel geht es nicht.",
+            note2: "Jedes Bild wird einzeln verrechnet, auch ein erneut erzeugtes.",
+            usage: "Titel und Zutaten des Rezepts werden an Google Gemini gesendet, um das Bild zu zeichnen. Die Bilder bleiben auf diesem Gerät: sie werden nicht synchronisiert und sind nie Teil eines geteilten Links.",
+            generate: "Bild erzeugen",
         },
         emptyPantry: "Vorrat leeren",
         clearShoppingList: "Einkaufsliste leeren",
@@ -573,15 +579,15 @@ export const translations = {
             spiceRack: "Das Gewürzregal speichert Grundvorräte wie Gewürze und Öle, die du immer da hast.",
             settings: "Wähle deine Ernährungsvorlieben, Personenanzahl und wie viele Mahlzeiten geplant werden sollen.",
             copyPasteMode: "Nutze den Kopieren & Einfügen-Modus (Standard), um mit jedem KI-Chat (ChatGPT, Claude, Gemini, etc.) ohne gespeicherte Zugangsdaten zu arbeiten.",
-            apiKey: "Alternativ kannst du einen Gemini API-Schlüssel für ein nahtloseres Erlebnis verwenden. Hole dir einen bei Google AI Studio.",
+            apiKey: "Ein Gemini-API-Schlüssel erzeugt Menüpläne direkt und schaltet zusätzlich Fotoerkennung, Lagerungstipps, Rezeptbilder, das Ersetzen einzelner Rezepte und den Kochchat frei. Hole dir einen bei Google AI Studio.",
             generates: "Drücke 'Planen' und die KI erstellt personalisierte Rezepte mit einer zusammengefassten Einkaufsliste.",
             localStorage: "Deine Einstellungen und Rezepte werden im lokalen Speicher deines Browsers gespeichert. Wenn du deine Browserdaten löschst, gehen diese Informationen verloren.",
             dontShowAgain: "Nicht mehr anzeigen",
             getStarted: "Los geht's"
         },
         modeSwitch: {
-            label: "Gemini API",
-            tooltip: "Aus: Kopieren & Einfügen — der Prompt wird für einen beliebigen KI-Chat vorbereitet, es wird nichts gespeichert. An: Rezepte werden direkt mit deinem eigenen Gemini-API-Schlüssel erzeugt."
+            label: "Direkt generieren",
+            tooltip: "Aus: der Prompt für den Menüplan wird für einen beliebigen KI-Chat vorbereitet. An: der Menüplan wird direkt mit deinem gespeicherten Gemini-API-Schlüssel erzeugt. Fotoerkennung, Lagerungstipps, Rezeptbilder, das Ersetzen einzelner Rezepte und der Kochchat laufen so oder so über den Schlüssel."
         },
         storageTips: {
             iconAriaLabel: "Lagerungstipp",
@@ -620,25 +626,22 @@ export const translations = {
             risk2: "Browser-Erweiterungen können ihn möglicherweise auslesen",
             risk3: "Der Schlüssel bleibt gespeichert, bis du die Browserdaten löschst",
             risk4: "Der Schlüssel ist in Netzwerkanfragen sichtbar (Browser-DevTools, Netzwerkprotokolle, Proxys)",
-            usage: "Der Schlüssel wird ausschließlich verwendet, um Google Gemini direkt aus deinem Browser aufzurufen — für Rezepte, Bilder und Chat. Keine Anfrage läuft über einen Server dieser App.",
+            usage: "Der Schlüssel wird nur verwendet, um Google Gemini direkt aus deinem Browser aufzurufen — für Menüpläne, Fotoerkennung, Lagerungstipps, Bilder, Ersetzen und Chat. Keine Anfrage läuft über einen Server dieser App.",
             understand: "Verstanden, fortfahren"
         },
         apiKeyDialog: {
             heading: "Gemini-API-Schlüssel",
-            description: "Der Schlüssel wird in diesem Browser gespeichert und direkt an Google Gemini gesendet. Mit dem Speichern wird die Rezeptgenerierung auf den API-Modus umgestellt.",
+            description: "Der Schlüssel wird in diesem Browser gespeichert und direkt an Google Gemini gesendet. Er ermöglicht Fotoerkennung, Lagerungstipps, Rezeptbilder, das Ersetzen einzelner Rezepte und den Kochchat; mit dem Speichern wird zusätzlich die Menüplan-Generierung auf die API umgestellt, was du jederzeit zurückschalten kannst.",
             save: "Schlüssel speichern",
+            delete: "Schlüssel löschen",
             errorEmpty: "Bitte gib einen API-Schlüssel ein.",
             editTooltip: "API-Schlüssel ändern"
         },
         clearApiKey: {
             title: "API-Schlüssel löschen?",
-            description: "Möchtest du deinen gespeicherten API-Schlüssel von diesem Gerät entfernen?",
+            description: "Fotoerkennung, Lagerungstipps, Rezeptbilder, das Ersetzen einzelner Rezepte und der Kochchat werden dann nicht mehr angeboten, und Menüpläne entstehen wieder per Kopieren & Einfügen. Du kannst das ein paar Sekunden lang rückgängig machen.",
             clear: "Ja, löschen",
-            keep: "Nein, behalten",
-            disableTitle: "API-Schlüssel-Modus ausschalten?",
-            disableDescription: "Rezepte werden ab jetzt zum Kopieren und Einfügen vorbereitet. Dein API-Schlüssel bleibt in diesem Browser gespeichert, sofern du ihn hier nicht löschst.",
-            disableAndClear: "Ausschalten und Schlüssel löschen",
-            disableAndKeep: "Ausschalten und Schlüssel behalten"
+            keep: "Nein, behalten"
         },
         undo: {
             pantryEmptied: "Vorrat geleert",
@@ -648,7 +651,6 @@ export const translations = {
             mealPlanReplaced: "Neuer Menüplan erstellt",
             action: "Rückgängig"
         },
-        apiKeyStoredWarning: "API-Schlüssel im lokalen Speicher gespeichert",
         aiDisclaimer: "Die Rezepte werden direkt von der KI generiert. Die KI kann Fehler machen. Kochen Sie immer auch mit gesundem Menschenverstand.",
         dataTransfer: {
             exportData: "Daten exportieren",
@@ -909,9 +911,14 @@ export const translations = {
                 "Peut-on préparer quelque chose à l'avance ?",
             ],
         },
-        imageGen: {
-            label: "Génération d'images",
-            tooltip: "Affiche les boutons de génération d'image pour chaque recette. Nécessite un palier Gemini payant ; chaque image entraîne des frais facturés à votre compte.",
+        imageGenCost: {
+            title: "Les images de recettes coûtent de l'argent",
+            description: "Chaque image est dessinée par Google Gemini avec votre clé API stockée et facturée à votre compte Google.",
+            beforeYouStart: "Avant la première image :",
+            note1: "La génération d'images nécessite un palier Gemini payant — une clé gratuite ne le permet pas.",
+            note2: "Chaque image est facturée séparément, y compris une image générée à nouveau.",
+            usage: "Le titre et les ingrédients de la recette sont envoyés à Google Gemini pour dessiner l'image. Les images restent sur cet appareil : elles ne sont jamais synchronisées ni incluses dans un lien partagé.",
+            generate: "Générer l'image",
         },
         emptyPantry: "Vider le garde-manger",
         clearShoppingList: "Vider la liste de courses",
@@ -927,15 +934,15 @@ export const translations = {
             spiceRack: "Le rack à épices stocke les produits de base comme les épices et huiles que vous avez toujours.",
             settings: "Choisissez vos préférences alimentaires, le nombre de personnes et de repas à planifier.",
             copyPasteMode: "Utilisez le mode Copier-Coller (par défaut) pour travailler avec n'importe quel chat IA (ChatGPT, Claude, Gemini, etc.) sans stocker d'identifiants.",
-            apiKey: "Sinon, vous pouvez utiliser une clé API Gemini pour une expérience plus fluide. Obtenez-en une sur Google AI Studio.",
+            apiKey: "Une clé API Gemini génère les plans de repas directement et débloque aussi la reconnaissance photo, les conseils de conservation, les images de recettes, le remplacement d'une recette et le chat de cuisine. Obtenez-en une sur Google AI Studio.",
             generates: "Cliquez sur 'Générer' et l'IA créera des recettes personnalisées avec une liste de courses consolidée.",
             localStorage: "Vos paramètres et recettes sont sauvegardés dans le stockage local de votre navigateur. Si vous effacez vos données de navigation, ces informations seront perdues.",
             dontShowAgain: "Ne plus afficher",
             getStarted: "Commencer"
         },
         modeSwitch: {
-            label: "API Gemini",
-            tooltip: "Désactivé : Copier-Coller — l'invite est préparée pour n'importe quel chat IA et rien n'est stocké. Activé : les recettes sont générées directement avec votre propre clé API Gemini."
+            label: "Génération directe",
+            tooltip: "Désactivé : l'invite du plan de repas est préparée pour n'importe quel chat IA. Activé : le plan de repas est généré directement avec votre clé API Gemini stockée. La reconnaissance photo, les conseils de conservation, les images de recettes, le remplacement d'une recette et le chat de cuisine fonctionnent avec la clé dans les deux cas."
         },
         storageTips: {
             iconAriaLabel: "Conseil de conservation",
@@ -974,25 +981,22 @@ export const translations = {
             risk2: "Les extensions de navigateur peuvent potentiellement la lire",
             risk3: "La clé persiste jusqu'à ce que vous effaciez les données du navigateur",
             risk4: "La clé sera visible dans les requêtes réseau (DevTools du navigateur, journaux réseau, proxys)",
-            usage: "La clé sert uniquement à appeler Google Gemini directement depuis votre navigateur, pour les recettes, les images et le chat. Aucune requête ne passe par un serveur de cette application.",
+            usage: "La clé sert uniquement à appeler Google Gemini directement depuis votre navigateur — pour les plans de repas, la reconnaissance photo, les conseils de conservation, les images, le remplacement et le chat. Aucune requête ne passe par un serveur de cette application.",
             understand: "Je comprends, continuer"
         },
         apiKeyDialog: {
             heading: "Clé API Gemini",
-            description: "La clé est stockée dans ce navigateur et envoyée directement à Google Gemini. L'enregistrer bascule aussi la génération de recettes en mode clé API.",
+            description: "La clé est stockée dans ce navigateur et envoyée directement à Google Gemini. Elle permet la reconnaissance photo, les conseils de conservation, les images de recettes, le remplacement d'une recette et le chat de cuisine ; l'enregistrer bascule en plus la génération du plan de repas vers l'API, ce que vous pouvez annuler à tout moment.",
             save: "Enregistrer la clé",
+            delete: "Supprimer la clé",
             errorEmpty: "Veuillez saisir une clé API.",
             editTooltip: "Modifier la clé API"
         },
         clearApiKey: {
             title: "Effacer la clé API ?",
-            description: "Voulez-vous supprimer votre clé API stockée de cet appareil ?",
+            description: "La reconnaissance photo, les conseils de conservation, les images de recettes, le remplacement d'une recette et le chat de cuisine ne seront plus proposés, et les plans de repas repasseront au copier-coller. Vous pouvez annuler pendant quelques secondes.",
             clear: "Oui, effacer",
-            keep: "Non, conserver",
-            disableTitle: "Désactiver le mode clé API ?",
-            disableDescription: "Les recettes seront désormais préparées pour le copier-coller. Votre clé API reste dans ce navigateur, sauf si vous la supprimez ici.",
-            disableAndClear: "Désactiver et supprimer la clé",
-            disableAndKeep: "Désactiver et conserver la clé"
+            keep: "Non, conserver"
         },
         undo: {
             pantryEmptied: "Garde-manger vidé",
@@ -1002,7 +1006,6 @@ export const translations = {
             mealPlanReplaced: "Nouveau plan de repas créé",
             action: "Annuler"
         },
-        apiKeyStoredWarning: "Clé API stockée dans le stockage local",
         aiDisclaimer: "Les recettes sont générées directement par l'IA. L'IA peut faire des erreurs. Cuisinez toujours avec bon sens.",
         dataTransfer: {
             exportData: "Exporter les données",
@@ -1263,9 +1266,14 @@ export const translations = {
                 "¿Se puede preparar algo con antelación?",
             ],
         },
-        imageGen: {
-            label: "Generación de imágenes",
-            tooltip: "Muestra botones de generación de imágenes por receta. Requiere un plan Gemini de pago; cada imagen genera un cargo en tu cuenta.",
+        imageGenCost: {
+            title: "Las imágenes de recetas cuestan dinero",
+            description: "Cada imagen la dibuja Google Gemini con tu clave API almacenada y se cobra a tu cuenta de Google.",
+            beforeYouStart: "Antes de la primera imagen:",
+            note1: "La generación de imágenes requiere un plan Gemini de pago — una clave gratuita no puede hacerlo.",
+            note2: "Cada imagen se cobra por separado, incluida una que vuelvas a generar.",
+            usage: "El título y los ingredientes de la receta se envían a Google Gemini para dibujar la imagen. Las imágenes se quedan en este dispositivo: nunca se sincronizan ni forman parte de un enlace compartido.",
+            generate: "Generar imagen",
         },
         emptyPantry: "Vaciar despensa",
         clearShoppingList: "Vaciar lista de compras",
@@ -1281,15 +1289,15 @@ export const translations = {
             spiceRack: "El especiero almacena productos básicos como especias y aceites que siempre tienes a mano.",
             settings: "Elige tus preferencias dietéticas, número de personas y cuántas comidas planificar.",
             copyPasteMode: "Usa el modo Copiar y Pegar (predeterminado) para trabajar con cualquier chat de IA (ChatGPT, Claude, Gemini, etc.) sin almacenar credenciales.",
-            apiKey: "Alternativamente, puedes usar una clave API de Gemini para una experiencia más fluida. Obtén una en Google AI Studio.",
+            apiKey: "Una clave API de Gemini genera los planes de comidas directamente y además desbloquea el reconocimiento de fotos, los consejos de conservación, las imágenes de recetas, el reemplazo de una receta y el chat de cocina. Obtén una en Google AI Studio.",
             generates: "Presiona 'Generar' y la IA creará recetas personalizadas con una lista de compras consolidada.",
             localStorage: "Tus configuraciones y recetas se guardan en el almacenamiento local de tu navegador. Si borras los datos del navegador, esta información se perderá.",
             dontShowAgain: "No mostrar de nuevo",
             getStarted: "Empezar"
         },
         modeSwitch: {
-            label: "API de Gemini",
-            tooltip: "Desactivado: Copiar y Pegar — el prompt se prepara para cualquier chat de IA y no se almacena nada. Activado: las recetas se generan directamente con tu propia clave API de Gemini."
+            label: "Generación directa",
+            tooltip: "Desactivado: el prompt del plan de comidas se prepara para cualquier chat de IA. Activado: el plan de comidas se genera directamente con tu clave API de Gemini almacenada. El reconocimiento de fotos, los consejos de conservación, las imágenes de recetas, el reemplazo de una receta y el chat de cocina funcionan con la clave en ambos casos."
         },
         storageTips: {
             iconAriaLabel: "Consejo de conservación",
@@ -1328,25 +1336,22 @@ export const translations = {
             risk2: "Las extensiones del navegador pueden leerla",
             risk3: "La clave permanece hasta que borres los datos del navegador",
             risk4: "La clave será visible en solicitudes de red (DevTools del navegador, registros de red, proxies)",
-            usage: "La clave solo se usa para llamar a Google Gemini directamente desde tu navegador, para recetas, imágenes y chat. Ninguna solicitud pasa por un servidor de esta aplicación.",
+            usage: "La clave solo se usa para llamar a Google Gemini directamente desde tu navegador — para planes de comidas, reconocimiento de fotos, consejos de conservación, imágenes, reemplazo y chat. Ninguna solicitud pasa por un servidor de esta aplicación.",
             understand: "Entiendo, continuar"
         },
         apiKeyDialog: {
             heading: "Clave API de Gemini",
-            description: "La clave se almacena en este navegador y se envía directamente a Google Gemini. Al guardarla también se cambia la generación de recetas al modo de clave API.",
+            description: "La clave se almacena en este navegador y se envía directamente a Google Gemini. Habilita el reconocimiento de fotos, los consejos de conservación, las imágenes de recetas, el reemplazo de una receta y el chat de cocina; al guardarla también se cambia la generación del plan de comidas a la API, algo que puedes revertir en cualquier momento.",
             save: "Guardar clave",
+            delete: "Eliminar clave",
             errorEmpty: "Introduce una clave API.",
             editTooltip: "Cambiar la clave API"
         },
         clearApiKey: {
             title: "¿Eliminar clave API?",
-            description: "¿Quieres eliminar tu clave API almacenada de este dispositivo?",
+            description: "El reconocimiento de fotos, los consejos de conservación, las imágenes de recetas, el reemplazo de una receta y el chat de cocina dejarán de ofrecerse, y los planes de comidas volverán a copiar y pegar. Puedes deshacerlo durante unos segundos.",
             clear: "Sí, eliminar",
-            keep: "No, mantener",
-            disableTitle: "¿Desactivar el modo clave API?",
-            disableDescription: "A partir de ahora las recetas se prepararán para copiar y pegar. Tu clave API permanece en este navegador salvo que la elimines aquí.",
-            disableAndClear: "Desactivar y eliminar la clave",
-            disableAndKeep: "Desactivar y mantener la clave"
+            keep: "No, mantener"
         },
         undo: {
             pantryEmptied: "Despensa vaciada",
@@ -1356,7 +1361,6 @@ export const translations = {
             mealPlanReplaced: "Nuevo plan de comidas creado",
             action: "Deshacer"
         },
-        apiKeyStoredWarning: "Clave API almacenada en almacenamiento local",
         aiDisclaimer: "Las recetas son generadas directamente por IA. La IA puede cometer errores. Cocine siempre con sentido común.",
         dataTransfer: {
             exportData: "Exportar datos",

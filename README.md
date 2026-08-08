@@ -6,9 +6,10 @@ Try it out on github pages: [AI Recipe Planner](https://drdonik.github.io/ai-rec
 
 ## Features
 
-- **Dual Operation Modes**:
-  - **Copy & Paste Mode** (default): No API key storage required. Copy the generated prompt to any AI service and paste the response back. More secure and private.
-  - **API Key Mode**: Direct integration with Google Gemini API for seamless recipe generation (stores key in localStorage with security warning).
+- **Two Routes to a Meal Plan**:
+  - **Copy & Paste** (default): No API key storage required. Copy the generated prompt to any AI service and paste the response back. More secure and private.
+  - **Generate directly**: Direct integration with the Google Gemini API (stores the key in localStorage with a security warning).
+- **What a Stored Key Also Unlocks**, whichever route is chosen: pantry ingredients from a photo, storage tips, recipe images, replacing a single recipe, and a chat about the recipe you are cooking. Each is offered only with a key present, and the two that expose something new — sending a photo, and paying per image — ask once before the first use.
 - **AI-Powered Recipes**: Generates personalized recipes using Google Gemini Flash 3 Preview.
 - **Minimize Food Waste**: Input vegetables, ingredients, spices and staples you have to minimize food waste.
 - **Spice Rack**: Manage staples and spices that are always available in your kitchen.
@@ -47,9 +48,9 @@ Try it out on github pages: [AI Recipe Planner](https://drdonik.github.io/ai-rec
 5.  Copy the prompt and paste it into any AI service (ChatGPT, Claude, Gemini, etc.).
 6.  Copy the AI's response and paste it back into the app.
 
-### API Key Mode (Optional)
+### Generating Directly With a Gemini API Key (Optional)
 
-1.  Enable **API Key Mode** in the header and enter your Gemini API key.
+1.  Switch on **Generate directly** in the header and enter your Gemini API key. The key stays useful if you switch the meal plan back to Copy & Paste: it keeps powering photo recognition, storage tips, images, replacement and chat.
 2.  Add ingredients you have in your pantry.
 3.  Add spices and staples to your spice rack.
 4.  Select your diet, number of people, and number of meals.

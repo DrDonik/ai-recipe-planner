@@ -11,6 +11,12 @@ interface ApiKeyDialogProps {
     step: ApiKeyDialogStep;
     onAcceptWarning: () => void;
     onSave: (key: string) => void;
+    /**
+     * Hands the deletion to `ClearApiKeyDialog`. Since the key stopped being
+     * tied to a mode, no switch leads to that question any more — the key's own
+     * dialog is where it belongs.
+     */
+    onDelete: () => void;
     onCancel: () => void;
 }
 
@@ -20,7 +26,7 @@ interface ApiKeyDialogProps {
  * matches how the Gist token is handled, and keeps a credential that is never
  * displayed again out of the permanent chrome.
  */
-export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKeyDialogProps) => {
+export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onDelete, onCancel }: ApiKeyDialogProps) => {
     const { apiKey, t } = useSettings();
     const dialogRef = useFocusTrap(onCancel, true);
 
@@ -132,6 +138,10 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKey
                 )}
             </div>
 
+            {/* Coloured on the exposure axis: saving puts the key somewhere it
+                can be read, deleting ends that exposure — which is why the
+                destructive button is the green one — and cancelling moves
+                nothing. Nothing is focused by default, so Enter cannot pick. */}
             <div className="flex flex-col gap-3">
                 <button
                     onClick={handleSave}
@@ -139,6 +149,14 @@ export const ApiKeyDialog = ({ step, onAcceptWarning, onSave, onCancel }: ApiKey
                 >
                     {t.apiKeyDialog.save}
                 </button>
+                {apiKey && (
+                    <button
+                        onClick={onDelete}
+                        className="btn btn-primary w-full py-3 rounded-xl"
+                    >
+                        {t.apiKeyDialog.delete}
+                    </button>
+                )}
                 <button
                     onClick={onCancel}
                     className="btn btn-quiet w-full py-3 rounded-xl"

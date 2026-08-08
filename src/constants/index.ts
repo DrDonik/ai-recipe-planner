@@ -43,7 +43,19 @@ export const STORAGE_KEYS = {
     GIST_TOKEN_WARNING_SEEN: 'gist_token_warning_seen',
     STORAGE_TIPS_CACHE: 'storage_tips_cache',
     PHOTO_PRIVACY_ACK: 'photo_privacy_ack',
-    IMAGE_GEN_ENABLED: 'image_gen_enabled',
+    /* Acknowledged once, on the first click of a Generate-image button: the
+       counterpart of PHOTO_PRIVACY_ACK. Sticky across key changes — it records
+       that the user understands images are billed, which a new key does not
+       undo. */
+    IMAGE_GEN_ACK: 'image_gen_ack',
+    /* Set when a generation attempt identifies the stored key as free-tier
+       (image quota 0). A property of the key, not of the user, so
+       SettingsContext clears it whenever the key changes. */
+    IMAGE_GEN_UNSUPPORTED: 'image_gen_unsupported',
+    /* Pre-1.14 opt-in switch for image generation, replaced by the two keys
+       above. Read once to carry an existing opt-in over as the acknowledgement
+       so those users are not asked again. */
+    LEGACY_IMAGE_GEN_ENABLED: 'image_gen_enabled',
     WEATHER_CACHE: 'weather_cache',
 } as const;
 

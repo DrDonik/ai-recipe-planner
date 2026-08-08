@@ -39,9 +39,12 @@ export const PantryInput = forwardRef<PantryInputRef, PantryInputProps>(({
     notification,
     autoFocus = true
 }, ref) => {
-    const { t, useCopyPaste, apiKey, language } = useSettings();
-    const tipsActive = !useCopyPaste && !!apiKey;
-    const cameraEnabled = !useCopyPaste && !!apiKey;
+    const { t, apiKey, language } = useSettings();
+    // Both follow the key, not the generation route: a stored key can identify
+    // a photo and fetch a storage tip whether or not the meal plan itself is
+    // generated directly. The photo's own consent dialog is unaffected.
+    const tipsActive = !!apiKey;
+    const cameraEnabled = !!apiKey;
     const { getTip, fetchTip, isLoading: isTipLoading, getError: getTipError } = useStorageTips();
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');

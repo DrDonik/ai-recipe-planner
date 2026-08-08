@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, ImageIcon, Info } from 'lucide-react';
+import { Utensils, Key, Globe, ChevronUp, ChevronDown, CircleHelp, AlertTriangle, Download, Upload, Cloud, CloudOff, Loader2, Info } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { STORAGE_KEYS } from '../constants';
 import { ApiKeyDialog, type ApiKeyDialogStep } from './ApiKeyDialog';
@@ -35,14 +35,14 @@ export const Header: React.FC<HeaderProps> = ({
     syncStatus,
     notification,
 }) => {
-    const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, imageGenEnabled, setImageGenEnabled, t } = useSettings();
+    const { useCopyPaste, setUseCopyPaste, apiKey, setApiKey, language, setLanguage, t } = useSettings();
 
-    // Check on mount if existing user needs to see the security warning
+    // Check on mount if existing user needs to see the security warning. A
+    // stored key is always in use now, so the mode no longer enters into it.
     const [apiDialogStep, setApiDialogStep] = useState<ApiKeyDialogStep | null>(
-        () => (!hasSeenApiKeyWarning() && !!apiKey && !useCopyPaste ? 'warning' : null)
+        () => (!hasSeenApiKeyWarning() && !!apiKey ? 'warning' : null)
     );
-    // 'disable' gates a switch-off, 'cleanup' tidies a key left behind by one.
-    const [clearDialog, setClearDialog] = useState<'disable' | 'cleanup' | null>(null);
+    const [showClearDialog, setShowClearDialog] = useState(false);
     const [showSyncDialog, setShowSyncDialog] = useState(false);
     const importFileRef = useRef<HTMLInputElement>(null);
 
@@ -120,7 +120,11 @@ export const Header: React.FC<HeaderProps> = ({
 
     const clearApiKeyWithUndo = () => {
         const backupKey = apiKey;
+        const backupMode = useCopyPaste;
         setApiKey('');
+        // Direct generation is the one capability that cannot outlive the key,
+        // so it falls back to Copy & Paste; the others simply stop being
+        // offered. The undo restores whichever mode was running.
         setUseCopyPaste(true);
         onShowNotification({
             message: t.undo.apiKeyCleared,
@@ -131,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ariaLabel: `${t.undo.action} ${t.undo.apiKeyCleared.toLowerCase()}`,
                 onClick: () => {
                     setApiKey(backupKey);
-                    setUseCopyPaste(false);
+                    setUseCopyPaste(backupMode);
                     onClearNotification();
                 }
             },
@@ -140,23 +144,19 @@ export const Header: React.FC<HeaderProps> = ({
     };
 
     const handleModeToggle = () => {
+        // Switching to Copy & Paste changes where the meal plan comes from and
+        // nothing else: the key stays, and photo recognition, chat, storage
+        // tips, images and replacement keep running on it. So the switch-off
+        // commits on the spot — no dialog gates a decision about a credential
+        // this flip does not touch.
         if (!useCopyPaste) {
-            // Switching TO Copy & Paste mode. With a key stored, the dialog
-            // gates the switch: nothing is committed until one of its two
-            // switch-off buttons is pressed.
-            if (apiKey) {
-                setClearDialog('disable');
-            } else {
-                setUseCopyPaste(true);
-            }
+            setUseCopyPaste(true);
             return;
         }
 
-        // Switching TO API Key mode. A stored key is all the mode needs, and
-        // the warning is about a key being stored — so with one already in
-        // local storage the switch exposes nothing new and asks nothing. The
-        // header's persistent apiKeyStoredWarning tooltip carries the reminder
-        // from there.
+        // Switching to direct generation is the one capability that needs the
+        // key. With one stored the switch commits; without one the dialog
+        // collects it, behind the storage warning on first use.
         if (apiKey) {
             setUseCopyPaste(false);
             return;
@@ -185,33 +185,34 @@ export const Header: React.FC<HeaderProps> = ({
 
     const handleApiDialogCancel = () => {
         // Deliberately no markApiKeyWarningSeen(): declining the warning is not
-        // acknowledging it, so a later switch to API Key mode must ask again —
-        // same as the Gist and photo dialogs, which only record consent on accept.
+        // acknowledging it, so a later attempt must ask again — same as the Gist
+        // and photo dialogs, which only record consent on accept.
         const declinedWarning = apiDialogStep === 'warning';
         setApiDialogStep(null);
 
         // Declining the warning while a key is already stored is the on-mount
-        // case for existing users: drop back to Copy & Paste and ask whether
-        // the key should be cleared. Every other cancel — an aborted switch, a
-        // closed key dialog — leaves the current mode untouched.
-        if (declinedWarning && !useCopyPaste && apiKey) {
-            setClearDialog('disable');
+        // case for existing users: they have not agreed to storing it, so offer
+        // to delete it. Every other cancel leaves everything untouched.
+        if (declinedWarning && apiKey) {
+            setShowClearDialog(true);
         }
     };
 
     const handleClearApiKey = () => {
-        setClearDialog(null);
+        setShowClearDialog(false);
         clearApiKeyWithUndo();
     };
 
-    const handleKeepApiKey = () => {
-        setClearDialog(null);
-        setUseCopyPaste(true);
-    };
+    // Keeping the key changes nothing at all, so this is also where Escape
+    // lands and what the dialog's second button does.
+    const handleKeepApiKey = () => setShowClearDialog(false);
 
-    // The exit that decides nothing: API Key mode keeps running, the key stays
-    // where it was. Escape lands here too.
-    const handleCancelClearDialog = () => setClearDialog(null);
+    // Deleting is reached from inside the key dialog, which steps aside for it
+    // rather than stacking a second modal on top of itself.
+    const handleRequestApiKeyDeletion = () => {
+        setApiDialogStep(null);
+        setShowClearDialog(true);
+    };
 
     const handleSyncToggle = () => {
         // A token kept from an earlier switch-off is all sync needs, so turning
@@ -240,17 +241,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${headerMinimized ? 'text-2xl' : 'text-2xl md:text-4xl'}`}>
                             {t.appTitle}
                         </h1>
-
-                        {/* API Key Warning Indicator (when minimized) */}
-                        {headerMinimized && useCopyPaste && apiKey && (
-                            <TooltipButton
-                                icon={<AlertTriangle size={16} className="text-red-500" />}
-                                tooltip={t.apiKeyStoredWarning}
-                                ariaLabel={t.apiKeyStoredWarning}
-                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => setClearDialog('cleanup')}
-                            />
-                        )}
 
                         {/* Sync Indicator (when minimized) — show for any non-idle state
                             so the button does not disappear during pulling/pushing. */}
@@ -309,31 +299,16 @@ export const Header: React.FC<HeaderProps> = ({
                                     label={t.modeSwitch.label}
                                     checked={!useCopyPaste}
                                     onChange={handleModeToggle}
-                                    /* Only the flips that actually open one: with
-                                       a key stored, switching on commits straight
-                                       away; without one, switching off does. */
-                                    opensDialog={useCopyPaste ? !apiKey : !!apiKey}
+                                    /* Only the flip that opens one: switching on
+                                       without a key. Every other flip commits on
+                                       the spot, in both directions. */
+                                    opensDialog={useCopyPaste && !apiKey}
+                                    /* The key's own control, and independent of
+                                       the mode: with a key stored it is what the
+                                       other four capabilities run on, so it stays
+                                       reachable in Copy & Paste too. */
                                     trailing={
-                                        useCopyPaste ? (
-                                            apiKey ? (
-                                                /* A key outliving API Key mode is worth flagging;
-                                                   clicking offers to clear it. */
-                                                <TooltipButton
-                                                    icon={<AlertTriangle size={16} className="text-red-500" />}
-                                                    tooltip={t.apiKeyStoredWarning}
-                                                    ariaLabel={t.apiKeyStoredWarning}
-                                                    className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                                    onClick={() => setClearDialog('cleanup')}
-                                                />
-                                            ) : (
-                                                <TooltipButton
-                                                    icon={<Info size={14} className="text-text-muted" />}
-                                                    tooltip={t.modeSwitch.tooltip}
-                                                    ariaLabel={`${t.a11y.info}: ${t.modeSwitch.label}`}
-                                                    className="!p-1"
-                                                />
-                                            )
-                                        ) : (
+                                        apiKey ? (
                                             <TooltipButton
                                                 icon={<Key size={14} className="text-text-muted" />}
                                                 tooltip={t.apiKeyDialog.editTooltip}
@@ -341,30 +316,16 @@ export const Header: React.FC<HeaderProps> = ({
                                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
                                                 onClick={() => setApiDialogStep('key')}
                                             />
+                                        ) : (
+                                            <TooltipButton
+                                                icon={<Info size={14} className="text-text-muted" />}
+                                                tooltip={t.modeSwitch.tooltip}
+                                                ariaLabel={`${t.a11y.info}: ${t.modeSwitch.label}`}
+                                                className="!p-1"
+                                            />
                                         )
                                     }
                                 />
-
-                                {/* Deliberately the odd one out: image generation
-                                    stores and exposes nothing, so it commits on
-                                    the spot and needs neither dialog nor
-                                    aria-haspopup. */}
-                                {!useCopyPaste && apiKey && (
-                                    <Toggle
-                                        icon={<ImageIcon size={14} />}
-                                        label={t.imageGen.label}
-                                        checked={imageGenEnabled}
-                                        onChange={() => setImageGenEnabled(!imageGenEnabled)}
-                                        trailing={
-                                            <TooltipButton
-                                                icon={<Info size={14} className="text-text-muted" />}
-                                                tooltip={t.imageGen.tooltip}
-                                                ariaLabel={`${t.a11y.info}: ${t.imageGen.label}`}
-                                                className="!p-1"
-                                            />
-                                        }
-                                    />
-                                )}
 
                                 {/* Switching on needs a token and switching off asks
                                     what becomes of it — except with a token kept
@@ -462,16 +423,15 @@ export const Header: React.FC<HeaderProps> = ({
                 step={apiDialogStep}
                 onAcceptWarning={handleSecurityAccept}
                 onSave={handleApiKeySave}
+                onDelete={handleRequestApiKeyDeletion}
                 onCancel={handleApiDialogCancel}
             />
         )}
 
-        {clearDialog && (
+        {showClearDialog && (
             <ClearApiKeyDialog
-                variant={clearDialog}
                 onClear={handleClearApiKey}
                 onKeep={handleKeepApiKey}
-                onCancel={handleCancelClearDialog}
             />
         )}
 

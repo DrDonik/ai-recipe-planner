@@ -13,6 +13,7 @@ import { KitchenSwitcher } from './components/KitchenSwitcher';
 import { ShoppingList } from './components/ShoppingList';
 import { WelcomeDialog } from './components/WelcomeDialog';
 import { CopyPasteDialog } from './components/CopyPasteDialog';
+import { ImageGenCostDialog } from './components/ImageGenCostDialog';
 import { ReplaceRecipeDialog } from './components/ReplaceRecipeDialog';
 import { generateRecipes, buildRecipePrompt, parseRecipeResponse } from './services/llm';
 import type { PantryItem, MealPlan, Recipe, Ingredient, Notification } from './types';
@@ -36,7 +37,7 @@ function App() {
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
   const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
-  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, plannedRecipes, language, imageGenEnabled, setImageGenEnabled, t, storagePersistError } = useSettings();
+  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, plannedRecipes, language, imageGenAck, setImageGenAck, imageGenUnsupported, setImageGenUnsupported, t, storagePersistError } = useSettings();
 
   const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
@@ -147,29 +148,46 @@ function App() {
   }, []);
 
   // On-demand recipe image generation, persisted in IndexedDB.
-  // Image generation requires a configured API key, direct-API mode (the
-  // copy-paste flow has no API call to make), and the user-facing toggle
-  // confirming they want to spend money on a paid Gemini tier. Standalone
-  // shared-link views (no meal plan loaded) also can't generate, since
-  // there's nowhere to persist.
+  // The four capabilities below follow the stored key alone. `useCopyPaste`
+  // decides one thing only — whether the meal plan is generated directly or
+  // prepared as a prompt — so a user who prefers the copy-paste route can still
+  // use the key for everything else. Standalone shared-link views (no meal plan
+  // loaded) still can't generate images, since there's nowhere to persist.
   const recipeIds = useMemo(() => mealPlan?.recipes.map(r => r.id) ?? [], [mealPlan]);
   const handleFreeTierLimit = useCallback(() => {
-    setImageGenEnabled(false);
+    setImageGenUnsupported(true);
     showNotification({ message: t.errors.imageFreeTierUnsupported, type: 'error', timeout: 5000 });
-  }, [setImageGenEnabled, showNotification, t.errors.imageFreeTierUnsupported]);
+  }, [setImageGenUnsupported, showNotification, t.errors.imageFreeTierUnsupported]);
   const recipeImage = useRecipeImage(recipeIds, { onFreeTierLimit: handleFreeTierLimit });
-  const canGenerateImages = !useCopyPaste && !!apiKey && imageGenEnabled;
-  // Single-recipe replacement needs a live API call, so it's gated like image
-  // generation: direct-API mode with a key (no copy-paste support for now).
-  const canReplaceRecipes = !useCopyPaste && !!apiKey;
+  // Hidden only where an attempt is pointless: no key, or a key already found
+  // to have no image quota. The cost itself is a question for the first click,
+  // not for a setting somewhere else.
+  const canGenerateImages = !!apiKey && !imageGenUnsupported;
+  const canReplaceRecipes = !!apiKey;
 
-  // In-kitchen chat about the recipe being cooked. Same gate as above — a chat
-  // is only workable with a live API call, and unlike image generation it needs
-  // no persistence target, so it also works on a recipe opened from a shared
-  // link (using the viewer's own key). Transcripts are held here, at the app
-  // root, so they survive leaving and re-entering the focus view.
+  // In-kitchen chat about the recipe being cooked. Unlike image generation it
+  // needs no persistence target, so it also works on a recipe opened from a
+  // shared link (using the viewer's own key). Transcripts are held here, at the
+  // app root, so they survive leaving and re-entering the focus view.
   const recipeChat = useRecipeChat();
-  const canChat = !useCopyPaste && !!apiKey;
+  const canChat = !!apiKey;
+
+  // First click on a Generate-image button asks about the cost, then generates
+  // the recipe it was clicked for; later clicks go straight through.
+  const [imageCostRecipe, setImageCostRecipe] = useState<Recipe | null>(null);
+  const requestRecipeImage = useCallback((recipe: Recipe) => {
+    if (!imageGenAck) {
+      setImageCostRecipe(recipe);
+      return;
+    }
+    void recipeImage.generate(recipe);
+  }, [imageGenAck, recipeImage]);
+  const handleImageCostAccept = useCallback(() => {
+    const recipe = imageCostRecipe;
+    setImageGenAck(true);
+    setImageCostRecipe(null);
+    if (recipe) void recipeImage.generate(recipe);
+  }, [imageCostRecipe, setImageGenAck, recipeImage]);
 
   // Storage error notification — deduplicated via ref guard
   const storageErrorShownRef = useRef(false);
@@ -703,7 +721,7 @@ function App() {
             onClose={clearViewRecipe}
             missingIngredientsMinimized={recipeMissingIngredientsMinimized}
             onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
-            onGenerateImage={canGenerateForView ? () => recipeImage.generate(viewRecipe) : undefined}
+            onGenerateImage={canGenerateForView ? () => requestRecipeImage(viewRecipe) : undefined}
             onRemoveImage={isOwnRecipe ? () => recipeImage.remove(viewRecipe.id) : undefined}
             isImageLoading={recipeImage.isLoading(viewRecipe.id)}
             imageError={recipeImage.getError(viewRecipe.id)}
@@ -711,6 +729,14 @@ function App() {
           />
         </div>
         {canChat && <RecipeChat recipe={viewRecipe} chat={recipeChat} />}
+        {/* Rendered in both branches: the focus view returns early, and its
+            image button asks the same question the grid's does. */}
+        {imageCostRecipe && (
+          <ImageGenCostDialog
+            onAccept={handleImageCostAccept}
+            onCancel={() => setImageCostRecipe(null)}
+          />
+        )}
       </div>
     );
   }
@@ -731,6 +757,12 @@ function App() {
           skipped on every page load. */}
       <a href="#main-content" className="skip-link">{t.skipToContent}</a>
       {showWelcome && <WelcomeDialog onClose={handleCloseWelcome} />}
+      {imageCostRecipe && (
+        <ImageGenCostDialog
+          onAccept={handleImageCostAccept}
+          onCancel={() => setImageCostRecipe(null)}
+        />
+      )}
       {showCopyPasteDialog && (
         <CopyPasteDialog
           prompt={copyPastePrompt}
@@ -867,7 +899,7 @@ function App() {
                         onViewSingle={() => openRecipeView(recipe)}
                         missingIngredientsMinimized={recipeMissingIngredientsMinimized}
                         onToggleMissingIngredientsMinimize={handleToggleRecipeMissingIngredientsMinimize}
-                        onGenerateImage={canGenerateImages ? () => recipeImage.generate(recipe) : undefined}
+                        onGenerateImage={canGenerateImages ? () => requestRecipeImage(recipe) : undefined}
                         onReplace={canReplaceRecipes ? () => openReplaceDialog(recipe) : undefined}
                         onRemoveImage={() => recipeImage.remove(recipe.id)}
                         isImageLoading={recipeImage.isLoading(recipe.id)}
