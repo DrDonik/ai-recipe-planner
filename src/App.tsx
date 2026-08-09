@@ -728,7 +728,14 @@ function App() {
             imageUrl={recipeImage.getImageUrl(viewRecipe.id)}
           />
         </div>
-        {canChat && <RecipeChat recipe={viewRecipe} chat={recipeChat} />}
+        {canChat && (
+          <RecipeChat
+            recipe={viewRecipe}
+            chat={recipeChat}
+            spices={spices}
+            appliances={appliances}
+          />
+        )}
         {/* Rendered in both branches: the focus view returns early, and its
             image button asks the same question the grid's does. */}
         {imageCostRecipe && (
