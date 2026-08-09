@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ShieldAlert, AlertTriangle, ExternalLink, Cloud, Copy, X } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -22,6 +22,9 @@ type Step = 'warning' | 'setup' | 'active' | 'stored';
 
 /** What the dialog has to say about the user's last click. */
 type Notice = { type: 'info' | 'error'; message: string };
+
+/** Lifetime of a confirmation, matching the toast this slot replaced. */
+const NOTICE_TIMEOUT_MS = 3000;
 
 interface GistSyncDialogProps {
     onClose: () => void;
@@ -55,6 +58,32 @@ export const GistSyncDialog = ({
     // The global toast is rendered behind the dialog's backdrop and sits
     // outside its focus trap, so feedback raised in here has to stay in here.
     const [notice, setNotice] = useState<Notice | null>(null);
+    const noticeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    /**
+     * A confirmation is transient — it keeps the three seconds the toast it
+     * replaced had, so a sync error arriving afterwards is not left sitting
+     * behind a stale "copied" for as long as the dialog stays open. An error
+     * has no timeout: it is the more actionable message, and it survives until
+     * the next click, which is what the old `copyError` did.
+     */
+    const showNotice = (next: Notice | null) => {
+        if (noticeTimeoutRef.current) {
+            clearTimeout(noticeTimeoutRef.current);
+            noticeTimeoutRef.current = null;
+        }
+        setNotice(next);
+        if (next?.type === 'info') {
+            noticeTimeoutRef.current = setTimeout(() => {
+                setNotice(null);
+                noticeTimeoutRef.current = null;
+            }, NOTICE_TIMEOUT_MS);
+        }
+    };
+
+    useEffect(() => () => {
+        if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+    }, []);
 
     const mapErrorToMessage = (err: unknown): string => {
         if (err instanceof GistUnauthorizedError) return t.sync.errorUnauthorized;
@@ -77,10 +106,10 @@ export const GistSyncDialog = ({
     };
 
     const handleCreateNew = async () => {
-        setNotice(null);
+        showNotice(null);
         const token = tokenInput.trim();
         if (!token) {
-            setNotice({ type: 'error', message: t.sync.errorTokenEmpty });
+            showNotice({ type: 'error', message: t.sync.errorTokenEmpty });
             return;
         }
         setBusy(true);
@@ -95,21 +124,21 @@ export const GistSyncDialog = ({
             // Reload so useGistSync initialises with the new config.
             window.location.reload();
         } catch (err) {
-            setNotice({ type: 'error', message: mapErrorToMessage(err) });
+            showNotice({ type: 'error', message: mapErrorToMessage(err) });
             setBusy(false);
         }
     };
 
     const handleUseExisting = async () => {
-        setNotice(null);
+        showNotice(null);
         const token = tokenInput.trim();
         const gistId = gistIdInput.trim();
         if (!token) {
-            setNotice({ type: 'error', message: t.sync.errorTokenEmpty });
+            showNotice({ type: 'error', message: t.sync.errorTokenEmpty });
             return;
         }
         if (!gistId) {
-            setNotice({ type: 'error', message: t.sync.errorGistIdEmpty });
+            showNotice({ type: 'error', message: t.sync.errorGistIdEmpty });
             return;
         }
         setBusy(true);
@@ -127,7 +156,7 @@ export const GistSyncDialog = ({
             // and useGistSync initialises with the new config.
             window.location.reload();
         } catch (err) {
-            setNotice({ type: 'error', message: mapErrorToMessage(err) });
+            showNotice({ type: 'error', message: mapErrorToMessage(err) });
             setBusy(false);
         }
     };
@@ -156,13 +185,13 @@ export const GistSyncDialog = ({
         if (!initiallyConfigured) return;
         try {
             await navigator.clipboard.writeText(initiallyConfigured.gistId);
-            setNotice({ type: 'info', message: t.sync.gistIdCopied });
+            showNotice({ type: 'info', message: t.sync.gistIdCopied });
         } catch {
             // Both ends of one button, so they share the slot. The failure
             // reuses the copy-paste translation key since its wording ("select
             // the text above and copy it manually") fits the
             // gist-id-above-the-button layout verbatim.
-            setNotice({ type: 'error', message: t.copyPaste.copyFailed });
+            showNotice({ type: 'error', message: t.copyPaste.copyFailed });
         }
     };
 
