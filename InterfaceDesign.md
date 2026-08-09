@@ -21,6 +21,19 @@ shaped settings controls onto a single row. Export and import stay icon
 buttons precisely because they are actions, not settings, and must not look
 like the switches.
 
+A settings row has two icon slots and each holds one role: the leading icon is
+what the row *is* — its glyph, and its state where the row has one the switch
+cannot show — and the trailing icon is what can be *done* about it. Sync used to
+end its line with the status cloud, which was also the only way into the sync
+dialog: an indicator that silently doubled as a button, and the one place in the
+app where a state and the control acting on it were the same pixel. The state
+moved to the front and the trailing column now says on sync what it says on the
+key's row — a pencil where a credential is stored, an ⓘ where none is (#311).
+Only sync's leading icon carries state, because only sync has state to carry:
+pulling, pushing, pending, error and a token kept past a switch-off are five
+things "on" and "off" cannot say. Give the leading slot a state when the row has
+one that outruns its switch, not to decorate it.
+
 A dialog's close **X** follows one rule: dialogs holding a task or a form get
 one — `ApiKeyDialog`, `GistSyncDialog`, `CopyPasteDialog`, `ReplaceRecipeDialog`
 — and single-question dialogs do not, because their buttons already answer them
@@ -54,7 +67,9 @@ Every action gets a response, scaled to the weight of the action.
 region beside its visible indicator, so the spinner is not the only channel —
 generation, the timers and the location search have one (#297), and so does the
 copy in `CopyPasteDialog`, which used to announce a finished copy only by
-relabelling the button it disabled in the same moment (#302). Where an action
+relabelling the button it disabled in the same moment (#302). Sync was the last
+one without: it runs unasked in the background, and it spoke only through a
+colour and a tooltip that had to be tabbed onto to be read (#311). Where an action
 can end two ways, both ends share the region — a copy that succeeded and a copy
 that failed are one concern, and two regions for them would talk over each
 other. Feedback outranks motion
