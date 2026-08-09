@@ -22,6 +22,10 @@ interface RecipeChatProps {
     /** The recipe being cooked — handed to the model as context. */
     recipe: Recipe;
     chat: RecipeChatController;
+    /** The active kitchen's spice rack, so substitutions can come from it. */
+    spices: string[];
+    /** The active kitchen's special appliances. */
+    appliances: string[];
 }
 
 /**
@@ -36,7 +40,7 @@ interface RecipeChatProps {
  * Only rendered when a Gemini key is configured and direct-API mode is active;
  * see `canChat` in App.tsx.
  */
-export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
+export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat, spices, appliances }) => {
     const { t } = useSettings();
     const { getProgress } = useCookingProgress();
     const [isOpen, setIsOpen] = useState(false);
@@ -53,16 +57,20 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat }) => {
     const isPending = chat.isPending(key);
     const error = chat.getError(key);
 
-    // Live cooking state, so "what do I do now?" is answerable without the
-    // user restating where they are. Same progress key as the recipe card.
-    // Rebuilt each render (it is only ever read inside event handlers, never
-    // compared as a dependency), leaving memoization to the React Compiler.
+    // Live cooking state plus the active kitchen, so "what do I do now?" and
+    // "what can I use instead?" are answerable without the user restating
+    // where they are or what is on the shelf. Same progress key as the recipe
+    // card. Rebuilt each render (it is only ever read inside event handlers,
+    // never compared as a dependency), leaving memoization to the React
+    // Compiler.
     const { struckIngredients, activeStep } = getProgress(key);
     const context: RecipeChatContext = {
         activeStep,
         struckIngredients: [...struckIngredients]
             .map(idx => recipe.ingredients[idx]?.item)
             .filter((item): item is string => !!item),
+        spices,
+        appliances,
     };
 
     // Keep the newest turn in view as the conversation grows.
