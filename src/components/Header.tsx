@@ -50,24 +50,25 @@ export const Header: React.FC<HeaderProps> = ({
     // that changes it reloads the page. `syncKeptOff` is a token that outlived
     // the feature it was entered for — the state the API key no longer has,
     // which is why only sync's switch-off asks a third question.
-    const syncKeptOff = readStoredSyncConfig() !== null && !isSyncEnabled();
+    const hasSyncToken = readStoredSyncConfig() !== null;
+    const syncKeptOff = hasSyncToken && !isSyncEnabled();
 
-    const syncIcon = (() => {
+    const syncIcon = (size: number) => {
         switch (syncStatus) {
             case 'pulling':
             case 'pushing':
-                return <Loader2 size={16} className="text-primary animate-spin" />;
+                return <Loader2 size={size} className="text-primary animate-spin" />;
             case 'pending':
-                return <Cloud size={16} className="text-warning-text" />;
+                return <Cloud size={size} className="text-warning-text" />;
             case 'synced':
-                return <Cloud size={16} className="text-primary" />;
+                return <Cloud size={size} className="text-primary" />;
             case 'error':
-                return <Cloud size={16} className="text-danger-text" />;
+                return <Cloud size={size} className="text-danger-text" />;
             case 'idle':
             default:
-                return <CloudOff size={16} className="text-text-muted" />;
+                return <CloudOff size={size} className="text-text-muted" />;
         }
-    })();
+    };
 
     const syncTooltip = (() => {
         switch (syncStatus) {
@@ -86,6 +87,11 @@ export const Header: React.FC<HeaderProps> = ({
                 return t.sync.disabledTooltip;
         }
     })();
+
+    // A token that outlived the switch-off is the one state sync has that its
+    // switch cannot show, so it takes over the status slot — sync is idle
+    // there, and "off" is already said by the switch beside it.
+    const syncStateTooltip = syncKeptOff ? t.sync.tokenStoredWarning : syncTooltip;
 
     const handleExport = () => {
         const data = buildExportData();
@@ -261,7 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
                             so the button does not disappear during pulling/pushing. */}
                         {headerMinimized && syncStatus !== 'idle' && (
                             <TooltipButton
-                                icon={syncIcon}
+                                icon={syncIcon(16)}
                                 tooltip={syncTooltip}
                                 ariaLabel={t.sync.openSettings}
                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
@@ -365,29 +371,57 @@ export const Header: React.FC<HeaderProps> = ({
                                 {/* Switching on needs a token and switching off asks
                                     what becomes of it — except with a token kept
                                     from an earlier switch-off, which turns sync
-                                    back on directly. */}
+                                    back on directly.
+
+                                    Sync is the only row whose state is richer than
+                                    its switch — pulling, pushing, pending, error
+                                    and a token kept past a switch-off are five
+                                    things "on" and "off" cannot say. So the leading
+                                    icon carries them, and the trailing column says
+                                    the one thing it says on the key's row: this
+                                    credential can be edited. The status icon only
+                                    becomes a focusable tooltip once there is a
+                                    token to report on; before that it is the plain
+                                    glyph the other two rows carry, and the ⓘ beside
+                                    it explains the feature, so no row ever holds
+                                    two tooltips. */}
                                 <Toggle
-                                    icon={<Cloud size={14} />}
+                                    icon={
+                                        hasSyncToken ? (
+                                            <TooltipButton
+                                                icon={
+                                                    syncKeptOff
+                                                        ? <AlertTriangle size={14} className="text-danger-text" />
+                                                        : syncIcon(14)
+                                                }
+                                                tooltip={syncStateTooltip}
+                                                ariaLabel={syncStateTooltip}
+                                                className="!p-1"
+                                            />
+                                        ) : (
+                                            syncIcon(14)
+                                        )
+                                    }
+                                    iconInteractive={hasSyncToken}
                                     label={t.sync.label}
                                     checked={syncStatus !== 'idle'}
                                     onChange={handleSyncToggle}
                                     opensDialog={!syncKeptOff}
                                     trailing={
-                                        syncKeptOff ? (
+                                        hasSyncToken ? (
                                             <TooltipButton
-                                                icon={<AlertTriangle size={16} className="text-danger-text" />}
-                                                tooltip={t.sync.tokenStoredWarning}
-                                                ariaLabel={t.sync.tokenStoredWarning}
+                                                icon={<Pencil size={14} className="text-text-muted" />}
+                                                tooltip={t.sync.editTooltip}
+                                                ariaLabel={t.sync.editTooltip}
                                                 className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
                                                 onClick={() => setShowSyncDialog(true)}
                                             />
                                         ) : (
                                             <TooltipButton
-                                                icon={syncIcon}
-                                                tooltip={syncTooltip}
-                                                ariaLabel={t.sync.openSettings}
-                                                className="!p-1 cursor-pointer hover:opacity-80 transition-opacity"
-                                                onClick={() => setShowSyncDialog(true)}
+                                                icon={<Info size={14} className="text-text-muted" />}
+                                                tooltip={t.sync.tooltip}
+                                                ariaLabel={`${t.a11y.info}: ${t.sync.label}`}
+                                                className="!p-1"
                                             />
                                         )
                                     }
@@ -449,6 +483,13 @@ export const Header: React.FC<HeaderProps> = ({
                     {notification?.anchor === 'api-key' && (
                         <UndoToast notification={notification} />
                     )}
+
+                    {/* Sync runs unasked in the background, and its indicator is
+                        now a colour and a glyph with a tooltip nobody has to
+                        find. Permanent and outside the collapsible block: a
+                        region rendered together with the text it is meant to
+                        announce stays silent, and minimizing would re-create it. */}
+                    <p className="sr-only" role="status">{syncStateTooltip}</p>
                 </div>
             </div>
         </header>
