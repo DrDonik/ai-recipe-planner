@@ -10,6 +10,13 @@ interface ToggleProps {
     ariaLabel?: string;
     /** Set when flipping the switch opens a dialog instead of committing. */
     opensDialog?: boolean;
+    /**
+     * Set when the icon slot holds a focusable control of its own — a status
+     * that carries its own tooltip rather than a decorative glyph. The cell is
+     * `aria-hidden` otherwise, and a focusable element inside a hidden subtree
+     * is reachable by keyboard but absent from the accessibility tree.
+     */
+    iconInteractive?: boolean;
 }
 
 /**
@@ -27,9 +34,10 @@ export const Toggle: React.FC<ToggleProps> = ({
     trailing,
     ariaLabel,
     opensDialog,
+    iconInteractive,
 }) => (
     <div className="contents">
-        <span className="text-text-muted justify-self-center" aria-hidden="true">{icon}</span>
+        <span className="text-text-muted justify-self-center" aria-hidden={iconInteractive ? undefined : true}>{icon}</span>
         <span className={`text-sm transition-colors ${checked ? 'text-text-main font-medium' : 'text-text-muted'}`}>
             {label}
         </span>
