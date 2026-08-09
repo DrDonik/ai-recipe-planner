@@ -515,8 +515,6 @@ export const Header: React.FC<HeaderProps> = ({
             <GistSyncDialog
                 onClose={() => setShowSyncDialog(false)}
                 syncStatus={syncStatus}
-                onShowError={(message) => onShowNotification({ message, type: 'error' })}
-                onShowInfo={(message) => onShowNotification({ message, type: 'undo', timeout: 3000 })}
             />
         )}
         </>
