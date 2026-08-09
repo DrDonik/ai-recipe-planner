@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ShieldAlert, AlertTriangle, ExternalLink, Cloud, Copy, X } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -20,11 +20,15 @@ import type { SyncStatus } from '../hooks/useGistSync';
 /** 'stored' is sync switched off with the token deliberately kept. */
 type Step = 'warning' | 'setup' | 'active' | 'stored';
 
+/** What the dialog has to say about the user's last click. */
+type Notice = { type: 'info' | 'error'; message: string };
+
+/** Lifetime of a confirmation, matching the toast this slot replaced. */
+const NOTICE_TIMEOUT_MS = 3000;
+
 interface GistSyncDialogProps {
     onClose: () => void;
     syncStatus: SyncStatus;
-    onShowError: (message: string) => void;
-    onShowInfo: (message: string) => void;
 }
 
 const hasSeenWarning = (): boolean =>
@@ -33,8 +37,6 @@ const hasSeenWarning = (): boolean =>
 export const GistSyncDialog = ({
     onClose,
     syncStatus,
-    onShowError,
-    onShowInfo,
 }: GistSyncDialogProps) => {
     const { t } = useSettings();
     // No button is a safe default in the warning and active steps. The setup
@@ -51,11 +53,37 @@ export const GistSyncDialog = ({
     const [tokenInput, setTokenInput] = useState('');
     const [gistIdInput, setGistIdInput] = useState('');
     const [busy, setBusy] = useState(false);
-    const [fieldError, setFieldError] = useState<string | null>(null);
-    // Dialog-local error for the active step. The global notification toast is
-    // rendered behind the dialog's backdrop, so errors triggered from within
-    // the dialog (e.g. a clipboard failure) must be shown inline.
-    const [copyError, setCopyError] = useState<string | null>(null);
+    // One slot for everything this dialog has to say: the empty-field checks,
+    // the network errors from the setup steps and both ends of the copy button.
+    // The global toast is rendered behind the dialog's backdrop and sits
+    // outside its focus trap, so feedback raised in here has to stay in here.
+    const [notice, setNotice] = useState<Notice | null>(null);
+    const noticeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    /**
+     * A confirmation is transient — it keeps the three seconds the toast it
+     * replaced had, so a sync error arriving afterwards is not left sitting
+     * behind a stale "copied" for as long as the dialog stays open. An error
+     * has no timeout: it is the more actionable message, and it survives until
+     * the next click, which is what the old `copyError` did.
+     */
+    const showNotice = (next: Notice | null) => {
+        if (noticeTimeoutRef.current) {
+            clearTimeout(noticeTimeoutRef.current);
+            noticeTimeoutRef.current = null;
+        }
+        setNotice(next);
+        if (next?.type === 'info') {
+            noticeTimeoutRef.current = setTimeout(() => {
+                setNotice(null);
+                noticeTimeoutRef.current = null;
+            }, NOTICE_TIMEOUT_MS);
+        }
+    };
+
+    useEffect(() => () => {
+        if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+    }, []);
 
     const mapErrorToMessage = (err: unknown): string => {
         if (err instanceof GistUnauthorizedError) return t.sync.errorUnauthorized;
@@ -78,10 +106,10 @@ export const GistSyncDialog = ({
     };
 
     const handleCreateNew = async () => {
-        setFieldError(null);
+        showNotice(null);
         const token = tokenInput.trim();
         if (!token) {
-            setFieldError(t.sync.errorTokenEmpty);
+            showNotice({ type: 'error', message: t.sync.errorTokenEmpty });
             return;
         }
         setBusy(true);
@@ -96,21 +124,21 @@ export const GistSyncDialog = ({
             // Reload so useGistSync initialises with the new config.
             window.location.reload();
         } catch (err) {
-            onShowError(mapErrorToMessage(err));
+            showNotice({ type: 'error', message: mapErrorToMessage(err) });
             setBusy(false);
         }
     };
 
     const handleUseExisting = async () => {
-        setFieldError(null);
+        showNotice(null);
         const token = tokenInput.trim();
         const gistId = gistIdInput.trim();
         if (!token) {
-            setFieldError(t.sync.errorTokenEmpty);
+            showNotice({ type: 'error', message: t.sync.errorTokenEmpty });
             return;
         }
         if (!gistId) {
-            setFieldError(t.sync.errorGistIdEmpty);
+            showNotice({ type: 'error', message: t.sync.errorGistIdEmpty });
             return;
         }
         setBusy(true);
@@ -128,7 +156,7 @@ export const GistSyncDialog = ({
             // and useGistSync initialises with the new config.
             window.location.reload();
         } catch (err) {
-            onShowError(mapErrorToMessage(err));
+            showNotice({ type: 'error', message: mapErrorToMessage(err) });
             setBusy(false);
         }
     };
@@ -157,16 +185,38 @@ export const GistSyncDialog = ({
         if (!initiallyConfigured) return;
         try {
             await navigator.clipboard.writeText(initiallyConfigured.gistId);
-            setCopyError(null);
-            onShowInfo(t.sync.gistIdCopied);
+            showNotice({ type: 'info', message: t.sync.gistIdCopied });
         } catch {
-            // Clipboard failed — surface inline (toasts are hidden by the
-            // dialog backdrop). Reuses the copy-paste translation key since
-            // its wording ("select the text above and copy it manually")
-            // fits the gist-id-above-the-button layout verbatim.
-            setCopyError(t.copyPaste.copyFailed);
+            // Both ends of one button, so they share the slot. The failure
+            // reuses the copy-paste translation key since its wording ("select
+            // the text above and copy it manually") fits the
+            // gist-id-above-the-button layout verbatim.
+            showNotice({ type: 'error', message: t.copyPaste.copyFailed });
         }
     };
+
+    // The sync status only has something to add where sync is configured and
+    // running. `notice` answers the user's last click and therefore outranks
+    // it, which is also why the copy confirmation replaces a standing error.
+    const statusError = step === 'active' && syncStatus === 'error' ? t.sync.errorTooltip : null;
+    const feedback: Notice | null =
+        notice ?? (statusError ? { type: 'error', message: statusError } : null);
+
+    // Carries no role of its own: the permanent region at the foot of the
+    // dialog announces it, and a second role here would say it twice.
+    const noticeBlock = feedback && (
+        <div
+            className={`mb-4 rounded-lg border p-3 ${
+                feedback.type === 'error'
+                    ? 'bg-danger/10 border-danger/30'
+                    : 'bg-warning/10 border-warning/30'
+            }`}
+        >
+            <p className={`text-sm ${feedback.type === 'error' ? 'text-danger-text' : 'text-warning-text'}`}>
+                {feedback.message}
+            </p>
+        </div>
+    );
 
     const renderWarning = () => (
         <>
@@ -267,13 +317,9 @@ export const GistSyncDialog = ({
                         className="w-full px-3 py-2 bg-white/50 dark:bg-black/20 border border-[var(--glass-border)] rounded-lg focus:border-primary text-sm"
                     />
                 </div>
-
-                {fieldError && (
-                    <p className="text-sm text-danger-text" role="alert">
-                        {fieldError}
-                    </p>
-                )}
             </div>
+
+            {noticeBlock}
 
             <div className="flex flex-col gap-3">
                 <button
@@ -303,9 +349,6 @@ export const GistSyncDialog = ({
 
     const renderActive = () => {
         const gistId = initiallyConfigured?.gistId ?? '';
-        // copyError takes precedence — it is a direct response to the user's
-        // last click, while the sync-status error reflects background state.
-        const errorMessage = copyError ?? (syncStatus === 'error' ? t.sync.errorTooltip : null);
         return (
             <>
                 <div className="flex items-center gap-3 mb-4">
@@ -332,11 +375,7 @@ export const GistSyncDialog = ({
                     </div>
                 </div>
 
-                {errorMessage && (
-                    <div className="mb-4 bg-danger/10 border border-danger/30 rounded-lg p-3">
-                        <p className="text-sm text-danger-text">{errorMessage}</p>
-                    </div>
-                )}
+                {noticeBlock}
 
                 <p className="text-sm text-text-muted mb-6">{t.sync.disableNote}</p>
 
@@ -427,6 +466,12 @@ export const GistSyncDialog = ({
                 {step === 'setup' && renderSetup()}
                 {step === 'active' && renderActive()}
                 {step === 'stored' && renderStored()}
+
+                {/* Permanent and outside the steps: a region that appears
+                    together with the text it carries stays silent. One region
+                    for the whole dialog, so a copy that succeeded and a copy
+                    that failed cannot talk over each other. */}
+                <p className="sr-only" role="status">{feedback?.message ?? ''}</p>
             </div>
         </div>
     );
