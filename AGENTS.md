@@ -36,6 +36,7 @@ The code will be carefully reviewed by an expert for correctness, security, edge
 
 ### When Adding Features
 
+- **Context is Everything**: When proposing functionalities or architecture, always think it through on the meta-level. The context of the UI element in question is usually the level where decisions fall out automatically. Why does the user interact with this element? How did they get here? What do they want to achieve? What does this element do in the entire in-app and out-of-app workflow? What other exisitng or not-yet-existing elements are related?
 - **Usability First**: Keep interactions minimal. Avoid adding steps or dialogs unless necessary.
 - **Interface Design**: Adhere to the Eight Golden Rules of Interface Design, and to what each has come to mean here: @InterfaceDesign.md
 - **Universal Design**: Golden Rule 2 in full — the accessibility conventions this repo is bound to: @UniversalDesign.md
