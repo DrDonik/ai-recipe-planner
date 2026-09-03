@@ -1,9 +1,23 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Utensils, ChefHat, NotepadText, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2, X } from 'lucide-react';
+import { Utensils, ChefHat, NotepadText, Users, Salad, Sparkles, ChevronUp, ChevronDown, Plus, Trash2, X, Camera, PencilLine, ScrollText } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import type { Notification } from '../types';
-import { VALIDATION } from '../constants';
+import { STORAGE_KEYS, VALIDATION } from '../constants';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import { UndoToast } from './ui/UndoToast';
+import { TooltipButton } from './ui/TooltipButton';
+import { OwnRecipeDialog } from './OwnRecipeDialog';
+import { PhotoPrivacyDialog } from './PhotoPrivacyDialog';
+
+/**
+ * Label for a brought-along recipe: its first non-empty line, which is where
+ * every transcription and every pasted recipe puts the title. Derived at
+ * render rather than stored, so correcting the text corrects the chip.
+ */
+const ownRecipeTitle = (recipe: string): string => {
+    const firstLine = recipe.split('\n').map(line => line.trim()).find(Boolean) ?? '';
+    return firstLine.length > 40 ? `${firstLine.slice(0, 40)}…` : firstLine;
+};
 
 export interface SettingsPanelRef {
     flushPendingInput: () => string | null;
@@ -27,9 +41,14 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
     onCancelGenerate,
     notification
 }, ref) => {
-    const { diet, setDiet, styleWishes, setStyleWishes, plannedRecipes, setPlannedRecipes, people, setPeople, meals, setMeals, t } = useSettings();
+    const { diet, setDiet, styleWishes, setStyleWishes, plannedRecipes, setPlannedRecipes, ownRecipes, setOwnRecipes, people, setPeople, meals, setMeals, apiKey, t } = useSettings();
     const [newStyleWish, setNewStyleWish] = useState('');
     const [newPlannedRecipe, setNewPlannedRecipe] = useState('');
+    const [showOwnRecipe, setShowOwnRecipe] = useState(false);
+    const [ownRecipeAutoCamera, setOwnRecipeAutoCamera] = useState(false);
+    const [showPhotoPrivacy, setShowPhotoPrivacy] = useState(false);
+    const [expandedOwnRecipe, setExpandedOwnRecipe] = useState<string | null>(null);
+    const [photoPrivacyAck, setPhotoPrivacyAck] = useLocalStorage<boolean>(STORAGE_KEYS.PHOTO_PRIVACY_ACK, false);
 
     const flushPendingInput = (): string | null => {
         const trimmed = newStyleWish.trim();
@@ -76,6 +95,36 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
 
     const handleRemovePlannedRecipe = (recipeToRemove: string) => {
         setPlannedRecipes(plannedRecipes.filter(recipe => recipe !== recipeToRemove));
+    };
+
+    // The photo consent is settled here rather than inside OwnRecipeDialog, so
+    // the two dialogs never stack: the exposure is the same one the pantry
+    // camera asks about, so a user who accepted it once is not asked again.
+    const handleOwnRecipeClick = () => {
+        if (apiKey && !photoPrivacyAck) {
+            setShowPhotoPrivacy(true);
+            return;
+        }
+        setOwnRecipeAutoCamera(!!apiKey);
+        setShowOwnRecipe(true);
+    };
+
+    const handlePhotoPrivacyAccept = () => {
+        setPhotoPrivacyAck(true);
+        setShowPhotoPrivacy(false);
+        setOwnRecipeAutoCamera(true);
+        setShowOwnRecipe(true);
+    };
+
+    const handleAddOwnRecipe = (recipe: string) => {
+        setShowOwnRecipe(false);
+        if (ownRecipes.includes(recipe)) return;
+        setOwnRecipes([...ownRecipes, recipe]);
+    };
+
+    const handleRemoveOwnRecipe = (recipeToRemove: string) => {
+        setOwnRecipes(ownRecipes.filter(recipe => recipe !== recipeToRemove));
+        setExpandedOwnRecipe(prev => (prev === recipeToRemove ? null : prev));
     };
 
     return (
@@ -198,13 +247,47 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                 >
                                     <Plus size={18} />
                                 </button>
+                                {/* A whole recipe is the same request as a dish
+                                    name — it fills one of the meals — so it is
+                                    entered from this row rather than a section
+                                    of its own. The camera leads where a key can
+                                    read a page; without one, the text stays. */}
+                                <TooltipButton
+                                    onClick={handleOwnRecipeClick}
+                                    icon={apiKey ? <Camera size={18} /> : <PencilLine size={18} />}
+                                    tooltip={apiKey ? t.ownRecipe.cameraAriaLabel : t.ownRecipe.writeAriaLabel}
+                                    ariaLabel={apiKey ? t.ownRecipe.cameraAriaLabel : t.ownRecipe.writeAriaLabel}
+                                    className="shrink-0"
+                                />
                             </form>
                             <div className="flex flex-wrap gap-2 w-full">
-                                {plannedRecipes.length === 0 && (
+                                {plannedRecipes.length === 0 && ownRecipes.length === 0 && (
                                     <div className="text-text-muted text-center py-2 italic w-full text-sm">
                                         {t.noPlannedRecipes}
                                     </div>
                                 )}
+                                {ownRecipes.map((recipe) => (
+                                    <div key={recipe} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
+                                        <ScrollText size={12} className="text-secondary shrink-0" aria-hidden="true" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setExpandedOwnRecipe(prev => (prev === recipe ? null : recipe))}
+                                            className="font-medium text-xs text-text-main"
+                                            aria-expanded={expandedOwnRecipe === recipe}
+                                            aria-label={`${t.ownRecipe.previewAriaLabel}: ${ownRecipeTitle(recipe)}`}
+                                        >
+                                            {ownRecipeTitle(recipe)}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveOwnRecipe(recipe)}
+                                            className="text-danger hover:text-danger-text hover:bg-danger/10 rounded-full p-0.5 transition-colors"
+                                            aria-label={`${t.ownRecipe.removeAriaLabel}: ${ownRecipeTitle(recipe)}`}
+                                        >
+                                            <Trash2 size={10} />
+                                        </button>
+                                    </div>
+                                ))}
                                 {plannedRecipes.map((recipe) => (
                                     <div key={recipe} className="flex flex-row items-center gap-1 px-2 py-0.5 rounded-full border border-border-base bg-bg-surface shadow-sm hover:border-border-hover transition-colors">
                                         <span className="font-medium text-xs text-text-main">{recipe}</span>
@@ -219,6 +302,11 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
                                     </div>
                                 ))}
                             </div>
+                            {expandedOwnRecipe !== null && (
+                                <pre className="w-full max-h-48 overflow-y-auto bg-white/30 dark:bg-black/20 rounded-lg p-3 text-xs text-text-base whitespace-pre-wrap font-sans">
+                                    {expandedOwnRecipe}
+                                </pre>
+                            )}
                         </div>
 
                         {/* Separator */}
@@ -306,6 +394,22 @@ export const SettingsPanel = forwardRef<SettingsPanelRef, SettingsPanelProps>(({
 
             {notification && (notification.anchor === undefined || notification.anchor === 'generate') && (
                 <UndoToast notification={notification} />
+            )}
+
+            {showPhotoPrivacy && (
+                <PhotoPrivacyDialog
+                    purpose="recipe"
+                    onAccept={handlePhotoPrivacyAccept}
+                    onCancel={() => setShowPhotoPrivacy(false)}
+                />
+            )}
+
+            {showOwnRecipe && (
+                <OwnRecipeDialog
+                    autoStartCamera={ownRecipeAutoCamera}
+                    onSubmit={handleAddOwnRecipe}
+                    onCancel={() => setShowOwnRecipe(false)}
+                />
             )}
         </>
     );

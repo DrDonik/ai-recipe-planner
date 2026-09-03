@@ -37,7 +37,7 @@ function App() {
   const savedScrollPositionRef = useRef<number>(0);
   const prevViewRecipeRef = useRef<Recipe | null>(null);
   const prevViewShoppingListRef = useRef<Ingredient[] | null>(null);
-  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, plannedRecipes, language, imageGenAck, setImageGenAck, imageGenUnsupported, setImageGenUnsupported, t, storagePersistError } = useSettings();
+  const { useCopyPaste, apiKey, people, meals, diet, styleWishes, plannedRecipes, ownRecipes, language, imageGenAck, setImageGenAck, imageGenUnsupported, setImageGenUnsupported, t, storagePersistError } = useSettings();
 
   const [pantryItems, setPantryItems, pantryPersistError] = useLocalStorage<PantryItem[]>(STORAGE_KEYS.PANTRY_ITEMS, []);
   const [spices, setSpices, spicesPersistError] = useLocalStorage<string[]>(STORAGE_KEYS.SPICE_RACK, []);
@@ -549,6 +549,7 @@ function App() {
         appliances: appliancesToUse,
         styleWishes: styleWishesToUse,
         plannedRecipes: plannedRecipesToUse,
+        ownRecipes,
         weather: forecast,
       });
       setCopyPastePrompt(prompt);
@@ -577,6 +578,7 @@ function App() {
         appliances: appliancesToUse,
         styleWishes: styleWishesToUse,
         plannedRecipes: plannedRecipesToUse,
+        ownRecipes,
         weather: forecast,
         errorTranslations: t.errors,
         externalSignal: controller.signal,
@@ -596,7 +598,7 @@ function App() {
       userAbortedRef.current = false;
       setLoading(false);
     }
-  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, forecast, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
+  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, ownRecipes, forecast, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
 
   const handleCancelGenerate = useCallback(() => {
     if (!generateAbortRef.current) return;

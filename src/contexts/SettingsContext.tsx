@@ -82,6 +82,8 @@ interface SettingsContextType {
     setStyleWishes: (wishes: string[]) => void;
     plannedRecipes: string[];
     setPlannedRecipes: (recipes: string[]) => void;
+    ownRecipes: string[];
+    setOwnRecipes: (recipes: string[]) => void;
     language: string;
     setLanguage: (lang: string) => void;
     imageGenAck: boolean;
@@ -158,6 +160,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     const [diet, setDiet, dietError] = useLocalStorage<string>(STORAGE_KEYS.DIET_PREFERENCE, DEFAULTS.DIET);
     const [styleWishes, setStyleWishes, styleWishesError] = useLocalStorage<string[]>(STORAGE_KEYS.STYLE_WISHES, getInitialStyleWishes());
     const [plannedRecipes, setPlannedRecipes, plannedRecipesError] = useLocalStorage<string[]>(STORAGE_KEYS.PLANNED_RECIPES, []);
+    const [ownRecipes, setOwnRecipes, ownRecipesError] = useLocalStorage<string[]>(STORAGE_KEYS.OWN_RECIPES, []);
     const [language, setLanguage, languageError] = useLocalStorage<string>(STORAGE_KEYS.LANGUAGE, getInitialLanguage());
     const [imageGenAck, setImageGenAck, imageGenAckError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_ACK, getInitialImageGenAck());
     const [imageGenUnsupported, setImageGenUnsupported, imageGenUnsupportedError] = useLocalStorage<boolean>(STORAGE_KEYS.IMAGE_GEN_UNSUPPORTED, false);
@@ -180,7 +183,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
             LANGUAGE_TAGS[isValidLanguage(language) ? language : DEFAULTS.LANGUAGE];
     }, [language]);
 
-    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || plannedRecipesError || languageError || imageGenAckError || imageGenUnsupportedError;
+    const storagePersistError = useCopyPasteError || apiKeyError || peopleError || mealsError || dietError || styleWishesError || plannedRecipesError || ownRecipesError || languageError || imageGenAckError || imageGenUnsupportedError;
 
     const t = getTranslations(language);
 
@@ -192,6 +195,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         diet, setDiet,
         styleWishes, setStyleWishes,
         plannedRecipes, setPlannedRecipes,
+        ownRecipes, setOwnRecipes,
         language, setLanguage,
         imageGenAck, setImageGenAck,
         imageGenUnsupported, setImageGenUnsupported,

@@ -16,6 +16,11 @@ export const STORAGE_KEYS = {
     DIET_PREFERENCE: 'diet_preference',
     STYLE_WISHES: 'style_wishes',
     PLANNED_RECIPES: 'planned_recipes',
+    /* Full recipe texts the user brought along (photographed or pasted), each
+       planned as one of the meals. Kept separate from PLANNED_RECIPES, which
+       holds short dish names: the two are entered and rendered in one section
+       but carry different lengths and a different prompt block. */
+    OWN_RECIPES: 'own_recipes',
     LANGUAGE: 'language',
     HEADER_MINIMIZED: 'header_minimized',
     OPTIONS_MINIMIZED: 'options_minimized',
@@ -75,6 +80,7 @@ export const SYNCED_STORAGE_KEYS: readonly string[] = [
     STORAGE_KEYS.DIET_PREFERENCE,
     STORAGE_KEYS.STYLE_WISHES,
     STORAGE_KEYS.PLANNED_RECIPES,
+    STORAGE_KEYS.OWN_RECIPES,
     STORAGE_KEYS.MEAL_PLAN,
     STORAGE_KEYS.SHOPPING_LIST_CHECKED,
     STORAGE_KEYS.STORAGE_TIPS_CACHE,
@@ -144,4 +150,8 @@ export const DEFAULTS = {
  */
 export const VALIDATION = {
     MAX_INPUT_LENGTH: 200,
+    /* A brought-along recipe is a whole page of text, not a field. Long enough
+       for a two-page recipe transcribed in one go, short enough that a handful
+       of them cannot crowd out the rest of the prompt. */
+    MAX_RECIPE_LENGTH: 4000,
 } as const;

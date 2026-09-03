@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { API_CONFIG, OPEN_METEO } from '../constants';
+import { API_CONFIG, OPEN_METEO, VALIDATION } from '../constants';
 import { translations } from '../constants/translations';
 import type { PantryItem, MealPlan, Ingredient, Recipe } from '../types';
 import type { Forecast, WeatherCondition } from './weather';
@@ -28,6 +28,35 @@ const sanitizeUserInput = (input: string, maxLength: number = 200): string => {
   sanitized = sanitized.replace(/\s+/g, ' ').trim();
 
   return sanitized;
+};
+
+/**
+ * Sanitizes a multi-line user input (a whole recipe) for inclusion in a prompt.
+ *
+ * Unlike `sanitizeUserInput`, line breaks survive: in a recipe they are the
+ * structure that separates the ingredient list from the method, and collapsing
+ * them would hand the model one run-on paragraph. Blank runs are capped at one
+ * so a photographed page cannot pad the prompt with whitespace.
+ */
+const sanitizeMultilineInput = (input: string, maxLength: number): string => {
+  if (!input) return '';
+
+  let sanitized = input.slice(0, maxLength);
+
+  // Normalize line endings first, so the control-character strip below cannot
+  // leave a lone \r behind.
+  sanitized = sanitized.replace(/\r\n?/g, '\n');
+
+  // Remove control characters except the newlines we just normalized.
+  // eslint-disable-next-line no-control-regex
+  sanitized = sanitized.replace(/[\x00-\x09\x0B-\x1F\x7F]/g, '');
+
+  // Collapse runs of blank lines and trailing spaces, keeping single breaks.
+  sanitized = sanitized.replace(/[ \t]+/g, ' ');
+  sanitized = sanitized.replace(/ *\n */g, '\n');
+  sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
+
+  return sanitized.trim();
 };
 
 /**
@@ -122,6 +151,11 @@ export interface RecipePromptParams {
   styleWishes?: string[];
   plannedRecipes?: string[];
   /**
+   * Whole recipes the user brought along, as plain text. Each is planned as
+   * one of the meals and transcribed into the response instead of invented.
+   */
+  ownRecipes?: string[];
+  /**
    * Forecast for the kitchen's location, if one is set and a forecast could
    * be fetched. Passed as structured values, never as a ready-made string, so
    * that nothing from the weather API's response can reach the prompt.
@@ -153,6 +187,7 @@ export const buildRecipePrompt = ({
   appliances = [],
   styleWishes = [],
   plannedRecipes = [],
+  ownRecipes = [],
   weather,
 }: RecipePromptParams): string => {
   const pantryList = ingredients
@@ -180,6 +215,18 @@ export const buildRecipePrompt = ({
     .filter(recipe => recipe.length > 0);
   const plannedRecipesText = sanitizedPlannedRecipes.length > 0
     ? `REQUESTED DISHES: ${sanitizedPlannedRecipes.join("; ")}. Each of these dishes MUST be planned as exactly one of the ${meals} meals (they count toward the ${meals} meals, in the order given; if there are more requested dishes than meals, prioritize the first ones). Create a full recipe for each requested dish, use my pantry ingredients where possible, and list everything I need to buy for it in "missingIngredients". Plan any remaining meals freely.`
+    : "";
+
+  const sanitizedOwnRecipes = ownRecipes
+    .map(recipe => sanitizeMultilineInput(recipe, VALIDATION.MAX_RECIPE_LENGTH))
+    .filter(recipe => recipe.length > 0);
+  // Delimited and placed after the short fields so the model reads the plan's
+  // parameters before the recipe bodies, which are by far the longest input.
+  const ownRecipeBodies = sanitizedOwnRecipes
+    .map((recipe, index) => `--- OWN RECIPE ${index + 1} ---\n${recipe}`)
+    .join("\n");
+  const ownRecipesText = sanitizedOwnRecipes.length > 0
+    ? `MY OWN RECIPES: ${sanitizedOwnRecipes.length} recipe(s) follow between the markers below. Each one MUST be planned as exactly one of the ${meals} meals, taking precedence over the requested dishes and over any meal you would choose yourself. Transcribe each into the JSON structure rather than writing your own version of the dish: keep its ingredients and the substance and order of its steps, and do not swap ingredients out, merge recipes or "improve" the method. If a recipe conflicts with the dietary preference, the recipe wins and stays as written; do not substitute to make it fit. RESCALE every quantity to ${people} people: scale from the serving count the recipe states, or, if it states none, from the most plausible serving count you can infer from its quantities, and name the count you assumed in that recipe's "comments" field. Apply the rescaled amounts both in "ingredients" and to any amount named inside an instruction step, rounded to amounts one would actually measure. Match the ingredients against my pantry and put the IDs of what I already have into "usedIngredients"; everything else the recipe needs goes into "missingIngredients" at the rescaled amount. Keep the recipe's own title, translated into ${language} like the rest of the output.\n${ownRecipeBodies}\n--- END OF MY OWN RECIPES ---`
     : "";
 
   const sanitizedDiet = sanitizeUserInput(diet, 200);
@@ -215,9 +262,10 @@ export const buildRecipePrompt = ({
     ${contextText}
     ${styleWishesText}
     ${plannedRecipesText}
+    ${ownRecipesText}
 
     RULES:
-    1. STRICTLY follow the dietary preference: ${sanitizedDiet}.${sanitizedStyleWishes ? ` Also respect the style/wishes: ${sanitizedStyleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
+    1. STRICTLY follow the dietary preference: ${sanitizedDiet}${sanitizedOwnRecipes.length > 0 ? ', except in my own recipes above, which stay as written' : ''}.${sanitizedStyleWishes ? ` Also respect the style/wishes: ${sanitizedStyleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
     2. ${ingredients.length > 0 ? 'Prioritize using as many of my pantry ingredients as possible.' : 'Choose suitable ingredients for delicious, balanced meals.'}
     3. The portion sizes must be realistic for ${people} people.
     4. ${ingredients.length > 0 ? `When a pantry item's quantity is enough for one recipe (e.g., 500 g potatoes as a side for 2 people, or 400 g chicken breast as a main for 2 people), use it entirely in that recipe rather than splitting it across multiple recipes. Only distribute a pantry item across recipes if the total quantity is large enough that each recipe receives a full, realistic serving per person.` : 'Ensure each recipe uses realistic quantities of each ingredient.'}
@@ -692,6 +740,125 @@ Respond with only one line. No explanation.`;
   }
 };
 
+export type TranscribeRecipeErrorKind = 'unreadable' | 'quota' | 'decode' | 'error';
+
+export class TranscribeRecipeError extends Error {
+  kind: TranscribeRecipeErrorKind;
+  constructor(kind: TranscribeRecipeErrorKind, message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'TranscribeRecipeError';
+    this.kind = kind;
+  }
+}
+
+/**
+ * Transcribes a photographed recipe (a cookbook page, a handwritten card) into
+ * plain text via Gemini's vision model.
+ *
+ * Deliberately returns text rather than a `Recipe`: the transcription is an
+ * input the user proofreads and corrects before it is stored, and a photo of
+ * handwriting is never read perfectly. Structuring happens later, in the one
+ * call that builds the whole meal plan, so this step adds no schema of its own
+ * and stays usable on the copy-paste route for everything downstream.
+ *
+ * The text is returned in the language it was photographed in — translating is
+ * the meal plan's job, and translating twice would compound the errors.
+ */
+export const transcribeRecipeFromImage = async (
+  apiKey: string,
+  base64Image: string,
+  mimeType: string,
+  signal?: AbortSignal
+): Promise<string> => {
+  if (!apiKey) throw new TranscribeRecipeError('error', 'API Key is required');
+
+  const prompt = `You transcribe recipes from photos.
+
+Read the recipe in the photo and write it out as plain text, in the language it is written in. Keep the original wording; do not translate, rewrite, shorten or add anything, and do not comment on the recipe.
+
+Use exactly this layout:
+- The recipe title on the first line.
+- Then the serving count and total time, each on its own line, if the recipe states them.
+- Then the ingredients, one per line, with the quantity as written.
+- Then the preparation steps, one per line, in order.
+
+If part of the page is cut off or unreadable, transcribe what you can read and mark each gap with [?]. Do not guess at quantities.
+
+If the photo shows no recipe at all, respond with the exact token NO_RECIPE and nothing else.`;
+
+  const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
+  const combinedSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+
+  try {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { inlineData: { mimeType, data: base64Image } },
+                { text: prompt },
+              ],
+            },
+          ],
+        }),
+        signal: combinedSignal,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = (await response.json().catch(() => ({}))) || {};
+      if (response.status === 429 || errorData.error?.status === 'RESOURCE_EXHAUSTED') {
+        throw new TranscribeRecipeError('quota', 'Quota exceeded');
+      }
+      throw new TranscribeRecipeError('error', errorData.error?.message || 'Fetch failed');
+    }
+
+    const data = await response.json();
+
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new TranscribeRecipeError(
+        'error',
+        data.promptFeedback?.blockReason ? 'Blocked by safety filter' : 'Empty response'
+      );
+    }
+    const candidate = data.candidates[0];
+    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+      throw new TranscribeRecipeError('error', 'Blocked by safety filter');
+    }
+    // A long transcription can arrive split across several parts.
+    const text: string | undefined = candidate.content?.parts
+      ?.map((part: { text?: string }) => part.text ?? '')
+      .join('');
+    if (!text?.trim()) throw new TranscribeRecipeError('error', 'Empty response');
+
+    // Strip a markdown code fence the model occasionally wraps the text in.
+    const cleaned = text
+      .trim()
+      .replace(/^```[a-z]*\n?/i, '')
+      .replace(/\n?```$/, '')
+      .trim();
+    if (!cleaned || cleaned === 'NO_RECIPE') {
+      throw new TranscribeRecipeError('unreadable', 'No recipe in photo');
+    }
+    return cleaned;
+  } catch (error) {
+    if (error instanceof TranscribeRecipeError) throw error;
+    if (error instanceof Error) {
+      // Caller-initiated abort: re-throw as-is so the UI can distinguish cancel from error.
+      if (error.name === 'AbortError' && signal?.aborted) throw error;
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        throw new TranscribeRecipeError('error', 'Timeout', { cause: error });
+      }
+    }
+    console.error('Transcribe recipe error:', error);
+    throw new TranscribeRecipeError('error', 'Unexpected error', { cause: error });
+  }
+};
+
 /**
  * A single turn in a recipe chat. `model` is Gemini's name for the assistant
  * role, kept verbatim so the history maps straight onto the API's `contents`.
@@ -912,6 +1079,7 @@ export const generateRecipes = async (
     appliances?: string[];
     styleWishes?: string[];
     plannedRecipes?: string[];
+    ownRecipes?: string[];
     weather?: Forecast;
     errorTranslations?: ErrorTranslations;
     externalSignal?: AbortSignal;
@@ -922,6 +1090,7 @@ export const generateRecipes = async (
     appliances = [],
     styleWishes = [],
     plannedRecipes = [],
+    ownRecipes = [],
     weather,
     errorTranslations,
     externalSignal,
@@ -941,6 +1110,7 @@ export const generateRecipes = async (
     appliances,
     styleWishes,
     plannedRecipes,
+    ownRecipes,
     weather,
   });
 
