@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, Camera, Loader2, AlertCircle } from 'lucide-react';
+import { X, Camera, Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { VALIDATION } from '../constants';
@@ -38,6 +38,7 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
     const [text, setText] = useState('');
     const [transcribing, setTranscribing] = useState(false);
     const [transcribed, setTranscribed] = useState(false);
+    const [truncated, setTruncated] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,7 +53,11 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
     // Every state this operation can be in, in one region: a running read, a
     // finished one and a failure are the same concern, and separate regions
     // for them would talk over each other.
-    const announcement = error ?? (transcribing ? t.ownRecipe.transcribing : transcribed ? t.ownRecipe.transcribed : '');
+    const announcement = error
+        ?? (transcribing ? t.ownRecipe.transcribing
+        : truncated ? t.ownRecipe.truncated
+        : transcribed ? t.ownRecipe.transcribed
+        : '');
 
     const cameraEnabled = !!apiKey;
 
@@ -89,6 +94,7 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
 
         setError(null);
         setTranscribed(false);
+        setTruncated(false);
         setTranscribing(true);
         const controller = new AbortController();
         abortRef.current = controller;
@@ -108,8 +114,12 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
             const recipe = await transcribeRecipeFromImage(apiKey, base64, mimeType, controller.signal);
             // Appended rather than replacing, so a second shot picks up the back
             // of a card or the column that ran onto the next page.
-            setText(prev => (prev.trim() ? `${prev.trimEnd()}\n\n${recipe}` : recipe).slice(0, VALIDATION.MAX_RECIPE_LENGTH));
+            setText(prev => (prev.trim() ? `${prev.trimEnd()}\n\n${recipe.text}` : recipe.text).slice(0, VALIDATION.MAX_RECIPE_LENGTH));
             setTranscribed(true);
+            // A read that stopped at the model's output limit still gives usable
+            // text, so it is kept — but the user has to be told, or a recipe cut
+            // off mid-method goes into the plan looking complete.
+            setTruncated(recipe.truncated);
             // Deferred until `disabled` clears — focus() on a disabled field is a no-op.
             setTimeout(() => textareaRef.current?.focus(), 0);
         } catch (err) {
@@ -224,6 +234,15 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
                         <div role="alert" className="flex items-start gap-2 text-sm text-danger-text">
                             <AlertCircle size={16} className="shrink-0 mt-0.5" />
                             <span>{error}</span>
+                        </div>
+                    )}
+
+                    {/* Not an error and not red: the text arrived and is kept.
+                        Amber says "check this", which is exactly the ask. */}
+                    {truncated && !error && (
+                        <div className="flex items-start gap-2 text-sm text-warning-text">
+                            <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
+                            <span>{t.ownRecipe.truncated}</span>
                         </div>
                     )}
                 </div>

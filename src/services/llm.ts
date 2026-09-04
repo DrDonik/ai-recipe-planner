@@ -763,13 +763,20 @@ export class TranscribeRecipeError extends Error {
  *
  * The text is returned in the language it was photographed in — translating is
  * the meal plan's job, and translating twice would compound the errors.
+ *
+ * Returns the text alongside a `truncated` flag rather than a bare string: a
+ * page of prose is long enough to reach the model's output limit, and a
+ * transcription that stops mid-method is still worth keeping — the user can
+ * photograph the rest into the same entry. Silently handing back a half recipe
+ * is what must not happen, so the flag is part of the result and the caller
+ * has to say something about it.
  */
 export const transcribeRecipeFromImage = async (
   apiKey: string,
   base64Image: string,
   mimeType: string,
   signal?: AbortSignal
-): Promise<string> => {
+): Promise<{ text: string; truncated: boolean }> => {
   if (!apiKey) throw new TranscribeRecipeError('error', 'API Key is required');
 
   const prompt = `You transcribe recipes from photos.
@@ -826,8 +833,14 @@ If the photo shows no recipe at all, respond with the exact token NO_RECIPE and 
       );
     }
     const candidate = data.candidates[0];
-    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
-      throw new TranscribeRecipeError('error', 'Blocked by safety filter');
+    // MAX_TOKENS is not a failure, it is a long page: the model stopped at its
+    // output limit with usable text in hand. Only the reasons that mean the
+    // response was withheld discard it. `identifyIngredientFromImage` can
+    // treat every non-STOP reason as a block because its answer is one word;
+    // a transcription is exactly the call that reaches the limit.
+    const truncated = candidate.finishReason === 'MAX_TOKENS';
+    if (candidate.finishReason && candidate.finishReason !== 'STOP' && !truncated) {
+      throw new TranscribeRecipeError('error', `Blocked (${candidate.finishReason})`);
     }
     // A long transcription can arrive split across several parts.
     const text: string | undefined = candidate.content?.parts
@@ -844,7 +857,7 @@ If the photo shows no recipe at all, respond with the exact token NO_RECIPE and 
     if (!cleaned || cleaned === 'NO_RECIPE') {
       throw new TranscribeRecipeError('unreadable', 'No recipe in photo');
     }
-    return cleaned;
+    return { text: cleaned, truncated };
   } catch (error) {
     if (error instanceof TranscribeRecipeError) throw error;
     if (error instanceof Error) {
