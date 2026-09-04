@@ -5,11 +5,23 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 interface PhotoPrivacyDialogProps {
     onAccept: () => void;
     onCancel: () => void;
+    /**
+     * What the photo is for. The exposure is identical either way — one image
+     * goes to Google — so both purposes share this dialog and the single
+     * PHOTO_PRIVACY_ACK: whoever accepted it once is never asked again. Only
+     * the two sentences that would otherwise be wrong differ, because the
+     * ingredient variant asks the user to keep documents out of the frame and
+     * a recipe page is a document.
+     */
+    purpose?: 'ingredient' | 'recipe';
 }
 
-export const PhotoPrivacyDialog = ({ onAccept, onCancel }: PhotoPrivacyDialogProps) => {
+export const PhotoPrivacyDialog = ({ onAccept, onCancel, purpose = 'ingredient' }: PhotoPrivacyDialogProps) => {
     const { t } = useSettings();
     const dialogRef = useFocusTrap(onCancel, true);
+    const isRecipe = purpose === 'recipe';
+    const description = isRecipe ? t.photoPrivacy.recipeDescription : t.photoPrivacy.description;
+    const note2 = isRecipe ? t.photoPrivacy.recipeNote2 : t.photoPrivacy.note2;
 
     return (
         <div
@@ -33,7 +45,7 @@ export const PhotoPrivacyDialog = ({ onAccept, onCancel }: PhotoPrivacyDialogPro
                 </div>
 
                 <p className="text-text-base mb-4">
-                    {t.photoPrivacy.description}
+                    {description}
                 </p>
 
                 <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 mb-4">
@@ -41,7 +53,7 @@ export const PhotoPrivacyDialog = ({ onAccept, onCancel }: PhotoPrivacyDialogPro
                         {t.photoPrivacy.beforeYouSend}
                     </p>
                     <ul className="space-y-2 text-sm text-text-muted">
-                        {[t.photoPrivacy.note1, t.photoPrivacy.note2].map((note) => (
+                        {[t.photoPrivacy.note1, note2].map((note) => (
                             <li key={note} className="flex items-start gap-2">
                                 <AlertTriangle className="text-warning-text shrink-0 mt-0.5" size={14} />
                                 <span>{note}</span>

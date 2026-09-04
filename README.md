@@ -9,11 +9,12 @@ Try it out on github pages: [AI Recipe Planner](https://drdonik.github.io/ai-rec
 - **Two Routes to a Meal Plan**:
   - **Copy & Paste** (default): No API key storage required. Copy the generated prompt to any AI service and paste the response back. More secure and private.
   - **Generate directly**: Direct integration with the Google Gemini API (stores the key in localStorage with a security warning).
-- **What a Stored Key Also Unlocks**, whichever route is chosen: pantry ingredients from a photo, storage tips, recipe images, replacing a single recipe, and a chat about the recipe you are cooking. Each is offered only with a key present, and the two that expose something new — sending a photo, and paying per image — ask once before the first use.
+- **What a Stored Key Also Unlocks**, whichever route is chosen: pantry ingredients from a photo, a recipe of your own read from a photographed page, storage tips, recipe images, replacing a single recipe, and a chat about the recipe you are cooking. Each is offered only with a key present, and the two that expose something new — sending a photo, and paying per image — ask once before the first use.
 - **AI-Powered Recipes**: Generates personalized recipes using Google Gemini Flash 3 Preview.
 - **Minimize Food Waste**: Input vegetables, ingredients, spices and staples you have to minimize food waste.
 - **Spice Rack**: Manage staples and spices that are always available in your kitchen.
 - **Customizable**: Set your dietary preferences (Vegan, Vegetarian, Pescatarian, etc.), style wishes, number of people, and number of meals.
+- **Bring Your Own Recipe**: Photograph a cookbook page or a handwritten card, check the transcription, and it is planned as one of your meals — rescaled to your number of people, with its ingredients drawn from your pantry and the rest added to the shopping list.
 - **Smart Shopping List**: Automatically generates a shopping list for missing ingredients with persistent checkboxes.
 - **Recipe Sharing**: Share your favorite recipes with others via URL (no backend required).
 - **Shopping List Sharing**: Share shopping lists with separate checkbox state for each recipient.
