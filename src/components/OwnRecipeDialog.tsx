@@ -38,7 +38,10 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
     const [text, setText] = useState('');
     const [transcribing, setTranscribing] = useState(false);
     const [transcribed, setTranscribed] = useState(false);
-    const [truncated, setTruncated] = useState(false);
+    // Every way a read can come back short, so none of them can pass as a whole
+    // recipe. Held as a key rather than a translated string: the dialog outlives
+    // a language switch.
+    const [warning, setWarning] = useState<'truncated' | 'entryFull' | 'tooLongForEntry' | null>(null);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -55,7 +58,7 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
     // for them would talk over each other.
     const announcement = error
         ?? (transcribing ? t.ownRecipe.transcribing
-        : truncated ? t.ownRecipe.truncated
+        : warning ? t.ownRecipe[warning]
         : transcribed ? t.ownRecipe.transcribed
         : '');
 
@@ -94,7 +97,7 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
 
         setError(null);
         setTranscribed(false);
-        setTruncated(false);
+        setWarning(null);
         setTranscribing(true);
         const controller = new AbortController();
         abortRef.current = controller;
@@ -114,12 +117,25 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
             const recipe = await transcribeRecipeFromImage(apiKey, base64, mimeType, controller.signal);
             // Appended rather than replacing, so a second shot picks up the back
             // of a card or the column that ran onto the next page.
-            setText(prev => (prev.trim() ? `${prev.trimEnd()}\n\n${recipe.text}` : recipe.text).slice(0, VALIDATION.MAX_RECIPE_LENGTH));
+            const combined = text.trim() ? `${text.trimEnd()}\n\n${recipe.text}` : recipe.text;
             setTranscribed(true);
-            // A read that stopped at the model's output limit still gives usable
-            // text, so it is kept — but the user has to be told, or a recipe cut
-            // off mid-method goes into the plan looking complete.
-            setTruncated(recipe.truncated);
+            if (combined.length <= VALIDATION.MAX_RECIPE_LENGTH) {
+                setText(combined);
+                // A read that stopped at the model's output limit still gives
+                // usable text, so it is kept — but the user has to be told, or a
+                // recipe cut off mid-method goes into the plan looking complete.
+                setWarning(recipe.truncated ? 'truncated' : null);
+            } else if (text.trim()) {
+                // Cutting the combined text to fit would drop the end of what was
+                // just photographed while reporting success. Refuse instead: the
+                // entry keeps exactly what it had, and the user decides what goes.
+                setWarning('entryFull');
+            } else {
+                // Nothing to preserve — one page longer than an entry can hold.
+                // Keep what fits and say that the end is missing.
+                setText(combined.slice(0, VALIDATION.MAX_RECIPE_LENGTH));
+                setWarning('tooLongForEntry');
+            }
             // Deferred until `disabled` clears — focus() on a disabled field is a no-op.
             setTimeout(() => textareaRef.current?.focus(), 0);
         } catch (err) {
@@ -239,10 +255,10 @@ export const OwnRecipeDialog: React.FC<OwnRecipeDialogProps> = ({
 
                     {/* Not an error and not red: the text arrived and is kept.
                         Amber says "check this", which is exactly the ask. */}
-                    {truncated && !error && (
+                    {warning && !error && (
                         <div className="flex items-start gap-2 text-sm text-warning-text">
                             <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
-                            <span>{t.ownRecipe.truncated}</span>
+                            <span>{t.ownRecipe[warning]}</span>
                         </div>
                     )}
                 </div>
