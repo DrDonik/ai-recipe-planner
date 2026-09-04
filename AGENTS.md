@@ -58,3 +58,5 @@ Structure the description after `.github/pull_request_template.md` and work
 through its checklist. Creating a pull request through the API does not fill the
 template in — copy it across yourself. Replace the comments rather than leaving
 them in the body, and drop a section that has nothing to say.
+
+Each pull request is reviewed by Coderabbit. However, you shall trigger Coderabbits‘ review by adding the comment „@coderabbitai review“ to the PR after opening it.
