@@ -70,11 +70,14 @@ export interface Nutrition {
 export interface Recipe {
   id: string;
   title: string;
-  time: string;
   ingredients: Ingredient[];
   instructions: string[];
   usedIngredients: string[]; // List of PantryItem IDs used
   missingIngredients?: Ingredient[]; // Optional: excluded in shared recipes
+  // Derived from the recipe above, and generated after it: see the key-order
+  // note on RecipeSchema in services/llm.ts. Field order is meaningless to
+  // TypeScript but not to the model, so the two are kept in step.
+  time: string;
   nutrition?: Nutrition; // Optional for backwards compatibility
   comments?: string; // Optional fun fact or remark from the LLM
 }

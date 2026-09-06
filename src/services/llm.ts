@@ -77,15 +77,22 @@ export const NutritionSchema = z.object({
   protein: z.number(),
 });
 
+/**
+ * Key order matters beyond documentation: it is the order the model fills the
+ * fields in when the response schema is enforced (see `buildResponseSchema`),
+ * and a model cannot estimate a total time or a nutrition breakdown for a
+ * recipe it has not written yet. Hence ingredients and instructions first,
+ * and the fields derived from them last.
+ */
 export const RecipeSchema = z.object({
   id: z.string(),
   title: z.string(),
-  time: z.string(),
   ingredients: z.array(IngredientSchema),
   instructions: z.array(z.string()),
   usedIngredients: z.array(z.string()),
   // Optional because shared recipes exclude missingIngredients (not relevant in standalone view)
   missingIngredients: z.array(IngredientSchema).optional(),
+  time: z.string(),
   nutrition: NutritionSchema.optional(),
   comments: z.string().optional(),
 });
@@ -94,6 +101,35 @@ export const MealPlanSchema = z.object({
   recipes: z.array(RecipeSchema),
   shoppingList: z.array(IngredientSchema),
 });
+
+/**
+ * The meal-plan schema in the shape Gemini's `responseJsonSchema` expects.
+ *
+ * Derived from {@link MealPlanSchema} rather than written out a second time,
+ * so the structure the model is held to and the structure we validate against
+ * cannot drift apart. Two keywords Zod emits are dropped: `$schema` is metadata
+ * the API has no use for, and `additionalProperties` is redundant because Zod
+ * strips unknown keys when it parses the response anyway. Both only widen the
+ * surface on which the API could reject the request.
+ *
+ * Built once at module load: the schema is a constant.
+ */
+const buildResponseSchema = (): Record<string, unknown> => {
+  const stripped = (node: unknown): unknown => {
+    if (Array.isArray(node)) return node.map(stripped);
+    if (node && typeof node === 'object') {
+      return Object.fromEntries(
+        Object.entries(node as Record<string, unknown>)
+          .filter(([key]) => key !== '$schema' && key !== 'additionalProperties')
+          .map(([key, value]) => [key, stripped(value)])
+      );
+    }
+    return node;
+  };
+  return stripped(z.toJSONSchema(MealPlanSchema)) as Record<string, unknown>;
+};
+
+export const MEAL_PLAN_RESPONSE_SCHEMA = buildResponseSchema();
 
 /**
  * Parameters for building a recipe prompt.
@@ -161,6 +197,13 @@ export interface RecipePromptParams {
    * that nothing from the weather API's response can reach the prompt.
    */
   weather?: Forecast;
+  /**
+   * True when the caller sends {@link MEAL_PLAN_RESPONSE_SCHEMA} along with the
+   * prompt, which is only possible on the direct Gemini route. The Copy-Paste
+   * route hands this same prompt to an unknown model with no way to constrain
+   * its output, so it keeps asking for well-formed JSON in prose.
+   */
+  structuredOutput?: boolean;
 }
 
 /** Fixed English phrasings for the weather hint — see `weather` above. */
@@ -189,6 +232,7 @@ export const buildRecipePrompt = ({
   plannedRecipes = [],
   ownRecipes = [],
   weather,
+  structuredOutput = false,
 }: RecipePromptParams): string => {
   const pantryList = ingredients
     .map((v) => `- ${sanitizeUserInput(v.name)} (${sanitizeUserInput(v.amount)}) [ID: ${v.id}]`)
@@ -282,7 +326,7 @@ export const buildRecipePrompt = ({
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
-    18. Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.
+    18. ${structuredOutput ? 'Return the JSON object described by the response schema, and nothing besides it.' : `Return ONLY valid JSON. No JSON-comments, no markdown formatting, no code blocks, no enumeration, no entrance statements before the JSON. Never use double quote characters (") inside string values; use single quotes (') if you need to quote something within a string.`}
     19. Let the season at TODAY's date gently inform the recipes: which produce is at its best then, and whether lighter or heartier dishes fit the time of year. Treat the time zone only as a coarse hint for hemisphere and climate region; ignore it where it does not clearly indicate one, and only assume a holiday if the date makes it unmistakable.${weatherLine ? " If a WEATHER line is given, let the coming days' temperatures and conditions also guide how light or hearty and how cooling or warming the dishes are; it describes the whole period, so do not tie it to a particular meal." : ''} This is a soft guideline only — the dietary preference, style/wishes, requested dishes and good use of my pantry always take precedence, and no recipe should be rejected merely for being out of season. Do not state the date in the output.
     20. Optionally include a "comments" field per recipe (1-2 sentences). Use it for a fun or surprising scientific, historical or geographical fact about the dish or its ingredients -- or, if the user provided unusual or inedible items, a lighthearted remark about why you skipped them. NO SALES TALK! Use single quotes (') for any quotations within the text.
     
@@ -305,11 +349,11 @@ export const buildRecipePrompt = ({
         {
           "id": "unique_id",
           "title": "Recipe Name",
-          "time": "30 mins",
           "ingredients": [ {"item": "Name", "amount": "Quantity"} ],
           "instructions": ["Step 1", "Step 2"],
           "usedIngredients": ["pantry_item_id_1", "pantry_item_id_2"],
           "missingIngredients": [{"item": "Chicken", "amount": "500g"}],
+          "time": "30 mins",
           "nutrition": {"calories": 450, "carbs": 35, "fat": 18, "protein": 28},
           "comments": "(optional) Fun scientific, historical or geographical fact or comment about omission of inedible ingredients about this recipe or its ingredients."
         }
@@ -1133,6 +1177,7 @@ export const generateRecipes = async (
     plannedRecipes,
     ownRecipes,
     weather,
+    structuredOutput: true,
   });
 
   const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
@@ -1154,6 +1199,14 @@ export const generateRecipes = async (
               parts: [{ text: prompt }],
             },
           ],
+          // Constrains the response to the meal-plan structure instead of
+          // asking for it in prose. Only this route can do that: the
+          // Copy-Paste route reaches a model we do not call ourselves, which
+          // is why `parseRecipeResponse` keeps its repair passes.
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseJsonSchema: MEAL_PLAN_RESPONSE_SCHEMA,
+          },
         }),
         signal,
       }
