@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { Clock, ChefHat, AlertCircle, Maximize, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
+import { Clock, Users, ChefHat, AlertCircle, Maximize, Sun, SunDim, Trash2, ListChecks, X, Lightbulb, ChevronUp, ChevronDown, Image as ImageIcon, Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Recipe, Notification } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
@@ -7,6 +7,7 @@ import { useCookingProgress } from '../contexts/CookingProgressContext';
 import { UndoToast } from './ui/UndoToast';
 import { TimerChip } from './TimerChip';
 import { parseInstruction } from '../utils/parseTimers';
+import { hasServings } from '../utils/servings';
 
 interface RecipeCardProps {
     recipe: Recipe;
@@ -92,6 +93,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                     schema.cookTime = `PT${minutes}M`;
                 }
             }
+            // Add the serving count as recipeYield if available
+            if (hasServings(recipe.servings)) {
+                schema.recipeYield = String(recipe.servings);
+            }
             // Add nutrition info if available
             if (recipe.nutrition) {
                 schema.nutrition = {
@@ -110,6 +115,15 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
             return null;
         }
     }, [recipe]);
+
+    // Recipes stored or shared before `servings` existed carry no count, and a
+    // count that is not a usable number says nothing worth a pill of its own.
+    const servings = recipe.servings;
+    const servingsLabel = hasServings(servings)
+        ? `${servings} ${servings === 1 ? t.servings.one : t.servings.other}`
+        : null;
+
+    const pillClass = `flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`;
 
     // Parse each instruction's time phrases once per instruction set, rather
     // than on every render (timer ticks re-render this card frequently).
@@ -170,12 +184,26 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, index, showOpenI
                 </div>
             </div>
 
-            <div className={`flex items-center justify-between mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
-                <div className={`flex items-center gap-2 text-primary bg-primary/10 px-3 rounded-full ${isStandalone ? 'h-9' : 'h-8'}`}>
-                    <Clock size={16} />
-                    {recipe.time}
+            {/* Time and servings are both figures that scale the whole recipe,
+                so they take one treatment and sit in one group — the class is
+                shared rather than repeated, so the two cannot drift apart.
+                It is the group that wraps, not the row: on a narrow card the
+                pills stack while the action buttons stay top right, aligned
+                with the first pill rather than floating between the two. */}
+            <div className={`flex items-start justify-between gap-2 mb-4 ${isStandalone ? 'text-base' : 'text-sm'} font-medium`}>
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <div className={pillClass}>
+                        <Clock size={16} />
+                        {recipe.time}
+                    </div>
+                    {servingsLabel && (
+                        <div className={pillClass}>
+                            <Users size={16} />
+                            {servingsLabel}
+                        </div>
+                    )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     {onGenerateImage && !imageUrl && !isImageLoading && !imageError && (
                         <button
                             onClick={onGenerateImage}

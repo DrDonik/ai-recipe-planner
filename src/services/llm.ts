@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { API_CONFIG, OPEN_METEO, VALIDATION } from '../constants';
 import { translations } from '../constants/translations';
 import type { PantryItem, MealPlan, Ingredient, Recipe } from '../types';
+import { hasServings } from '../utils/servings';
 import type { Forecast, WeatherCondition } from './weather';
 
 /**
@@ -83,10 +84,24 @@ export const NutritionSchema = z.object({
  * and a model cannot estimate a total time or a nutrition breakdown for a
  * recipe it has not written yet. Hence ingredients and instructions first,
  * and the fields derived from them last.
+ *
+ * `servings` sits ahead of them for the same reason read the other way: it is
+ * not derived from the recipe but a constraint the amounts have to follow, so
+ * the model states it before writing them rather than describing afterwards
+ * what it happened to cook for.
+ *
+ * `servings` is optional so that recipes stored or shared before it existed
+ * still validate — `RecipeSchema` also guards the shared-link URL parameter,
+ * where a required field would reject every link already in circulation. It is
+ * a plain number rather than a constrained integer for the same reason
+ * `nutrition` is: this schema validates the whole meal plan, so a bound the
+ * model narrowly misses would throw away every recipe in the response over one
+ * cosmetic figure. Callers check the value before showing it instead.
  */
 export const RecipeSchema = z.object({
   id: z.string(),
   title: z.string(),
+  servings: z.number().optional(),
   ingredients: z.array(IngredientSchema),
   instructions: z.array(z.string()),
   usedIngredients: z.array(z.string()),
@@ -311,7 +326,7 @@ export const buildRecipePrompt = ({
     RULES:
     1. STRICTLY follow the dietary preference: ${sanitizedDiet}${sanitizedOwnRecipes.length > 0 ? ', except in my own recipes above, which stay as written' : ''}.${sanitizedStyleWishes ? ` Also respect the style/wishes: ${sanitizedStyleWishes}. This should guide the cuisine type, dietary restrictions, or cooking style preferences.` : ''}
     2. ${ingredients.length > 0 ? 'Prioritize using as many of my pantry ingredients as possible.' : 'Choose suitable ingredients for delicious, balanced meals.'}
-    3. The portion sizes must be realistic for ${people} people.
+    3. The portion sizes must be realistic for ${people} people, and each recipe's "servings" field must state how many people that recipe is actually written for. That is ${people}, unless the style/wishes ask for a particular recipe to feed a different number; then that recipe states the number it was scaled to, and its amounts follow it both in "ingredients" and where a step names a quantity.
     4. ${ingredients.length > 0 ? `When a pantry item's quantity is enough for one recipe (e.g., 500 g potatoes as a side for 2 people, or 400 g chicken breast as a main for 2 people), use it entirely in that recipe rather than splitting it across multiple recipes. Only distribute a pantry item across recipes if the total quantity is large enough that each recipe receives a full, realistic serving per person.` : 'Ensure each recipe uses realistic quantities of each ingredient.'}
     5. ${ingredients.length > 0 ? `If there are too few ingredients to generate ${meals} meals for ${people} people, do not stretch the same few ingredients across all meals if it results in repetitive or poor-quality recipes. Instead generate recipes with different ingredients that will have to be bought.` : `For every meal, choose ingredients that work well together and create balanced, delicious meals.`}
     6. ${ingredients.length > 0 ? `If I have too few ingredients for the requested amount of meals, supplement with additional ingredients from your own knowledge and add them to the "missingIngredients" array.` : `All ingredients ${spices.length > 0 ? '(except available spices/staples)' : ''} will need to be purchased and should be listed in the "missingIngredients" array. Set "usedIngredients" to an empty array.`}
@@ -351,6 +366,7 @@ export const buildRecipePrompt = ({
         {
           "id": "unique_id",
           "title": "Recipe Name",
+          "servings": ${people},
           "ingredients": [ {"item": "Name", "amount": "Quantity"} ],
           "instructions": ["Step 1", "Step 2"],
           "usedIngredients": ["pantry_item_id_1", "pantry_item_id_2"],
@@ -972,6 +988,10 @@ const buildRecipeChatSystemInstruction = (
     .map((step, idx) => `${idx + 1}. ${sanitizeUserInput(step, 600)}`)
     .join('\n');
 
+  // Scaling a recipe up or down is the most likely question about this number,
+  // and without it the model can only guess what the amounts are written for.
+  const servingsLine = hasServings(recipe.servings) ? `\nSERVINGS: ${recipe.servings}` : '';
+
   const nutritionLine = recipe.nutrition
     ? `\nNUTRITION PER SERVING (estimate): ${recipe.nutrition.calories} kcal, ${recipe.nutrition.carbs} g carbs, ${recipe.nutrition.fat} g fat, ${recipe.nutrition.protein} g protein`
     : '';
@@ -1009,7 +1029,7 @@ const buildRecipeChatSystemInstruction = (
 
   return `You are a kitchen assistant helping someone who is cooking the recipe below right now.
 
-RECIPE: ${sanitizeUserInput(recipe.title, 200)}
+RECIPE: ${sanitizeUserInput(recipe.title, 200)}${servingsLine}
 TOTAL TIME: ${sanitizeUserInput(recipe.time, 50)}
 
 INGREDIENTS:
