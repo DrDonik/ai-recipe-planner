@@ -70,6 +70,14 @@ export interface Nutrition {
 export interface Recipe {
   id: string;
   title: string;
+  /**
+   * How many people the recipe is written for. Optional: recipes stored or
+   * shared before this field existed carry no count, and the card simply omits
+   * it for them. Usually the app-wide people setting, but a style/wish may ask
+   * for a single recipe to feed a different number, which is why the model
+   * reports it rather than the client stamping it on.
+   */
+  servings?: number;
   ingredients: Ingredient[];
   instructions: string[];
   usedIngredients: string[]; // List of PantryItem IDs used
