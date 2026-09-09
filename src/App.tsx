@@ -124,6 +124,12 @@ function App() {
   const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(prev => !prev), [setShoppingListMinimized]);
   const handleToggleRecipeMissingIngredientsMinimize = useCallback(() => setRecipeMissingIngredientsMinimized(prev => !prev), [setRecipeMissingIngredientsMinimized]);
 
+  /**
+   * Put a notification in the single-valued slot right now, replacing whatever
+   * is there, and arm the auto-dismiss timer when the notification carries one.
+   * Callers go through `showNotification`, which decides whether now is the
+   * right moment; this is the half that does the showing.
+   */
   const presentNotification = useCallback((notif: Notification) => {
     // Clear any existing timeout
     if (notificationTimeoutRef.current) {
@@ -140,12 +146,19 @@ function App() {
     }
   }, []);
 
+  /**
+   * Raise a notification, holding it back while any dialog is open.
+   *
+   * A toast renders in the document flow, so while a dialog is up it sits behind
+   * that dialog's z-[60] backdrop and, because every dialog is aria-modal,
+   * outside the accessibility tree: neither seen nor heard. A held notification
+   * is released by the effect below once the last dialog closes, which gives it
+   * its full timeout and a freshly mounted role="alert".
+   *
+   * Identity is stable — the modal count is read imperatively rather than
+   * subscribed to — because several `useCallback`s downstream depend on it.
+   */
   const showNotification = useCallback((notif: Notification) => {
-    // A toast raised while a dialog is open renders behind its z-[60] backdrop
-    // and, because the dialog is aria-modal, outside the accessibility tree:
-    // neither seen nor heard. Hold it instead, so it gets its full timeout and
-    // a freshly mounted role="alert" once the last dialog closes.
-    //
     // Only notifications without an action. An undo toast is raised by a click
     // on the page, which a modal covers, so it cannot land here in the first
     // place — and deferring one would be wrong anyway: deleteRecipe runs a

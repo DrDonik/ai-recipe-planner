@@ -14,6 +14,7 @@ let openModalCount = 0;
 const modalListeners = new Set<() => void>();
 const emitModalCount = () => { modalListeners.forEach(listener => listener()); };
 
+/** Subscribe to changes in the count; returns the unsubscribe function. */
 export const subscribeModalCount = (listener: () => void) => {
     modalListeners.add(listener);
     return () => { modalListeners.delete(listener); };
