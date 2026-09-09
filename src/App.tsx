@@ -26,6 +26,7 @@ import { generateShareUrl } from './utils/sharing';
 import { parseSharedUrlParams } from './utils/sharedUrlParams';
 import { Header } from './components/Header';
 import { SettingsPanel, type SettingsPanelRef } from './components/SettingsPanel';
+import { getModalCount, useModalOpen } from './hooks/useFocusTrap';
 import { useSettings } from './contexts/SettingsContext';
 import { STORAGE_KEYS, URL_PARAMS } from './constants';
 
@@ -68,17 +69,17 @@ function App() {
   const [recipeMissingIngredientsMinimized, setRecipeMissingIngredientsMinimized, recipeMissingMinPersistError] = useLocalStorage<boolean>(STORAGE_KEYS.RECIPE_MISSING_INGREDIENTS_MINIMIZED, false);
   const [mealPlan, setMealPlan, mealPlanPersistError] = useLocalStorage<MealPlan | null>(STORAGE_KEYS.MEAL_PLAN, null);
 
-  // Parse URL params once at mount. Feeds the view/notification initializers
-  // below so shared-link routing happens on the first render (no double-render).
+  // Parse URL params once at mount. Feeds the view initializers below so
+  // shared-link routing happens on the first render (no double-render). The
+  // invalid-data message is raised from an effect instead — see below.
   const [initialSharedData] = useState(parseSharedUrlParams);
 
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState<Notification | null>(() =>
-    initialSharedData.hasInvalidData
-      ? { message: t.invalidSharedData || "Invalid shared data. The link may be corrupted.", type: 'error' }
-      : null
-  );
+  const [notification, setNotification] = useState<Notification | null>(null);
   const notificationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Holds a notification raised while a dialog was open, until the last one closes.
+  const queuedNotificationRef = useRef<Notification | null>(null);
+  const modalOpen = useModalOpen();
   const generateAbortRef = useRef<AbortController | null>(null);
   const userAbortedRef = useRef(false);
 
@@ -123,7 +124,7 @@ function App() {
   const handleToggleShoppingListMinimize = useCallback(() => setShoppingListMinimized(prev => !prev), [setShoppingListMinimized]);
   const handleToggleRecipeMissingIngredientsMinimize = useCallback(() => setRecipeMissingIngredientsMinimized(prev => !prev), [setRecipeMissingIngredientsMinimized]);
 
-  const showNotification = useCallback((notif: Notification) => {
+  const presentNotification = useCallback((notif: Notification) => {
     // Clear any existing timeout
     if (notificationTimeoutRef.current) {
       clearTimeout(notificationTimeoutRef.current);
@@ -139,13 +140,47 @@ function App() {
     }
   }, []);
 
+  const showNotification = useCallback((notif: Notification) => {
+    // A toast raised while a dialog is open renders behind its z-[60] backdrop
+    // and, because the dialog is aria-modal, outside the accessibility tree:
+    // neither seen nor heard. Hold it instead, so it gets its full timeout and
+    // a freshly mounted role="alert" once the last dialog closes.
+    //
+    // Only notifications without an action. An undo toast is raised by a click
+    // on the page, which a modal covers, so it cannot land here in the first
+    // place — and deferring one would be wrong anyway: deleteRecipe runs a
+    // second timer that commits the deletion, so a held toast would offer Undo
+    // after the deed had already committed.
+    //
+    // A path that reloads the page while a dialog is open (GistSyncDialog's
+    // disable, Header's import) drops whatever is held. That is accepted: the
+    // message describes state from before the reload.
+    if (!notif.action && getModalCount() > 0) {
+      queuedNotificationRef.current = notif; // last one wins, like the visible slot
+      return;
+    }
+    presentNotification(notif);
+  }, [presentNotification]);
+
   const clearNotification = useCallback(() => {
     if (notificationTimeoutRef.current) {
       clearTimeout(notificationTimeoutRef.current);
       notificationTimeoutRef.current = null;
     }
+    queuedNotificationRef.current = null;
     setNotification(null);
   }, []);
+
+  // Release a held notification once the last dialog closes. getModalCount() is
+  // re-read here because StrictMode's double mount takes the count 1 -> 0 -> 1
+  // in dev, and the store snapshot can surface that transient zero.
+  useEffect(() => {
+    if (modalOpen || getModalCount() > 0) return;
+    const queued = queuedNotificationRef.current;
+    if (!queued) return;
+    queuedNotificationRef.current = null;
+    presentNotification(queued);
+  }, [modalOpen, presentNotification]);
 
   // On-demand recipe image generation, persisted in IndexedDB.
   // The four capabilities below follow the stored key alone. `useCopyPaste`
@@ -188,6 +223,17 @@ function App() {
     setImageCostRecipe(null);
     if (recipe) void recipeImage.generate(recipe);
   }, [imageCostRecipe, setImageGenAck, recipeImage]);
+
+  // A corrupted shared link is reported through showNotification rather than
+  // from the notification initializer: WelcomeDialog is open on a first visit,
+  // and a message set during mount would sit behind its backdrop just like the
+  // background ones. Ref-guarded so a language switch doesn't re-raise it.
+  const invalidSharedDataShownRef = useRef(false);
+  useEffect(() => {
+    if (!initialSharedData.hasInvalidData || invalidSharedDataShownRef.current) return;
+    invalidSharedDataShownRef.current = true;
+    showNotification({ message: t.invalidSharedData, type: 'error' });
+  }, [initialSharedData.hasInvalidData, showNotification, t.invalidSharedData]);
 
   // Storage error notification — deduplicated via ref guard
   const storageErrorShownRef = useRef(false);
@@ -242,7 +288,10 @@ function App() {
     showNotification({ message, type: 'error' });
   }, [sync.status, sync.errorKind, showNotification, t.sync.errorUnauthorized, t.sync.errorNotFound, t.sync.errorPayload, t.sync.errorNetwork]);
 
-  // Cleanup notification timeout on unmount
+  // Cleanup notification timeout on unmount. The held notification is
+  // deliberately *not* cleared here: a ref is collected with the component, so
+  // there is nothing to leak, and StrictMode's simulated unmount in dev would
+  // otherwise discard a notification held for a dialog that is still open.
   useEffect(() => {
     return () => {
       if (notificationTimeoutRef.current) {
