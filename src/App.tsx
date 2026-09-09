@@ -187,13 +187,19 @@ function App() {
   // Release a held notification once the last dialog closes. getModalCount() is
   // re-read here because StrictMode's double mount takes the count 1 -> 0 -> 1
   // in dev, and the store snapshot can surface that transient zero.
+  //
+  // A live undo toast also holds the release back. The slot is single-valued,
+  // so releasing over one would drop the Undo button while the timer behind it
+  // keeps running — deleteRecipe commits five seconds after the click whether
+  // or not its toast is still on screen. Every undo toast carries a timeout, so
+  // clearing `notification` re-runs this effect and the held message follows.
   useEffect(() => {
-    if (modalOpen || getModalCount() > 0) return;
+    if (modalOpen || getModalCount() > 0 || notification?.action) return;
     const queued = queuedNotificationRef.current;
     if (!queued) return;
     queuedNotificationRef.current = null;
     presentNotification(queued);
-  }, [modalOpen, presentNotification]);
+  }, [modalOpen, notification, presentNotification]);
 
   // On-demand recipe image generation, persisted in IndexedDB.
   // The four capabilities below follow the stored key alone. `useCopyPaste`
