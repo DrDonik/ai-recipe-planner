@@ -10,7 +10,7 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Copy-
 
 ## Versioning & Release
 
-**The version in `package.json` is frozen at 2.0.0 and is not maintained. There
+**The version in `package.json` is frozen at 3.3.3 and is not maintained. There
 is no release process. Do not bump it, do not create tags, and do not open a
 pull request whose purpose is a version bump.**
 
@@ -23,12 +23,13 @@ back. A reload gets the current one.
 The releases were cut per pull request, which made the label say nothing a
 commit range does not say better, and the manual bump was a merge conflict git
 could not see: two branches writing the same new version produce identical text,
-so one of them silently shipped without a release. 2.0.0 is a deliberate
-endpoint rather than the next patch, chosen so the number does not read as an
-actively maintained series.
+so one of them silently shipped without a release. 3.3.3 is not the next patch
+and is not meant to be read as one: it matches #333, the pull request that ended
+the practice, and the repetition is there to say that the number has stopped
+counting anything.
 
 The existing tags and GitHub Releases stay where they are. They are history and
-the only rollback anchors that exist. v2.0.0 is the last of them, published by
+the only rollback anchors that exist. v3.3.3 is the last of them, published by
 hand and saying so in its notes.
 
 ## Implementation Guidelines
