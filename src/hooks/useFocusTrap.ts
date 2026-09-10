@@ -1,4 +1,31 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
+
+/**
+ * Number of dialogs currently mounted, and a subscription to it.
+ *
+ * Every dialog in the app — and nothing else — calls `useFocusTrap`, so the
+ * hook is the honest place to keep this. A dialog is a `fixed inset-0 z-[60]`
+ * backdrop with `aria-modal="true"`, which puts anything rendered in the
+ * document flow behind it both visually and in the accessibility tree.
+ * `App` uses the signal to hold a background notification until the last
+ * dialog closes, rather than letting it expire unseen behind one.
+ */
+let openModalCount = 0;
+const modalListeners = new Set<() => void>();
+const emitModalCount = () => { modalListeners.forEach(listener => listener()); };
+
+/** Subscribe to changes in the count; returns the unsubscribe function. */
+export const subscribeModalCount = (listener: () => void) => {
+    modalListeners.add(listener);
+    return () => { modalListeners.delete(listener); };
+};
+
+/** Current count, readable outside React — see `showNotification` in `App`. */
+export const getModalCount = () => openModalCount;
+
+/** Subscribed form of the same fact, for effects that react to it. */
+export const useModalOpen = () =>
+    useSyncExternalStore(subscribeModalCount, () => openModalCount > 0, () => false);
 
 /**
  * Custom hook that implements focus trap for dialogs and modals.
@@ -28,6 +55,11 @@ export function useFocusTrap(onClose: () => void, focusContainer = false) {
     }, [onClose]);
 
     useEffect(() => {
+        // Paired with the decrement in this effect's cleanup, so StrictMode's
+        // double mount in dev nets out to the same count.
+        openModalCount++;
+        emitModalCount();
+
         // Store the currently focused element
         previousFocusRef.current = document.activeElement as HTMLElement;
 
@@ -100,6 +132,8 @@ export function useFocusTrap(onClose: () => void, focusContainer = false) {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             previousFocusRef.current?.focus();
+            openModalCount--;
+            emitModalCount();
         };
     }, []); // Empty dependency array - effect runs only once on mount
 
