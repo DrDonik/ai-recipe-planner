@@ -10,24 +10,27 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Copy-
 
 ## Versioning & Release
 
-**Current version**: 1.20.2
+**The version in `package.json` is frozen at 3.3.3 and is not maintained. There
+is no release process. Do not bump it, do not create tags, and do not open a
+pull request whose purpose is a version bump.**
 
-This project follows [Semantic Versioning](https://semver.org/) (SemVer):
+`deploy.yml` publishes every push to `main` to GitHub Pages, so `main` is what
+is running and nothing else claims to be. Nothing reads the version: the package
+is `"private": true` and never published, the string appears nowhere in the built
+app, and there is no service worker or lazy chunk that could hold an old build
+back. A reload gets the current one.
 
-- **Major version (1.x.x)**: Breaking changes, major architectural changes, incompatible API changes
-- **Minor version (x.1.x)**: New features, enhancements, backwards-compatible functionality additions
-- **Patch version (x.x.1)**: Bug fixes, minor improvements, documentation updates
+The releases were cut per pull request, which made the label say nothing a
+commit range does not say better, and the manual bump was a merge conflict git
+could not see: two branches writing the same new version produce identical text,
+so one of them silently shipped without a release. 3.3.3 is not the next patch
+and is not meant to be read as one: it matches #333, the pull request that ended
+the practice, and the repetition is there to say that the number has stopped
+counting anything.
 
-### Version Management Workflow
-
-1. Update version in `package.json` (use `npm version X.Y.Z --no-git-tag-version` so `package-lock.json` stays in sync) and in `AGENTS.md`
-2. Commit changes with message: `chore: bump version to X.Y.Z`
-3. Get the commit onto `main` (push, or merge a pull request)
-4. `tag-release.yml` creates the `vX.Y.Z` tag automatically, which triggers `release.yml` to publish the GitHub Release.
-
-Tagging by hand is no longer necessary — the version in `package.json` is what
-drives a release. An existing tag is never overwritten, so re-running the
-workflow on an already-released version is a no-op.
+The existing tags and GitHub Releases stay where they are. They are history and
+the only rollback anchors that exist. v3.3.3 is the last of them, published by
+hand and saying so in its notes.
 
 ## Implementation Guidelines
 
