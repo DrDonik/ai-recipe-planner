@@ -68,7 +68,6 @@ const sanitizeMultilineInput = (input: string, maxLength: number): string => {
 export const IngredientSchema = z.object({
   item: z.string(),
   amount: z.string(),
-  unit: z.string().optional(),
 });
 
 export const NutritionSchema = z.object({
@@ -337,7 +336,7 @@ export const buildRecipePrompt = ({
     11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe. This includes what a method mentions only in passing: fat for greasing a dish, a thickener, a splash of the cooking water, a garnish. If a step names it, it has a line in "ingredients". The one exception is plain tap water, which needs no line of its own.
     12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices and staples if they are listed in "Available Spices/Staples".
     13. Each recipe's "missingIngredients" must list only the ingredients that specific recipe requires to be purchased, at the amount needed for that recipe alone. Do not combine amounts across recipes in "missingIngredients".
-    14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}.
+    14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}. The unit belongs inside "amount", never in a field of its own: {"amount": "500g"}, NOT {"amount": "500", "unit": "g"}.
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.

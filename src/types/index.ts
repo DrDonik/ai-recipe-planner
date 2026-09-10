@@ -46,11 +46,16 @@ export interface Kitchen {
 
 /**
  * An ingredient used in a recipe or shopping list.
+ *
+ * `amount` carries the unit with it ("500 g", "1 bunch", "a pinch"), which is
+ * what the prompt has always asked for and what every display, the shopping
+ * list's item key and the pantry matching read. There is deliberately no
+ * separate `unit` field: nothing in the app computes with amounts, so splitting
+ * them would only fork one concept across two fields.
  */
 export interface Ingredient {
   item: string;
   amount: string;
-  unit?: string;
 }
 
 /**
