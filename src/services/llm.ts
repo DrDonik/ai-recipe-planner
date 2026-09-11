@@ -159,6 +159,7 @@ export interface ErrorTranslations {
   fetchFailed: string;
   emptyResponse: string;
   timeout: string;
+  planTimeout: string;
   networkError: string;
   unexpectedError: string;
   imageBlocked: string;
@@ -1201,7 +1202,7 @@ export const generateRecipes = async (
     structuredOutput: true,
   });
 
-  const timeoutSignal = AbortSignal.timeout(API_CONFIG.TIMEOUT_MS);
+  const timeoutSignal = AbortSignal.timeout(API_CONFIG.PLAN_TIMEOUT_MS);
   const signal = externalSignal
     ? AbortSignal.any([externalSignal, timeoutSignal])
     : timeoutSignal;
@@ -1250,9 +1251,15 @@ export const generateRecipes = async (
     // Handle specific error types with user-friendly messages
     if (error instanceof Error) {
       if (error.name === 'AbortError' || error.name === 'TimeoutError') {
-        // Preserve AbortError when the caller initiated the cancel; otherwise it's a timeout.
-        if (externalSignal?.aborted) throw error;
-        throw new Error(errors.timeout, { cause: error });
+        // Which signal fired *first*, not which are aborted by the time this
+        // runs: `AbortSignal.any` adopts the reason of the one that won, so
+        // comparing reasons stays right even if the other aborts in between.
+        // A caller-initiated cancel keeps its AbortError; anything else here
+        // is the ceiling. Not `errors.timeout`: the five shorter calls time
+        // out on something the user cannot influence, whereas this one has a
+        // lever right next to the button — the recipe count drives the duration.
+        if (externalSignal?.aborted && signal.reason !== timeoutSignal.reason) throw error;
+        throw new Error(errors.planTimeout, { cause: error });
       }
       if (error.message.includes('Failed to fetch')) {
         throw new Error(errors.networkError, { cause: error });

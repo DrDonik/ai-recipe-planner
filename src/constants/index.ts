@@ -102,6 +102,15 @@ export const API_CONFIG = {
     MODEL: 'gemini-3.6-flash',
     IMAGE_MODEL: 'gemini-3.1-flash-image',
     TIMEOUT_MS: 60000,
+    /**
+     * Meal-plan generation gets its own budget: its duration scales with the
+     * number of recipes requested, and the setting allows up to ten, so the
+     * 60s that suffices for a storage tip or a single image is regularly
+     * exceeded from about six recipes on. Generous rather than tuned — the
+     * generate button doubles as a cancel button while a plan is running, so
+     * a long ceiling never leaves the user stuck.
+     */
+    PLAN_TIMEOUT_MS: 180000,
     KEY_URL: 'https://aistudio.google.com/app/apikey',
 } as const;
 
