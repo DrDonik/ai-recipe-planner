@@ -566,14 +566,25 @@ function App() {
     });
   }, [pendingDeleteRecipeId, commitRecipeDeletion, showNotification, clearNotification, t.undo.recipeDeleted, t.undo.action]);
 
-  // After a new plan replaces an existing one, offer a one-tap undo.
-  // Restores the prior plan and the shopping-list checkmarks that were cleared.
-  const offerMealPlanUndo = useCallback((previousMealPlan: MealPlan | null, previousShoppingChecks: string | null) => {
-    if (!previousMealPlan) return;
+  /**
+   * Confirms a new meal plan and, where there is something to go back to,
+   * offers the undo. The two used to be one: no previous plan meant no toast
+   * at all, so the very first generation after a reload succeeded silently.
+   * `durationMs` appends how long the generation took, which is what makes a
+   * timeout ceiling something the user can reason about instead of guess at;
+   * the Copy-Paste route measures nothing and passes none.
+   */
+  const announceMealPlan = useCallback((previousMealPlan: MealPlan | null, previousShoppingChecks: string | null, durationMs?: number) => {
+    // Appended at the call site rather than folded into the key: the seconds
+    // read the same in all four languages, and the undo's accessible name
+    // stays derived from the bare sentence so it is not read out with them.
+    const message = durationMs === undefined
+      ? t.undo.mealPlanReplaced
+      : `${t.undo.mealPlanReplaced} (${Math.round(durationMs / 1000)}s)`;
     showNotification({
-      message: t.undo.mealPlanReplaced,
+      message,
       type: 'undo',
-      action: {
+      action: previousMealPlan ? {
         label: t.undo.action,
         ariaLabel: `${t.undo.action} ${t.undo.mealPlanReplaced.toLowerCase()}`,
         onClick: () => {
@@ -585,7 +596,7 @@ function App() {
           }
           clearNotification();
         }
-      },
+      } : undefined,
       timeout: 5000
     });
   }, [showNotification, clearNotification, setMealPlan, t.undo.mealPlanReplaced, t.undo.action]);
@@ -640,6 +651,7 @@ function App() {
     generateAbortRef.current = controller;
     userAbortedRef.current = false;
 
+    const startedAt = performance.now();
     try {
       const plan = await generateRecipes(apiKey, itemsToUse, people, meals, diet, language, {
         spices: spicesToUse,
@@ -651,10 +663,11 @@ function App() {
         errorTranslations: t.errors,
         externalSignal: controller.signal,
       });
+      const durationMs = performance.now() - startedAt;
       setMealPlan(plan);
       // Clear shopping list checkmarks when generating a new meal plan (scenario 9)
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
-      offerMealPlanUndo(previousMealPlan, previousShoppingChecks);
+      announceMealPlan(previousMealPlan, previousShoppingChecks, durationMs);
     } catch (err: unknown) {
       // User-initiated cancel: silently revert to ready state, keep previous plan
       if (userAbortedRef.current && err instanceof Error && err.name === 'AbortError') return;
@@ -666,7 +679,7 @@ function App() {
       userAbortedRef.current = false;
       setLoading(false);
     }
-  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, ownRecipes, forecast, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, offerMealPlanUndo]);
+  }, [pantryItems, spices, appliances, styleWishes, plannedRecipes, ownRecipes, forecast, useCopyPaste, apiKey, people, meals, diet, language, t, setCopyPastePrompt, setShowCopyPasteDialog, showNotification, clearNotification, setMealPlan, mealPlan, announceMealPlan]);
 
   const handleCancelGenerate = useCallback(() => {
     if (!generateAbortRef.current) return;
@@ -685,14 +698,14 @@ function App() {
       const plan = parseRecipeResponse(response, t.errors);
       setMealPlan(plan);
       localStorage.removeItem(STORAGE_KEYS.SHOPPING_LIST_CHECKED);
-      offerMealPlanUndo(previousMealPlan, previousShoppingChecks);
+      announceMealPlan(previousMealPlan, previousShoppingChecks);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t.parseError;
       showNotification({ message, type: 'error' });
     } finally {
       setLoading(false);
     }
-  }, [t.errors, t.parseError, setMealPlan, clearNotification, showNotification, setShowCopyPasteDialog, mealPlan, offerMealPlanUndo]);
+  }, [t.errors, t.parseError, setMealPlan, clearNotification, showNotification, setShowCopyPasteDialog, mealPlan, announceMealPlan]);
 
   const handleCopyPasteCancel = useCallback(() => {
     setShowCopyPasteDialog(false);
