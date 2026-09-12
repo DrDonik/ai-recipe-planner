@@ -45,7 +45,7 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat, spices, ap
     const { getProgress } = useCookingProgress();
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const launcherRef = useRef<HTMLButtonElement>(null);
     // Skips the focus-return on first render, so merely entering the focus view
@@ -78,6 +78,21 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat, spices, ap
         const el = listRef.current;
         if (el) el.scrollTop = el.scrollHeight;
     }, [messages.length, isPending, error, isOpen]);
+
+    // Grow the composer with its content rather than scrolling a single line
+    // sideways. The height is cleared before `scrollHeight` is read, because
+    // scrollHeight never reports less than the height already set and the
+    // field could otherwise not shrink again. `max-h` on the element caps the
+    // used height regardless of this inline value, so a long question scrolls
+    // inside five lines instead of pushing the transcript off screen. Runs on
+    // open as well: the draft survives a close, and the remounted field would
+    // otherwise come back one line tall.
+    useEffect(() => {
+        const el = inputRef.current;
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = `${el.scrollHeight}px`;
+    }, [input, isOpen]);
 
     // Move focus into the panel when it opens, and hand it back to the button
     // when it closes — otherwise Escape or the close button drop focus on
@@ -259,22 +274,29 @@ export const RecipeChat: React.FC<RecipeChatProps> = ({ recipe, chat, spices, ap
                             )}
 
                             {/* Composer */}
-                            <div className="flex items-center gap-2 p-3 border-t border-border-base/30">
-                                <input
+                            <div className="flex items-end gap-2 p-3 border-t border-border-base/30">
+                                {/* Enter sends, as it did when this was a single-line input;
+                                    Shift+Enter breaks the line. The cap is five lines of
+                                    `text-sm` (5 × 1.25rem) plus the 0.5rem padding either
+                                    side, so it lands on a line boundary instead of leaving a
+                                    sliver of a sixth. No height transition: an animated
+                                    height drags the focus ring behind it. */}
+                                <textarea
                                     ref={inputRef}
-                                    type="text"
+                                    rows={1}
                                     value={input}
                                     maxLength={MAX_CHAT_INPUT_LENGTH}
+                                    enterKeyHint="send"
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
                                             if (input.trim()) ask(input);
                                         }
                                     }}
                                     placeholder={t.recipeChat.placeholder}
                                     aria-label={t.recipeChat.placeholder}
-                                    className="flex-1 min-w-0 bg-white/30 dark:bg-black/20 rounded-lg px-3 py-2 text-sm"
+                                    className="flex-1 min-w-0 max-h-[7.25rem] resize-none overflow-y-auto bg-white/30 dark:bg-black/20 rounded-lg px-3 py-2 text-sm"
                                 />
                                 <button
                                     type="button"
