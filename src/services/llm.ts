@@ -81,10 +81,17 @@ export const NutritionSchema = z.object({
  * Key order matters beyond documentation: it is the order the model fills the
  * fields in when the response schema is enforced (see `buildResponseSchema`),
  * and a model cannot estimate a total time or a nutrition breakdown for a
- * recipe it has not written yet. Hence ingredients and instructions first,
- * and the fields derived from them last.
+ * recipe it has not written yet. Hence the method and the ingredient list
+ * first, and the fields derived from them last.
  *
- * `servings` sits ahead of them for the same reason read the other way: it is
+ * `instructions` comes before `ingredients` because the list is ordered by
+ * first use in the method (see INGREDIENT LIST in `buildRecipePrompt`), and a
+ * list sorted by an order that has not been written yet can only be a guess —
+ * the same argument that puts `time` at the end. It also turns rule 11, that
+ * every ingredient a step names has a line of its own, into something the
+ * model can read off the method instead of having to anticipate it.
+ *
+ * `servings` sits ahead of both for the same reason read the other way: it is
  * not derived from the recipe but a constraint the amounts have to follow, so
  * the model states it before writing them rather than describing afterwards
  * what it happened to cook for.
@@ -101,8 +108,8 @@ export const RecipeSchema = z.object({
   id: z.string(),
   title: z.string(),
   servings: z.number().optional(),
-  ingredients: z.array(IngredientSchema),
   instructions: z.array(z.string()),
+  ingredients: z.array(IngredientSchema),
   usedIngredients: z.array(z.string()),
   // Optional because shared recipes exclude missingIngredients (not relevant in standalone view)
   missingIngredients: z.array(IngredientSchema).optional(),
@@ -337,7 +344,7 @@ export const buildRecipePrompt = ({
     11. The "ingredients" array must contain EVERY single ingredient needed for the recipe: pantry items, items to buy, and any spice rack items used in the recipe. This includes what a method mentions only in passing: fat for greasing a dish, a thickener, a splash of the cooking water, a garnish. If a step names it, it has a line in "ingredients". The one exception is plain tap water, which needs no line of its own.
     12. The "missingIngredients" array must ONLY contain items I need to buy. DO NOT include spices and staples if they are listed in "Available Spices/Staples".
     13. Each recipe's "missingIngredients" must list only the ingredients that specific recipe requires to be purchased, at the amount needed for that recipe alone. Do not combine amounts across recipes in "missingIngredients".
-    14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500g"}, NOT {"item": "Carrots 500g"}. The unit belongs inside "amount", never in a field of its own: {"amount": "500g"}, NOT {"amount": "500", "unit": "g"}.
+    14. The "item" field MUST NOT include the "amount". Keep them separate. Example: {"item": "Carrots", "amount": "500 g"}, NOT {"item": "Carrots 500 g"}. The unit belongs inside "amount", never in a field of its own: {"amount": "500 g"}, NOT {"amount": "500", "unit": "g"}. Always separate the number from its unit with a space: "500 g", "2 tbsp", "1.5 l", "180 °C", never "500g" or "1.5l". That holds for every amount in the output -- in "ingredients", "missingIngredients" and "shoppingList" alike, and for any amount or temperature named inside an instruction step.
     15. Ensure "missingIngredients" is a list of distinct objects, not one combined string.
     16. If you need to buy spices or staples, use the "missingIngredients" array.
     17. The top-level "shoppingList" is the aggregated shopping list across all recipes. If the same ingredient is needed in multiple recipes, combine the totals here.
@@ -355,6 +362,11 @@ export const buildRecipePrompt = ({
     - NAME PARALLEL STRANDS: where a dish has components that run alongside one another, prefix every step with its strand ("Sauce: ...", "Side: ..."). Start a strand at the point it must actually be started, not at the point it is served: a side that has to cook during the oven phase gets its first step before that phase, not after it.
     - CONSISTENT NAMES: refer to an ingredient by the same name "ingredients" gives it. Where a step works on a combination, name it once and reuse that name ("the onion mixture").
 
+    INGREDIENT LIST:
+    - ORDER BY FIRST USE: write the method first, then read "ingredients" off it: the list follows the order in which the finished "instructions" first name each ingredient, so that working down the list is working through the recipe. Not by importance, not by category, and not by the point at which a step would have needed the ingredient before the rules above pulled it forward -- the order of the steps as you finally wrote them is the order of the list.
+    - Where one step first names several ingredients, keep them in the order that step names them.
+    - Order is the only thing these rules decide. What the list contains is rule 11, and every ingredient still carries its own amount for the whole recipe, however many steps it is split across.
+
     NUTRITION ESTIMATES:
     - Provide rough nutritional estimates PER SERVING (for one person) in the "nutrition" object.
     - "calories" is in kcal. "carbs", "fat", and "protein" are in grams.
@@ -367,17 +379,17 @@ export const buildRecipePrompt = ({
           "id": "unique_id",
           "title": "Recipe Name",
           "servings": ${people},
-          "ingredients": [ {"item": "Name", "amount": "Quantity"} ],
           "instructions": ["Step 1", "Step 2"],
+          "ingredients": [ {"item": "Name", "amount": "Quantity"} ],
           "usedIngredients": ["pantry_item_id_1", "pantry_item_id_2"],
-          "missingIngredients": [{"item": "Chicken", "amount": "500g"}],
+          "missingIngredients": [{"item": "Chicken", "amount": "500 g"}],
           "time": "30 mins",
           "nutrition": {"calories": 450, "carbs": 35, "fat": 18, "protein": 28},
           "comments": "(optional) Fun scientific, historical or geographical fact or comment about omission of inedible ingredients about this recipe or its ingredients."
         }
       ],
       "shoppingList": [
-        {"item": "Chicken", "amount": "500g"}
+        {"item": "Chicken", "amount": "500 g"}
       ]
     }
   `;
@@ -616,14 +628,20 @@ export const generateRecipeImage = async (
   const sanitizedTitle = sanitizeUserInput(recipeTitle, 200);
   if (!sanitizedTitle) throw new Error(errors.unexpectedError);
 
-  const topIngredients = ingredients
+  // The first few lines of the list, which is ordered by first use in the
+  // method (see INGREDIENT LIST in `buildRecipePrompt`) — a proxy for what the
+  // dish is made of, not a ranking: a recipe that starts by marinating meat
+  // leads with it, one that starts by softening onions in oil leads with those.
+  // The data carries no better signal, and nothing computes with amounts, so
+  // this stays a hint beside the title rather than a claim about the plate.
+  const leadIngredients = ingredients
     .slice(0, 5)
     .map((i) => sanitizeUserInput(i.item, 60))
     .filter((s) => s.length > 0)
     .join(', ');
 
   const prompt = `An appetizing overhead food photograph of '${sanitizedTitle}'${
-    topIngredients ? `, featuring ${topIngredients}` : ''
+    leadIngredients ? `, featuring ${leadIngredients}` : ''
   }. Natural daylight, shallow depth of field, plated on a simple ceramic dish on a wooden table. Photorealistic, magazine-quality food photography. No text, no watermarks, no logos.`;
 
   try {
