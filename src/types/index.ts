@@ -49,9 +49,12 @@ export interface Kitchen {
  *
  * `amount` carries the unit with it ("500 g", "1 bunch", "a pinch"), which is
  * what the prompt has always asked for and what every display, the shopping
- * list's item key and the pantry matching read. There is deliberately no
- * separate `unit` field: nothing in the app computes with amounts, so splitting
- * them would only fork one concept across two fields.
+ * list's item key and the pantry matching read. The space between number and
+ * unit belongs to that format, and the prompt now states it rather than only
+ * showing it: its own examples wrote "500g" against this line's "500 g", and
+ * the model went with the examples. There is deliberately no separate `unit`
+ * field: nothing in the app computes with amounts, so splitting them would
+ * only fork one concept across two fields.
  */
 export interface Ingredient {
   item: string;
@@ -83,8 +86,10 @@ export interface Recipe {
    * reports it rather than the client stamping it on.
    */
   servings?: number;
-  ingredients: Ingredient[];
+  // The method comes before the list because the list is ordered by first use
+  // in it: see the key-order note on RecipeSchema in services/llm.ts.
   instructions: string[];
+  ingredients: Ingredient[];
   usedIngredients: string[]; // List of PantryItem IDs used
   missingIngredients?: Ingredient[]; // Optional: excluded in shared recipes
   // Derived from the recipe above, and generated after it: see the key-order
