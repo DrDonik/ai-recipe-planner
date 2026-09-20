@@ -10,9 +10,9 @@ AI Recipe Planner is a React-based meal planning application that uses AI (Copy-
 
 ## Versioning & Release
 
-**The version in `package.json` is frozen at 3.3.3 and is not maintained. There
+The version in `package.json` is frozen at 3.3.3 and is not maintained. There
 is no release process. Do not bump it, do not create tags, and do not open a
-pull request whose purpose is a version bump.**
+pull request whose purpose is a version bump.
 
 `deploy.yml` publishes every push to `main` to GitHub Pages, so `main` is what
 is running and nothing else claims to be. Nothing reads the version: the package
@@ -20,29 +20,18 @@ is `"private": true` and never published, the string appears nowhere in the buil
 app, and there is no service worker or lazy chunk that could hold an old build
 back. A reload gets the current one.
 
-The releases were cut per pull request, which made the label say nothing a
-commit range does not say better, and the manual bump was a merge conflict git
-could not see: two branches writing the same new version produce identical text,
-so one of them silently shipped without a release. 3.3.3 is not the next patch
-and is not meant to be read as one: it matches #333, the pull request that ended
-the practice, and the repetition is there to say that the number has stopped
-counting anything.
-
-The existing tags and GitHub Releases stay where they are. They are history and
-the only rollback anchors that exist. v3.3.3 is the last of them, published by
-hand and saying so in its notes.
-
 ## Implementation Guidelines
 
 Think carefully and implement the most concise solution that changes as little code as possible.
-The code will be carefully reviewed by an expert for correctness, security, edge cases, maintainability, and fit with the existing codebase.
+All new code code will be carefully reviewed by an expert for correctness, security, edge cases, maintainability, and fit with the existing codebase.
 
 ### When Adding Features
 
 - **Context is Everything**: When proposing functionalities or architecture, always think it through on the meta-level. The context of the UI element in question is usually the level where decisions fall out automatically. Why does the user interact with this element? How did they get here? What do they want to achieve? What does this element do in the entire in-app and out-of-app workflow? What other exisitng or not-yet-existing elements are related?
-- **Usability First**: Keep interactions minimal. Avoid adding steps or dialogs unless necessary.
+- **Usability First**: Always think user experience first. If the intended user experience or user flow is unclear, ask.
 - **Interface Design**: Adhere to the Eight Golden Rules of Interface Design, and to what each has come to mean here: @InterfaceDesign.md
 - **Universal Design**: Golden Rule 2 in full — the accessibility conventions this repo is bound to: @UniversalDesign.md
+- **Minimize UI Interactions**: Keep interactions minimal. Avoid adding steps or dialogs unless necessary.
 - **Minimize clicks**: Use sensible defaults, persist user choices
 - **Minimize scrolling**: Use collapsible panels, keep important actions visible
 - **All panels should be collapsible** with state persisted to localStorage
@@ -62,4 +51,4 @@ through its checklist. Creating a pull request through the API does not fill the
 template in — copy it across yourself. Replace the comments rather than leaving
 them in the body, and drop a section that has nothing to say.
 
-Each pull request is reviewed by Coderabbit. However, you shall trigger Coderabbits‘ review by adding the comment „@coderabbitai review“ to the PR after opening it.
+Coderabbit does not review this repository automatically (it has fewer than 10 stars), so you must trigger every review yourself: after opening the PR, add a comment containing exactly `@coderabbitai review`. As an exception to guideline 7 (never jump straight to implementation), fix no-brainer feedback directly; discuss anything that is a judgement call with the requester instead of deciding it on your own. Retrigger the review after every push that changes code (not after edits to the PR title or body). Once Coderabbit answers `No actionable comments were generated in the recent review.`, the review round is done.
