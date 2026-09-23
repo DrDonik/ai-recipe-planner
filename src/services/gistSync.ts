@@ -171,6 +171,10 @@ const gistFetch = async (
     if (response.status === 404) {
         throw new GistNotFoundError();
     }
+    // GitHub reached and rejected the content; sending it again will not help.
+    if (response.status === 422) {
+        throw new GistPayloadError(`GitHub responded with status ${response.status}`);
+    }
     if (!response.ok) {
         throw new GistNetworkError(`GitHub responded with status ${response.status}`);
     }
@@ -232,7 +236,12 @@ export const pullGist = async (
     gistId: string,
 ): Promise<SyncPayload | null> => {
     const response = await gistFetch(`${GIST_API.BASE_URL}/${gistId}`, { method: 'GET' }, token);
-    const gist = (await response.json()) as GistResponse;
+    let gist: GistResponse;
+    try {
+        gist = (await response.json()) as GistResponse;
+    } catch {
+        throw new GistPayloadError('GitHub response is not valid JSON');
+    }
     return extractPayload(gist, token);
 };
 
