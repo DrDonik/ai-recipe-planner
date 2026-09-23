@@ -47,16 +47,64 @@ const classifyError = (err: unknown): SyncErrorKind => {
     return 'network';
 };
 
+/** Backoff before each automatic retry; the last delay repeats. */
+const RETRY_DELAYS_MS = [5_000, 15_000, 60_000, 300_000];
+
+/**
+ * Re-runs a sync step that failed on the network: on a backoff, or at once
+ * when the browser reports it is back online. Holds one step at a time; a new
+ * failure replaces the pending one. Timers are suspended while an iPadOS PWA
+ * sits in the background, so a pending retry also fires soon after it returns.
+ */
+const createRetrier = () => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pending: (() => void) | null = null;
+    let attempt = 0;
+
+    const cancel = () => {
+        if (timer) clearTimeout(timer);
+        timer = null;
+        pending = null;
+    };
+    const fire = () => {
+        const step = pending;
+        cancel();
+        step?.();
+    };
+
+    return {
+        schedule: (step: () => void) => {
+            cancel();
+            pending = step;
+            timer = setTimeout(fire, RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)]);
+            attempt++;
+        },
+        succeeded: () => {
+            cancel();
+            attempt = 0;
+        },
+        fireNow: () => {
+            if (pending) fire();
+        },
+        cancel,
+    };
+};
+
 /**
  * Orchestrates Gist-based sync for the app:
  *
  * 1. On mount, pulls the remote payload. If it exists, applies it to
  *    localStorage (remote always wins on page load).
- * 2. After the initial pull completes, subscribes to localStorage change
+ * 2. After the initial pull succeeds, subscribes to localStorage change
  *    events and pushes a debounced snapshot whenever a synced key changes.
  *
- * Each page load triggers at most one pull. Pushes are debounced by
- * GIST_API.PUSH_DEBOUNCE_MS to coalesce rapid edits.
+ * Each page load pulls until one pull succeeds, and never pushes before it
+ * has: a push is a full snapshot, so pushing without having pulled would
+ * overwrite whatever another device stored since. A step that fails on the
+ * network is retried (see createRetrier); the other error kinds need the user
+ * and are not. Retries run quietly — status stays `error` until one succeeds,
+ * so a failure that persists is not re-announced on every attempt. Pushes are
+ * debounced by GIST_API.PUSH_DEBOUNCE_MS to coalesce rapid edits.
  */
 export const useGistSync = (): UseGistSyncResult => {
     // Null while sync is switched off, so a token kept on this device sits
@@ -68,15 +116,18 @@ export const useGistSync = (): UseGistSyncResult => {
     const [errorKind, setErrorKind] = useState<SyncErrorKind | null>(null);
     const [justPulledFromRemote, setJustPulledFromRemote] = useState(false);
 
-    // The initial pull must complete before we start pushing, otherwise we
-    // race the applySyncPayload writes and push what we just pulled.
+    // The initial pull must succeed before we start pushing, otherwise we
+    // race the applySyncPayload writes and push what we just pulled — or,
+    // after a failed pull, push a stale snapshot over the remote.
     const pullCompleteRef = useRef(false);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pushInFlightRef = useRef(false);
     const pushQueuedRef = useRef(false);
+    const [retrier] = useState(createRetrier);
 
-    // Run pull exactly once on mount. The effect reads its own config to
-    // avoid a stale closure if the hook ever receives config via props.
+    // Pull on mount, retrying on network errors until one succeeds. The effect
+    // reads its own config to avoid a stale closure if the hook ever receives
+    // config via props.
     useEffect(() => {
         const cfg = readActiveSyncConfig();
         if (!cfg) {
@@ -85,7 +136,7 @@ export const useGistSync = (): UseGistSyncResult => {
         }
 
         let cancelled = false;
-        (async () => {
+        const pull = async () => {
             try {
                 const remote = await pullGist(cfg.token, cfg.gistId);
                 if (cancelled) return;
@@ -97,30 +148,31 @@ export const useGistSync = (): UseGistSyncResult => {
                     );
                     setJustPulledFromRemote(true);
                 }
+                pullCompleteRef.current = true;
+                retrier.succeeded();
                 setStatus('synced');
                 setErrorKind(null);
             } catch (err) {
                 if (cancelled) return;
+                const kind = classifyError(err);
                 setStatus('error');
-                setErrorKind(classifyError(err));
-            } finally {
-                if (!cancelled) {
-                    pullCompleteRef.current = true;
-                }
+                setErrorKind(kind);
+                if (kind === 'network') retrier.schedule(pull);
             }
-        })();
+        };
+        pull();
 
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [retrier]);
 
     // Debounced push on synced-key changes. Subscribes only after the pull
     // completes, so applySyncPayload writes do not trigger a push.
     useEffect(() => {
         if (!isConfigured) return;
 
-        const performPush = async () => {
+        const performPush = async (isRetry = false) => {
             const cfg = readActiveSyncConfig();
             if (!cfg) return;
 
@@ -131,7 +183,7 @@ export const useGistSync = (): UseGistSyncResult => {
             }
 
             pushInFlightRef.current = true;
-            setStatus('pushing');
+            if (!isRetry) setStatus('pushing');
             try {
                 const payload = buildSyncPayload();
                 await pushGist(cfg.token, cfg.gistId, payload);
@@ -139,11 +191,14 @@ export const useGistSync = (): UseGistSyncResult => {
                     STORAGE_KEYS.SYNC_UPDATED_AT,
                     JSON.stringify(payload.updatedAt),
                 );
+                retrier.succeeded();
                 setStatus('synced');
                 setErrorKind(null);
             } catch (err) {
+                const kind = classifyError(err);
                 setStatus('error');
-                setErrorKind(classifyError(err));
+                setErrorKind(kind);
+                if (kind === 'network') retrier.schedule(() => performPush(true));
             } finally {
                 pushInFlightRef.current = false;
                 if (pushQueuedRef.current) {
@@ -175,7 +230,18 @@ export const useGistSync = (): UseGistSyncResult => {
                 debounceTimerRef.current = null;
             }
         };
-    }, [isConfigured]);
+    }, [isConfigured, retrier]);
+
+    // Coming back online is the likeliest moment for a retry to succeed, so a
+    // pending one does not wait out its backoff.
+    useEffect(() => {
+        if (!isConfigured) return;
+        window.addEventListener('online', retrier.fireNow);
+        return () => {
+            window.removeEventListener('online', retrier.fireNow);
+            retrier.cancel();
+        };
+    }, [isConfigured, retrier]);
 
     return {
         status,
