@@ -236,9 +236,17 @@ export const pullGist = async (
     gistId: string,
 ): Promise<SyncPayload | null> => {
     const response = await gistFetch(`${GIST_API.BASE_URL}/${gistId}`, { method: 'GET' }, token);
+    // Reading the body can still fail in transport; only a body that arrived
+    // and does not parse is a payload problem.
+    let body: string;
+    try {
+        body = await response.text();
+    } catch (err) {
+        throw new GistNetworkError(err instanceof Error ? err.message : String(err));
+    }
     let gist: GistResponse;
     try {
-        gist = (await response.json()) as GistResponse;
+        gist = JSON.parse(body) as GistResponse;
     } catch {
         throw new GistPayloadError('GitHub response is not valid JSON');
     }

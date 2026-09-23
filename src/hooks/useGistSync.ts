@@ -139,10 +139,18 @@ export const useGistSync = (): UseGistSyncResult => {
         }
 
         let cancelled = false;
+        // Another tab can switch sync off or to another Gist while a retry
+        // waits; a stale retry must neither apply the old Gist nor unlock
+        // pushes, which read the new config.
+        const configIsCurrent = () => {
+            const current = readActiveSyncConfig();
+            return current?.token === cfg.token && current.gistId === cfg.gistId;
+        };
         const pull = async () => {
+            if (!configIsCurrent()) return;
             try {
                 const remote = await pullGist(cfg.token, cfg.gistId);
-                if (cancelled) return;
+                if (cancelled || !configIsCurrent()) return;
                 if (remote) {
                     applySyncPayload(remote);
                     localStorage.setItem(
@@ -156,7 +164,7 @@ export const useGistSync = (): UseGistSyncResult => {
                 setStatus('synced');
                 setErrorKind(null);
             } catch (err) {
-                if (cancelled) return;
+                if (cancelled || !configIsCurrent()) return;
                 setStatus('error');
                 setErrorKind(classifyError(err));
                 if (err instanceof GistNetworkError) retrier.schedule(pull);
