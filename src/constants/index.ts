@@ -88,10 +88,16 @@ export const SYNCED_STORAGE_KEYS: readonly string[] = [
 
 /**
  * URL query parameter names for sharing functionality.
+ *
+ * `r` / `l` carry the compressed payload every link is written in now. The
+ * legacy names carry the uncompressed one and are only ever read: links in that
+ * format live on in chats and notes, and must keep opening.
  */
 export const URL_PARAMS = {
-    RECIPE: 'recipe',
-    SHOPPING_LIST: 'shoppingList',
+    RECIPE: 'r',
+    SHOPPING_LIST: 'l',
+    LEGACY_RECIPE: 'recipe',
+    LEGACY_SHOPPING_LIST: 'shoppingList',
 } as const;
 
 /**
