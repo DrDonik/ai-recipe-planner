@@ -17,12 +17,41 @@ const fromBinaryString = (binString: string): Uint8Array =>
     Uint8Array.from(binString, (char) => char.codePointAt(0)!);
 
 /**
- * Encodes an object into a URL-safe string: UTF-8 JSON, raw-deflated, then
- * base64url without padding. base64url needs no percent-encoding, so the
- * result can go straight into `searchParams.set`.
+ * CRC-32 (IEEE, as gzip and PNG use it). fflate computes one internally but does
+ * not export it. Not Adler-32, zlib's cheaper choice: it is weak on short, local
+ * changes, which is exactly what a mangled link produces, and in testing it let
+ * a single substituted character through.
+ */
+const CRC_TABLE = Uint32Array.from({ length: 256 }, (_, n) => {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    return c;
+});
+
+const crc32 = (bytes: Uint8Array): number => {
+    let crc = 0xffffffff;
+    for (const byte of bytes) crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+    return (crc ^ 0xffffffff) >>> 0;
+};
+
+const CHECKSUM_BYTES = 4;
+
+/**
+ * Encodes an object into a URL-safe string: UTF-8 JSON, raw-deflated, followed
+ * by the big-endian CRC-32 of the JSON, then base64url without padding.
+ * base64url needs no percent-encoding, so the result can go straight into
+ * `searchParams.set`.
+ *
+ * The checksum is there because raw deflate has none: a link mangled in transit
+ * would otherwise often inflate to valid JSON and open a silently altered
+ * recipe instead of the invalid-link notice.
  */
 export const encodeForUrl = <T>(data: T): string => {
-    const bytes = deflateSync(new TextEncoder().encode(JSON.stringify(data)), { level: 9 });
+    const json = new TextEncoder().encode(JSON.stringify(data));
+    const deflated = deflateSync(json, { level: 9 });
+    const bytes = new Uint8Array(deflated.length + CHECKSUM_BYTES);
+    bytes.set(deflated);
+    new DataView(bytes.buffer).setUint32(deflated.length, crc32(json));
     return btoa(toBinaryString(bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
 
@@ -63,11 +92,15 @@ const decodeWith = <T>(toBytes: () => Uint8Array, schema?: z.ZodSchema<T>): T | 
 export const decodeFromUrl = <T>(payload: string, schema?: z.ZodSchema<T>): T | null =>
     decodeWith(() => {
         if (payload.length > MAX_PAYLOAD_LENGTH) throw new Error('Shared payload exceeds the length cap');
-        const compressed = fromBinaryString(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+        const bytes = fromBinaryString(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+        if (bytes.length <= CHECKSUM_BYTES) throw new Error('Shared payload is too short');
+        const checksumOffset = bytes.length - CHECKSUM_BYTES;
+        const expectedChecksum = new DataView(bytes.buffer).getUint32(checksumOffset);
         // fflate stops silently at the end of a supplied buffer, so one byte of
         // headroom is what tells "exactly at the cap" from "past it".
-        const inflated = inflateSync(compressed, { out: new Uint8Array(MAX_INFLATED_BYTES + 1) });
+        const inflated = inflateSync(bytes.subarray(0, checksumOffset), { out: new Uint8Array(MAX_INFLATED_BYTES + 1) });
         if (inflated.length > MAX_INFLATED_BYTES) throw new Error('Shared payload inflates past the cap');
+        if (crc32(inflated) !== expectedChecksum) throw new Error('Shared payload fails its checksum');
         return inflated;
     }, schema);
 
