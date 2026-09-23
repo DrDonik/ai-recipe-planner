@@ -290,9 +290,19 @@ function App() {
 
   // Surface sync errors to the user (category-specific message, one-shot per error state change)
   const syncErrorShownRef = useRef<string | null>(null);
+  // The error toast has no timeout, so a later successful sync has to take it
+  // down again, or it outlives the failure it reports. Matched by identity, so
+  // a message that has since replaced it in the slot is left alone.
+  const syncErrorNotificationRef = useRef<Notification | null>(null);
   useEffect(() => {
     if (sync.status !== 'error' || sync.errorKind === null) {
       syncErrorShownRef.current = null;
+      const shown = syncErrorNotificationRef.current;
+      if (sync.status === 'synced' && shown) {
+        syncErrorNotificationRef.current = null;
+        if (queuedNotificationRef.current === shown) queuedNotificationRef.current = null;
+        setNotification(prev => (prev === shown ? null : prev));
+      }
       return;
     }
     if (syncErrorShownRef.current === sync.errorKind) return;
@@ -304,7 +314,9 @@ function App() {
       payload: t.sync.errorPayload,
       network: t.sync.errorNetwork,
     }[sync.errorKind];
-    showNotification({ message, type: 'error' });
+    const notif: Notification = { message, type: 'error' };
+    syncErrorNotificationRef.current = notif;
+    showNotification(notif);
   }, [sync.status, sync.errorKind, showNotification, t.sync.errorUnauthorized, t.sync.errorNotFound, t.sync.errorPayload, t.sync.errorNetwork]);
 
   // Cleanup notification timeout on unmount. The held notification is
