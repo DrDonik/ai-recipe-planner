@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "fflate": "^0.8.3",
-    "framer-motion": "^13.4.4",
-    "lucide-react": "^1.48.0",
+    "framer-motion": "^14.0.0",
+    "lucide-react": "^1.52.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zod": "^4.6.5"
