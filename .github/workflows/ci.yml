@@ -19,7 +19,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "26"
+          check-latest: true
           cache: "npm"
 
       - name: Install dependencies
@@ -38,7 +39,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "26"
+          check-latest: true
           cache: "npm"
 
       - name: Install dependencies
