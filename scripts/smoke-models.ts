@@ -200,6 +200,9 @@ const results = [
       expect(r.ingredients.length > 0 && r.instructions.length > 0, `"${r.title}" is empty`);
       expect(r.usedIngredients.every((id) => ids.has(id)), `"${r.title}" cites unknown pantry ids`);
     }
+    // Using up the pantry is the point of the app, and all four items suit
+    // any diet, so a plan that touches none of them ignored the prompt.
+    expect(plan.recipes.some((r) => r.usedIngredients.length > 0), 'plan uses no pantry item');
     return plan.recipes.map((r) => r.title).join(' / ');
   }),
   await check('storage tip', async () => {
