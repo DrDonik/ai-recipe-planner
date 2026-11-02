@@ -35,6 +35,7 @@ interface Part {
   inlineData?: unknown;
 }
 interface Chunk {
+  error?: { code?: number; message?: string; status?: string };
   candidates?: { content?: { parts?: Part[]; role?: string }; finishReason?: string }[];
   promptFeedback?: unknown;
   usageMetadata?: {
@@ -54,6 +55,10 @@ const foldStream = (sse: string): Chunk => {
     .split('\n')
     .filter((line) => line.startsWith('data:'))
     .map((line) => JSON.parse(line.slice(5)));
+  // A stream can start with HTTP 200 and still end in an error event; the
+  // content before it is incomplete, not a result.
+  const failed = chunks.find((c) => c.error)?.error;
+  if (failed) throw new Error(`stream ${failed.status ?? 'error'}: ${failed.message ?? 'unknown'}`);
   const parts: Part[] = [];
   let finishReason: string | undefined;
   for (const chunk of chunks) {
