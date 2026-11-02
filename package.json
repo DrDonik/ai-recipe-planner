@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke:models": "NODE_USE_ENV_PROXY=1 tsx scripts/smoke-models.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",
@@ -32,6 +33,7 @@
     "globals": "^17.13.0",
     "postcss": "^8.5.32",
     "tailwindcss": "^4.1.18",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5"
