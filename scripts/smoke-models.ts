@@ -11,7 +11,8 @@
  * the Gemini key as a network secret for generativelanguage.googleapis.com,
  * sent as the `x-goog-api-key` header. The key never enters this process.
  *
- * Every check reports its duration and tokens. `--plan-runs N` and
+ * Every check reports its duration, and a passing one its tokens; the summary
+ * at the end counts all tokens, failed attempts included. `--plan-runs N` and
  * `--image-runs N` repeat the meal plan and the recipe image, the two checks
  * whose duration the user waits on and whose token count varies from run to
  * run, and add a `MEDIAN` line for each; doc/gemini-models.md compares
@@ -102,7 +103,8 @@ const usage = new Map<string, Usage>();
 // Google routes requests for a retired model to its successor without an
 // error, so a model change can reach the live app with no change to the code.
 // Every response names the model that answered; one that is not the requested
-// model is a failure. `startsWith` tolerates a version suffix.
+// model, or that names none, is a failure, since an unnamed answer leaves the
+// routing unverified. `startsWith` tolerates a version suffix.
 const rerouted = new Set<string>();
 
 // The cloud environment's proxy drops a request that sends nothing back for 30
@@ -130,8 +132,8 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   if (!response.ok) return response;
 
   const body = foldStream(await response.text());
-  if (body.modelVersion && !body.modelVersion.startsWith(model)) {
-    rerouted.add(`requested ${model}, answered by ${body.modelVersion}`);
+  if (!body.modelVersion?.startsWith(model)) {
+    rerouted.add(`requested ${model}, answered by ${body.modelVersion ?? 'an unnamed model'}`);
   }
   const u = body.usageMetadata;
   const entry = usage.get(model) ?? { calls: 0, input: 0, output: 0 };
@@ -196,7 +198,8 @@ const check = async (name: string, run: () => Promise<string>): Promise<Outcome>
       return outcome;
     } catch (error) {
       if (attempt === 2) {
-        console.log(`FAIL  ${name}: ${describe(error)}`);
+        const secs = (performance.now() - start) / 1000;
+        console.log(`FAIL  ${name}: ${describe(error)} (${secs.toFixed(1)} s, final attempt)`);
         return { ok: false, secs: NaN, input: 0, output: 0 };
       }
       console.log(`retry ${name}: ${describe(error)}`);
