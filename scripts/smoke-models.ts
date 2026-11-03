@@ -104,7 +104,9 @@ const usage = new Map<string, Usage>();
 // error, so a model change can reach the live app with no change to the code.
 // Every response names the model that answered; one that is not the requested
 // model, or that names none, is a failure, since an unnamed answer leaves the
-// routing unverified. `startsWith` tolerates a version suffix.
+// routing unverified. The match is exact: a prefix test would let
+// `gemini-3.6-flash-lite` pass for `gemini-3.6-flash`, and routing to a Lite
+// model is what Google did with `gemini-2.5-flash`.
 const rerouted = new Set<string>();
 
 // The cloud environment's proxy drops a request that sends nothing back for 30
@@ -132,7 +134,7 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   if (!response.ok) return response;
 
   const body = foldStream(await response.text());
-  if (!body.modelVersion?.startsWith(model)) {
+  if (body.modelVersion !== model) {
     rerouted.add(`requested ${model}, answered by ${body.modelVersion ?? 'an unnamed model'}`);
   }
   const u = body.usageMetadata;
