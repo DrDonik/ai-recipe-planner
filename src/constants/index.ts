@@ -105,7 +105,7 @@ export const URL_PARAMS = {
  */
 export const API_CONFIG = {
     BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models',
-    MODEL: 'gemini-3.6-flash',
+    MODEL: 'gemini-3.8-flash',
     IMAGE_MODEL: 'gemini-nano-banana-2.1',
     TIMEOUT_MS: 60000,
     /**
