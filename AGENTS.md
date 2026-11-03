@@ -53,10 +53,6 @@ them in the body, and drop a section that has nothing to say.
 
 Coderabbit does not review this repository automatically (it has fewer than 10 stars), so you must trigger every review yourself: after opening the PR, add a comment containing exactly `@coderabbitai review`. As an exception to guideline 7 (never jump straight to implementation), fix no-brainer feedback directly; discuss anything that is a judgement call with the requester instead of deciding it on your own. Retrigger the review after every push that changes code (not after edits to the PR title or body). Once Coderabbit answers `No actionable comments were generated in the recent review.`, the review round is done.
 
-### Model Updates
+### Gemini Models
 
-The Gemini models in `API_CONFIG` (`src/constants/index.ts`) are kept current by a monthly scheduled task, not by hand. It moves to the newest stable model of the same class (Flash stays Flash, the image model stays an image model, never a preview or experimental model), whether or not the old one is being retired.
-
-CI only lints and builds, so it cannot tell whether a new model still follows the prompts. `npm run smoke:models` (`scripts/smoke-models.ts`) can: it runs the app's own request functions against the live API, one check per capability the key powers. It needs a cloud session whose environment holds the Gemini key as a network secret for `generativelanguage.googleapis.com` (header `x-goog-api-key`); the key never enters the session.
-
-The task merges a model PR itself only when every smoke check passes, CI is green and no list price on Google's pricing page went up. A price increase or a failing check leaves the PR open for the requester. As an exception to the Coderabbit rule above, these PRs are not sent to Coderabbit: they change one string, and the smoke test is the review.
+The models in `API_CONFIG` are chosen, measured and kept current as described in `doc/gemini-models.md`, which a monthly scheduled task follows. Do not change them by hand without recording the decision there. Model pull requests opened by that task are exempt from the Coderabbit review above.

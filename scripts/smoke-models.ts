@@ -10,6 +10,13 @@
  * Run with `npm run smoke:models` in a cloud session whose environment holds
  * the Gemini key as a network secret for generativelanguage.googleapis.com,
  * sent as the `x-goog-api-key` header. The key never enters this process.
+ *
+ * Every check reports its duration, and a passing one its tokens; the summary
+ * at the end counts all tokens, failed attempts included. `--plan-runs N` and
+ * `--image-runs N` repeat the meal plan and the recipe image, the two checks
+ * whose duration the user waits on and whose token count varies from run to
+ * run, and add a `MEDIAN` line for each; doc/gemini-models.md compares
+ * models on those medians.
  */
 import { readFile } from 'node:fs/promises';
 import { API_CONFIG, DEFAULTS } from '../src/constants';
@@ -43,6 +50,7 @@ interface Chunk {
     candidatesTokenCount?: number;
     thoughtsTokenCount?: number;
   };
+  modelVersion?: string;
 }
 
 /**
@@ -81,6 +89,7 @@ const foldStream = (sse: string): Chunk => {
     }),
     promptFeedback: chunks.find((c) => c.promptFeedback)?.promptFeedback,
     usageMetadata: last.usageMetadata,
+    modelVersion: chunks.map((c) => c.modelVersion).filter(Boolean).at(-1),
   };
 };
 
@@ -90,6 +99,15 @@ interface Usage {
   output: number;
 }
 const usage = new Map<string, Usage>();
+
+// Google routes requests for a retired model to its successor without an
+// error, so a model change can reach the live app with no change to the code.
+// Every response names the model that answered; one that is not the requested
+// model, or that names none, is a failure, since an unnamed answer leaves the
+// routing unverified. The match is exact: a prefix test would let
+// `gemini-3.6-flash-lite` pass for `gemini-3.6-flash`, and routing to a Lite
+// model is what Google did with `gemini-2.5-flash`.
+const rerouted = new Set<string>();
 
 // The cloud environment's proxy drops a request that sends nothing back for 30
 // seconds, and a meal plan thinks for longer than that before its first word.
@@ -116,6 +134,9 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   if (!response.ok) return response;
 
   const body = foldStream(await response.text());
+  if (body.modelVersion !== model) {
+    rerouted.add(`requested ${model}, answered by ${body.modelVersion ?? 'an unnamed model'}`);
+  }
   const u = body.usageMetadata;
   const entry = usage.get(model) ?? { calls: 0, input: 0, output: 0 };
   entry.calls += 1;
@@ -147,22 +168,77 @@ const describe = (error: unknown): string => {
   return parts.join(' <- ');
 };
 
+interface Outcome {
+  ok: boolean;
+  secs: number;
+  input: number;
+  output: number;
+}
+
+const totals = () => {
+  let input = 0;
+  let output = 0;
+  for (const u of usage.values()) {
+    input += u.input;
+    output += u.output;
+  }
+  return { input, output };
+};
+
 // One retry, because a single transient upstream failure is not a verdict on
-// the model.
-const check = async (name: string, run: () => Promise<string>): Promise<boolean> => {
+// the model. Duration and tokens are those of the attempt that passed.
+const check = async (name: string, run: () => Promise<string>): Promise<Outcome> => {
   for (let attempt = 1; ; attempt++) {
+    const before = totals();
+    const start = performance.now();
     try {
-      console.log(`PASS  ${name}: ${await run()}`);
-      return true;
+      const detail = await run();
+      const secs = (performance.now() - start) / 1000;
+      const after = totals();
+      const outcome = { ok: true, secs, input: after.input - before.input, output: after.output - before.output };
+      console.log(`PASS  ${name}: ${detail} (${secs.toFixed(1)} s, ${outcome.input} / ${outcome.output} tokens)`);
+      return outcome;
     } catch (error) {
       if (attempt === 2) {
-        console.log(`FAIL  ${name}: ${describe(error)}`);
-        return false;
+        const secs = (performance.now() - start) / 1000;
+        console.log(`FAIL  ${name}: ${describe(error)} (${secs.toFixed(1)} s, final attempt)`);
+        return { ok: false, secs: NaN, input: 0, output: 0 };
       }
       console.log(`retry ${name}: ${describe(error)}`);
     }
   }
 };
+
+const runsOf = (flag: string): number => {
+  const i = process.argv.indexOf(flag);
+  const n = i < 0 ? 1 : Number(process.argv[i + 1]);
+  if (!Number.isInteger(n) || n < 1) throw new Error(`${flag} needs a positive whole number`);
+  return n;
+};
+
+const median = (values: number[]): number => {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = sorted.length >> 1;
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+};
+
+const repeated = async (name: string, runs: number, run: () => Promise<string>): Promise<boolean> => {
+  const outcomes: Outcome[] = [];
+  for (let i = 1; i <= runs; i++) {
+    outcomes.push(await check(runs > 1 ? `${name} ${i}/${runs}` : name, run));
+  }
+  const ok = outcomes.every((o) => o.ok);
+  if (ok && runs > 1) {
+    const secs = median(outcomes.map((o) => o.secs));
+    const input = median(outcomes.map((o) => o.input));
+    const output = median(outcomes.map((o) => o.output));
+    console.log(`MEDIAN ${name} over ${runs}: ${secs.toFixed(1)} s, ${input} / ${output} tokens`);
+  }
+  return ok;
+};
+
+const planRuns = runsOf('--plan-runs');
+const imageRuns = runsOf('--image-runs');
 
 const language = DEFAULTS.LANGUAGE;
 
@@ -197,7 +273,7 @@ const lemonRice: Recipe = {
 console.log(`Models: text ${API_CONFIG.MODEL}, image ${API_CONFIG.IMAGE_MODEL}\n`);
 
 const results = [
-  await check('meal plan', async () => {
+  await repeated('meal plan', planRuns, async () => {
     const plan = await generateRecipes(KEY, pantry, 2, 2, DEFAULTS.DIET, language);
     expect(plan.recipes.length === 2, `asked for 2 recipes, got ${plan.recipes.length}`);
     const ids = new Set(pantry.map((p) => p.id));
@@ -210,12 +286,12 @@ const results = [
     expect(plan.recipes.some((r) => r.usedIngredients.length > 0), 'plan uses no pantry item');
     return plan.recipes.map((r) => r.title).join(' / ');
   }),
-  await check('storage tip', async () => {
+  (await check('storage tip', async () => {
     const tip = await fetchStorageTip(KEY, 'carrots', language);
     expect(tip.trim().length > 0 && tip.length < 600, `unexpected length ${tip.length}`);
     return `${tip.length} chars`;
-  }),
-  await check('chat', async () => {
+  })).ok,
+  (await check('chat', async () => {
     const reply = await chatAboutRecipe(
       KEY,
       lemonRice,
@@ -224,18 +300,18 @@ const results = [
     );
     expect(reply.trim().length > 0, 'empty reply');
     return `${reply.length} chars`;
-  }),
-  await check('recipe image', async () => {
+  })).ok,
+  await repeated('recipe image', imageRuns, async () => {
     const image = await generateRecipeImage(KEY, lemonRice.title, lemonRice.ingredients);
     expect(image.type.startsWith('image/') && image.size > 10_000, `${image.type}, ${image.size} bytes`);
     return `${image.type}, ${Math.round(image.size / 1024)} KB`;
   }),
-  await check('ingredient photo', async () => {
+  (await check('ingredient photo', async () => {
     const name = await identifyIngredientFromImage(KEY, await fixture('lemon.jpg'), 'image/jpeg', language);
     expect(/lemon/i.test(name), `expected a lemon, got "${name}"`);
     return name;
-  }),
-  await check('recipe photo', async () => {
+  })).ok,
+  (await check('recipe photo', async () => {
     const { text, truncated } = await transcribeRecipeFromImage(
       KEY,
       await fixture('recipe-card.jpg'),
@@ -246,8 +322,12 @@ const results = [
       expect(text.includes(needle), `missing "${needle}"`);
     }
     return `${text.split('\n').length} lines`;
-  }),
+  })).ok,
 ];
+
+for (const reroute of rerouted) console.log(`FAIL  model version: ${reroute}`);
+if (rerouted.size === 0) console.log('PASS  model version: every response came from the requested model');
+results.push(rerouted.size === 0);
 
 console.log('\nTokens (input / output incl. thinking):');
 for (const [model, u] of usage) {
