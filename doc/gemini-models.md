@@ -111,8 +111,10 @@ session; never try to read, print or pass it.
    English after `.github/pull_request_template.md`, with a table of the
    criteria and their numbers at the top. Do not request a Coderabbit review:
    the change is one string, and the smoke test is the review.
-9. If every criterion holds, squash-merge: enable auto-merge, or wait for the
-   checks and merge. Otherwise leave the pull request open and state at the top
+9. If every criterion holds, wait for the checks and squash-merge. Do not
+   enable auto-merge: the ruleset on `main` requires an approving review, which
+   only a Coderabbit review gives, so auto-merge would wait forever; the merge
+   goes through the repository admin's bypass instead. Otherwise leave the pull request open and state at the top
    of its description which criteria failed, with the numbers. A slower or more
    expensive model is the requester's decision, never the task's.
 10. Final message: one short paragraph in German: merged, open and awaiting a
