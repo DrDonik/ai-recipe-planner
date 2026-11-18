@@ -77,10 +77,9 @@ session; never try to read, print or pass it.
 1. Read "Current models" and "Decisions" above. A candidate recorded as
    rejected is skipped unless its revisit condition has occurred.
 2. If a model pull request from an earlier run is still open, open no second
-   one: re-measure, update the numbers in its description, apply the criteria
-   above to it, and proceed under step 9 if every criterion now holds.
-   Otherwise disable its auto-merge if it is on, and report that it awaits a
-   decision.
+   one: re-measure, update the numbers in its description, apply criteria 1
+   to 5 above to it, and proceed under step 9 if they all hold now. Otherwise
+   disable its auto-merge if it is on, and report that it awaits a decision.
 3. Find candidates. List the available models with
    `curl -sS "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000"`
    and cross-check https://aistudio.google.com/docs/models and
