@@ -78,7 +78,7 @@ session; never try to read, print or pass it.
    rejected is skipped unless its revisit condition has occurred.
 2. If a model pull request from an earlier run is still open, open no second
    one: re-measure, update the numbers in its description, apply the criteria
-   above to it, and merge it under step 9 if every criterion now holds.
+   above to it, and proceed under step 9 if every criterion now holds.
    Otherwise report that it awaits a decision.
 3. Find candidates. List the available models with
    `curl -sS "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000"`
@@ -109,14 +109,16 @@ session; never try to read, print or pass it.
    the adoption with the measured numbers. Commit message:
    `chore(models): move <text|image> model to <id>`. Open the pull request in
    English after `.github/pull_request_template.md`, with a table of the
-   criteria and their numbers at the top. Do not request a Coderabbit review:
-   the change is one string, and the smoke test is the review.
-9. Wait for the checks. If every criterion holds, squash-merge. Do not enable
-   auto-merge: the ruleset on `main` requires an approving review, which only a
-   Coderabbit review gives, so auto-merge would wait forever. The task runs
-   under the repository owner's account, and the merge goes through its admin
-   bypass instead. Otherwise leave the pull request open and state at the top
-   of its description which criteria failed, with the numbers. A slower or more
+   criteria and their numbers at the top.
+9. If every criterion holds, the pull request goes the way every pull request
+   in this repository goes, as `AGENTS.md` describes under "When Opening a Pull
+   Request": enable auto-merge (squash), trigger the Coderabbit review and
+   follow it with check-ins until the pull request has merged. The ruleset
+   enforces green `build` and `lint`; never merge through the admin bypass.
+   Fix no-brainer feedback; a judgement call goes to the requester: leave the
+   pull request open and report it. Otherwise, if a criterion fails, enable no
+   auto-merge, leave the pull request open and state at the top of its
+   description which criteria failed, with the numbers. A slower or more
    expensive model is the requester's decision, never the task's.
 10. Final message: one short paragraph in German: merged, open and awaiting a
     decision (and why), or nothing to do; the smoke result; any announced price
