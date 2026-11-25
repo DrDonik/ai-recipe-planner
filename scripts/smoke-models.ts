@@ -30,10 +30,10 @@ import {
 } from '../src/services/llm';
 import type { PantryItem, Recipe } from '../src/types';
 
-// The request functions refuse an empty key and send it as `?key=`, and Google
-// rejects any `key` parameter that is not a valid key, even when a valid
-// header is present. So they get a placeholder, and the parameter is dropped
-// before the request leaves; the proxy attaches the real key as a header.
+// The request functions refuse an empty key and send it as the
+// `x-goog-api-key` header, and Google rejects a header that is not a valid
+// key. So they get a placeholder, and the header is dropped before the request
+// leaves; the proxy attaches the real key in its place.
 const KEY = 'attached-by-proxy';
 
 interface Part {
@@ -119,7 +119,9 @@ const rerouted = new Set<string>();
 const realFetch = globalThis.fetch;
 globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   const url = new URL(input instanceof Request ? input.url : String(input));
-  url.searchParams.delete('key');
+  const headers = new Headers(init?.headers);
+  headers.delete('x-goog-api-key');
+  init = { ...init, headers };
   const model = /\/models\/([^/:]+):generateContent$/.exec(url.pathname)?.[1];
   if (!model) return realFetch(url, init);
 
