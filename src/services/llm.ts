@@ -536,10 +536,10 @@ export const fetchStorageTip = async (
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
 
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
         }),
@@ -649,10 +649,10 @@ export const generateRecipeImage = async (
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
 
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.IMAGE_MODEL}:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.IMAGE_MODEL}:generateContent`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
         }),
@@ -763,10 +763,10 @@ Respond with only one line. No explanation.`;
 
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [
             {
@@ -886,10 +886,10 @@ If the photo shows no recipe at all, respond with the exact token NO_RECIPE and 
 
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [
             {
@@ -1111,10 +1111,10 @@ export const chatAboutRecipe = async (
 
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           systemInstruction: {
             parts: [{ text: buildRecipeChatSystemInstruction(recipe, language, context) }],
@@ -1227,11 +1227,12 @@ export const generateRecipes = async (
 
   try {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent?key=${apiKey}`,
+      `${API_CONFIG.BASE_URL}/${API_CONFIG.MODEL}:generateContent`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
         },
         body: JSON.stringify({
           contents: [
